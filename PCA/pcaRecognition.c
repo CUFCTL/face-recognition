@@ -17,7 +17,7 @@
 #include <dirent.h>
 #include <float.h>
 
-#include "matrix.h"
+#include "matrixOperations.h"
 
 
 int main (int argc, char **argv) {
