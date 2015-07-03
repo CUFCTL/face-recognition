@@ -118,7 +118,7 @@ int main (void) {
 	// Test Group 2.1.1
 	fprintf (output, "\n-------------Test Group 2.1.1 -------------\n");
 	R = m_sumRows (M);
-	fprintf (output, "m_sumRows(M) = \n");
+	fprintf (output, "m_sumRows(M) = \");
 	m_fprint (output, R);
 	m_free (R);
 

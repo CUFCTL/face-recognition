@@ -9,7 +9,7 @@
 #include <inttypes.h>
 #include <time.h>
 
-#include "matrix.h"
+#include "matrixOperations.h"
 
 int file_select(const struct dirent *entry);
 
