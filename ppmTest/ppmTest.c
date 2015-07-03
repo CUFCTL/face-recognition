@@ -7,7 +7,7 @@ int main (void) {
 
 	matrix_t *PPM = initializeMatrix (UNDEFINED, 92 * 112, 1);
 	unsigned char *pixels = malloc (3 * 92*112*sizeof(unsigned char));
-	loadPPMtoMatrixCol (".//images//1.ppm", PPM, 0, pixels);
+	loadPPMtoMatrixCol ("..//test_images//1.ppm", PPM, 0, pixels);
 	
 	writePPMgrayscale (".//wahaha.ppm", PPM, 0, 92, 112);
 
