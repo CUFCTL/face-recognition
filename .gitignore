@@ -2,7 +2,7 @@
 *.o
 
 # matrixTest executable
-./MatrixOperationsTests/matrixTest
+MatrixOperationsTests/matrixTest
 
 # vim swap files
 *.swp
