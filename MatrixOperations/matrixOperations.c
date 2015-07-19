@@ -458,19 +458,19 @@ matrix_t *m_meanRows (matrix_t *M) {
 
 // void find(data_t *outvect, data_t **matrix, int rows, int cols);
 // NOTE: this also assumes that outvect is a column vector)
-// 		orgininal function may have had a bug where first index was not zero and all others were and the same bug exists here as I just translated your code
-//		org function can find one row mult times, not sure if intended or not
+// places the row indeces of non-zero elements in a vector
+// This vector has additional, non-used space, not sure what to do about this -miller
 matrix_t * m_findNonZeros (matrix_t *M) {
-	matrix_t *R = m_initialize (ZEROS, M->numRows, 1);
+	matrix_t *R = m_initialize (ZEROS, M->numRows * M->numCols, 1);
 	precision val;
 	int i, j, count = 0;
 	for (i = 0; i < M->numRows; i++) {
 		for (j = 0; j < M->numCols; j++) {
 			val = elem(M, i, j);
 			if (val != 0) {
-				elem(R, count, 0) = (precision) i;
-                count++; //NOTE: added this cause it just seemed like it should be, could be totally wrong
-			}
+				elem(R, count, 0) = (precision) (i + 1);
+                count++; 
+            }
 		}
 	}
 	return R;
