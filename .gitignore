@@ -1,4 +1,10 @@
 # object files
 *.o
 
+# matrixTest executable
+./MatrixOperationsTests/matrixTest
+
+# vim swap files
+*.swp
+
 # add other files to ignore here
