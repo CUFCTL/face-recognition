@@ -223,7 +223,7 @@ void m_flipCols (matrix_t *M) {
 
 
 /*******************************************************************************
- * void normalize(data_t *outmatrix, data_t *matrix, int rows, int cols); * m_flipCols
+ * void normalize(data_t *outmatrix, data_t *matrix, int rows, int cols); 
  *
  * normalizes the matrix
 *******************************************************************************/
@@ -257,6 +257,9 @@ void m_normalize (matrix_t *M) {
  * void inv(data_t *outmatrix, data_t *matrix, int rows);
  *
  * inverse of the matrix
+ *
+ * Bug: This function currently throws away the result. Should it return the
+ * inverse or should it do the computation in-place?
 *******************************************************************************/
 void m_inverseMatrix (matrix_t *M) {
 	

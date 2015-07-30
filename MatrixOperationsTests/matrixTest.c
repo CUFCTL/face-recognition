@@ -29,6 +29,14 @@ int main (void) {
 	m_free (M);
 
 	M = m_initialize (FILL, XDIM, YDIM);
+	m_normalize (M);
+    m_elem_mult(M, 35);
+    fprintf (output, "m_normalize(M)\n");
+	fprintf (output, "m_elem_mult(M, 35) =\n");
+	m_fprint (output, M);
+	m_free (M);
+
+	M = m_initialize (FILL, XDIM, YDIM);
 	m_inverseMatrix (M);
 	fprintf (output, "m_inverseMatrix(M) = \n");
 	m_fprint (output, M);
@@ -38,6 +46,14 @@ int main (void) {
 	fprintf (output, "\n-------------Test Group 2.0.1 -------------\n");
 	M = m_initialize (FILL, XDIM, YDIM);
 	m_elem_truncate (M);
+	fprintf (output, "m_elem_truncate(M) = \n");
+	m_fprint (output, M);
+	m_free (M);
+
+	M = m_initialize (FILL, XDIM, YDIM);
+    m_elem_divideByConst(M, 6);
+	m_elem_truncate (M);
+    fprintf (output, "m_divide_by_constant(M, 6)\n");
 	fprintf (output, "m_elem_truncate(M) = \n");
 	m_fprint (output, M);
 	m_free (M);
