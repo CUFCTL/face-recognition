@@ -36,12 +36,13 @@ int main (void) {
 	m_fprint (output, M);
 	m_free (M);
 
+    // We need a better test for this function to ensure it is behaving
 	M = m_initialize (FILL, XDIM, YDIM);
 	m_inverseMatrix (M);
 	fprintf (output, "m_inverseMatrix(M) = \n");
 	m_fprint (output, M);
 	m_free (M);
-	
+
 	// Test Group 2.0.1
 	fprintf (output, "\n-------------Test Group 2.0.1 -------------\n");
 	M = m_initialize (FILL, XDIM, YDIM);
