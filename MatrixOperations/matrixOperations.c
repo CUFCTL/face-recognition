@@ -650,7 +650,7 @@ precision m_determinant (matrix_t *M) {
 				c++;
 			}
 			val = m_determinant (A);
-			sign = 2 * (2 % (j + 1)) - 1;
+			sign = 1 - 2 * ((i % 2) ^ (j % 2));;
 			det += sign * elem(M, 0, j) * val;
 		}
 		m_free (A);
