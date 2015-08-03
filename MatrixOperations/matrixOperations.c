@@ -261,13 +261,15 @@ void m_normalize (matrix_t *M) {
 void m_inverseMatrix (matrix_t *M) {
 	
 	matrix_t *cofactorMatrix = m_cofactor (M);
+	matrix_t *transpose = m_transpose (cofactorMatrix);
 	precision det = m_determinant (M);
-	m_elem_divideByConst (cofactorMatrix, det);
+    m_elem_divideByConst (transpose, det);
 	
-    m_free(M);
-    M = m_copy(cofactorMatrix);
+    m_free (M);
+    M = m_copy(transpose);
 
-	m_free (cofactorMatrix);
+	m_free (transpose);
+    m_free (cofactorMatrix);
 }
 
 //2.0.1
@@ -539,7 +541,7 @@ matrix_t * m_findNonZeros (matrix_t *M) {
 matrix_t * m_transpose (matrix_t *M) {
 	int i, j;
 	matrix_t *T = m_initialize (UNDEFINED, M->numCols, M->numRows);
-	
+
 	for (i = 0; i < T->numRows; i++) {
 		for (j = 0; j < T->numCols; j++) {
 			elem(T, i, j) = elem(M, j, i);
@@ -685,18 +687,8 @@ matrix_t * m_cofactor (matrix_t *M) {
 				row++;
 			}
 			val = m_determinant (A);
-			if (j % 2 == 0) {
-                if (i % 2 == 0)
-                    sign = 1;
-                else
-                    sign = -1;
-            } else {
-                if (i % 2 == 0)
-                    sign = -1;
-                else
-                    sign = 1;
-            }
-			val *=sign;
+			sign = 1 - 2 * ((i % 2) ^ (j % 2)); // I think this is illegal
+            val *= sign;
 			elem(R, j, i) = val;
 		}
 	}

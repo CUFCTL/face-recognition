@@ -196,7 +196,23 @@ int main (void) {
 
     matrix_t *N = m_initialize (FILL, 3, 3);
 	R = m_cofactor (N);
+    fprintf (output, "Three-by-Three matrix N\n");
+	fprintf (output, "m_cofactor(N) = \n");
+	m_fprint (output, R);
+	m_free (R);
+    m_free (N);
+
+    N = m_initialize (FILL, 2, 2);
+	R = m_cofactor (N);
     fprintf (output, "Two-by-Two matrix N\n");
+	fprintf (output, "m_cofactor(N) = \n");
+	m_fprint (output, R);
+	m_free (R);
+    m_free (N);
+
+    N = m_initialize (IDENTITY, 2, 2);
+	R = m_cofactor (N);
+    fprintf (output, "Two-by-Two Identity matrix N\n");
 	fprintf (output, "m_cofactor(N) = \n");
 	m_fprint (output, R);
 	m_free (R);
