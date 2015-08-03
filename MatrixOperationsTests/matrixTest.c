@@ -212,7 +212,7 @@ int main (void) {
 
     N = m_initialize (IDENTITY, XDIM, YDIM);
 	R = m_cofactor (N);
-    fprintf (output, "Identity matrix N\n");
+    fprintf (output, "Identity matrix 6x6 N\n");
     fprintf (output, "m_determinant(N)\n");
     fprintf (output, "%lf\n", m_determinant (N));
 	fprintf (output, "m_cofactor(N) = \n");
@@ -222,10 +222,40 @@ int main (void) {
 
     N = m_initialize (IDENTITY, 5, 5);
 	R = m_cofactor (N);
-    fprintf (output, "Identity matrix N\n");
+    fprintf (output, "Identity matrix 5x5 N\n");
     fprintf (output, "m_determinant(N)\n");
     fprintf (output, "%lf\n", m_determinant (N));
     fprintf (output, "m_cofactor(N) = \n");
+	m_fprint (output, R);
+	m_free (R);
+    m_free (N);
+
+    N = m_initialize (IDENTITY, 4, 4);
+	R = m_cofactor (N);
+    fprintf (output, "Identity matrix 4x4 N\n");
+    fprintf (output, "m_determinant (N)\n");
+    fprintf (output, "%lf\n", m_determinant (N));
+    fprintf (output, "m_cofactor (N) = \n");
+	m_fprint (output, R);
+	m_free (R);
+    m_free (N);
+
+    N = m_initialize (IDENTITY, 3, 3);
+	R = m_cofactor (N);
+    fprintf (output, "Identity matrix 3x3 N\n");
+    fprintf (output, "m_determinant (N)\n");
+    fprintf (output, "%lf\n", m_determinant (N));
+    fprintf (output, "m_cofactor (N) = \n");
+	m_fprint (output, R);
+	m_free (R);
+    m_free (N);
+
+    N = m_initialize (IDENTITY, 2, 2);
+	R = m_cofactor (N);
+    fprintf (output, "Identity matrix 2x2 N\n");
+    fprintf (output, "m_determinant (N)\n");
+    fprintf (output, "%lf\n", m_determinant (N));
+    fprintf (output, "m_cofactor (N) = \n");
 	m_fprint (output, R);
 	m_free (R);
     m_free (N);
