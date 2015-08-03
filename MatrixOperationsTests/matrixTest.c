@@ -210,15 +210,27 @@ int main (void) {
 	m_free (R);
     m_free (N);
 
-    N = m_initialize (IDENTITY, 2, 2);
+    N = m_initialize (IDENTITY, XDIM, YDIM);
 	R = m_cofactor (N);
-    fprintf (output, "Two-by-Two Identity matrix N\n");
+    fprintf (output, "Identity matrix N\n");
+    fprintf (output, "m_determinant(N)\n");
+    fprintf (output, "%lf\n", m_determinant (N));
 	fprintf (output, "m_cofactor(N) = \n");
 	m_fprint (output, R);
 	m_free (R);
     m_free (N);
 
-	R = m_covariance (M);
+    N = m_initialize (IDENTITY, 5, 5);
+	R = m_cofactor (N);
+    fprintf (output, "Identity matrix N\n");
+    fprintf (output, "m_determinant(N)\n");
+    fprintf (output, "%lf\n", m_determinant (N));
+    fprintf (output, "m_cofactor(N) = \n");
+	m_fprint (output, R);
+	m_free (R);
+    m_free (N);
+
+    R = m_covariance (M);
 	fprintf (output, "m_covariance(M) = \n");
 	m_fprint (output, R);
 	m_free (R);
