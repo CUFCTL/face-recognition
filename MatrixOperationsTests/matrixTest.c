@@ -194,6 +194,14 @@ int main (void) {
 	m_fprint (output, R);
 	m_free (R);
 
+    matrix_t *N = m_initialize (FILL, 3, 3);
+	R = m_cofactor (N);
+    fprintf (output, "Two-by-Two matrix N\n");
+	fprintf (output, "m_cofactor(N) = \n");
+	m_fprint (output, R);
+	m_free (R);
+    m_free (N);
+
 	R = m_covariance (M);
 	fprintf (output, "m_covariance(M) = \n");
 	m_fprint (output, R);
