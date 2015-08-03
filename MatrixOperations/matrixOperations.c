@@ -685,7 +685,17 @@ matrix_t * m_cofactor (matrix_t *M) {
 				row++;
 			}
 			val = m_determinant (A);
-			sign = 2 * (2 % (j + 1)) - 1;
+			if (j % 2 == 0) {
+                if (i % 2 == 0)
+                    sign = 1;
+                else
+                    sign = -1;
+            } else {
+                if (i % 2 == 0)
+                    sign = -1;
+                else
+                    sign = 1;
+            }
 			val *=sign;
 			elem(R, j, i) = val;
 		}
