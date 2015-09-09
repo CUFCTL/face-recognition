@@ -1,3 +1,14 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <stdint.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdint.h>
+#include <math.h>
+//#include <gsl/gsl_matrix.h>
+//#include <gsl/gsl_eigen.h>
+#include "matrixOperations.h"
 
 
 #define precision double
