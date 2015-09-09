@@ -1,4 +1,4 @@
-#include "matrixOperations.h"
+#include "matrixOperations6.h"
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 6 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 /*******************************************************************************
@@ -7,7 +7,7 @@
  * NOTE: ONLY SYMMETRIC MATRICIES ATM
 *******************************************************************************/
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors) {
-	/*gsl_matrix * A = gsl_matrix_alloc (M->numRows, M->numCols);
+	gsl_matrix * A = gsl_matrix_alloc (M->numRows, M->numCols);
 	gsl_matrix * gslEigenvectors = gsl_matrix_alloc (M->numRows, M->numCols);
 	gsl_vector * gslEigenvalues = gsl_vector_alloc (M->numRows);
 	
@@ -56,11 +56,8 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t
 	gsl_vector_free (gslEigenvalues);
 	
 	*p_eigenvectors = eigenvectors;
-	*p_eigenvalues = eigenvalues; */
+	*p_eigenvalues = eigenvalues; 
     
-    *p_eigenvalues = m_initialize (ZEROS, M->numRows, 1);
-    *p_eigenvectors = m_initialize (ZEROS, M->numRows, M->numCols);
-
 }
 
 

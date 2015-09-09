@@ -4,7 +4,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrixOperations.h"
+#include "matrixOperations1.h"
+#include "matrixOperations2.h"
+#include "matrixOperations3.h"
+#include "matrixOperations4.h"
+#include "matrixOperations5.h"
+//#include "matrixOperations6.h"
 
 int main (void) {
 	
@@ -312,7 +317,7 @@ int main (void) {
 	m_free (R);
 
 	// Test Group 6	
-	fprintf (output, "\n-------------Test Group 6 -------------\n");
+    /*	fprintf (output, "\n-------------Test Group 6 -------------\n");
 
 	matrix_t *eigenvalues, *eigenvectors;
 	m_eigenvalues_eigenvectors (M, &eigenvalues, &eigenvectors);
@@ -325,12 +330,12 @@ int main (void) {
 	R = m_getSubMatrix (M, 2, 2, 3, 3);
 	fprintf (output, "m_getSubMatrix (M, 2, 2, 3, 3) = \n");
 	m_fprint (output, R);
-
+*/
 	// Test Group 7
 	fprintf (output, "\n GROUP 7 IS NOT TESTED IN THIS TEST\n");
 
-	m_free (eigenvectors);
-	m_free (eigenvalues);
+	//m_free (eigenvectors);
+	//m_free (eigenvalues);
 	m_free (M);
 	m_free (B);
 	m_free (A);

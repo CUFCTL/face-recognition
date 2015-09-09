@@ -1,4 +1,4 @@
-#include "matrixOperations.h"
+#include "matrixOperations2.h"
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 2 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 // These operate on input matrix M and will change the data stored in M
@@ -57,11 +57,13 @@ void m_normalize (matrix_t *M) {
 
 
 /*******************************************************************************
- * void inv(data_t *outmatrix, data_t *matrix, int rows);
+ * void inv(dataem_t *outmatrix, data_t *matrix, int rows);
  *
  * inverse of the matrix
 *******************************************************************************/
-void m_inverseMatrix (matrix_t *M) {
+// TODO: Temp moved this to thr group 3 fuctions due to dependancy issues. 
+// Do not work on this right now if you are just doing group 2.
+/*void m_inverseMatrix (matrix_t *M) {
 	
 	matrix_t *cofactorMatrix = m_cofactor (M);
 	matrix_t *transpose = m_transpose (cofactorMatrix);
@@ -73,7 +75,7 @@ void m_inverseMatrix (matrix_t *M) {
 
 	m_free (transpose);
     m_free (cofactorMatrix);
-}
+}*/
 
 //2.0.1
 /*******************************************************************************

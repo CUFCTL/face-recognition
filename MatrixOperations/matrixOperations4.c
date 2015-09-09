@@ -1,4 +1,4 @@
-#include "matrixOperations.h"
+#include "matrixOperations4.h"
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 4 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 /*  These functions manipulate multiple matrices and return a matrix of 

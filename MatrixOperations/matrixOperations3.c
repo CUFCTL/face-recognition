@@ -1,4 +1,23 @@
-#include "matrixOperations.h"
+#include "matrixOperations3.h"
+
+
+// Temp moved this here for dependancy issues. Group 3 code person should work on this for right now. 
+void m_inverseMatrix (matrix_t *M) {
+	
+	matrix_t *cofactorMatrix = m_cofactor (M);
+	matrix_t *transpose = m_transpose (cofactorMatrix);
+	precision det = m_determinant (M);
+    m_elem_divideByConst (transpose, det);
+	
+    m_free (M);
+    M = m_copy(transpose);
+
+	m_free (transpose);
+    m_free (cofactorMatrix);
+}
+
+
+
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 3 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 /*******************************************************************************
@@ -30,9 +49,10 @@ precision m_norm (matrix_t *M, int specRow) {
  *  divide eigenvectors matrix by the product of the e-vectors and e-values
 *******************************************************************************/
 matrix_t * m_sqrtm (matrix_t *M) {
-	
+	/*
 	matrix_t *eigenvectors;
 	matrix_t *eigenvalues;
+    // TODO: EIGENVALUES NOT CURRENTLY WORKING
 	m_eigenvalues_eigenvectors (M, &eigenvalues, &eigenvectors);
 	
 	m_elem_sqrt (eigenvalues);
@@ -42,7 +62,8 @@ matrix_t * m_sqrtm (matrix_t *M) {
 	matrix_t * R = m_matrix_division (temp, eigenvectors);
 	m_free (temp);
 	m_free(eigenvectors);
-	return R;
+	return R;*/
+    return M;
 }
 
 

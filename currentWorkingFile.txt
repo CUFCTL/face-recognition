@@ -1,0 +1,9 @@
+List what you are currently working on
+example:
+Connor      matrixOperations.h
+
+Make sure to pull before start working on stuff and check this file. Make sure to push after you are done. Make sure to add your name to this file and take it off.
+
+
+vvvvvv List Stuff here vvvvvv
+_____________________________________
