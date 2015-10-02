@@ -1,0 +1,155 @@
+.TH "/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations2.h" 3 "Wed Sep 30 2015" "Facial Recognition - Common Code" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations2.h \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'matrixOperations\&.h'\fP
+.br
+\fC#include 'matrixOperations1\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBm_flipCols\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_normalize\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_truncate\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_acos\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_sqrt\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_negate\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_exp\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_pow\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_mult\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_divideByConst\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_divideByMatrix\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_add\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_sumCols\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_meanCols\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_sumRows\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_meanRows\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_findNonZeros\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_transpose\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_reshape\fP (\fBmatrix_t\fP *M, int newNumRows, int newNumCols)"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "void m_elem_acos (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 108 of file matrixOperations2\&.c\&.
+.SS "void m_elem_add (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+
+.PP
+Definition at line 228 of file matrixOperations2\&.c\&.
+.SS "void m_elem_divideByConst (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+
+.PP
+Definition at line 198 of file matrixOperations2\&.c\&.
+.SS "void m_elem_divideByMatrix (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+
+.PP
+Definition at line 213 of file matrixOperations2\&.c\&.
+.SS "void m_elem_exp (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 153 of file matrixOperations2\&.c\&.
+.SS "void m_elem_mult (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+
+.PP
+Definition at line 184 of file matrixOperations2\&.c\&.
+.SS "void m_elem_negate (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 138 of file matrixOperations2\&.c\&.
+.SS "void m_elem_pow (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+
+.PP
+Definition at line 169 of file matrixOperations2\&.c\&.
+.SS "void m_elem_sqrt (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 123 of file matrixOperations2\&.c\&.
+.SS "void m_elem_truncate (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 89 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_findNonZeros (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 320 of file matrixOperations2\&.c\&.
+.SS "void m_flipCols (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 15 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_meanCols (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 266 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_meanRows (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 303 of file matrixOperations2\&.c\&.
+.SS "void m_normalize (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 33 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_reshape (\fBmatrix_t\fP *M, intnewNumRows, intnewNumCols)"
+
+.PP
+Definition at line 363 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_sumCols (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 245 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_sumRows (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 282 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_transpose (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 346 of file matrixOperations2\&.c\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Facial Recognition - Common Code from the source code\&.

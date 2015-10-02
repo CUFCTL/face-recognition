@@ -1,0 +1,199 @@
+.TH "/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations2.c" 3 "Fri Oct 2 2015" "Facial Recognition - Common Code" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations2.c \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'matrixOperations\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBm_flipCols\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_normalize\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_truncate\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_acos\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_sqrt\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_negate\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_exp\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_pow\fP (\fBmatrix_t\fP *M, \fBprecision\fP num)"
+.br
+.ti -1c
+.RI "void \fBm_elem_mult\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_divideByConst\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_divideByMatrix\fP (\fBmatrix_t\fP *M, \fBprecision\fP num)"
+.br
+.ti -1c
+.RI "void \fBm_elem_add\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_sumCols\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_meanCols\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_sumRows\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_meanRows\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_findNonZeros\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_transpose\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_reshape\fP (\fBmatrix_t\fP *M, int newNumRows, int newNumCols)"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "void m_elem_acos (\fBmatrix_t\fP *M)"
+m_acosAll
+.PP
+applies acos to all matrix elements
+.PP
+ICA: void matrix_acos(data_t *outmatrix, data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 108 of file matrixOperations2\&.c\&.
+.SS "void m_elem_add (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+void sum_scalar_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar);
+.PP
+adds element-wise matrix to contant 
+.PP
+Definition at line 228 of file matrixOperations2\&.c\&.
+.SS "void m_elem_divideByConst (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+void divide_by_constant(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar);
+.PP
+divides matrix by contant 
+.PP
+Definition at line 198 of file matrixOperations2\&.c\&.
+.SS "void m_elem_divideByMatrix (\fBmatrix_t\fP *M, \fBprecision\fPnum)"
+void divide_scaler_by_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar) ;
+.PP
+divides constant by matrix element-wise 
+.PP
+Definition at line 213 of file matrixOperations2\&.c\&.
+.SS "void m_elem_exp (\fBmatrix_t\fP *M)"
+void matrix_exp(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+raises e to all matrix elements 
+.PP
+Definition at line 153 of file matrixOperations2\&.c\&.
+.SS "void m_elem_mult (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+void scale_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, int scalar);
+.PP
+scales matrix by contant 
+.PP
+Definition at line 184 of file matrixOperations2\&.c\&.
+.SS "void m_elem_negate (\fBmatrix_t\fP *M)"
+void matrix_negate(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+negates all matrix elements 
+.PP
+Definition at line 138 of file matrixOperations2\&.c\&.
+.SS "void m_elem_pow (\fBmatrix_t\fP *M, \fBprecision\fPnum)"
+void raise_matrix_to_power(data_t *outmatrix, data_t *matrix, int rows, int cols, int scalar);
+.PP
+raises all matrix elements to a power 
+.PP
+Definition at line 169 of file matrixOperations2\&.c\&.
+.SS "void m_elem_sqrt (\fBmatrix_t\fP *M)"
+void matrix_sqrt(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+applies sqrt to all matrix elements 
+.PP
+Definition at line 123 of file matrixOperations2\&.c\&.
+.SS "void m_elem_truncate (\fBmatrix_t\fP *M)"
+void inv(dataem_t *outmatrix, data_t *matrix, int rows);
+.PP
+inverse of the matrix m_truncateAll
+.PP
+Truncates the entries in matrix M
+.PP
+ICA: void fix(data_t *outmatrix, data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 89 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_findNonZeros (\fBmatrix_t\fP *M)"
+void find(data_t *outvect, data_t **matrix, int rows, int cols); NOTE: this also assumes that outvect is a column vector) places the row indeces of non-zero elements in a vector This vector has additional, non-used space, not sure what to do about this -miller 
+.PP
+Definition at line 320 of file matrixOperations2\&.c\&.
+.SS "void m_flipCols (\fBmatrix_t\fP *M)"
+m_flipCols
+.PP
+Swaps columns in M from left to right
+.PP
+ICA: void fliplr(data_t *outmatrix, data_t *matrix, int rows, int cols) 
+.PP
+Definition at line 15 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_meanCols (\fBmatrix_t\fP *M)"
+void mean_of_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+takes the mean value of each column 
+.PP
+Definition at line 266 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_meanRows (\fBmatrix_t\fP *M)"
+void mean_of_matrix_by_rows(data_t *outmatrix,data_t *matrix,int rows,int cols);
+.PP
+takes the mean of the rows of a matrix, returns a col vect 
+.PP
+Definition at line 303 of file matrixOperations2\&.c\&.
+.SS "void m_normalize (\fBmatrix_t\fP *M)"
+void normalize(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+normalizes the matrix 
+.PP
+Definition at line 33 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_reshape (\fBmatrix_t\fP *M, intnewNumRows, intnewNumCols)"
+void reshape(data_t **outmatrix, int outRows, int outCols, data_t **matrix, int rows, int cols)
+.PP
+reshapes matrix by changing dimensions, keeping data 
+.PP
+Definition at line 363 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_sumCols (\fBmatrix_t\fP *M)"
+void sum_columns(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+sums the columns of a matrix, returns a row vector 
+.PP
+Definition at line 245 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_sumRows (\fBmatrix_t\fP *M)"
+void sum_rows(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+sums the rows of a matrix, returns a col vect 
+.PP
+Definition at line 282 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_transpose (\fBmatrix_t\fP *M)"
+transpose matrix
+.PP
+This function transposes a matrix
+.PP
+ICA: void transpose(data_t *outmatrix, data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 346 of file matrixOperations2\&.c\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Facial Recognition - Common Code from the source code\&.
