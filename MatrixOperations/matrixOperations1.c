@@ -1,4 +1,4 @@
-#include "matrixOperations1.h"
+#include "matrixOperations.h"
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 1 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 //  initialization, free, input, output, and copy functions

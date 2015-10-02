@@ -1,4 +1,4 @@
-#include "matrixOperations2.h"
+#include "matrixOperations.h"
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 2 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 // These operate on input matrix M and will change the data stored in M

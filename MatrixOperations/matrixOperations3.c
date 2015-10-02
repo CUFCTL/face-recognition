@@ -1,4 +1,4 @@
-#include "matrixOperations3.h"
+#include "matrixOperations.h"
 
 
 // Temp moved this here for dependancy issues. Group 3 code person should work on this for right now. 
