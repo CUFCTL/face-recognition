@@ -4,15 +4,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrixOperations1.h"
-#include "matrixOperations2.h"
-#include "matrixOperations3.h"
-#include "matrixOperations4.h"
-#include "matrixOperations5.h"
-//#include "matrixOperations6.h"
+#include "matrixOperations.h"
+
 
 int main (void) {
-	
+
 	FILE *output = fopen ("testResults.txt", "w");
 
 	matrix_t *M = m_initialize (FILL, XDIM, YDIM);
@@ -132,7 +128,7 @@ int main (void) {
 	fprintf (output, "\n-------------Test Group 2.1.0 -------------\n");
 	matrix_t *R;
 	M = m_initialize (FILL, XDIM, YDIM);
-	
+
 	R = m_sumCols (M);
 	fprintf (output, "m_sumCols(M) = \n");
 	m_fprint (output, R);
@@ -168,7 +164,7 @@ int main (void) {
 	matrix_t *A = m_initialize (FILL, XDIM, YDIM);
 	fprintf (output, "A = \n");
 	m_fprint (output, A);
-	
+
 	R = m_transpose (A);
 	fprintf (output, "m_transpose (A) = \n");
 	m_fprint (output, R);
@@ -182,15 +178,15 @@ int main (void) {
 	// Test Group 3
 	fprintf (output, "\n-------------Test Group 3 -------------\n");
 	M = m_initialize (FILL, XDIM, YDIM);
-	
+
 	fprintf (output, "m_norm (M, specRow) is SKIPPED IN THIS TEST\n");
-	
+
 	R = m_sqrtm (M);
 	fprintf (output, "m_sqrtm(M) = \n");
 	m_fprint (output, R);
 	m_free (R);
 
-	
+
 	precision val = m_determinant (M);
 	fprintf (output, "m_determinant(M) = %lf\n", val);
 
@@ -276,7 +272,7 @@ int main (void) {
 	m_elem_add (B, -10.0);
 	fprintf (output, "B =\n");
 	m_fprint (output, B);
-	
+
 	R = m_dot_subtract (M, B);
 	fprintf (output, "m_dot_subtract(M, B) = \n");
 	m_fprint (output, R);
@@ -306,24 +302,24 @@ int main (void) {
 	m_free (R);
 
 	matrix_t *V = m_initialize (UNDEFINED, 1, 6);
-	V->data[0] = 4; V->data[1] = 5; V->data[2] = 2; V->data[3] = 1; 
+	V->data[0] = 4; V->data[1] = 5; V->data[2] = 2; V->data[3] = 1;
 	V->data[4] = 0; V->data[5] = 3;
 	fprintf (output, "V = \n");
 	m_fprint (output, V);
-	
+
 	R = m_reorder_columns (M, V);
 	fprintf (output, "m_reorderCols (M, V) = \n");
 	m_fprint (output, R);
 	m_free (R);
 
-	// Test Group 6	
+	// Test Group 6
     /*	fprintf (output, "\n-------------Test Group 6 -------------\n");
 
 	matrix_t *eigenvalues, *eigenvectors;
 	m_eigenvalues_eigenvectors (M, &eigenvalues, &eigenvectors);
 	fprintf (output, "M's eigenvalues =  \n");
 	m_fprint (output, eigenvalues);
-	
+
 	fprintf (output, "M's eigenvectors = \n");
 	m_fprint (output, eigenvectors);
 
@@ -343,4 +339,3 @@ int main (void) {
 
 	return 0;
 }
-
