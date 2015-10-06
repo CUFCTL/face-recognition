@@ -1,0 +1,21 @@
+removed m_inverseMatrix function tests
+
+m_flipCols            works
+m_normalize           works
+m_elem_mult           works
+m_elem_truncate       works
+m_elem_divideByConst  works
+m_elem_acos           works
+m_elem_sqrt           works
+m_elem_negate         works
+m_elem_exp            works
+m_elem_pow            works
+m_elem_divideByMatrix works
+m_elem_add            works
+m_sumCols             works
+m_meanCols            works
+m_sumRows             works
+m_meanRows            works
+m_findNonZeros        works
+m_transpose           works
+m_reshape             works

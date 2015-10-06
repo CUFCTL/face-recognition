@@ -37,19 +37,6 @@ int main (void)
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
-	m_inverseMatrix (M);
-	fprintf (output, "m_inverseMatrix(M) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-    M = m_initialize (IDENTITY, XDIM, YDIM);
-    m_inverseMatrix (M);
-    fprintf (output, "This test will take the inverse of the identity\n");
-    fprintf (output, "m_inverseMatrix(M) = \n");
-    m_fprint (output, M);
-    m_free (M);
-
 	// Test Group 2.0.1
 	fprintf (output, "\n-------------Test Group 2.0.1 -------------\n");
 	M = m_initialize (FILL, XDIM, YDIM);
