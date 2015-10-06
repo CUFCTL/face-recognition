@@ -1,0 +1,830 @@
+\hypertarget{matrix_operations_8h}{\section{/home/scott/\-Clemson-\/\-C\-I-\/-\/-\/\-Facial-\/\-Recognition/\-Matrix\-Operations/matrix\-Operations.h File Reference}
+\label{matrix_operations_8h}\index{/home/scott/\-Clemson-\/\-C\-I-\/-\/-\/\-Facial-\/\-Recognition/\-Matrix\-Operations/matrix\-Operations.\-h@{/home/scott/\-Clemson-\/\-C\-I-\/-\/-\/\-Facial-\/\-Recognition/\-Matrix\-Operations/matrix\-Operations.\-h}}
+}
+{\ttfamily \#include $<$stdio.\-h$>$}\\*
+{\ttfamily \#include $<$stdlib.\-h$>$}\\*
+{\ttfamily \#include $<$assert.\-h$>$}\\*
+{\ttfamily \#include $<$stdint.\-h$>$}\\*
+{\ttfamily \#include $<$string.\-h$>$}\\*
+{\ttfamily \#include $<$ctype.\-h$>$}\\*
+{\ttfamily \#include $<$math.\-h$>$}\\*
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structmatrix__t}{matrix\-\_\-t}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}{precision}~double
+\item 
+\#define \hyperlink{matrix_operations_8h_a2dc3870be25a19efa2940150507aaf71}{U\-N\-D\-E\-F\-I\-N\-E\-D}~0
+\item 
+\#define \hyperlink{matrix_operations_8h_ae65829fa721c1322bf86fa4a747f5693}{Z\-E\-R\-O\-S}~1
+\item 
+\#define \hyperlink{matrix_operations_8h_a55ead18ae83ed081acdd195a593d0bc3}{O\-N\-E\-S}~2
+\item 
+\#define \hyperlink{matrix_operations_8h_a63b5892f7ab163bcb862316801283eb3}{F\-I\-L\-L}~3
+\item 
+\#define \hyperlink{matrix_operations_8h_a44fdeee315bbbfda43356ffbdf05a1b3}{I\-D\-E\-N\-T\-I\-T\-Y}~4
+\item 
+\#define \hyperlink{matrix_operations_8h_a4594ff69b42430e5b31670333bad4446}{N\-O\-T\-\_\-\-T\-R\-A\-N\-S\-P\-O\-S\-E\-D}~0
+\item 
+\#define \hyperlink{matrix_operations_8h_aebf233c71be994865bf797becfe885fb}{T\-R\-A\-N\-S\-P\-O\-S\-E\-D}~1
+\item 
+\#define \hyperlink{matrix_operations_8h_a8c98756b922647298e5ba1fb6fed4f08}{H\-O\-R\-Z}~0
+\item 
+\#define \hyperlink{matrix_operations_8h_a22c2b7cb14b1ffb516a9ed4a164b5cda}{V\-E\-R\-T}~1
+\item 
+\#define \hyperlink{matrix_operations_8h_a4b5014034c9aac136ab8c82c2d16dc82}{C\-O\-L\-O\-R}~0
+\item 
+\#define \hyperlink{matrix_operations_8h_a4b31056871d5bc746fb659d963a0c4d8}{G\-R\-A\-Y\-S\-C\-A\-L\-E}~1
+\item 
+\#define \hyperlink{matrix_operations_8h_a43bda94ea92b5a0e18e404892f3c2668}{P\-A\-R\-E\-N\-T}~0
+\item 
+\#define \hyperlink{matrix_operations_8h_ad33c3e51307945c6c3968785cbbff5df}{S\-U\-B\-M\-A\-T\-R\-I\-X}~1
+\item 
+\#define \hyperlink{matrix_operations_8h_ac43470b51f50603afbf5b01b4298814d}{I\-S\-\_\-\-C\-O\-L\-O\-R}~\hyperlink{matrix_operations_8h_a4b31056871d5bc746fb659d963a0c4d8}{G\-R\-A\-Y\-S\-C\-A\-L\-E}
+\item 
+\#define \hyperlink{matrix_operations_8h_acdae5e1680201182adf148cdb963c183}{elem}(M, i, j)~(M)-\/$>$data\mbox{[}(j) $\ast$ (M)-\/$>$num\-Rows + (i)\mbox{]}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a170140db41813e5e05e69f6b0e9e5e97}{m\-\_\-initialize} (int mode, int num\-Rows, int num\-Cols)
+\item 
+void \hyperlink{matrix_operations_8h_aeccabc73cca6fb32d2200a3d787db3dd}{m\-\_\-free} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_a173666c46f45d946c918d8b0265f5b55}{m\-\_\-fprint} (F\-I\-L\-E $\ast$stream, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_a55a6c54b04f1f41144e5ef2952fa9b0e}{m\-\_\-fwrite} (F\-I\-L\-E $\ast$stream, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a0fb98dea861b95f3ca7d6b3fcf936bbb}{m\-\_\-fscan} (F\-I\-L\-E $\ast$stream)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a58d4d60e501a22245ed9089994127ac6}{m\-\_\-fread} (F\-I\-L\-E $\ast$stream)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a67dd80f90790816029588d2a1fee2a9e}{m\-\_\-copy} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_ab59f205f1f41212ee7bf3aa8082ceb11}{m\-\_\-flip\-Cols} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_a14d7c2a067cf5c06de73ff34d34056c6}{m\-\_\-normalize} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_a9a854dbc276f0a1c278c0dfa58dc9c7f}{m\-\_\-elem\-\_\-truncate} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_ae126646a7981ac6a6007f140fcc0c8a6}{m\-\_\-elem\-\_\-acos} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_aafcf026ab4ada57d2568e22ed15f6d18}{m\-\_\-elem\-\_\-sqrt} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_a7dac600d83ec3f520a11ce7976a63513}{m\-\_\-elem\-\_\-negate} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_ac7ef6aaa9c4b588de9eb8eafca0154f6}{m\-\_\-elem\-\_\-exp} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+void \hyperlink{matrix_operations_8h_a5386a408e147bcd679433d49cc5ec452}{m\-\_\-elem\-\_\-pow} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, \hyperlink{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}{precision} x)
+\item 
+void \hyperlink{matrix_operations_8h_ae9939a03cc257493a6a7f6e4c37d80bc}{m\-\_\-elem\-\_\-mult} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, \hyperlink{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}{precision} x)
+\item 
+void \hyperlink{matrix_operations_8h_a9254f5363aa3fad596542e197f2d6b41}{m\-\_\-elem\-\_\-divide\-By\-Const} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, \hyperlink{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}{precision} x)
+\item 
+void \hyperlink{matrix_operations_8h_ae2fb432928f084577c915e66549b901e}{m\-\_\-elem\-\_\-divide\-By\-Matrix} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, \hyperlink{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}{precision} x)
+\item 
+void \hyperlink{matrix_operations_8h_a7111e3ea4a5c40db395b89a39eded790}{m\-\_\-elem\-\_\-add} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, \hyperlink{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}{precision} x)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_ad1c0e69f28e10580a688c9ec4a24fef3}{m\-\_\-sum\-Cols} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a91d67537de5b984116b8d513d1d365c7}{m\-\_\-mean\-Cols} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a0a8a4e41a9d35ae3113ccb2dba39f320}{m\-\_\-sum\-Rows} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a3f98ee634a677f7fd660072fb603428e}{m\-\_\-mean\-Rows} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a9828cda2df4c7a4a9bccd35d02233e13}{m\-\_\-find\-Non\-Zeros} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a63af958caab4645afc58e64af7ad8f65}{m\-\_\-transpose} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_ae164a5f83f9a682f4d29b2337246a258}{m\-\_\-reshape} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, int new\-Num\-Rows, int new\-Num\-Cols)
+\item 
+void \hyperlink{matrix_operations_8h_a4d4a771438dce48bfe1d1209ed9e697b}{m\-\_\-inverse\-Matrix} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}{precision} \hyperlink{matrix_operations_8h_a16803f1bb073c2e77c5d8a8b20c0974a}{m\-\_\-norm} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, int spec\-Row)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_adb23c622448049bf89a0abda63365d70}{m\-\_\-sqrtm} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}{precision} \hyperlink{matrix_operations_8h_ab72cff27ff4de0a620e096676df827ea}{m\-\_\-determinant} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a43f31ca3beaa8e5be76630c244030483}{m\-\_\-cofactor} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a6ada1271d3948c509aff6660a2757ab8}{m\-\_\-covariance} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a636ba44cce2359ba5e0fe2a8de8bdfef}{m\-\_\-dot\-\_\-subtract} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$A, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$B)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a37a00d3d1deddd47665f33ab3d3b0dbf}{m\-\_\-dot\-\_\-add} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$A, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$B)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_ad2adf90d2f4194864fa71d72bf7db502}{m\-\_\-dot\-\_\-division} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$A, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$B)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a00c47cf567aa8123940f2733f070ed33}{m\-\_\-matrix\-\_\-multiply} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$A, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$B, int max\-Cols)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_a2e05ddccdc38b73d2ed3cdadf440be52}{m\-\_\-matrix\-\_\-division} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$A, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$B)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_acfd0c2b55e4813ec5701cf93293c7c4a}{m\-\_\-reorder\-\_\-columns} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$V)
+\item 
+void \hyperlink{matrix_operations_8h_aff2e3ec9ed9bc8b8a34e295f0fa45fa7}{m\-\_\-eigenvalues\-\_\-eigenvectors} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$$\ast$p\-\_\-eigenvalues, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$$\ast$p\-\_\-eigenvectors)
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations_8h_aeda0ac9cc8b0b232e0b1e8774c47be90}{m\-\_\-get\-Sub\-Matrix} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, int start\-Row, int start\-Col, int num\-Rows, int num\-Cols)
+\item 
+void \hyperlink{matrix_operations_8h_a932bbb45408469666ee87b216942aff6}{load\-P\-P\-Mto\-Matrix\-Col} (char $\ast$path, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, int spec\-Col, unsigned char $\ast$pixels)
+\item 
+void \hyperlink{matrix_operations_8h_a5a9f8508684278dc37926171c9187200}{write\-P\-P\-Mgrayscale} (char $\ast$filename, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M, int spec\-C\-Ol, int height, int width)
+\end{DoxyCompactItemize}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{matrix_operations_8h_a4b5014034c9aac136ab8c82c2d16dc82}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!C\-O\-L\-O\-R@{C\-O\-L\-O\-R}}
+\index{C\-O\-L\-O\-R@{C\-O\-L\-O\-R}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{C\-O\-L\-O\-R}]{\setlength{\rightskip}{0pt plus 5cm}\#define C\-O\-L\-O\-R~0}}\label{matrix_operations_8h_a4b5014034c9aac136ab8c82c2d16dc82}
+
+
+Definition at line 23 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_acdae5e1680201182adf148cdb963c183}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!elem@{elem}}
+\index{elem@{elem}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{elem}]{\setlength{\rightskip}{0pt plus 5cm}\#define elem(
+\begin{DoxyParamCaption}
+\item[{}]{M, }
+\item[{}]{i, }
+\item[{}]{j}
+\end{DoxyParamCaption}
+)~(M)-\/$>$data\mbox{[}(j) $\ast$ (M)-\/$>$num\-Rows + (i)\mbox{]}}}\label{matrix_operations_8h_acdae5e1680201182adf148cdb963c183}
+
+
+Definition at line 38 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a63b5892f7ab163bcb862316801283eb3}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!F\-I\-L\-L@{F\-I\-L\-L}}
+\index{F\-I\-L\-L@{F\-I\-L\-L}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{F\-I\-L\-L}]{\setlength{\rightskip}{0pt plus 5cm}\#define F\-I\-L\-L~3}}\label{matrix_operations_8h_a63b5892f7ab163bcb862316801283eb3}
+
+
+Definition at line 17 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a4b31056871d5bc746fb659d963a0c4d8}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!G\-R\-A\-Y\-S\-C\-A\-L\-E@{G\-R\-A\-Y\-S\-C\-A\-L\-E}}
+\index{G\-R\-A\-Y\-S\-C\-A\-L\-E@{G\-R\-A\-Y\-S\-C\-A\-L\-E}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{G\-R\-A\-Y\-S\-C\-A\-L\-E}]{\setlength{\rightskip}{0pt plus 5cm}\#define G\-R\-A\-Y\-S\-C\-A\-L\-E~1}}\label{matrix_operations_8h_a4b31056871d5bc746fb659d963a0c4d8}
+
+
+Definition at line 24 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a8c98756b922647298e5ba1fb6fed4f08}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!H\-O\-R\-Z@{H\-O\-R\-Z}}
+\index{H\-O\-R\-Z@{H\-O\-R\-Z}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{H\-O\-R\-Z}]{\setlength{\rightskip}{0pt plus 5cm}\#define H\-O\-R\-Z~0}}\label{matrix_operations_8h_a8c98756b922647298e5ba1fb6fed4f08}
+
+
+Definition at line 21 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a44fdeee315bbbfda43356ffbdf05a1b3}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!I\-D\-E\-N\-T\-I\-T\-Y@{I\-D\-E\-N\-T\-I\-T\-Y}}
+\index{I\-D\-E\-N\-T\-I\-T\-Y@{I\-D\-E\-N\-T\-I\-T\-Y}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{I\-D\-E\-N\-T\-I\-T\-Y}]{\setlength{\rightskip}{0pt plus 5cm}\#define I\-D\-E\-N\-T\-I\-T\-Y~4}}\label{matrix_operations_8h_a44fdeee315bbbfda43356ffbdf05a1b3}
+
+
+Definition at line 18 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_ac43470b51f50603afbf5b01b4298814d}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!I\-S\-\_\-\-C\-O\-L\-O\-R@{I\-S\-\_\-\-C\-O\-L\-O\-R}}
+\index{I\-S\-\_\-\-C\-O\-L\-O\-R@{I\-S\-\_\-\-C\-O\-L\-O\-R}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{I\-S\-\_\-\-C\-O\-L\-O\-R}]{\setlength{\rightskip}{0pt plus 5cm}\#define I\-S\-\_\-\-C\-O\-L\-O\-R~{\bf G\-R\-A\-Y\-S\-C\-A\-L\-E}}}\label{matrix_operations_8h_ac43470b51f50603afbf5b01b4298814d}
+
+
+Definition at line 27 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a4594ff69b42430e5b31670333bad4446}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!N\-O\-T\-\_\-\-T\-R\-A\-N\-S\-P\-O\-S\-E\-D@{N\-O\-T\-\_\-\-T\-R\-A\-N\-S\-P\-O\-S\-E\-D}}
+\index{N\-O\-T\-\_\-\-T\-R\-A\-N\-S\-P\-O\-S\-E\-D@{N\-O\-T\-\_\-\-T\-R\-A\-N\-S\-P\-O\-S\-E\-D}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{N\-O\-T\-\_\-\-T\-R\-A\-N\-S\-P\-O\-S\-E\-D}]{\setlength{\rightskip}{0pt plus 5cm}\#define N\-O\-T\-\_\-\-T\-R\-A\-N\-S\-P\-O\-S\-E\-D~0}}\label{matrix_operations_8h_a4594ff69b42430e5b31670333bad4446}
+
+
+Definition at line 19 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a55ead18ae83ed081acdd195a593d0bc3}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!O\-N\-E\-S@{O\-N\-E\-S}}
+\index{O\-N\-E\-S@{O\-N\-E\-S}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{O\-N\-E\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define O\-N\-E\-S~2}}\label{matrix_operations_8h_a55ead18ae83ed081acdd195a593d0bc3}
+
+
+Definition at line 16 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a43bda94ea92b5a0e18e404892f3c2668}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!P\-A\-R\-E\-N\-T@{P\-A\-R\-E\-N\-T}}
+\index{P\-A\-R\-E\-N\-T@{P\-A\-R\-E\-N\-T}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{P\-A\-R\-E\-N\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define P\-A\-R\-E\-N\-T~0}}\label{matrix_operations_8h_a43bda94ea92b5a0e18e404892f3c2668}
+
+
+Definition at line 25 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!precision@{precision}}
+\index{precision@{precision}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{precision}]{\setlength{\rightskip}{0pt plus 5cm}\#define precision~double}}\label{matrix_operations_8h_a4b090d5fdf6231e51ec0223d07b8a1b5}
+
+
+Definition at line 13 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_ad33c3e51307945c6c3968785cbbff5df}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!S\-U\-B\-M\-A\-T\-R\-I\-X@{S\-U\-B\-M\-A\-T\-R\-I\-X}}
+\index{S\-U\-B\-M\-A\-T\-R\-I\-X@{S\-U\-B\-M\-A\-T\-R\-I\-X}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{S\-U\-B\-M\-A\-T\-R\-I\-X}]{\setlength{\rightskip}{0pt plus 5cm}\#define S\-U\-B\-M\-A\-T\-R\-I\-X~1}}\label{matrix_operations_8h_ad33c3e51307945c6c3968785cbbff5df}
+
+
+Definition at line 26 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_aebf233c71be994865bf797becfe885fb}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!T\-R\-A\-N\-S\-P\-O\-S\-E\-D@{T\-R\-A\-N\-S\-P\-O\-S\-E\-D}}
+\index{T\-R\-A\-N\-S\-P\-O\-S\-E\-D@{T\-R\-A\-N\-S\-P\-O\-S\-E\-D}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{T\-R\-A\-N\-S\-P\-O\-S\-E\-D}]{\setlength{\rightskip}{0pt plus 5cm}\#define T\-R\-A\-N\-S\-P\-O\-S\-E\-D~1}}\label{matrix_operations_8h_aebf233c71be994865bf797becfe885fb}
+
+
+Definition at line 20 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a2dc3870be25a19efa2940150507aaf71}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!U\-N\-D\-E\-F\-I\-N\-E\-D@{U\-N\-D\-E\-F\-I\-N\-E\-D}}
+\index{U\-N\-D\-E\-F\-I\-N\-E\-D@{U\-N\-D\-E\-F\-I\-N\-E\-D}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{U\-N\-D\-E\-F\-I\-N\-E\-D}]{\setlength{\rightskip}{0pt plus 5cm}\#define U\-N\-D\-E\-F\-I\-N\-E\-D~0}}\label{matrix_operations_8h_a2dc3870be25a19efa2940150507aaf71}
+
+
+Definition at line 14 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_a22c2b7cb14b1ffb516a9ed4a164b5cda}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!V\-E\-R\-T@{V\-E\-R\-T}}
+\index{V\-E\-R\-T@{V\-E\-R\-T}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{V\-E\-R\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define V\-E\-R\-T~1}}\label{matrix_operations_8h_a22c2b7cb14b1ffb516a9ed4a164b5cda}
+
+
+Definition at line 22 of file matrix\-Operations.\-h.
+
+\hypertarget{matrix_operations_8h_ae65829fa721c1322bf86fa4a747f5693}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!Z\-E\-R\-O\-S@{Z\-E\-R\-O\-S}}
+\index{Z\-E\-R\-O\-S@{Z\-E\-R\-O\-S}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{Z\-E\-R\-O\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define Z\-E\-R\-O\-S~1}}\label{matrix_operations_8h_ae65829fa721c1322bf86fa4a747f5693}
+
+
+Definition at line 15 of file matrix\-Operations.\-h.
+
+
+
+\subsection{Function Documentation}
+\hypertarget{matrix_operations_8h_a932bbb45408469666ee87b216942aff6}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!load\-P\-P\-Mto\-Matrix\-Col@{load\-P\-P\-Mto\-Matrix\-Col}}
+\index{load\-P\-P\-Mto\-Matrix\-Col@{load\-P\-P\-Mto\-Matrix\-Col}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{load\-P\-P\-Mto\-Matrix\-Col}]{\setlength{\rightskip}{0pt plus 5cm}void load\-P\-P\-Mto\-Matrix\-Col (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{path, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{int}]{spec\-Col, }
+\item[{unsigned char $\ast$}]{pixels}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a932bbb45408469666ee87b216942aff6}
+
+
+Definition at line 122 of file matrix\-Operations6.\-c.
+
+\hypertarget{matrix_operations_8h_a43f31ca3beaa8e5be76630c244030483}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-cofactor@{m\-\_\-cofactor}}
+\index{m\-\_\-cofactor@{m\-\_\-cofactor}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-cofactor}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-cofactor (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a43f31ca3beaa8e5be76630c244030483}
+
+
+Definition at line 116 of file matrix\-Operations3.\-c.
+
+\hypertarget{matrix_operations_8h_a67dd80f90790816029588d2a1fee2a9e}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-copy@{m\-\_\-copy}}
+\index{m\-\_\-copy@{m\-\_\-copy}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-copy}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-copy (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a67dd80f90790816029588d2a1fee2a9e}
+m\-\_\-copy
+
+Copies matrix M into a new matrix
+
+I\-C\-A\-: data\-\_\-t$\ast$ copy(data\-\_\-t$\ast$ orig,int rows,int cols); 
+
+Definition at line 171 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations_8h_a6ada1271d3948c509aff6660a2757ab8}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-covariance@{m\-\_\-covariance}}
+\index{m\-\_\-covariance@{m\-\_\-covariance}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-covariance}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-covariance (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a6ada1271d3948c509aff6660a2757ab8}
+
+
+Definition at line 153 of file matrix\-Operations3.\-c.
+
+\hypertarget{matrix_operations_8h_ab72cff27ff4de0a620e096676df827ea}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-determinant@{m\-\_\-determinant}}
+\index{m\-\_\-determinant@{m\-\_\-determinant}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-determinant}]{\setlength{\rightskip}{0pt plus 5cm}{\bf precision} m\-\_\-determinant (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_ab72cff27ff4de0a620e096676df827ea}
+
+
+Definition at line 75 of file matrix\-Operations3.\-c.
+
+\hypertarget{matrix_operations_8h_a37a00d3d1deddd47665f33ab3d3b0dbf}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-dot\-\_\-add@{m\-\_\-dot\-\_\-add}}
+\index{m\-\_\-dot\-\_\-add@{m\-\_\-dot\-\_\-add}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-dot\-\_\-add}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-dot\-\_\-add (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{A, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{B}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a37a00d3d1deddd47665f33ab3d3b0dbf}
+
+
+Definition at line 30 of file matrix\-Operations4.\-c.
+
+\hypertarget{matrix_operations_8h_ad2adf90d2f4194864fa71d72bf7db502}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-dot\-\_\-division@{m\-\_\-dot\-\_\-division}}
+\index{m\-\_\-dot\-\_\-division@{m\-\_\-dot\-\_\-division}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-dot\-\_\-division}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-dot\-\_\-division (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{A, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{B}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_ad2adf90d2f4194864fa71d72bf7db502}
+
+
+Definition at line 48 of file matrix\-Operations4.\-c.
+
+\hypertarget{matrix_operations_8h_a636ba44cce2359ba5e0fe2a8de8bdfef}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-dot\-\_\-subtract@{m\-\_\-dot\-\_\-subtract}}
+\index{m\-\_\-dot\-\_\-subtract@{m\-\_\-dot\-\_\-subtract}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-dot\-\_\-subtract}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-dot\-\_\-subtract (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{A, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{B}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a636ba44cce2359ba5e0fe2a8de8bdfef}
+
+
+Definition at line 12 of file matrix\-Operations4.\-c.
+
+\hypertarget{matrix_operations_8h_aff2e3ec9ed9bc8b8a34e295f0fa45fa7}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-eigenvalues\-\_\-eigenvectors@{m\-\_\-eigenvalues\-\_\-eigenvectors}}
+\index{m\-\_\-eigenvalues\-\_\-eigenvectors@{m\-\_\-eigenvalues\-\_\-eigenvectors}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-eigenvalues\-\_\-eigenvectors}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-eigenvalues\-\_\-eigenvectors (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{{\bf matrix\-\_\-t} $\ast$$\ast$}]{p\-\_\-eigenvalues, }
+\item[{{\bf matrix\-\_\-t} $\ast$$\ast$}]{p\-\_\-eigenvectors}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_aff2e3ec9ed9bc8b8a34e295f0fa45fa7}
+
+
+Definition at line 9 of file matrix\-Operations6.\-c.
+
+\hypertarget{matrix_operations_8h_ae126646a7981ac6a6007f140fcc0c8a6}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-acos@{m\-\_\-elem\-\_\-acos}}
+\index{m\-\_\-elem\-\_\-acos@{m\-\_\-elem\-\_\-acos}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-acos}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-acos (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_ae126646a7981ac6a6007f140fcc0c8a6}
+m\-\_\-acos\-All
+
+applies acos to all matrix elements
+
+I\-C\-A\-: void matrix\-\_\-acos(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols); 
+
+Definition at line 108 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a7111e3ea4a5c40db395b89a39eded790}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-add@{m\-\_\-elem\-\_\-add}}
+\index{m\-\_\-elem\-\_\-add@{m\-\_\-elem\-\_\-add}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-add}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-add (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{{\bf precision}}]{x}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a7111e3ea4a5c40db395b89a39eded790}
+void sum\-\_\-scalar\-\_\-matrix(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols, data\-\_\-t scalar);
+
+adds element-\/wise matrix to contant 
+
+Definition at line 228 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a9254f5363aa3fad596542e197f2d6b41}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-divide\-By\-Const@{m\-\_\-elem\-\_\-divide\-By\-Const}}
+\index{m\-\_\-elem\-\_\-divide\-By\-Const@{m\-\_\-elem\-\_\-divide\-By\-Const}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-divide\-By\-Const}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-divide\-By\-Const (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{{\bf precision}}]{x}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a9254f5363aa3fad596542e197f2d6b41}
+void divide\-\_\-by\-\_\-constant(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols, data\-\_\-t scalar);
+
+divides matrix by contant 
+
+Definition at line 198 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_ae2fb432928f084577c915e66549b901e}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-divide\-By\-Matrix@{m\-\_\-elem\-\_\-divide\-By\-Matrix}}
+\index{m\-\_\-elem\-\_\-divide\-By\-Matrix@{m\-\_\-elem\-\_\-divide\-By\-Matrix}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-divide\-By\-Matrix}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-divide\-By\-Matrix (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{{\bf precision}}]{num}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_ae2fb432928f084577c915e66549b901e}
+void divide\-\_\-scaler\-\_\-by\-\_\-matrix(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols, data\-\_\-t scalar) ;
+
+divides constant by matrix element-\/wise 
+
+Definition at line 213 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_ac7ef6aaa9c4b588de9eb8eafca0154f6}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-exp@{m\-\_\-elem\-\_\-exp}}
+\index{m\-\_\-elem\-\_\-exp@{m\-\_\-elem\-\_\-exp}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-exp}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-exp (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_ac7ef6aaa9c4b588de9eb8eafca0154f6}
+void matrix\-\_\-exp(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols);
+
+raises e to all matrix elements 
+
+Definition at line 153 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_ae9939a03cc257493a6a7f6e4c37d80bc}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-mult@{m\-\_\-elem\-\_\-mult}}
+\index{m\-\_\-elem\-\_\-mult@{m\-\_\-elem\-\_\-mult}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-mult}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-mult (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{{\bf precision}}]{x}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_ae9939a03cc257493a6a7f6e4c37d80bc}
+void scale\-\_\-matrix(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols, int scalar);
+
+scales matrix by contant 
+
+Definition at line 184 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a7dac600d83ec3f520a11ce7976a63513}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-negate@{m\-\_\-elem\-\_\-negate}}
+\index{m\-\_\-elem\-\_\-negate@{m\-\_\-elem\-\_\-negate}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-negate}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-negate (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a7dac600d83ec3f520a11ce7976a63513}
+void matrix\-\_\-negate(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols);
+
+negates all matrix elements 
+
+Definition at line 138 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a5386a408e147bcd679433d49cc5ec452}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-pow@{m\-\_\-elem\-\_\-pow}}
+\index{m\-\_\-elem\-\_\-pow@{m\-\_\-elem\-\_\-pow}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-pow}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-pow (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{{\bf precision}}]{num}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a5386a408e147bcd679433d49cc5ec452}
+void raise\-\_\-matrix\-\_\-to\-\_\-power(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols, int scalar);
+
+raises all matrix elements to a power 
+
+Definition at line 169 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_aafcf026ab4ada57d2568e22ed15f6d18}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-sqrt@{m\-\_\-elem\-\_\-sqrt}}
+\index{m\-\_\-elem\-\_\-sqrt@{m\-\_\-elem\-\_\-sqrt}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-sqrt}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-sqrt (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_aafcf026ab4ada57d2568e22ed15f6d18}
+void matrix\-\_\-sqrt(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols);
+
+applies sqrt to all matrix elements 
+
+Definition at line 123 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a9a854dbc276f0a1c278c0dfa58dc9c7f}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-elem\-\_\-truncate@{m\-\_\-elem\-\_\-truncate}}
+\index{m\-\_\-elem\-\_\-truncate@{m\-\_\-elem\-\_\-truncate}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-elem\-\_\-truncate}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-elem\-\_\-truncate (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a9a854dbc276f0a1c278c0dfa58dc9c7f}
+void inv(dataem\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows);
+
+inverse of the matrix m\-\_\-truncate\-All
+
+Truncates the entries in matrix M
+
+I\-C\-A\-: void fix(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols); 
+
+Definition at line 89 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a9828cda2df4c7a4a9bccd35d02233e13}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-find\-Non\-Zeros@{m\-\_\-find\-Non\-Zeros}}
+\index{m\-\_\-find\-Non\-Zeros@{m\-\_\-find\-Non\-Zeros}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-find\-Non\-Zeros}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-find\-Non\-Zeros (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a9828cda2df4c7a4a9bccd35d02233e13}
+void find(data\-\_\-t $\ast$outvect, data\-\_\-t $\ast$$\ast$matrix, int rows, int cols); N\-O\-T\-E\-: this also assumes that outvect is a column vector) places the row indeces of non-\/zero elements in a vector This vector has additional, non-\/used space, not sure what to do about this -\/miller 
+
+Definition at line 320 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_ab59f205f1f41212ee7bf3aa8082ceb11}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-flip\-Cols@{m\-\_\-flip\-Cols}}
+\index{m\-\_\-flip\-Cols@{m\-\_\-flip\-Cols}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-flip\-Cols}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-flip\-Cols (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_ab59f205f1f41212ee7bf3aa8082ceb11}
+m\-\_\-flip\-Cols
+
+Swaps columns in M from left to right
+
+I\-C\-A\-: void fliplr(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols) 
+
+Definition at line 15 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a173666c46f45d946c918d8b0265f5b55}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-fprint@{m\-\_\-fprint}}
+\index{m\-\_\-fprint@{m\-\_\-fprint}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-fprint}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-fprint (
+\begin{DoxyParamCaption}
+\item[{F\-I\-L\-E $\ast$}]{stream, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a173666c46f45d946c918d8b0265f5b55}
+m\-\_\-fprint
+
+Prints matrix M to the stream specified Prints num\-Rows, num\-Cols, then each whole row of the matrix (aka \mbox{[}0\mbox{]}\mbox{[}0\mbox{]}, \mbox{[}0\mbox{]}\mbox{[}1\mbox{]}..)
+
+I\-C\-A\-: void print\-\_\-matrix(data\-\_\-t $\ast$matrix, int rows, int cols); 
+
+Definition at line 90 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations_8h_a58d4d60e501a22245ed9089994127ac6}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-fread@{m\-\_\-fread}}
+\index{m\-\_\-fread@{m\-\_\-fread}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-fread}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-fread (
+\begin{DoxyParamCaption}
+\item[{F\-I\-L\-E $\ast$}]{stream}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a58d4d60e501a22245ed9089994127ac6}
+m\-\_\-fread
+
+reads matrix written by print\-Matrix in stream specified 
+
+Definition at line 153 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations_8h_aeccabc73cca6fb32d2200a3d787db3dd}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-free@{m\-\_\-free}}
+\index{m\-\_\-free@{m\-\_\-free}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_aeccabc73cca6fb32d2200a3d787db3dd}
+m\-\_\-free
+
+Frees memory for matrix M I\-C\-A\-: void free\-\_\-matrix(data\-\_\-t $\ast$$\ast$matrix); void free\-\_\-vector(data\-\_\-t $\ast$$\ast$vector); 
+
+Definition at line 73 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations_8h_a0fb98dea861b95f3ca7d6b3fcf936bbb}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-fscan@{m\-\_\-fscan}}
+\index{m\-\_\-fscan@{m\-\_\-fscan}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-fscan}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-fscan (
+\begin{DoxyParamCaption}
+\item[{F\-I\-L\-E $\ast$}]{stream}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a0fb98dea861b95f3ca7d6b3fcf936bbb}
+m\-\_\-fscan
+
+Scans matrix written by print\-Matrix in stream specified 
+
+Definition at line 131 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations_8h_a55a6c54b04f1f41144e5ef2952fa9b0e}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-fwrite@{m\-\_\-fwrite}}
+\index{m\-\_\-fwrite@{m\-\_\-fwrite}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-fwrite}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-fwrite (
+\begin{DoxyParamCaption}
+\item[{F\-I\-L\-E $\ast$}]{stream, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a55a6c54b04f1f41144e5ef2952fa9b0e}
+m\-\_\-fwrite
+
+Writes matrix M to the stream specified Writes num\-Rows, num\-Cols, then the data N\-O\-T\-E\-: will not work with submatrixes right now 
+
+Definition at line 112 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations_8h_aeda0ac9cc8b0b232e0b1e8774c47be90}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-get\-Sub\-Matrix@{m\-\_\-get\-Sub\-Matrix}}
+\index{m\-\_\-get\-Sub\-Matrix@{m\-\_\-get\-Sub\-Matrix}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-get\-Sub\-Matrix}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-get\-Sub\-Matrix (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{int}]{start\-Row, }
+\item[{int}]{start\-Col, }
+\item[{int}]{num\-Rows, }
+\item[{int}]{num\-Cols}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_aeda0ac9cc8b0b232e0b1e8774c47be90}
+
+
+Definition at line 68 of file matrix\-Operations6.\-c.
+
+\hypertarget{matrix_operations_8h_a170140db41813e5e05e69f6b0e9e5e97}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-initialize@{m\-\_\-initialize}}
+\index{m\-\_\-initialize@{m\-\_\-initialize}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-initialize}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-initialize (
+\begin{DoxyParamCaption}
+\item[{int}]{mode, }
+\item[{int}]{num\-Rows, }
+\item[{int}]{num\-Cols}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a170140db41813e5e05e69f6b0e9e5e97}
+m\-\_\-initialize
+
+Returns a matrix pointer to a matrix of size M x N
+
+Depending on the input variable \char`\"{}mode\char`\"{}, data is either a 2\-D matrix of 
+\begin{DoxyItemize}
+\item Z\-E\-R\-O\-S = zeros 
+\item I\-D\-E\-N\-T\-I\-T\-Y = identity matrix 
+\item U\-N\-D\-E\-F\-I\-N\-E\-D = undefined values 
+\item O\-N\-E\-S = all ones 
+\item F\-I\-L\-L = each element increases by one 
+\end{DoxyItemize}
+
+I\-C\-A\-: void allocate\-\_\-matrix(data\-\_\-t $\ast$$\ast$vector, int rows, int cols); void allocate\-\_\-vector(data\-\_\-t $\ast$$\ast$vector, int length); void ones(data\-\_\-t $\ast$ones\-Mat, int rows, int cols); void eye(data\-\_\-t $\ast$identity, int dimension); void fill\-\_\-matrix(data\-\_\-t $\ast$matrix, int rows, int cols); 
+
+Definition at line 26 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations_8h_a4d4a771438dce48bfe1d1209ed9e697b}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-inverse\-Matrix@{m\-\_\-inverse\-Matrix}}
+\index{m\-\_\-inverse\-Matrix@{m\-\_\-inverse\-Matrix}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-inverse\-Matrix}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-inverse\-Matrix (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a4d4a771438dce48bfe1d1209ed9e697b}
+
+
+Definition at line 5 of file matrix\-Operations3.\-c.
+
+\hypertarget{matrix_operations_8h_a2e05ddccdc38b73d2ed3cdadf440be52}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-matrix\-\_\-division@{m\-\_\-matrix\-\_\-division}}
+\index{m\-\_\-matrix\-\_\-division@{m\-\_\-matrix\-\_\-division}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-matrix\-\_\-division}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-matrix\-\_\-division (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{A, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{B}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a2e05ddccdc38b73d2ed3cdadf440be52}
+
+
+Definition at line 37 of file matrix\-Operations5.\-c.
+
+\hypertarget{matrix_operations_8h_a00c47cf567aa8123940f2733f070ed33}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-matrix\-\_\-multiply@{m\-\_\-matrix\-\_\-multiply}}
+\index{m\-\_\-matrix\-\_\-multiply@{m\-\_\-matrix\-\_\-multiply}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-matrix\-\_\-multiply}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-matrix\-\_\-multiply (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{A, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{B, }
+\item[{int}]{max\-Cols}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a00c47cf567aa8123940f2733f070ed33}
+
+
+Definition at line 11 of file matrix\-Operations5.\-c.
+
+\hypertarget{matrix_operations_8h_a91d67537de5b984116b8d513d1d365c7}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-mean\-Cols@{m\-\_\-mean\-Cols}}
+\index{m\-\_\-mean\-Cols@{m\-\_\-mean\-Cols}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-mean\-Cols}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-mean\-Cols (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a91d67537de5b984116b8d513d1d365c7}
+void mean\-\_\-of\-\_\-matrix(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols);
+
+takes the mean value of each column 
+
+Definition at line 266 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a3f98ee634a677f7fd660072fb603428e}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-mean\-Rows@{m\-\_\-mean\-Rows}}
+\index{m\-\_\-mean\-Rows@{m\-\_\-mean\-Rows}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-mean\-Rows}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-mean\-Rows (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a3f98ee634a677f7fd660072fb603428e}
+void mean\-\_\-of\-\_\-matrix\-\_\-by\-\_\-rows(data\-\_\-t $\ast$outmatrix,data\-\_\-t $\ast$matrix,int rows,int cols);
+
+takes the mean of the rows of a matrix, returns a col vect 
+
+Definition at line 303 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a16803f1bb073c2e77c5d8a8b20c0974a}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-norm@{m\-\_\-norm}}
+\index{m\-\_\-norm@{m\-\_\-norm}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-norm}]{\setlength{\rightskip}{0pt plus 5cm}{\bf precision} m\-\_\-norm (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{int}]{spec\-Row}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a16803f1bb073c2e77c5d8a8b20c0974a}
+
+
+Definition at line 29 of file matrix\-Operations3.\-c.
+
+\hypertarget{matrix_operations_8h_a14d7c2a067cf5c06de73ff34d34056c6}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-normalize@{m\-\_\-normalize}}
+\index{m\-\_\-normalize@{m\-\_\-normalize}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-normalize}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-normalize (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a14d7c2a067cf5c06de73ff34d34056c6}
+void normalize(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols);
+
+normalizes the matrix 
+
+Definition at line 33 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_acfd0c2b55e4813ec5701cf93293c7c4a}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-reorder\-\_\-columns@{m\-\_\-reorder\-\_\-columns}}
+\index{m\-\_\-reorder\-\_\-columns@{m\-\_\-reorder\-\_\-columns}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-reorder\-\_\-columns}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-reorder\-\_\-columns (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{V}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_acfd0c2b55e4813ec5701cf93293c7c4a}
+
+
+Definition at line 57 of file matrix\-Operations5.\-c.
+
+\hypertarget{matrix_operations_8h_ae164a5f83f9a682f4d29b2337246a258}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-reshape@{m\-\_\-reshape}}
+\index{m\-\_\-reshape@{m\-\_\-reshape}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-reshape}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-reshape (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{int}]{new\-Num\-Rows, }
+\item[{int}]{new\-Num\-Cols}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_ae164a5f83f9a682f4d29b2337246a258}
+void reshape(data\-\_\-t $\ast$$\ast$outmatrix, int out\-Rows, int out\-Cols, data\-\_\-t $\ast$$\ast$matrix, int rows, int cols)
+
+reshapes matrix by changing dimensions, keeping data 
+
+Definition at line 363 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_adb23c622448049bf89a0abda63365d70}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-sqrtm@{m\-\_\-sqrtm}}
+\index{m\-\_\-sqrtm@{m\-\_\-sqrtm}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-sqrtm}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-sqrtm (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_adb23c622448049bf89a0abda63365d70}
+
+
+Definition at line 51 of file matrix\-Operations3.\-c.
+
+\hypertarget{matrix_operations_8h_ad1c0e69f28e10580a688c9ec4a24fef3}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-sum\-Cols@{m\-\_\-sum\-Cols}}
+\index{m\-\_\-sum\-Cols@{m\-\_\-sum\-Cols}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-sum\-Cols}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-sum\-Cols (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_ad1c0e69f28e10580a688c9ec4a24fef3}
+void sum\-\_\-columns(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols);
+
+sums the columns of a matrix, returns a row vector 
+
+Definition at line 245 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a0a8a4e41a9d35ae3113ccb2dba39f320}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-sum\-Rows@{m\-\_\-sum\-Rows}}
+\index{m\-\_\-sum\-Rows@{m\-\_\-sum\-Rows}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-sum\-Rows}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-sum\-Rows (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a0a8a4e41a9d35ae3113ccb2dba39f320}
+void sum\-\_\-rows(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols);
+
+sums the rows of a matrix, returns a col vect 
+
+Definition at line 282 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a63af958caab4645afc58e64af7ad8f65}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!m\-\_\-transpose@{m\-\_\-transpose}}
+\index{m\-\_\-transpose@{m\-\_\-transpose}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{m\-\_\-transpose}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-transpose (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a63af958caab4645afc58e64af7ad8f65}
+transpose matrix
+
+This function transposes a matrix
+
+I\-C\-A\-: void transpose(data\-\_\-t $\ast$outmatrix, data\-\_\-t $\ast$matrix, int rows, int cols); 
+
+Definition at line 346 of file matrix\-Operations2.\-c.
+
+\hypertarget{matrix_operations_8h_a5a9f8508684278dc37926171c9187200}{\index{matrix\-Operations.\-h@{matrix\-Operations.\-h}!write\-P\-P\-Mgrayscale@{write\-P\-P\-Mgrayscale}}
+\index{write\-P\-P\-Mgrayscale@{write\-P\-P\-Mgrayscale}!matrixOperations.h@{matrix\-Operations.\-h}}
+\subsubsection[{write\-P\-P\-Mgrayscale}]{\setlength{\rightskip}{0pt plus 5cm}void write\-P\-P\-Mgrayscale (
+\begin{DoxyParamCaption}
+\item[{char $\ast$}]{filename, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M, }
+\item[{int}]{spec\-C\-Ol, }
+\item[{int}]{height, }
+\item[{int}]{width}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations_8h_a5a9f8508684278dc37926171c9187200}
+
+
+Definition at line 168 of file matrix\-Operations6.\-c.
+

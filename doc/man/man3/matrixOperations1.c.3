@@ -1,0 +1,104 @@
+.TH "/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations1.c" 3 "Fri Oct 2 2015" "Facial Recognition - Common Code" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations1.c \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'matrixOperations\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_initialize\fP (int mode, int numRows, int numCols)"
+.br
+.ti -1c
+.RI "void \fBm_free\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_fprint\fP (FILE *stream, \fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_fwrite\fP (FILE *stream, \fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_fscan\fP (FILE *stream)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_fread\fP (FILE *stream)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_copy\fP (\fBmatrix_t\fP *M)"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "\fBmatrix_t\fP* m_copy (\fBmatrix_t\fP *M)"
+m_copy
+.PP
+Copies matrix M into a new matrix
+.PP
+ICA: data_t* copy(data_t* orig,int rows,int cols); 
+.PP
+Definition at line 171 of file matrixOperations1\&.c\&.
+.SS "void m_fprint (FILE *stream, \fBmatrix_t\fP *M)"
+m_fprint
+.PP
+Prints matrix M to the stream specified Prints numRows, numCols, then each whole row of the matrix (aka [0][0], [0][1]\&.\&.)
+.PP
+ICA: void print_matrix(data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 90 of file matrixOperations1\&.c\&.
+.SS "\fBmatrix_t\fP* m_fread (FILE *stream)"
+m_fread
+.PP
+reads matrix written by printMatrix in stream specified 
+.PP
+Definition at line 153 of file matrixOperations1\&.c\&.
+.SS "void m_free (\fBmatrix_t\fP *M)"
+m_free
+.PP
+Frees memory for matrix M ICA: void free_matrix(data_t **matrix); void free_vector(data_t **vector); 
+.PP
+Definition at line 73 of file matrixOperations1\&.c\&.
+.SS "\fBmatrix_t\fP* m_fscan (FILE *stream)"
+m_fscan
+.PP
+Scans matrix written by printMatrix in stream specified 
+.PP
+Definition at line 131 of file matrixOperations1\&.c\&.
+.SS "void m_fwrite (FILE *stream, \fBmatrix_t\fP *M)"
+m_fwrite
+.PP
+Writes matrix M to the stream specified Writes numRows, numCols, then the data NOTE: will not work with submatrixes right now 
+.PP
+Definition at line 112 of file matrixOperations1\&.c\&.
+.SS "\fBmatrix_t\fP* m_initialize (intmode, intnumRows, intnumCols)"
+m_initialize
+.PP
+Returns a matrix pointer to a matrix of size M x N
+.PP
+Depending on the input variable 'mode', data is either a 2D matrix of 
+.PD 0
+
+.IP "\(bu" 2
+ZEROS = zeros 
+.IP "\(bu" 2
+IDENTITY = identity matrix 
+.IP "\(bu" 2
+UNDEFINED = undefined values 
+.IP "\(bu" 2
+ONES = all ones 
+.IP "\(bu" 2
+FILL = each element increases by one 
+.PP
+.PP
+ICA: void allocate_matrix(data_t **vector, int rows, int cols); void allocate_vector(data_t **vector, int length); void ones(data_t *onesMat, int rows, int cols); void eye(data_t *identity, int dimension); void fill_matrix(data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 26 of file matrixOperations1\&.c\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Facial Recognition - Common Code from the source code\&.

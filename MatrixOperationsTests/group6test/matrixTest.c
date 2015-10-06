@@ -4,12 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrixOperations1.h"
-#include "matrixOperations2.h"
-#include "matrixOperations3.h"
-#include "matrixOperations4.h"
-#include "matrixOperations5.h"
-#include "matrixOperations6.h"
+#include "matrixOperations.h"
 
 int main(void)
 {

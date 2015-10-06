@@ -1,0 +1,48 @@
+.TH "/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations6.h" 3 "Wed Sep 30 2015" "Facial Recognition - Common Code" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations6.h \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'matrixOperations\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBm_eigenvalues_eigenvectors\fP (\fBmatrix_t\fP *M, \fBmatrix_t\fP **p_eigenvalues, \fBmatrix_t\fP **p_eigenvectors)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_getSubMatrix\fP (\fBmatrix_t\fP *M, int startRow, int startCol, int numRows, int numCols)"
+.br
+.ti -1c
+.RI "void \fBloadPPMtoMatrixCol\fP (char *path, \fBmatrix_t\fP *M, int specCol, unsigned char *pixels)"
+.br
+.ti -1c
+.RI "void \fBwritePPMgrayscale\fP (char *filename, \fBmatrix_t\fP *M, int specCOl, int height, int width)"
+.br
+.in -1c
+.SH "Function Documentation"
+.PP 
+.SS "void loadPPMtoMatrixCol (char *path, \fBmatrix_t\fP *M, intspecCol, unsigned char *pixels)"
+
+.PP
+Definition at line 122 of file matrixOperations6\&.c\&.
+.SS "void m_eigenvalues_eigenvectors (\fBmatrix_t\fP *M, \fBmatrix_t\fP **p_eigenvalues, \fBmatrix_t\fP **p_eigenvectors)"
+
+.PP
+Definition at line 9 of file matrixOperations6\&.c\&.
+.SS "\fBmatrix_t\fP* m_getSubMatrix (\fBmatrix_t\fP *M, intstartRow, intstartCol, intnumRows, intnumCols)"
+
+.PP
+Definition at line 68 of file matrixOperations6\&.c\&.
+.SS "void writePPMgrayscale (char *filename, \fBmatrix_t\fP *M, intspecCOl, intheight, intwidth)"
+
+.PP
+Definition at line 168 of file matrixOperations6\&.c\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Facial Recognition - Common Code from the source code\&.

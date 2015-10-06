@@ -1,0 +1,154 @@
+\hypertarget{matrix_operations1_8h}{\section{/home/scott/\-Clemson-\/\-C\-I-\/-\/-\/\-Facial-\/\-Recognition/\-Matrix\-Operations/matrix\-Operations1.h File Reference}
+\label{matrix_operations1_8h}\index{/home/scott/\-Clemson-\/\-C\-I-\/-\/-\/\-Facial-\/\-Recognition/\-Matrix\-Operations/matrix\-Operations1.\-h@{/home/scott/\-Clemson-\/\-C\-I-\/-\/-\/\-Facial-\/\-Recognition/\-Matrix\-Operations/matrix\-Operations1.\-h}}
+}
+{\ttfamily \#include \char`\"{}matrix\-Operations.\-h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations1_8h_a170140db41813e5e05e69f6b0e9e5e97}{m\-\_\-initialize} (int mode, int num\-Rows, int num\-Cols)
+\begin{DoxyCompactList}\small\item\em Returns a matrix pointer to a matrix of size M x N. \end{DoxyCompactList}\item 
+void \hyperlink{matrix_operations1_8h_aeccabc73cca6fb32d2200a3d787db3dd}{m\-\_\-free} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\begin{DoxyCompactList}\small\item\em Frees memory for matrix M. \end{DoxyCompactList}\item 
+void \hyperlink{matrix_operations1_8h_a173666c46f45d946c918d8b0265f5b55}{m\-\_\-fprint} (F\-I\-L\-E $\ast$stream, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\begin{DoxyCompactList}\small\item\em Prints matrix M to the stream specified. \end{DoxyCompactList}\item 
+void \hyperlink{matrix_operations1_8h_a55a6c54b04f1f41144e5ef2952fa9b0e}{m\-\_\-fwrite} (F\-I\-L\-E $\ast$stream, \hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\begin{DoxyCompactList}\small\item\em Writes matrix M to the stream specified. \end{DoxyCompactList}\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations1_8h_a0fb98dea861b95f3ca7d6b3fcf936bbb}{m\-\_\-fscan} (F\-I\-L\-E $\ast$stream)
+\begin{DoxyCompactList}\small\item\em Scans matrix written by print\-Matrix in stream specified. \end{DoxyCompactList}\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations1_8h_a58d4d60e501a22245ed9089994127ac6}{m\-\_\-fread} (F\-I\-L\-E $\ast$stream)
+\begin{DoxyCompactList}\small\item\em Reads matrix written by print\-Matrix in stream specified. \end{DoxyCompactList}\item 
+\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$ \hyperlink{matrix_operations1_8h_a67dd80f90790816029588d2a1fee2a9e}{m\-\_\-copy} (\hyperlink{structmatrix__t}{matrix\-\_\-t} $\ast$M)
+\begin{DoxyCompactList}\small\item\em Copies matrix M into a new matrix. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Function Documentation}
+\hypertarget{matrix_operations1_8h_a67dd80f90790816029588d2a1fee2a9e}{\index{matrix\-Operations1.\-h@{matrix\-Operations1.\-h}!m\-\_\-copy@{m\-\_\-copy}}
+\index{m\-\_\-copy@{m\-\_\-copy}!matrixOperations1.h@{matrix\-Operations1.\-h}}
+\subsubsection[{m\-\_\-copy}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-copy (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations1_8h_a67dd80f90790816029588d2a1fee2a9e}
+
+
+Copies matrix M into a new matrix. 
+
+m\-\_\-copy
+
+I\-C\-A\-: data\-\_\-t$\ast$ copy(data\-\_\-t$\ast$ orig,int rows,int cols); 
+
+Definition at line 176 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations1_8h_a173666c46f45d946c918d8b0265f5b55}{\index{matrix\-Operations1.\-h@{matrix\-Operations1.\-h}!m\-\_\-fprint@{m\-\_\-fprint}}
+\index{m\-\_\-fprint@{m\-\_\-fprint}!matrixOperations1.h@{matrix\-Operations1.\-h}}
+\subsubsection[{m\-\_\-fprint}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-fprint (
+\begin{DoxyParamCaption}
+\item[{F\-I\-L\-E $\ast$}]{stream, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations1_8h_a173666c46f45d946c918d8b0265f5b55}
+
+
+Prints matrix M to the stream specified. 
+
+m\-\_\-fprint
+
+Prints num\-Rows, num\-Cols, then each whole row of the matrix (aka \mbox{[}0\mbox{]}\mbox{[}0\mbox{]}, \mbox{[}0\mbox{]}\mbox{[}1\mbox{]}..)
+
+I\-C\-A\-: void print\-\_\-matrix(data\-\_\-t $\ast$matrix, int rows, int cols); 
+
+Definition at line 92 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations1_8h_a58d4d60e501a22245ed9089994127ac6}{\index{matrix\-Operations1.\-h@{matrix\-Operations1.\-h}!m\-\_\-fread@{m\-\_\-fread}}
+\index{m\-\_\-fread@{m\-\_\-fread}!matrixOperations1.h@{matrix\-Operations1.\-h}}
+\subsubsection[{m\-\_\-fread}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-fread (
+\begin{DoxyParamCaption}
+\item[{F\-I\-L\-E $\ast$}]{stream}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations1_8h_a58d4d60e501a22245ed9089994127ac6}
+
+
+Reads matrix written by print\-Matrix in stream specified. 
+
+m\-\_\-fread 
+
+Definition at line 158 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations1_8h_aeccabc73cca6fb32d2200a3d787db3dd}{\index{matrix\-Operations1.\-h@{matrix\-Operations1.\-h}!m\-\_\-free@{m\-\_\-free}}
+\index{m\-\_\-free@{m\-\_\-free}!matrixOperations1.h@{matrix\-Operations1.\-h}}
+\subsubsection[{m\-\_\-free}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-free (
+\begin{DoxyParamCaption}
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations1_8h_aeccabc73cca6fb32d2200a3d787db3dd}
+
+
+Frees memory for matrix M. 
+
+m\-\_\-free
+
+I\-C\-A\-: void free\-\_\-matrix(data\-\_\-t $\ast$$\ast$matrix); void free\-\_\-vector(data\-\_\-t $\ast$$\ast$vector); 
+
+Definition at line 74 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations1_8h_a0fb98dea861b95f3ca7d6b3fcf936bbb}{\index{matrix\-Operations1.\-h@{matrix\-Operations1.\-h}!m\-\_\-fscan@{m\-\_\-fscan}}
+\index{m\-\_\-fscan@{m\-\_\-fscan}!matrixOperations1.h@{matrix\-Operations1.\-h}}
+\subsubsection[{m\-\_\-fscan}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-fscan (
+\begin{DoxyParamCaption}
+\item[{F\-I\-L\-E $\ast$}]{stream}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations1_8h_a0fb98dea861b95f3ca7d6b3fcf936bbb}
+
+
+Scans matrix written by print\-Matrix in stream specified. 
+
+m\-\_\-fscan 
+
+Definition at line 135 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations1_8h_a55a6c54b04f1f41144e5ef2952fa9b0e}{\index{matrix\-Operations1.\-h@{matrix\-Operations1.\-h}!m\-\_\-fwrite@{m\-\_\-fwrite}}
+\index{m\-\_\-fwrite@{m\-\_\-fwrite}!matrixOperations1.h@{matrix\-Operations1.\-h}}
+\subsubsection[{m\-\_\-fwrite}]{\setlength{\rightskip}{0pt plus 5cm}void m\-\_\-fwrite (
+\begin{DoxyParamCaption}
+\item[{F\-I\-L\-E $\ast$}]{stream, }
+\item[{{\bf matrix\-\_\-t} $\ast$}]{M}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations1_8h_a55a6c54b04f1f41144e5ef2952fa9b0e}
+
+
+Writes matrix M to the stream specified. 
+
+m\-\_\-fwrite
+
+Writes num\-Rows, num\-Cols, then the data N\-O\-T\-E\-: will not work with submatrixes right now 
+
+Definition at line 115 of file matrix\-Operations1.\-c.
+
+\hypertarget{matrix_operations1_8h_a170140db41813e5e05e69f6b0e9e5e97}{\index{matrix\-Operations1.\-h@{matrix\-Operations1.\-h}!m\-\_\-initialize@{m\-\_\-initialize}}
+\index{m\-\_\-initialize@{m\-\_\-initialize}!matrixOperations1.h@{matrix\-Operations1.\-h}}
+\subsubsection[{m\-\_\-initialize}]{\setlength{\rightskip}{0pt plus 5cm}{\bf matrix\-\_\-t}$\ast$ m\-\_\-initialize (
+\begin{DoxyParamCaption}
+\item[{int}]{mode, }
+\item[{int}]{num\-Rows, }
+\item[{int}]{num\-Cols}
+\end{DoxyParamCaption}
+)}}\label{matrix_operations1_8h_a170140db41813e5e05e69f6b0e9e5e97}
+
+
+Returns a matrix pointer to a matrix of size M x N. 
+
+m\-\_\-initialize
+
+Depending on the input variable \char`\"{}mode\char`\"{}, data is either a 2\-D matrix of 
+\begin{DoxyItemize}
+\item Z\-E\-R\-O\-S = zeros  
+\item I\-D\-E\-N\-T\-I\-T\-Y = identity matrix  
+\item U\-N\-D\-E\-F\-I\-N\-E\-D = undefined values  
+\item O\-N\-E\-S = all ones  
+\item F\-I\-L\-L = each element increases by one  
+\end{DoxyItemize}
+
+I\-C\-A\-: void allocate\-\_\-matrix(data\-\_\-t $\ast$$\ast$vector, int rows, int cols); void allocate\-\_\-vector(data\-\_\-t $\ast$$\ast$vector, int length); void ones(data\-\_\-t $\ast$ones\-Mat, int rows, int cols); void eye(data\-\_\-t $\ast$identity, int dimension); void fill\-\_\-matrix(data\-\_\-t $\ast$matrix, int rows, int cols); 
+
+Definition at line 26 of file matrix\-Operations1.\-c.
+

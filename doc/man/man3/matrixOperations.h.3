@@ -1,0 +1,532 @@
+.TH "/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations.h" 3 "Fri Oct 2 2015" "Facial Recognition - Common Code" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/scott/Clemson-CI---Facial-Recognition/MatrixOperations/matrixOperations.h \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdio\&.h>\fP
+.br
+\fC#include <stdlib\&.h>\fP
+.br
+\fC#include <assert\&.h>\fP
+.br
+\fC#include <stdint\&.h>\fP
+.br
+\fC#include <string\&.h>\fP
+.br
+\fC#include <ctype\&.h>\fP
+.br
+\fC#include <math\&.h>\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBmatrix_t\fP"
+.br
+.in -1c
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBprecision\fP   double"
+.br
+.ti -1c
+.RI "#define \fBUNDEFINED\fP   0"
+.br
+.ti -1c
+.RI "#define \fBZEROS\fP   1"
+.br
+.ti -1c
+.RI "#define \fBONES\fP   2"
+.br
+.ti -1c
+.RI "#define \fBFILL\fP   3"
+.br
+.ti -1c
+.RI "#define \fBIDENTITY\fP   4"
+.br
+.ti -1c
+.RI "#define \fBNOT_TRANSPOSED\fP   0"
+.br
+.ti -1c
+.RI "#define \fBTRANSPOSED\fP   1"
+.br
+.ti -1c
+.RI "#define \fBHORZ\fP   0"
+.br
+.ti -1c
+.RI "#define \fBVERT\fP   1"
+.br
+.ti -1c
+.RI "#define \fBCOLOR\fP   0"
+.br
+.ti -1c
+.RI "#define \fBGRAYSCALE\fP   1"
+.br
+.ti -1c
+.RI "#define \fBPARENT\fP   0"
+.br
+.ti -1c
+.RI "#define \fBSUBMATRIX\fP   1"
+.br
+.ti -1c
+.RI "#define \fBIS_COLOR\fP   \fBGRAYSCALE\fP"
+.br
+.ti -1c
+.RI "#define \fBelem\fP(M, i, j)   (M)->data[(j) * (M)->numRows + (i)]"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_initialize\fP (int mode, int numRows, int numCols)"
+.br
+.ti -1c
+.RI "void \fBm_free\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_fprint\fP (FILE *stream, \fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_fwrite\fP (FILE *stream, \fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_fscan\fP (FILE *stream)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_fread\fP (FILE *stream)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_copy\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_flipCols\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_normalize\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_truncate\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_acos\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_sqrt\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_negate\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_exp\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "void \fBm_elem_pow\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_mult\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_divideByConst\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_divideByMatrix\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "void \fBm_elem_add\fP (\fBmatrix_t\fP *M, \fBprecision\fP x)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_sumCols\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_meanCols\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_sumRows\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_meanRows\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_findNonZeros\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_transpose\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_reshape\fP (\fBmatrix_t\fP *M, int newNumRows, int newNumCols)"
+.br
+.ti -1c
+.RI "void \fBm_inverseMatrix\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBprecision\fP \fBm_norm\fP (\fBmatrix_t\fP *M, int specRow)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_sqrtm\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBprecision\fP \fBm_determinant\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_cofactor\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_covariance\fP (\fBmatrix_t\fP *M)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_dot_subtract\fP (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_dot_add\fP (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_dot_division\fP (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_matrix_multiply\fP (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B, int maxCols)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_matrix_division\fP (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_reorder_columns\fP (\fBmatrix_t\fP *M, \fBmatrix_t\fP *V)"
+.br
+.ti -1c
+.RI "void \fBm_eigenvalues_eigenvectors\fP (\fBmatrix_t\fP *M, \fBmatrix_t\fP **p_eigenvalues, \fBmatrix_t\fP **p_eigenvectors)"
+.br
+.ti -1c
+.RI "\fBmatrix_t\fP * \fBm_getSubMatrix\fP (\fBmatrix_t\fP *M, int startRow, int startCol, int numRows, int numCols)"
+.br
+.ti -1c
+.RI "void \fBloadPPMtoMatrixCol\fP (char *path, \fBmatrix_t\fP *M, int specCol, unsigned char *pixels)"
+.br
+.ti -1c
+.RI "void \fBwritePPMgrayscale\fP (char *filename, \fBmatrix_t\fP *M, int specCOl, int height, int width)"
+.br
+.in -1c
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define COLOR   0"
+
+.PP
+Definition at line 23 of file matrixOperations\&.h\&.
+.SS "#define elem(M, i, j)   (M)->data[(j) * (M)->numRows + (i)]"
+
+.PP
+Definition at line 38 of file matrixOperations\&.h\&.
+.SS "#define FILL   3"
+
+.PP
+Definition at line 17 of file matrixOperations\&.h\&.
+.SS "#define GRAYSCALE   1"
+
+.PP
+Definition at line 24 of file matrixOperations\&.h\&.
+.SS "#define HORZ   0"
+
+.PP
+Definition at line 21 of file matrixOperations\&.h\&.
+.SS "#define IDENTITY   4"
+
+.PP
+Definition at line 18 of file matrixOperations\&.h\&.
+.SS "#define IS_COLOR   \fBGRAYSCALE\fP"
+
+.PP
+Definition at line 27 of file matrixOperations\&.h\&.
+.SS "#define NOT_TRANSPOSED   0"
+
+.PP
+Definition at line 19 of file matrixOperations\&.h\&.
+.SS "#define ONES   2"
+
+.PP
+Definition at line 16 of file matrixOperations\&.h\&.
+.SS "#define PARENT   0"
+
+.PP
+Definition at line 25 of file matrixOperations\&.h\&.
+.SS "#define precision   double"
+
+.PP
+Definition at line 13 of file matrixOperations\&.h\&.
+.SS "#define SUBMATRIX   1"
+
+.PP
+Definition at line 26 of file matrixOperations\&.h\&.
+.SS "#define TRANSPOSED   1"
+
+.PP
+Definition at line 20 of file matrixOperations\&.h\&.
+.SS "#define UNDEFINED   0"
+
+.PP
+Definition at line 14 of file matrixOperations\&.h\&.
+.SS "#define VERT   1"
+
+.PP
+Definition at line 22 of file matrixOperations\&.h\&.
+.SS "#define ZEROS   1"
+
+.PP
+Definition at line 15 of file matrixOperations\&.h\&.
+.SH "Function Documentation"
+.PP 
+.SS "void loadPPMtoMatrixCol (char *path, \fBmatrix_t\fP *M, intspecCol, unsigned char *pixels)"
+
+.PP
+Definition at line 122 of file matrixOperations6\&.c\&.
+.SS "\fBmatrix_t\fP* m_cofactor (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 116 of file matrixOperations3\&.c\&.
+.SS "\fBmatrix_t\fP* m_copy (\fBmatrix_t\fP *M)"
+m_copy
+.PP
+Copies matrix M into a new matrix
+.PP
+ICA: data_t* copy(data_t* orig,int rows,int cols); 
+.PP
+Definition at line 171 of file matrixOperations1\&.c\&.
+.SS "\fBmatrix_t\fP* m_covariance (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 153 of file matrixOperations3\&.c\&.
+.SS "\fBprecision\fP m_determinant (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 75 of file matrixOperations3\&.c\&.
+.SS "\fBmatrix_t\fP* m_dot_add (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B)"
+
+.PP
+Definition at line 30 of file matrixOperations4\&.c\&.
+.SS "\fBmatrix_t\fP* m_dot_division (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B)"
+
+.PP
+Definition at line 48 of file matrixOperations4\&.c\&.
+.SS "\fBmatrix_t\fP* m_dot_subtract (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B)"
+
+.PP
+Definition at line 12 of file matrixOperations4\&.c\&.
+.SS "void m_eigenvalues_eigenvectors (\fBmatrix_t\fP *M, \fBmatrix_t\fP **p_eigenvalues, \fBmatrix_t\fP **p_eigenvectors)"
+
+.PP
+Definition at line 9 of file matrixOperations6\&.c\&.
+.SS "void m_elem_acos (\fBmatrix_t\fP *M)"
+m_acosAll
+.PP
+applies acos to all matrix elements
+.PP
+ICA: void matrix_acos(data_t *outmatrix, data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 108 of file matrixOperations2\&.c\&.
+.SS "void m_elem_add (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+void sum_scalar_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar);
+.PP
+adds element-wise matrix to contant 
+.PP
+Definition at line 228 of file matrixOperations2\&.c\&.
+.SS "void m_elem_divideByConst (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+void divide_by_constant(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar);
+.PP
+divides matrix by contant 
+.PP
+Definition at line 198 of file matrixOperations2\&.c\&.
+.SS "void m_elem_divideByMatrix (\fBmatrix_t\fP *M, \fBprecision\fPnum)"
+void divide_scaler_by_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar) ;
+.PP
+divides constant by matrix element-wise 
+.PP
+Definition at line 213 of file matrixOperations2\&.c\&.
+.SS "void m_elem_exp (\fBmatrix_t\fP *M)"
+void matrix_exp(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+raises e to all matrix elements 
+.PP
+Definition at line 153 of file matrixOperations2\&.c\&.
+.SS "void m_elem_mult (\fBmatrix_t\fP *M, \fBprecision\fPx)"
+void scale_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, int scalar);
+.PP
+scales matrix by contant 
+.PP
+Definition at line 184 of file matrixOperations2\&.c\&.
+.SS "void m_elem_negate (\fBmatrix_t\fP *M)"
+void matrix_negate(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+negates all matrix elements 
+.PP
+Definition at line 138 of file matrixOperations2\&.c\&.
+.SS "void m_elem_pow (\fBmatrix_t\fP *M, \fBprecision\fPnum)"
+void raise_matrix_to_power(data_t *outmatrix, data_t *matrix, int rows, int cols, int scalar);
+.PP
+raises all matrix elements to a power 
+.PP
+Definition at line 169 of file matrixOperations2\&.c\&.
+.SS "void m_elem_sqrt (\fBmatrix_t\fP *M)"
+void matrix_sqrt(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+applies sqrt to all matrix elements 
+.PP
+Definition at line 123 of file matrixOperations2\&.c\&.
+.SS "void m_elem_truncate (\fBmatrix_t\fP *M)"
+void inv(dataem_t *outmatrix, data_t *matrix, int rows);
+.PP
+inverse of the matrix m_truncateAll
+.PP
+Truncates the entries in matrix M
+.PP
+ICA: void fix(data_t *outmatrix, data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 89 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_findNonZeros (\fBmatrix_t\fP *M)"
+void find(data_t *outvect, data_t **matrix, int rows, int cols); NOTE: this also assumes that outvect is a column vector) places the row indeces of non-zero elements in a vector This vector has additional, non-used space, not sure what to do about this -miller 
+.PP
+Definition at line 320 of file matrixOperations2\&.c\&.
+.SS "void m_flipCols (\fBmatrix_t\fP *M)"
+m_flipCols
+.PP
+Swaps columns in M from left to right
+.PP
+ICA: void fliplr(data_t *outmatrix, data_t *matrix, int rows, int cols) 
+.PP
+Definition at line 15 of file matrixOperations2\&.c\&.
+.SS "void m_fprint (FILE *stream, \fBmatrix_t\fP *M)"
+m_fprint
+.PP
+Prints matrix M to the stream specified Prints numRows, numCols, then each whole row of the matrix (aka [0][0], [0][1]\&.\&.)
+.PP
+ICA: void print_matrix(data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 90 of file matrixOperations1\&.c\&.
+.SS "\fBmatrix_t\fP* m_fread (FILE *stream)"
+m_fread
+.PP
+reads matrix written by printMatrix in stream specified 
+.PP
+Definition at line 153 of file matrixOperations1\&.c\&.
+.SS "void m_free (\fBmatrix_t\fP *M)"
+m_free
+.PP
+Frees memory for matrix M ICA: void free_matrix(data_t **matrix); void free_vector(data_t **vector); 
+.PP
+Definition at line 73 of file matrixOperations1\&.c\&.
+.SS "\fBmatrix_t\fP* m_fscan (FILE *stream)"
+m_fscan
+.PP
+Scans matrix written by printMatrix in stream specified 
+.PP
+Definition at line 131 of file matrixOperations1\&.c\&.
+.SS "void m_fwrite (FILE *stream, \fBmatrix_t\fP *M)"
+m_fwrite
+.PP
+Writes matrix M to the stream specified Writes numRows, numCols, then the data NOTE: will not work with submatrixes right now 
+.PP
+Definition at line 112 of file matrixOperations1\&.c\&.
+.SS "\fBmatrix_t\fP* m_getSubMatrix (\fBmatrix_t\fP *M, intstartRow, intstartCol, intnumRows, intnumCols)"
+
+.PP
+Definition at line 68 of file matrixOperations6\&.c\&.
+.SS "\fBmatrix_t\fP* m_initialize (intmode, intnumRows, intnumCols)"
+m_initialize
+.PP
+Returns a matrix pointer to a matrix of size M x N
+.PP
+Depending on the input variable 'mode', data is either a 2D matrix of 
+.PD 0
+
+.IP "\(bu" 2
+ZEROS = zeros 
+.IP "\(bu" 2
+IDENTITY = identity matrix 
+.IP "\(bu" 2
+UNDEFINED = undefined values 
+.IP "\(bu" 2
+ONES = all ones 
+.IP "\(bu" 2
+FILL = each element increases by one 
+.PP
+.PP
+ICA: void allocate_matrix(data_t **vector, int rows, int cols); void allocate_vector(data_t **vector, int length); void ones(data_t *onesMat, int rows, int cols); void eye(data_t *identity, int dimension); void fill_matrix(data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 26 of file matrixOperations1\&.c\&.
+.SS "void m_inverseMatrix (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 5 of file matrixOperations3\&.c\&.
+.SS "\fBmatrix_t\fP* m_matrix_division (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B)"
+
+.PP
+Definition at line 37 of file matrixOperations5\&.c\&.
+.SS "\fBmatrix_t\fP* m_matrix_multiply (\fBmatrix_t\fP *A, \fBmatrix_t\fP *B, intmaxCols)"
+
+.PP
+Definition at line 11 of file matrixOperations5\&.c\&.
+.SS "\fBmatrix_t\fP* m_meanCols (\fBmatrix_t\fP *M)"
+void mean_of_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+takes the mean value of each column 
+.PP
+Definition at line 266 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_meanRows (\fBmatrix_t\fP *M)"
+void mean_of_matrix_by_rows(data_t *outmatrix,data_t *matrix,int rows,int cols);
+.PP
+takes the mean of the rows of a matrix, returns a col vect 
+.PP
+Definition at line 303 of file matrixOperations2\&.c\&.
+.SS "\fBprecision\fP m_norm (\fBmatrix_t\fP *M, intspecRow)"
+
+.PP
+Definition at line 29 of file matrixOperations3\&.c\&.
+.SS "void m_normalize (\fBmatrix_t\fP *M)"
+void normalize(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+normalizes the matrix 
+.PP
+Definition at line 33 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_reorder_columns (\fBmatrix_t\fP *M, \fBmatrix_t\fP *V)"
+
+.PP
+Definition at line 57 of file matrixOperations5\&.c\&.
+.SS "\fBmatrix_t\fP* m_reshape (\fBmatrix_t\fP *M, intnewNumRows, intnewNumCols)"
+void reshape(data_t **outmatrix, int outRows, int outCols, data_t **matrix, int rows, int cols)
+.PP
+reshapes matrix by changing dimensions, keeping data 
+.PP
+Definition at line 363 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_sqrtm (\fBmatrix_t\fP *M)"
+
+.PP
+Definition at line 51 of file matrixOperations3\&.c\&.
+.SS "\fBmatrix_t\fP* m_sumCols (\fBmatrix_t\fP *M)"
+void sum_columns(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+sums the columns of a matrix, returns a row vector 
+.PP
+Definition at line 245 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_sumRows (\fBmatrix_t\fP *M)"
+void sum_rows(data_t *outmatrix, data_t *matrix, int rows, int cols);
+.PP
+sums the rows of a matrix, returns a col vect 
+.PP
+Definition at line 282 of file matrixOperations2\&.c\&.
+.SS "\fBmatrix_t\fP* m_transpose (\fBmatrix_t\fP *M)"
+transpose matrix
+.PP
+This function transposes a matrix
+.PP
+ICA: void transpose(data_t *outmatrix, data_t *matrix, int rows, int cols); 
+.PP
+Definition at line 346 of file matrixOperations2\&.c\&.
+.SS "void writePPMgrayscale (char *filename, \fBmatrix_t\fP *M, intspecCOl, intheight, intwidth)"
+
+.PP
+Definition at line 168 of file matrixOperations6\&.c\&.
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Facial Recognition - Common Code from the source code\&.
