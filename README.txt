@@ -13,6 +13,17 @@ Miller Hall
     Date Updated:
         10/16/2015
 
+Colin Targonski
+    Current Project:
+        Shared Code Team
+    Progress:
+        Working on documentation and function verification. Also beginning work
+        on BLAS library
+    Next Step:
+        BLAS integration
+    Date Updated:
+        10/16/2015
+
 ############################# Algorithms #######################################
 Algorithm               |Verification Status        |Date       |Member
 
@@ -25,5 +36,3 @@ m_sqrtm                 |Not Verified               |10/07/15   |Miller
 m_determinant           |Not Verified               |10/07/15   |Miller
 m_cofactor              |Not Verified               |10/07/15   |Miller
 m_covariance            |Not Verified               |10/07/15   |Miller
-
-    
