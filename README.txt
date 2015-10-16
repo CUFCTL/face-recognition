@@ -12,6 +12,17 @@ Miller Hall
         Blas integration into the matrix library
     Date Updated:
         10/16/2015
+=======
+Taylor Sieling
+    Current Project:
+        Shared Code Team
+    Progress:
+        Working on documentation and function verification. Also working on
+        getting Blas working on my machine.
+    Next Step:
+        Blas integration into the matrix library
+    Date Updated:
+        10/16/2015
 
 <<<<<<< HEAD
 Colin Targonski
