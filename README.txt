@@ -95,4 +95,5 @@ m_dot_subtract          |Verified                   |10/21/15   |Taylor
 m_dot_add               |Verified                   |10/21/15   |Taylor
 m_dot_division          |Not Verified               |10/21/15   |Taylor
 m_matrix_multiply       |Verified                   |10/21/15   |Taylor
+m_matrix_division       |Not Verified               |10/21/15   |Taylor
 m_reorder_columns       |Not Verified               |10/21/15   |Taylor
