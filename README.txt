@@ -50,7 +50,7 @@ Greg FitzMaurice
 	Current Project:
 		Algorithms: PCA
 	Progress:
-		
+		Determine if actually complete.
 	Next Step:
 		Test PCA functionality using semi-completed/completed shared library
 	Date Updated:
