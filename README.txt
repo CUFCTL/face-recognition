@@ -45,6 +45,17 @@ James Peterkin II
 		Look at blas documentation
 	Date Updated:
 		10/16/2015
+=======
+Greg FitzMaurice
+	Current Project:
+		Algorithms: PCA
+	Progress:
+		
+	Next Step:
+		Test PCA functionality using semi-completed/completed shared library
+	Date Updated:
+		10/21/2015
+		
 >>>>>>> cffaf3b94cc70e4c5278b5b2809b4388c1e18efe
 
 ############################# Algorithms #######################################
