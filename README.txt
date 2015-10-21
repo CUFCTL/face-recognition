@@ -61,7 +61,14 @@ Algorithm               |Verification Status        |Date       |Member
 
 ########################## Library Functions ###################################
 Function Name           |Verification Status        |Date       |Member
-
+m_initialize            |Verified                   |10/21/15   |Taylor
+m_free                  |Verified                   |10/21/15   |Taylor
+m_fprint                |Verified                   |10/21/15   |Taylor
+m_fwrite                |Verified                   |10/21/15   |Taylor
+m_fscan                 |Verified                   |10/21/15   |Taylor
+m_fread                 |Verified                   |10/21/15   |Taylor
+m_copy                  |Verified                   |10/21/15   |Taylor
+                        |                           |           |
 m_flipCols              |Verified                   |10/02/15   |James
 m_normalize             |Verified                   |10/02/2015 |James
 m_elem_mult             |Verified                   |10/02/2015 |James
