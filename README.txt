@@ -23,8 +23,7 @@ Taylor Sieling
         Blas integration into the matrix library
     Date Updated:
         10/16/2015
-
-<<<<<<< HEAD
+=======
 Colin Targonski
     Current Project:
         Shared Code Team
@@ -56,7 +55,6 @@ Greg FitzMaurice
 	Date Updated:
 		10/21/2015
 
->>>>>>> cffaf3b94cc70e4c5278b5b2809b4388c1e18efe
 
 ############################# Algorithms #######################################
 Algorithm               |Verification Status        |Date       |Member
