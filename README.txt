@@ -55,7 +55,7 @@ Greg FitzMaurice
 		Test PCA functionality using semi-completed/completed shared library
 	Date Updated:
 		10/21/2015
-		
+
 >>>>>>> cffaf3b94cc70e4c5278b5b2809b4388c1e18efe
 
 ############################# Algorithms #######################################
@@ -90,3 +90,9 @@ m_sqrtm                 |Not Verified               |10/07/15   |Miller
 m_determinant           |Not Verified               |10/07/15   |Miller
 m_cofactor              |Not Verified               |10/07/15   |Miller
 m_covariance            |Not Verified               |10/07/15   |Miller
+                        |                           |           |
+m_dot_subtract          |Verified                   |10/21/15   |Taylor
+m_dot_add               |Verified                   |10/21/15   |Taylor
+m_dot_division          |Not Verified               |10/21/15   |Taylor
+m_matrix_multiply       |Verified                   |10/21/15   |Taylor
+m_reorder_columns       |Not Verified               |10/21/15   |Taylor
