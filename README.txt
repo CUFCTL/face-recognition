@@ -102,3 +102,8 @@ m_dot_division          |Not Verified               |10/21/15   |Taylor
 m_matrix_multiply       |Verified                   |10/21/15   |Taylor
 m_matrix_division       |Not Verified               |10/21/15   |Taylor
 m_reorder_columns       |Not Verified               |10/21/15   |Taylor
+
+m_eigenvalues_eigenve...|Not Verified               |10/22/15   |Colin
+m_getSubMatrix          |Not Verified               |10/22/15   |Colin
+loadPPMtoMatrixCol      |Not Verified               |10/22/15   |Colin
+writePPMgrayscale       |Not Verified               |10/22/15   |Colin
