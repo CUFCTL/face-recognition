@@ -61,7 +61,14 @@ Algorithm               |Verification Status        |Date       |Member
 
 ########################## Library Functions ###################################
 Function Name           |Verification Status        |Date       |Member
-
+m_initialize            |Verified                   |10/21/15   |Taylor
+m_free                  |Verified                   |10/21/15   |Taylor
+m_fprint                |Verified                   |10/21/15   |Taylor
+m_fwrite                |Verified                   |10/21/15   |Taylor
+m_fscan                 |Verified                   |10/21/15   |Taylor
+m_fread                 |Verified                   |10/21/15   |Taylor
+m_copy                  |Verified                   |10/21/15   |Taylor
+                        |                           |           |
 m_flipCols              |Verified                   |10/02/15   |James
 m_normalize             |Verified                   |10/02/2015 |James
 m_elem_mult             |Verified                   |10/02/2015 |James
@@ -96,9 +103,16 @@ m_matrix_multiply       |Verified                   |10/21/15   |Taylor
 m_matrix_division       |Not Verified               |10/21/15   |Taylor
 m_reorder_columns       |Not Verified               |10/21/15   |Taylor
 
+<<<<<<< HEAD
 ** Note: When we say verified we are talking about an initial verification step
 which does not mean the function is fully trustworthy in the final code.
 
 There will be an additional possibility for this column: "Verified using BLAS"
 which will mean that the library function has be implemented in blas and
 is ready to be used in the final code
+=======
+m_eigenvalues_eigenve...|Not Verified               |10/22/15   |Colin
+m_getSubMatrix          |Not Verified               |10/22/15   |Colin
+loadPPMtoMatrixCol      |Not Verified               |10/22/15   |Colin
+writePPMgrayscale       |Not Verified               |10/22/15   |Colin
+>>>>>>> 0bf735e57aef35b89413ce60ad34cd16bd4cf1e8
