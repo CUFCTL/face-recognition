@@ -1,19 +1,17 @@
 #include "matrixOperations.h"
+#include <cblas.h>
+#include <lapacke.h>
 
 
 // Temp moved this here for dependancy issues. Group 3 code person should work on this for right now. 
 void m_inverseMatrix (matrix_t *M) {
-	
-	matrix_t *cofactorMatrix = m_cofactor (M);
-	matrix_t *transpose = m_transpose (cofactorMatrix);
-	precision det = m_determinant (M);
-    m_elem_divideByConst (transpose, det);
-	
-    m_free (M);
-    M = m_copy(transpose);
-
-	m_free (transpose);
-    m_free (cofactorMatrix);
+    int info;
+    precision *work;
+    assert(M->rows == M->cols);
+    //          (rows   , columns, matrix , 
+    cblas_dgetrf(M->rows, M->cols, M->data,
+    //          (order  , matrix, Leading Dim, IPIV, 
+    cblas_dgetri(M->rows, M     , M->rows    ,     , work->data, 
 }
 
 
