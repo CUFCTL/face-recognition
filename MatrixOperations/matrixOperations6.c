@@ -2,15 +2,15 @@
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 6 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 /*******************************************************************************
- * void matrix_eig(data_t *out_eig_vect, data_t*out_eig_vals, data_t* matrix, int rows, int cols); 
+ * void matrix_eig(data_t *out_eig_vect, data_t*out_eig_vals, data_t* matrix, int rows, int cols);
  * Get eigenvalues and eigenvectors of symmetric matrix
  * NOTE: ONLY SYMMETRIC MATRICIES ATM
 *******************************************************************************/
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors) {
-	gsl_matrix * A = gsl_matrix_alloc (M->numRows, M->numCols);
+/*	gsl_matrix * A = gsl_matrix_alloc (M->numRows, M->numCols);
 	gsl_matrix * gslEigenvectors = gsl_matrix_alloc (M->numRows, M->numCols);
 	gsl_vector * gslEigenvalues = gsl_vector_alloc (M->numRows);
-	
+
 	precision val;
 	int i, j;
 	// Copy M into A
@@ -33,7 +33,7 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t
 	// to match matlab eigenvectors, they don't HAVE to to match but
 	// its at least something to keep in mind
 	// ********************************************************
-	
+
 	matrix_t *eigenvalues = m_initialize (UNDEFINED, gslEigenvalues->size, 1);
 	matrix_t *eigenvectors = m_initialize (UNDEFINED, gslEigenvectors->size1, gslEigenvectors->size2);
 
@@ -42,7 +42,7 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t
 		val = gsl_vector_get (gslEigenvalues, i);
 		m_setelem(val, eigenvalues, i, 0);
 	}
-	
+
 	// Copy the eigenvectors into a regular matrix
 	for (i = 0; i < gslEigenvectors->size1; i++) {
 		for (j = 0; j < gslEigenvectors->size2; j++) {
@@ -54,10 +54,32 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t
 	gsl_matrix_free (gslEigenvectors);
 	gsl_matrix_free (A);
 	gsl_vector_free (gslEigenvalues);
-	
+
 	*p_eigenvectors = eigenvectors;
-	*p_eigenvalues = eigenvalues; 
-    
+	*p_eigenvalues = eigenvalues;
+*/
+
+
+
+// ***********************************************************************************************************
+// ***********************************************************************************************************
+// going to use ddgev in BLAS to compute the eigenvalues/eigenvectors of the matrix
+// The following is the routine:
+// dggev (JOBVL, JOBVR, N, A, LDA, B, LDB, ALPHAR, ALPHAI, BETA, VL, LDVL, VR, LDVR, WORK, LWORK, INFO)
+// JOBVL    --->     'N' - do not compute left generalized eigenvector
+//					 'V' - compute the left EV
+// JOBVR    --->     'N' - do not compute right generalized eigenvector
+//					 'V' - compute the right EV
+// N        --->     The order of the matrices A, B, VL, and VR.  N >= 0.
+// A        --->     A is DOUBLE PRECISION array, dimension (LDA, N)
+//                   On entry, the matrix A in the pair (A,B).
+//                   On exit, A has been overwritten.
+//LDA       --->     
+//
+
+// ***********************************************************************************************************
+// ***********************************************************************************************************
+    dggev()
 }
 
 
@@ -87,30 +109,30 @@ void skip_to_next_value(FILE* in)
    {
        if(ch == '#')
        {
-          while(ch != '\n') 
+          while(ch != '\n')
           {
              ch = fgetc(in);
-          }      
+          }
        }
        else
        {
           while(isspace(ch))
           {
-             ch = fgetc(in);             
+             ch = fgetc(in);
           }
        }
    }
-   
+
    ungetc(ch,in); //return last read value
 }
 
 /*******************************************************************************
  * loadPPMtoMatrixCol
- * 
+ *
  * This function loads the pixel data of a PPM image as a single column vector
  * in the preinitialized matrix M. It will load it into the column specified as
- * the specCol parameter. 
- * 
+ * the specCol parameter.
+ *
  * This function automatically turns any picture to grayscale if it is not
  * already
  * NOTE : currently this is set manually with the #define IS_COLOR in matrix.h
@@ -125,7 +147,7 @@ void loadPPMtoMatrixCol (char *path, matrix_t *M, int specCol, unsigned char *pi
 	int height, width, size, i;
 	int numPixels = M->numRows;
 	precision intensity;
-	
+
 	fscanf (in, "%s", header);
 	if (strcmp (header, "P3") == 0) {
 		skip_to_next_value (in);
@@ -153,7 +175,7 @@ void loadPPMtoMatrixCol (char *path, matrix_t *M, int specCol, unsigned char *pi
 					0.114 * (precision) pixels[3*i+2];
 		elem(M, i, specCol) = intensity;
 	}
-	
+
 	fclose (in);
 }
 
@@ -162,7 +184,7 @@ void loadPPMtoMatrixCol (char *path, matrix_t *M, int specCol, unsigned char *pi
  * writePPMgrayscale
  *
  * This writes a column vector of M (column specified by specCol) as a
- * grayscale ppm image. The height and width of the image must be specified 
+ * grayscale ppm image. The height and width of the image must be specified
  *
 *******************************************************************************/
 void writePPMgrayscale (char * filename, matrix_t *M, int specCol, int height, int width) {
@@ -185,5 +207,3 @@ void writePPMgrayscale (char * filename, matrix_t *M, int specCol, int height, i
 	}
 	fclose (out);
 }
-
-
