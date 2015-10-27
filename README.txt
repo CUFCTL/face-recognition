@@ -54,6 +54,16 @@ Greg FitzMaurice
 		Test PCA functionality using semi-completed/completed shared library
 	Date Updated:
 		10/21/2015
+=======
+Zhong Hu
+	Current Project:
+		Algorithms: ICA
+	Progress:
+		Finishing few functions.
+	Next Step:
+		Swap the matrix function with the functions in the shared library
+	Date Updated:
+		10/27/2015
 
 
 ############################# Algorithms #######################################
