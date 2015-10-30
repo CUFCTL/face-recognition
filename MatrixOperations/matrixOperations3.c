@@ -3,15 +3,19 @@
 #include <lapacke.h>
 
 
-// Temp moved this here for dependancy issues. Group 3 code person should work on this for right now. 
+// Temp moved this here for dependancy issues. Group 3 code person should work on this
+// for right now. 
+// TODO - Documentation & Free's - Miller 10/30
 void m_inverseMatrix (matrix_t *M) {
-    int info;
-    precision *work;
     assert(M->rows == M->cols);
-    //          (rows   , columns, matrix , 
-    cblas_dgetrf(M->rows, M->cols, M->data,
+    int info;
+    int lwork = M->rows * M->cols;
+    int *ipiv = malloc((M->rows + 1) * sizeof(int));
+    precision *work = malloc(lwork * sizeof(precision));
+    //          (rows   , columns, matrix , lda    , ipiv, info );
+    cblas_dgetrf(M->rows, M->cols, M->data, M->rows, ipiv, &info);
     //          (order  , matrix, Leading Dim, IPIV, 
-    cblas_dgetri(M->rows, M     , M->rows    ,     , work->data, 
+    cblas_dgetri(M->rows, M     , M->rows    , ipiv, work, &lwork, &info); 
 }
 
 
