@@ -63,7 +63,7 @@ Zhong Hu
 	Next Step:
 		Swap the matrix function with the functions in the shared library
 	Date Updated:
-		10/27/2015
+		11/4/2015
 
 
 ############################# Algorithms #######################################
