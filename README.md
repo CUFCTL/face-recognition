@@ -4,64 +4,64 @@
 ##Team Members
 
 ###Miller Hall
--Current Project:
- -Shared Code Team
--Progress:
- -Curently working on coordinating documentation
--Next Step:
- -Blas integration into the matrix library
--Date Updated:
- -10/16/2015
+- Current Project:
+ - Shared Code Team
+- Progress:
+ - Curently working on coordinating documentation
+- Next Step:
+ - Blas integration into the matrix library
+- Date Updated:
+ - 10/16/2015
 
 ###Taylor Sieling
--Current Project:
- -Shared Code Team
--Progress:
- -Working on documentation and function verification. Also working on getting Blas working on my machine.
--Next Step:
- -Blas integration into the matrix library
--Date Updated:
- -10/16/2015
+- Current Project:
+ - Shared Code Team
+- Progress:
+ - Working on documentation and function verification. Also working on getting Blas working on my machine.
+- Next Step:
+ - Blas integration into the matrix library
+- Date Updated:
+ - 10/16/2015
 
 ###Colin Targonski
--Current Project:
- -Shared Code Team
--Progress:
- -Working on documentation and function verification. Also beginning work on BLAS library
--Next Step:
- -BLAS integration
--Date Updated:
- -10/16/2015
+- Current Project:
+ - Shared Code Team
+- Progress:
+ - Working on documentation and function verification. Also beginning work on BLAS library
+- Next Step:
+ - BLAS integration
+- Date Updated:
+ - 10/16/2015
 
 ###James Peterkin II
--Current Project:
- -Shared Code Team
--Progress:
- -Documenting working functions in group2 matrix functions
--Next Step:
- -Look at blas documentation
--Date Updated:
- -10/16/2015
+- Current Project:
+ - Shared Code Team
+- Progress:
+ - Documenting working functions in group2 matrix functions
+- Next Step:
+ - Look at blas documentation
+- Date Updated:
+ - 10/16/2015
 
 ###Greg FitzMaurice
--Current Project:
- -Algorithms: PCA
--Progress:
- -Determine if actually complete.
--Next Step:
- -Test PCA functionality using semi-completed/completed shared library
--Date Updated:
- -10/21/2015
+- Current Project:
+ - Algorithms: PCA
+- Progress:
+ - Determine if actually complete.
+- Next Step:
+ - Test PCA functionality using semi-completed/completed shared library
+- Date Updated:
+ - 10/21/2015
 
 ###Zhong Hu
--Current Project:
- -Algorithms: ICA
--Progress:
- -Finishing few functions.
--Next Step:
- -Swap the matrix function with the functions in the shared library
--Date Updated:
- -10/27/2015
+- Current Project:
+ - Algorithms: ICA
+- Progress:
+ - Finishing few functions.
+- Next Step:
+ - Swap the matrix function with the functions in the shared library
+- Date Updated:
+ - 10/27/2015
 
 
 ##Algorithms
