@@ -161,7 +161,7 @@ matrix_t * m_covariance (matrix_t *M) {
 	
 	for (j = 0; j < M->numCols; j++) {
 		for (i = 0; i < M->numRows; i++) {
-			val = elem(M, i, j) - elem(colAvgs, 0, j);
+			elem(norm,i,j) = elem(M, i, j) - elem(colAvgs, 0, j);
 		}
 	}
 	
