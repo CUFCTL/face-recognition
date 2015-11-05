@@ -110,11 +110,11 @@ m_norm                     | Not Verified               | 10/07/15   | Miller
 m_sqrtm                    | Not Verified               | 10/07/15   | Miller
 m_determinant              | Not Verified               | 10/07/15   | Miller
 m_cofactor                 | Not Verified               | 10/07/15   | Miller
-m_covariance               | Not Verified               | 10/07/15   | Miller
+m_covariance               | Verified                   | 11/05/15   | Greg
                            |                            |            |
 m_dot_subtract             | Verified                   | 10/21/15   | Taylor
 m_dot_add                  | Verified                   | 10/21/15   | Taylor
-m_dot_division             | Verified                   | 10/21/15   | Greg
+m_dot_division             | Verified                   | 11/03/15   | Greg
 m_matrix_multiply          | Verified                   | 10/21/15   | Taylor
 m_matrix_division          | Not Verified               | 10/21/15   | Taylor
 m_reorder_columns          | Not Verified               | 10/21/15   | Taylor
