@@ -1,5 +1,4 @@
 #Clemson FCT Facial Recognition
------
 
 ##Team Members
 
@@ -66,7 +65,8 @@
 
 ##Algorithms
 
-Algorithm               | Verification Status        | Date       | Member
+Algorithm                  | Verification Status        | Date       | Member
+---                        | ---                        | ---        | ---
 
 ##Library Functions
 
