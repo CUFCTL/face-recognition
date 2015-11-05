@@ -122,8 +122,7 @@ writePPMgrayscale          | Not Verified               | 10/22/15   | Colin
 _Note: When we say verified we are talking about an initial verification step which does not mean the function is fully trustworthy in the final code. There will be an additional possibility for this column: "Verified using BLAS" which will mean that the library function has be implemented in blas and is ready to be used in the final code_
 
 ##### Blas Libraries
-Much of the code in this project depends on blas. In order to run it properly, it is necessary to install the following blas and lapack libraries:
-
+| Much of the code in this project depends on blas. In order to run it properly, it is necessary to install the following blas and lapack libraries: |
 | ---                             |
 | libblas-dev (1.2.20110419-5)    |
 | libblas3 (1.2.20110419-5)       |
