@@ -124,6 +124,7 @@ _Note: When we say verified we are talking about an initial verification step wh
 ##### Blas Libraries
 Much of the code in this project depends on blas. In order to run it properly, it is necessary to install the following blas and lapack libraries:
 
+| ---                             |
 | libblas-dev (1.2.20110419-5)    |
 | libblas3 (1.2.20110419-5)       |
 | libgfortran3 (4.8.1-10ubuntu9)  |
