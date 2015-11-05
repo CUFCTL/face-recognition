@@ -4,13 +4,18 @@
 
 ####Miller Hall
 - Current Project:
- - Shared Code Team
+ - Assess progress of matrix operations library
+ - Ensure all functions are working
+ - Use blas to optimize the remaining functions
 - Progress:
- - Curently working on coordinating documentation
+ - Assess progress of matrix operations library
 - Next Step:
- - Blas integration into the matrix library
+ - By the end of the semester all functions using blas
+ - All code from project documented and in same repository
+ - Improve code legibility
+ - Move all helper functions into the central library
 - Date Updated:
- - 10/16/2015
+ - 11/5/2015
 
 ####Taylor Sieling
 - Current Project:
