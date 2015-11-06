@@ -1,0 +1,14 @@
+CC=gcc
+CFLAGS=-c -Wall 
+LDFLAGS=-lm -llapacke -llapack -lblas 
+SOURCES= ICA.c pcabigFn.c levelTwoOps.c runicaAux.c
+OBJECTS=$(SOURCES:.c=.o)
+EXECUTABLE=testICA
+
+all: $(SOURCES) $(EXECUTABLE)
+	
+$(EXECUTABLE): $(OBJECTS) 
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+
+.c.o:
+	$(CC) $(CFLAGS) $< -o $@

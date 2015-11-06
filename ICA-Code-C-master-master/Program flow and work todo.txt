@@ -1,0 +1,48 @@
+
+Starts with:
+	ICA.c includes
+			main:
+				needs matlab interface to bring in data
+				arch 1 and arch << both need work
+			runica:
+				runcia function < mostly done, check and a few fixes
+
+	runicaAux.c includes auxiliary functions for runica function
+			spherex:
+				needs work, check over 
+			sep96:
+				a few lines need to be written, possibly even one last matrix manipulation
+				also needs matrix dimensions in allocations
+			sepout:
+				needs work, check over
+			wchange:
+				needs work, wonder about *angel on last line, check this
+				
+	pcabigFn.c  include pcabigfn called by the arch's in main
+			pcabigFn:
+			check frees deff. not enough, make sure you don't free something that is used later
+			mostly done, switch dgeev to eig function
+			also look at line 157 wr_matrix and convert wr vector to wr_matrix?
+			
+	matrix_manipulation.h includes many matrix manipulations used through out the program
+	
+	levelTwoOps.c  - believe all have been tested
+					zero_mean and eigSort called from pcabigFn
+					didn't see where cosfn was called from
+			zero_mean:
+				looks done, check frees
+			cosFn:
+				looks done, check frees
+			eigSort:
+				looks done
+	
+	nnclassFn.c  - called at the end of main
+			nnclassFn: 
+				needs lots of work 
+				
+				
+	Also if you want compile any of the files run
+	for example nnclassFn.c
+	gcc nnclassFn.c -lm -o nnclassFn
+	to run ./nnclassFn
+	
