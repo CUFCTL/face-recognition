@@ -29,13 +29,13 @@
 
 ####Colin Targonski
 - Current Project:
- - Shared Code Team
+ - ICA team
 - Progress:
- - Working on documentation and function verification. Also beginning work on BLAS library
+ - Meeting with Zhong to discuss what needs to be done in the ICA files
 - Next Step:
- - BLAS integration
+ - Work on several functions in the ICA and verify them
 - Date Updated:
- - 10/16/2015
+ - 11/5/2015
 
 ####James Peterkin II
 - Current Project:
