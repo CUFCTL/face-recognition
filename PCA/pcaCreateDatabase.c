@@ -44,7 +44,7 @@ int main (int argc, char **argv) {
 	numPixels = imgWidth * imgHeight;
 	
 	/* Allocate the Image array T */
-	matrix_t *T = initializeMatrix (UNDEFINED, numPixels,numImages);
+	matrix_t *T = m_initialize (UNDEFINED, numPixels,numImages);
 	
 	// Load images into the matrix
 	unsigned char *pixels = (unsigned char *) malloc (3 * numPixels * sizeof (unsigned char));
@@ -63,7 +63,7 @@ int main (int argc, char **argv) {
 
 	// Calculate the mean face
 	start = clock();
-	matrix_t *m = calcMeanCol (T);
+	matrix_t *m = calcMeanCol (T); //NEED TO MAKE THIS FUNCTION
 	end = clock();
 	printf("time to calc mean face, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
@@ -73,7 +73,7 @@ int main (int argc, char **argv) {
 	
 	start = clock();
 	for (i = 0; i < numImages; i++) {
-		subtractMatrixColumn (A, i, m, 0);
+		subtractMatrixColumn (A, i, m, 0); //NEED TO MAKE THIS FUNCTION
 	}
 	end = clock();
 	printf("time to calc A, time=%g\n",
@@ -82,7 +82,9 @@ int main (int argc, char **argv) {
 	/* Calculate the surrogate matrix L */
 	/* ----- L = (A')*A ----- */
 	start = clock();
-	matrix_t *L = calcSurrogateMatrix (A);
+	//matrix_t *L = calcSurrogateMatrix (A);
+    matrix_t *invA = m_inverseMatrix(A);
+    matrix_t *L = m_matrix_multiply(A,invA,colA);
 	end = clock();
 	printf("time to calc surrogate matrix L, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
