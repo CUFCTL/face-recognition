@@ -7,7 +7,7 @@
 	- parts of reading in the PPM
 	- vector subtract
 	- distance formula
-	- finding the min	
+	- finding the min
 	- any other loops
 */
 
@@ -36,14 +36,14 @@ int main (int argc, char **argv) {
 	/*matrix_t *projectedImages = fscanMatrix (projectedImagesFile);
 	matrix_t *eigenfaces = fscanMatrix (projectedImagesFile);
 	matrix_t *m = fscanMatrix (projectedImagesFile); */
-	
-	matrix_t *projectedImages = freadMatrix (projectedImagesFile);
-	matrix_t *transposedEigenfaces = freadMatrix (projectedImagesFile);
-	matrix_t *m = freadMatrix (projectedImagesFile);
+
+	matrix_t *projectedImages = m_fread (projectedImagesFile);					//freadMatrix to m_fread
+	matrix_t *transposedEigenfaces = m_fread (projectedImagesFile);				//
+	matrix_t *m = m_fread (projectedImagesFile);								//
 
 
 	// Read in the filenames
-	char **filenames = malloc (projectedImages->numCols * sizeof (char *));	
+	char **filenames = malloc (projectedImages->numCols * sizeof (char *));
 	for (i = 0; i < projectedImages->numCols; i++) {
 		filenames[i] = malloc (200 * sizeof (char));
 		fscanf (filenamesFile, "%s", filenames[i]);
@@ -54,16 +54,16 @@ int main (int argc, char **argv) {
 	while (fscanf(testImagesFile, "%s", testImagePath) && !feof (testImagesFile)) {
 		// Read in a test image
 		sprintf (path, "%s%s", testPath, testImagePath);
-		matrix_t *testImage = initializeMatrix (UNDEFINED, m->numRows, 1);
-		
-		loadPPMtoMatrixCol (path, testImage, 0, pixels);
+		matrix_t *testImage = m_initialize (UNDEFINED, m->numRows, 1);			// initializeMatrix to m_initialize
+
+		loadPPMtoMatrixCol (path, testImage, 0, pixels);						// Already using shared library
 
 		// Take the difference image
-		subtractMatrixColumn (testImage, 0, m, 0);
+		subtractMatrixColumn (testImage, 0, m, 0);								// Needs shared library function
 		matrix_t *differenceImage = testImage; // for naming standards
 
 		// Project the image into the face space
-		matrix_t *projectedTestImage = matrixMultiply (transposedEigenfaces, NOT_TRANSPOSED, differenceImage, NOT_TRANSPOSED, 0);
+		matrix_t *projectedTestImage = m_matrix_multiply (transposedEigenfaces, NOT_TRANSPOSED, differenceImage, NOT_TRANSPOSED, 0);		// matrixMultiply to m_matrix_multiply
 
 
 		// Calculate the min Euclidean distance between the projectedTestImage and
@@ -74,12 +74,12 @@ int main (int argc, char **argv) {
 		int idx = -1;
 		for (i = 0; i < projectedImages->numCols; i++) {
 			norm = 0;
-			for (j = 0; j < projectedImages->numRows; j++) {		
+			for (j = 0; j < projectedImages->numRows; j++) {
                 temp = elem(projectedTestImage, j, 0) - elem(projectedImages, j, i);
 				norm += abs (temp);
 			}
 			norm *= norm;
-			
+
 			if (norm < min) {
 				min = norm;
 				idx = i;
