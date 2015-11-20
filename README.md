@@ -19,13 +19,13 @@
 
 ####Taylor Sieling
 - Current Project:
- - Shared Code Team
+ - Algorithms: PCA
 - Progress:
- - Working on documentation and function verification. Also working on getting Blas working on my machine.
+ - Switching out functions in pcaRecognition.c for shared library functions
 - Next Step:
- - Blas integration into the matrix library
+ - Verify shared functions work in pcaRecognition.c
 - Date Updated:
- - 10/16/2015
+ - 11/19/2015
 
 ####Colin Targonski
 - Current Project:
@@ -84,7 +84,7 @@ m_fwrite                   | Verified                   | 10/21/15   | Taylor
 m_fscan                    | Verified                   | 10/21/15   | Taylor
 m_fread                    | Verified                   | 10/21/15   | Taylor
 m_copy                     | Verified                   | 10/21/15   | Taylor
-                           |                            |            | 
+                           |                            |            |
 m_flipCols                 | Verified                   | 10/02/15   | James
 m_normalize                | Verified                   | 10/02/2015 | James
 m_elem_mult                | Verified                   | 10/02/2015 | James
