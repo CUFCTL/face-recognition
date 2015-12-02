@@ -63,7 +63,7 @@ int main (int argc, char **argv) {
 
 	// Calculate the mean face
 	start = clock();
-	matrix_t *m = calcMeanCol (T); //NEED TO MAKE THIS FUNCTION
+	matrix_t *m = m_meanRows (T);
 	end = clock();
 	printf("time to calc mean face, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
@@ -73,7 +73,7 @@ int main (int argc, char **argv) {
 	
 	start = clock();
 	for (i = 0; i < numImages; i++) {
-		subtractMatrixColumn (A, i, m, 0); //NEED TO MAKE THIS FUNCTION
+	    m_subtractColumn (A, i, m, 0); //NEED TO MAKE THIS FUNCTION
 	}
 	end = clock();
 	printf("time to calc A, time=%g\n",
@@ -84,7 +84,7 @@ int main (int argc, char **argv) {
 	start = clock();
 	//matrix_t *L = calcSurrogateMatrix (A);
     matrix_t *invA = m_inverseMatrix(A);
-    matrix_t *L = m_matrix_multiply(A,invA,colA);
+    matrix_t *L = m_matrix_multiply(A,invA,invA->numCols);
 	end = clock();
 	printf("time to calc surrogate matrix L, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
@@ -92,41 +92,42 @@ int main (int argc, char **argv) {
 	
 	/* Calculate eigenvectors for L */
 	start = clock();
-	matrix_t *L_eigenvectors = calcEigenvectorsSymmetric (L);
+	//matrix_t *L_eigenvectors = calcEigenvectorsSymmetric (L);
+    matrix_t *L_eigenvectors = m_eigenvalues_eigenvectors(L);
 	end = clock();
 	printf("time to calc eigenvectors, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
 
-	freeMatrix (L);
+	m_free (L);
 	
 	/* Calculate Eigenfaces */
 	/* ----- Eigenfaces = A * L_eigenvectors ----- */
 	start = clock();
-	matrix_t *eigenfaces = matrixMultiply (A, NOT_TRANSPOSED, L_eigenvectors, NOT_TRANSPOSED, 0);
+	matrix_t *eigenfaces = m_matrix_multiply (A, L_eigenvectors, L_eigenvectors->numCols);
 	end = clock();
 	printf("time to calc eigenfaces, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
 
-	freeMatrix (L_eigenvectors);
+	m_free (L_eigenvectors);
 
 	/* Transpose eigenfaces */
 	start = clock();
-	matrix_t *transposedEigenfaces = transposeMatrix (eigenfaces);
+	matrix_t *transposedEigenfaces = m_transpose (eigenfaces);
 	end = clock();
 	printf("time to transpose eigenfaces, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
-	freeMatrix (eigenfaces);
+	m_free (eigenfaces);
 	eigenfaces = NULL;
 
 	/* Calculate Projected Images */
 	/* ----- ProjectedImages = eigenfaces' * A ----- */
 	start = clock();
-	matrix_t *projectedImages = matrixMultiply (transposedEigenfaces, NOT_TRANSPOSED, A, NOT_TRANSPOSED, A->numCols);
+	matrix_t *projectedImages = m_matrix_multiply (transposedEigenfaces, A, A->numCols);
 	end = clock();
 	printf("time to calc projectedImages, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
 
-	freeMatrix (A);
+	m_free (A);
 	A = NULL;
 
 	// Print the Projected Image matrix and the mean image
@@ -135,9 +136,9 @@ int main (int argc, char **argv) {
 	fprintMatrix (out, eigenfaces);
 	fprintMatrix (out, m); */
 	
-	fwriteMatrix (out, projectedImages);
-	fwriteMatrix (out, transposedEigenfaces);
-	fwriteMatrix (out, m);
+	m_fwrite (out, projectedImages);
+	m_fwrite (out, transposedEigenfaces);
+	m_fwrite (out, m);
 
 
 	// Write the filenames corresponding to each column
@@ -153,9 +154,9 @@ int main (int argc, char **argv) {
 	writePPMgrayscale("meanImage.ppm", m, 0, imgHeight, imgWidth);
 	
 	/* COMMENT - could move these up to help memory */
-	freeMatrix (projectedImages);
-	freeMatrix (transposedEigenfaces);
-	freeMatrix (m);
+	m_free (projectedImages);
+	m_free (transposedEigenfaces);
+	m_free (m);
 
 	
 	fclose (out);
