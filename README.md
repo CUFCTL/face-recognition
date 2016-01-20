@@ -82,7 +82,7 @@ m_free                     |x||| Verified                   | 10/21/15   | Taylo
 m_fprint                   |||| Verified                   | 10/21/15   | Taylor
 m_fwrite                   |x||| Verified                   | 10/21/15   | Taylor
 m_fscan                    |||| Verified                   | 10/21/15   | Taylor
-m_fread                    |||| Verified                   | 10/21/15   | Taylor
+m_fread                    |x||| Verified                   | 10/21/15   | Taylor
 m_copy                     |||| Verified                   | 10/21/15   | Taylor
                            ||||                            |            |
 m_flipCols                 |||| Verified                   | 10/02/15   | James
