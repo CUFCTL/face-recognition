@@ -250,6 +250,20 @@ matrix_t *m_meanCols (matrix_t *M) {
 	return R;
 }
 
+/*
+ * inputs: column vector m will be subtracted from column i
+ *         of matrix A
+ * outputs: void.  subtraction is done on A
+ * note: initially made for PCA
+*/
+void m_subtractColumn(A,i,m){
+    int r;
+    int c;
+    c = i;
+    for(r = 0;r < A->numRows;r++){
+        elem(A,r,c) = elem(A,r,c) - elem(m,r,0);
+    }
+}
 
 //2.1.1
 /*******************************************************************************
