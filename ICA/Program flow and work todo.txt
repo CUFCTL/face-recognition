@@ -45,4 +45,6 @@ Starts with:
 	for example nnclassFn.c
 	gcc nnclassFn.c -lm -o nnclassFn
 	to run ./nnclassFn
+
+test
 	
