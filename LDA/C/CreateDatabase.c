@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************
 Align a set of face images (the training set T1, T2, ... , TM)
 
 Description: This function reshapes all 2D images of the training database into
@@ -19,7 +19,7 @@ See also: STRCMP, STRCAT, RESHAPE
 
 Original version by Amir Hossein Omidvarnia, October 2007
                  Email: aomidvar@ece.ut.ac.ir
-******************************************************************************/
+***************************************************************************/
 
 /**
 Note that at present the way that the files are read in is not in sequential
