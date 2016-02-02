@@ -11,6 +11,7 @@
  *  Lasted Edited: Jul. 9, 2013
  *
  *  Changes made: by William - created this file
+ *  Changes made: by Zhong Hu, finishing the file, comment with initial ZH
  *
  */
 void nnclassFn(*testPerf, *rankmat, *rank, train, trainRows, trainCols, test, testRows, testCols, trainClass, answer) {
@@ -48,13 +49,35 @@ void nnclassFn(*testPerf, *rankmat, *rank, train, trainRows, trainCols, test, te
     transpose(dist);
     eigsort(Sdist, dists_t);    // [Sdist,nearest] = sort(dists'); %cols of Sdist are distances in ascend order
                 // %1st row of nearest is index of 1st closest training example
-
+	
                 // %Create vector with nearest example, and vector with class label.
         // Nnbr = nearest(1,:);            %First row of nearest contains NN
         // %Nnbr = nearest(2,:);
+	//ZH need to initial Nnbr
+	data_t	Nnbr;
+	int i;
+	for (i=0; i< dists_t column; i++){
+		Nnbr = dists_t(1,i);
+	}
 // testClass = trainClass(Nnbr);
-
+	//ZH indexing with a vector
+	
+	
+	/*ZH What I need to do 
+		lookup eigsort, is dists_t = nearest
+		lookup data_t
+		lookup matrix find
+		and indexing
+	
+*/
 // correct = find( (testClass - answer == 0));
+	//ZH find the index where testclass-answer =  0;
+	
+	
+	
+	//ZH use size function
+	
+	
 // testPerf = size(correct,1) / size(answer,1)
 // if(size(correct,2)>size(correct,1))
 //         testPerf = size(correct,2) / size(answer,2)
@@ -70,6 +93,16 @@ void nnclassFn(*testPerf, *rankmat, *rank, train, trainRows, trainCols, test, te
 //         rank(i) = cumtestPerf;
 // end
 // 
+	//ZH
+	int cumtestPerf =0;
+	int i;
+	for(i=1; i<=30; i++){
+		
+		
+	}
+
+
+
 // %For FERET test, want probeID (answer), then rank, then matched ID no.,
 // %then FA flag, then "matching score".  This will be a matrix with: 
 // %probe  rank    match                           FAflag          matching score
@@ -79,5 +112,5 @@ void nnclassFn(*testPerf, *rankmat, *rank, train, trainRows, trainCols, test, te
 // %i      4
 
 
-    return;
+    //return;
 }

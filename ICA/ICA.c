@@ -323,7 +323,7 @@ void ICA(double v[], double r[], double e[]) {
 	|
     |   COMMENTS FROM MATLAB CODE
 =======================================================*/
-runica(data_t *matrix, data_t *oldx, int rows, int cols, data_t *uu, data_t *w, data_t *wz){
+void runica(data_t *matrix, data_t *oldx, int rows, int cols, data_t *uu, data_t *w, data_t *wz){
 	data_t *xx;
 	data_t *ID;
 	data_t *oldw;
