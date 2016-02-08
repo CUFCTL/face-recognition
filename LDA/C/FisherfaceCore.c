@@ -132,7 +132,8 @@ MATRIX **FisherfaceCore(const database_t *Database)
 
   //cblas_dgemm(Order,         TransA,     TransB,       M,       N,       K,       alpha, A,        lda,     B,        ldb,     beta, C,        ldc);
 //  cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, P,       P,       pixels,  1,     *A->data, P,       *A->data, P,       0,    *L->data, P);
-    cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, A->cols, A->cols, A->rows, 1,     *A->data, A->cols, *A->data, A->cols, 0,    *L->data, L->cols);
+    // cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, A->cols, A->cols, A->rows, 1,     *A->data, A->cols, *A->data, A->cols, 0,    *L->data, L->cols);
+    L = m_matrix_multiply(A, A, A->cols);
 
     if (p_cov) {
         printf("\nL = surrogate of covariance:\n");
