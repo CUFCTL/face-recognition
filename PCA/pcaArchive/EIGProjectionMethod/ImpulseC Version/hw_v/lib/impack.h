@@ -1,0 +1,11 @@
+`define slice(v, first, sz) v[first +: sz]
+`define sign_ext(v, sz) ($signed(v) | sz'sd0)
+`define ashr(v, n) ($signed(v) >>> n)
+`define cmp_less_s(v1, v2) ($signed(v1) < $signed(v2))
+`define cmp_less_equal_s(v1, v2) ($signed(v1) <= $signed(v2))
+`define neg(e) (0 - (e))
+`define xnor(e1, e2) (~ ( (e1) ^ (e2) ) )
+`define mul_s(v1, v2) ($signed(v1) * $signed(v2))
+`define div_s(v1, v2) ($signed(v1) / $signed(v2))
+`define mod_s(v1, v2) ($signed(v1) % $signed(v2))
+`define nop(e) (e)

@@ -1,0 +1,51 @@
+% A modification of the sample script that loops through and matches
+% all image files in the TestDatabasePath directory
+%
+% See also: CREATEDATABASE, EIGENFACECORE, RECOGNITION
+
+% Original version by Amir Hossein Omidvarnia, October 2007
+%                     Email: aomidvar@ece.ut.ac.ir                  
+
+clear all
+clc
+close all
+
+% You can customize and fix initial directory paths
+% TrainDatabasePath = uigetdir('D:\Program Files\MATLAB\R2006a\work', 'Select training database path' );
+% TestDatabasePath = uigetdir('D:\Program Files\MATLAB\R2006a\work', 'Select test database path');
+
+% hard-coded directory can be replaced with pop-up above or changed here
+TrainDatabasePath = 'C:\Documents and Settings\smithmc\Desktop\1largertrain\train';
+TestDatabasePath  = 'C:\Documents and Settings\smithmc\Desktop\1largertrain\test';
+
+TrainFiles = dir(TrainDatabasePath);
+TestFiles = dir(TestDatabasePath);
+
+for i = 1 : size(TestFiles,1)
+    
+    TestFiles(i).name;
+    
+    if (strcmp(TestFiles(i).name,'.')|strcmp(TestFiles(i).name,'..')|strcmp(TestFiles(i).name,'Thumbs.db'))
+        continue;
+    end
+
+    TestName = strcat('\',TestFiles(i).name);
+    TestImage = strcat(TestDatabasePath,TestName);
+
+    im = imread(TestImage);
+    
+    T = CreateDatabase(TrainDatabasePath);
+    [m, A, Eigenfaces] = EigenfaceCore(T);
+    OutputName = Recognition(TestImage, m, A, Eigenfaces);
+    
+    SelectedImage = strcat(TrainDatabasePath,'\',TrainFiles(OutputName).name);
+    SelectedImage = imread(SelectedImage);
+
+    str = strcat('Test image is      : ',TestFiles(i).name);
+    disp(str)
+    
+    sprintf('\n')
+
+    str = strcat('Matched image is : ', TrainFiles(OutputName).name, '\);
+    disp(str)                 
+end

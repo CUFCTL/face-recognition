@@ -1,0 +1,33 @@
+opening eigenfaces_200.txt...
+Database contains 200 images...
+../Image/Train/ORL_200/4.ppm
+
+Overall Speed:				1.564256 (ms)
+../Image/Train/ORL_200/8.ppm
+
+Overall Speed:				1.573824 (ms)
+../Image/Train/ORL_200/12.ppm
+
+Overall Speed:				1.572352 (ms)
+../Image/Train/ORL_200/16.ppm
+
+Overall Speed:				1.571104 (ms)
+../Image/Train/ORL_200/20.ppm
+
+Overall Speed:				1.573472 (ms)
+../Image/Train/ORL_200/24.ppm
+
+Overall Speed:				1.571744 (ms)
+../Image/Train/ORL_200/28.ppm
+
+Overall Speed:				1.572256 (ms)
+../Image/Train/ORL_200/32.ppm
+
+Overall Speed:				1.571360 (ms)
+../Image/Train/ORL_200/36.ppm
+
+Overall Speed:				1.571136 (ms)
+../Image/Train/ORL_200/40.ppm
+
+Overall Speed:				1.572096 (ms)
+PCA done...
