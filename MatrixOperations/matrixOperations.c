@@ -444,12 +444,13 @@ matrix_t *m_meanCols (matrix_t *M) {
  * outputs: void.  subtraction is done on A
  * note: initially made for PCA
 */
-void m_subtractColumn(A,i,m){
+void m_subtractColumn(matrix_t *M,int i,matrix_t *m){
     int r;
     int c;
     c = i;
-    for(r = 0;r < A->numRows;r++){
-        elem(A,r,c) = elem(A,r,c) - elem(m,r,0);
+    for(r = 0;r < M->numRows;r++){
+        M->data[c * M->numRows + r] -= m->data[r];
+        //elem(M,r,c) = elem(M,r,c) - elem(m,r,0);
     }
 }
 
@@ -564,15 +565,15 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 // for right now. 
 // TODO - Documentation & Free's - Miller 10/30
 void m_inverseMatrix (matrix_t *M) {
-    assert(M->rows == M->cols);
+    assert(M->numRows == M->numCols);
     int info;
-    int lwork = M->rows * M->cols;
-    int *ipiv = malloc((M->rows + 1) * sizeof(int));
+    int lwork = M->numRows * M->numCols;
+    int *ipiv = malloc((M->numRows + 1) * sizeof(int));
     precision *work = malloc(lwork * sizeof(precision));
     //          (rows   , columns, matrix , lda    , ipiv, info );
-    cblas_dgetrf(M->rows, M->cols, M->data, M->rows, ipiv, &info);
+    cblas_dgetrf(M->numRows, M->numCols, M->data, M->numRows, ipiv, &info);
     //          (order  , matrix, Leading Dim, IPIV, 
-    cblas_dgetri(M->rows, M     , M->rows    , ipiv, work, &lwork, &info); 
+    cblas_dgetri(M->numRows, M     , M->numRows    , ipiv, work, &lwork, &info); 
 }
 
 /*******************************************************************************
@@ -999,7 +1000,7 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t
 
 // ***********************************************************************************************************
 // ***********************************************************************************************************
-    dggev()
+    //dggev()
 }
 
 
