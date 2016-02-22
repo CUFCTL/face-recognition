@@ -14,7 +14,7 @@ all : pcaCreateDatabase pcaRecognition
 
 
 pcaCreateDatabase : pcaCreateDatabase.c $(OBJ)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) pcaCreateDatabase.c -llapacke -o pcaCreateDatabase
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) pcaCreateDatabase.c -lm -llapacke -o pcaCreateDatabase
 
 pcaRecognition : pcaRecognition.c $(OBJ)
 	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) pcaRecognition.c -o pcaRecognition
