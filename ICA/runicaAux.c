@@ -122,9 +122,15 @@ sep96(data_t *x, data_t *w, int *perm, int sweep, int count, int N, int M, int P
 	//allocate_matrix(&BI, ?rows, ?rows);
   allocate_matrix(&BI, rows, rows); //ZH we believe its rows by rows, BI = B * ID
 
-	allocate_matrix(&temp_u, ?, ?);
-    allocate_matrix(&temp_u1, ?, ?);
-	allocate_matrix(&u_transposed, ?cols, ?rows);
+//	allocate_matrix(&temp_u, ?, ?);
+  allocate_matrix(&temp_u, rows, rows); // ZH
+
+//  allocate_matrix(&temp_u1, ?, ?);
+//	allocate_matrix(&u_transposed, ?cols, ?rows);
+
+
+  allocate_matrix(&temp_u1, rows, rows); // ZH
+	allocate_matrix(&u_transposed, cols, rows); //ZH
 	x = vect_reorder_mat(x, perm);  // x=x(:,perm);
     sweep=sweep+1; int t=1;             // sweep=sweep+1; t=1;
     noblocks = fix(P/B);            // noblocks=fix(P/B);
