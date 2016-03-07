@@ -59,12 +59,13 @@ int main (int argc, char **argv) {
 		loadPPMtoMatrixCol (path, testImage, 0, pixels);						// Already using shared library
 
 		// Take the difference image
-		subtractMatrixColumn (testImage, 0, m, 0);								// Needs shared library function
+		//subtractMatrixColumn (testImage, 0, m, 0);								// Needs shared library function
+		m_subtractColumn (testImage, 0, m);								// Needs shared library function
 		matrix_t *differenceImage = testImage; // for naming standards
 
 		// Project the image into the face space
-		matrix_t *projectedTestImage = m_matrix_multiply (transposedEigenfaces, NOT_TRANSPOSED, differenceImage, NOT_TRANSPOSED, 0);		// matrixMultiply to m_matrix_multiply
-
+		//matrix_t *projectedTestImage = m_matrix_multiply (transposedEigenfaces, NOT_TRANSPOSED, differenceImage, NOT_TRANSPOSED, 0);		// matrixMultiply to m_matrix_multiply
+        matrix_t *projectedTestImage = m_matrix_multiply(transposedEigenfaces,differenceImage,transposedEigenfaces->numCols);
 
 		// Calculate the min Euclidean distance between the projectedTestImage and
 		// the projectedImages

@@ -12,12 +12,11 @@ OBJ = matrixOperations.o
 
 all : pcaCreateDatabase pcaRecognition
 
-
 pcaCreateDatabase : pcaCreateDatabase.c $(OBJ)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) pcaCreateDatabase.c -lm -llapacke -o pcaCreateDatabase
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) pcaCreateDatabase.c -lm -lcblas -llapacke -o pcaCreateDatabase
 
 pcaRecognition : pcaRecognition.c $(OBJ)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) pcaRecognition.c -o pcaRecognition
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) pcaRecognition.c -lm -lcblas -llapacke -o pcaRecognition
 
 clean :
 	rm -f *.ppm *.o  *.dat pcaCreateDatabase pcaRecognition

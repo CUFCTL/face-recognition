@@ -1,6 +1,7 @@
 #include "matrixOperations.h"
 #include <cblas.h>
 #include <lapacke.h>
+#include <math.h>
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 1 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 //  initialization, free, input, output, and copy functions
@@ -564,16 +565,19 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 // Temp moved this here for dependancy issues. Group 3 code person should work on this
 // for right now. 
 // TODO - Documentation & Free's - Miller 10/30
+// UPDATE 03/02/16: make sure to compile time include -llapacke
+// NEEDS VERIFICATION - Greg
 void m_inverseMatrix (matrix_t *M) {
     assert(M->numRows == M->numCols);
     int info;
-    int lwork = M->numRows * M->numCols;
+    //int lwork = M->numRows * M->numCols;
     int *ipiv = malloc((M->numRows + 1) * sizeof(int));
-    precision *work = malloc(lwork * sizeof(precision));
+    //precision *work = malloc(lwork * sizeof(precision));
     //          (rows   , columns, matrix , lda    , ipiv, info );
-    cblas_dgetrf(M->numRows, M->numCols, M->data, M->numRows, ipiv, &info);
+    info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR,M->numRows, M->numCols, M->data, M->numRows, ipiv);
+    if(info){}
     //          (order  , matrix, Leading Dim, IPIV, 
-    cblas_dgetri(M->numRows, M     , M->numRows    , ipiv, work, &lwork, &info); 
+    info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->numRows,M->data,M->numRows, ipiv); 
 }
 
 /*******************************************************************************
