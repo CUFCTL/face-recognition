@@ -1,0 +1,87 @@
+mkdir hw_v
+HW_SRC="pca_hw.c"; \
+	for i in $HW_SRC; do CPP_INCLUDES="$CPP_INCLUDES -include $i"; done; \
+	echo | "C:/Impulse/CoDeveloper3/MinGW/bin/gcc" -E -DIMPULSE_C_SYNTHESIS -DRC_INVOKED -DBYTE="unsigned char" -DWORD="unsigned short" -DDWORD="unsigned int" -Dsize_t="long unsigned int" -DNULL=0 -Dstdin=NULL "-IC:\Impulse\CoDeveloper3\Include" "-IC:/Impulse/CoDeveloper3/StageMaster/include" $CPP_INCLUDES - > ImpulsePCA.i
+"C:/Impulse/CoDeveloper3/bin/impulse_snoot" -Timpulse-c ImpulsePCA.i ImpulsePCA.snt
+"C:/Impulse/CoDeveloper3/bin/impulse_prep" ImpulsePCA.snt ImpulsePCA.pk0
+Impulse C Transformations
+Copyright 2002-2009, Impulse Accelerated Technologies, Inc.
+All rights reserved.
+Build May 13 2009.
+processing ImpulsePCA.snt...
+"C:/Impulse/CoDeveloper3/bin/impulse_porky" -iterate -fold -unused-syms -unused-types -Dmemcpys -const-prop  -scalarize  -loop-invariants  ImpulsePCA.pk0 ImpulsePCA.pk1
+"C:/Impulse/CoDeveloper3/bin/impulse_porky" -build-arefs ImpulsePCA.pk1 ImpulsePCA.pky
+"C:/Impulse/CoDeveloper3/bin/impulse_impc" ImpulsePCA.pky ImpulsePCA.sic
+Impulse C Preprocessor
+Copyright 2002-2009, Impulse Accelerated Technologies, Inc.
+All rights reserved.
+Build May 13 2009.
+---Software activated---
+processing ImpulsePCA.pky...
+analyzing co_initialize...
+found architecture definition: RecognitionArch/generic
+analyzing config_recognition...
+creating stream s1 ...
+creating stream s2 ...
+creating process producer ...
+creating process recognition ...
+creating process consumer ...
+"C:/Impulse/CoDeveloper3/bin/impulse_s2xml"  ImpulsePCA.sic > ImpulsePCA.xic
+Impulse C to XML
+Copyright 2003-2007, Impulse Accelerated Technologies, Inc.
+All rights reserved.
+Build May 13 2009.
+"C:/Impulse/CoDeveloper3/StageMaster/bin/impulse_sm" -g "-aC:/Impulse/CoDeveloper3/Architectures/xilinx_generic_vlog.xml" -hhw_v  ImpulsePCA.xic ImpulsePCA.xhw
+Stage Master Version 3.7
+Copyright by Green Mountain Computing Systems, 2003-2008.
+All rights reserved.
+Build May 12 2009.
+
+Analyzing Recognition:
+.... done 4 blocks
+Generating . done
+Results:
+
+|----------------------------------------
+| Recognition
+|----------------------------------------
+|  Block #0 loop:
+|    Stages: 4
+|    Max. Unit Delay: 0
+|  Block #1 loop:
+|    Stages: 2
+|    Max. Unit Delay: 1
+|  Block #2:
+|    Stages: 1
+|    Max. Unit Delay: 0
+|  Block #3:
+|    Stages: 1
+|    Max. Unit Delay: 0
+|----------------------------------------
+| Operators:
+|  1 Comparator(s) (3 bit)
+|----------------------------------------
+| Total Stages: 5
+| Max. Unit Delay: 1
+| Estimated DSPs: 0
+|----------------------------------------
+Writing output ... done
+"C:/Impulse/CoDeveloper3/bin/impulse_arch" "-aC:/Impulse/CoDeveloper3/Architectures/xilinx_generic_vlog.xml" -dc -no_port_bus_connect  -swdirsw -files "ImpulsePCA_comp.v ImpulsePCA_top.v " ImpulsePCA.xic hw_v/ImpulsePCA_top.v
+Impulse C HDL Design Generator
+Copyright 2002-2009, Impulse Accelerated Technologies, Inc.
+All rights reserved.
+Loading C:/Impulse/CoDeveloper3/Architectures/xilinx_generic_vlog.xml ...
+Loading C:/Impulse/CoDeveloper3/Architectures/Verilog/Generic/Generic/bus.xml ...
+Loading C:/Impulse/CoDeveloper3/Architectures/Verilog/target.xml ...
+Loading C:/Impulse/CoDeveloper3/Architectures/Verilog/Xilinx/technology.xml ...
+Loading C:/Impulse/CoDeveloper3/Architectures/Verilog/Generic/Generic/system.xml ...
+Loading ImpulsePCA.xic ...
+"C:/Impulse/CoDeveloper3/bin/impulse_genvlog.exe"  ImpulsePCA.xhw hw_v/ImpulsePCA_comp.v
+Impulse C RTL Component Generator
+Copyright 2002-2009, Impulse Accelerated Technologies, Inc.
+All rights reserved.
+Generating Recognition ...
+---Software activated---
+chmod -R +rw hw_v
+mkdir sw
+make: *** No rule to make target `grayscale.c', needed by `sw/co_init.c'.  Stop.

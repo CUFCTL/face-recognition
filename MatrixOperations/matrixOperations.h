@@ -89,6 +89,7 @@ matrix_t * m_meanRows (matrix_t *M);
 matrix_t * m_findNonZeros (matrix_t *M);
 // 2.1.2
 //	- reshapes data in matrix to new form
+void m_subtractColumn(matrix_t *A, int i, matrix_t *m);
 matrix_t * m_transpose (matrix_t *M);
 matrix_t * m_reshape (matrix_t *M, int newNumRows, int newNumCols);
 

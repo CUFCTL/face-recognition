@@ -18,7 +18,7 @@
                                      and 'D' will be a MNxP 2D matrix.
 
  Returns:
-    M                             - MATRIX ** consisting of the following 4 entries:
+    M                             - matrix_t ** consisting of the following 4 entries:
     M[0] = mean                   - ((M*N)x1) Mean of the training database
     M[1] = V_PCA                  - ((M*N)x(P-C)) Eigen vectors of the covariance matrix of the training database
     M[2] = V_Fisher               - ((P-C)x(C-1)) Largest (C-1) eigen vectors of matrix J = inv(Sw) * Sb
@@ -28,24 +28,23 @@
 
  Original version by Amir Hossein Omidvarnia, October 2007
                      Email: aomidvar@ece.ut.ac.ir
+
+TODO : update debud prints to more elegant solution
 *******************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <cblas.h>
-#include <lapacke.h>
 #include <assert.h>
 
-#include "ppm.h"
+#include "../../MatrixOperations/matrixOperations.c"
 #include "CreateDatabase.h"
-#include "matrix.h"
 #include "FisherfaceCore.h"
 
-MATRIX **FisherfaceCore(const database_t *Database)
+matrix_t **FisherfaceCore(const matrix_t *Database)
 {
-    int Class_population = 4; //Set value according to database (Images per person)
+    int Class_population = IM_PER_PERSON; //Set value according to database (Images per person)
     int P = Database->images; //Total Number of training images
     int pixels = Database->pixels; //total pixels per image (i.e., width * height)
     int Class_number = P / Class_population; //Number of classes (or persons)
@@ -62,50 +61,43 @@ MATRIX **FisherfaceCore(const database_t *Database)
     double *work, *info;    // Array of doubles containing intermediate values for dggev
     double temp_double;
 
-    // MATRIX types
-    MATRIX **M; //What the function returns
-    MATRIX *Database_matrix; //Database stored in MATRIX form
-    MATRIX *m_database; //Pixelwise mean of database images
-    MATRIX *A; //Deviation matrix (imagewise difference from mean)
-    MATRIX *L; //Surrogate of covariance matrix, L = A' * A
-    MATRIX *D; //Eigenvalues of L
-    MATRIX *V; //Eigenvectors of L
-    MATRIX *L_eig_vec; //filtered eigenvectors
-    MATRIX *V_PCA; //
-    MATRIX *ProjectedImages_PCA;
-    MATRIX *m_PCA; //mean of ProjectedImages_PCA
-    MATRIX *tempMean; //temporary matrix to store the mean of ProjectedImages_PCA
-    MATRIX *tempMat;
-    MATRIX *S;
-    MATRIX *J_eig_vec;
-    MATRIX *alphai, *alphar, *beta;
+    // matrix_t types
+    matrix_t **M; //What the function returns
+    matrix_t *Database_matrix; //Database stored in matrix_t form
+    matrix_t *m_database; //Pixelwise mean of database images
+    matrix_t *A; //Deviation matrix (imagewise difference from mean)
+    matrix_t *L; //Surrogate of covariance matrix, L = A' * A
+    matrix_t *D; //Eigenvalues of L
+    matrix_t *V; //Eigenvectors of L
+    matrix_t *L_eig_vec; //filtered eigenvectors
+    matrix_t *V_PCA; //
+    matrix_t *ProjectedImages_PCA;
+    matrix_t *m_PCA; //mean of ProjectedImages_PCA
+    matrix_t *tempMean; //temporary matrix to store the mean of ProjectedImages_PCA
+    matrix_t *tempMat;
+    matrix_t *S;
+    matrix_t *J_eig_vec;
+    matrix_t *alphai, *alphar, *beta;
 
-    M = (MATRIX **) malloc(4 * sizeof(MATRIX *));
-
-    // Convert Database to MATRIX
-    Database_matrix = matrix_constructor(pixels, Database->images);
-    for (i = 0; i < Database_matrix->rows; i++) {
-        for (j = 0; j < Database_matrix->cols; j++) {
-            Database_matrix->data[i][j] = Database->data[i][j];
-        }
-    }
+    // Allocate room for four return matrices
+    M = (matrix_t **) malloc(4 * sizeof(matrix_t *));
 
     if (p_database) {
         printf("Database\n");
-        matrix_print(Database_matrix, 0);
+        m_fprint(stdout, Database_matrix);
     }
 
     //**************************************************************************
     //Calculate mean
     //<.m: 36>
-    m_database = matrix_mean(Database_matrix);
+    m_database = m_meanCols(Database_matrix);
 
     //Assign mean database
     M[0] = m_database;
 
     if (p_mean) {
         printf("\nmean:\n");
-        matrix_print(M[0], 2);
+        m_fprint(stdout, M[0]);
     }
 
     //**************************************************************************
@@ -128,11 +120,8 @@ MATRIX **FisherfaceCore(const database_t *Database)
     //**************************************************************************
     //Calculate L, surrogate of covariance matrix, L = A'*A
     //<.m: 42>
-    L = matrix_constructor(P, P);
 
-  //cblas_dgemm(Order,         TransA,     TransB,       M,       N,       K,       alpha, A,        lda,     B,        ldb,     beta, C,        ldc);
-//  cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, P,       P,       pixels,  1,     *A->data, P,       *A->data, P,       0,    *L->data, P);
-    cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, A->cols, A->cols, A->rows, 1,     *A->data, A->cols, *A->data, A->cols, 0,    *L->data, L->cols);
+    L = m_matrix_multiply(A, A, A->cols);
 
     if (p_cov) {
         printf("\nL = surrogate of covariance:\n");
@@ -178,7 +167,8 @@ MATRIX **FisherfaceCore(const database_t *Database)
     V_PCA = matrix_constructor(pixels, P - Class_number);
 
     //void cblas_dgemm(Order,         TransA,       TransB,       M,      N,                K, alpha, *A,       lda,     *B,               ldb,             beta, *C,           ldc);
-    cblas_dgemm(       CblasRowMajor, CblasNoTrans, CblasNoTrans, pixels, P - Class_number, P, 1,     *A->data, A->cols, *L_eig_vec->data, L_eig_vec->cols, 0,    *V_PCA->data, V_PCA->cols);
+    // cblas_dgemm(       CblasRowMajor, CblasNoTrans, CblasNoTrans, pixels, P - Class_number, P, 1,     *A->data, A->cols, *L_eig_vec->data, L_eig_vec->cols, 0,    *V_PCA->data, V_PCA->cols);
+    V_PCA = m_matrix_multiply(A, L_eig_vec, A->cols);
 
     if (p_vpca) {
         printf("V_PCA:\n");
@@ -320,7 +310,7 @@ MATRIX **FisherfaceCore(const database_t *Database)
     return M;
 }
 
-void DestroyFisher(MATRIX **M)
+void DestroyFisher(matrix_t **M)
 {
     matrix_destructor(M[0]);
 //    matrix_destructor(M[1]);

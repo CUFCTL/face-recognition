@@ -1,0 +1,4 @@
+# _Makefile - created by CoDeveloper version 3.50.b.3
+PROJECT_NAME = ImpulsePCA
+include _Makefile.defs
+include C:/Impulse/CoDeveloper3\MakeRules\Makefile.rules

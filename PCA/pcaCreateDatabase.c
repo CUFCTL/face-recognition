@@ -8,7 +8,7 @@
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #include <time.h>
-
+#include <lapacke.h>
 #include "matrixOperations.h"
 
 int file_select(const struct dirent *entry);
@@ -73,7 +73,7 @@ int main (int argc, char **argv) {
 	
 	start = clock();
 	for (i = 0; i < numImages; i++) {
-	    m_subtractColumn (A, i, m, 0); //NEED TO MAKE THIS FUNCTION
+	    m_subtractColumn (A, i, m); //need to test function
 	}
 	end = clock();
 	printf("time to calc A, time=%g\n",
@@ -81,10 +81,14 @@ int main (int argc, char **argv) {
 	
 	/* Calculate the surrogate matrix L */
 	/* ----- L = (A')*A ----- */
+    matrix_t *A2 = m_initialize(UNDEFINED, A->numRows, A->numCols);
+    for(i = 0;i < (A->numRows * A->numCols);i++){
+        A2[i] = A[i];
+    }
 	start = clock();
 	//matrix_t *L = calcSurrogateMatrix (A);
-    matrix_t *invA = m_inverseMatrix(A);
-    matrix_t *L = m_matrix_multiply(A,invA,invA->numCols);
+    m_inverseMatrix(A);
+    matrix_t *L = m_matrix_multiply(A,A2,A->numCols);
 	end = clock();
 	printf("time to calc surrogate matrix L, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
@@ -93,12 +97,20 @@ int main (int argc, char **argv) {
 	/* Calculate eigenvectors for L */
 	start = clock();
 	//matrix_t *L_eigenvectors = calcEigenvectorsSymmetric (L);
-    matrix_t *L_eigenvectors = m_eigenvalues_eigenvectors(L);
+    //matrix_t *L_eigenvectors = m_eigenvalues_eigenvectors(L);
+    int info;
+    double w[L->numRows*L->numCols];
+    info = LAPACKE_dsyev(LAPACK_ROW_MAJOR,'V','U',L->numRows,L->data,L->numCols,w);
+    if(info > 0){
+        printf("The algorithm failed to compute eigenvalues.\n");
+        exit(1);
+    }
 	end = clock();
 	printf("time to calc eigenvectors, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
 
-	m_free (L);
+    matrix_t *L_eigenvectors = L;
+	//m_free (L);
 	
 	/* Calculate Eigenfaces */
 	/* ----- Eigenfaces = A * L_eigenvectors ----- */
