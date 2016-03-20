@@ -29,7 +29,7 @@
  Original version by Amir Hossein Omidvarnia, October 2007
                      Email: aomidvar@ece.ut.ac.ir
 
-TODO : update debud prints to more elegant solution
+TODO : update debug prints to more elegant solution
 *******************************************************************************/
 
 #include <stdio.h>
@@ -49,23 +49,18 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     int pixels = Database->pixels; //total pixels per image (i.e., width * height)
     int Class_number = P / Class_population; //Number of classes (or persons)
     int i, j, k, l;
-    // debug print flags
-    int p_database = 0;
-    int p_mean = 0;
-    int p_dev = 0;
-    int p_cov = 0;
-    int p_eig = 1;
-    int p_vpca = 0;
-    int p_pipca = 1;
-    int p_mPCA = 1;
     double *work, *info;    // Array of doubles containing intermediate values for dggev
     double temp_double;
+
+    // Verbose mode: debug prints
+    int verbose = 1;
 
     // matrix_t types
     matrix_t **M; //What the function returns
     matrix_t *Database_matrix; //Database stored in matrix_t form
     matrix_t *m_database; //Pixelwise mean of database images
     matrix_t *A; //Deviation matrix (imagewise difference from mean)
+    matrix_t *At; // Transpose of A
     matrix_t *L; //Surrogate of covariance matrix, L = A' * A
     matrix_t *D; //Eigenvalues of L
     matrix_t *V; //Eigenvectors of L
@@ -82,27 +77,25 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     // Allocate room for four return matrices
     M = (matrix_t **) malloc(4 * sizeof(matrix_t *));
 
-    if (p_database) {
+    if (verbose) {
         printf("Database\n");
         m_fprint(stdout, Database_matrix);
     }
 
     //**************************************************************************
     //Calculate mean
-    //<.m: 36>
     m_database = m_meanCols(Database_matrix);
 
-    //Assign mean database
+    // This value is the first returned by the function
     M[0] = m_database;
 
-    if (p_mean) {
+    if (verbose) {
         printf("\nmean:\n");
         m_fprint(stdout, M[0]);
     }
 
     //**************************************************************************
     //Calculate A, deviation matrix
-    //<.m: 39>
     A = matrix_constructor(pixels, P);
 
     for (i = 0; i < pixels; i++) {
@@ -112,31 +105,30 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
         }
     }
 
-    if (p_dev) {
+    if (verbose) {
         printf("\ndeviation:\n");
-        matrix_print(A, 2);
+        m_fprintf(stdout, A);
     }
 
     //**************************************************************************
     //Calculate L, surrogate of covariance matrix, L = A'*A
-    //<.m: 42>
 
-    L = m_matrix_multiply(A, A, A->cols);
+    At = m_transpose(A);
+    L = m_matrix_multiply(A, At, A->cols);
+    m_free(At);
 
-    if (p_cov) {
+    if (verbose) {
         printf("\nL = surrogate of covariance:\n");
         matrix_print(L, 2);
     }
 
     // Calculate eigenvectors and eigenvalues
-    //<.m: 43>
-    D = matrix_constructor(P, 1);
 
-    LAPACKE_dsyev(LAPACK_ROW_MAJOR, 'V', 'U', P, *L->data, P, *D->data);
-    V = L;
-    L = NULL;
+    // D is the (D)iagonal matrix of eigenvalues
+    // V is the matrix of eigen(V)ectors
+    m_eigenvalues_eigenvectors(M, D, V);
 
-    if (p_eig) {
+    if (verbose) {
         printf("D, eigenvalues:\n");
         matrix_print(D, 2);
         printf("V, eigenvectors:\n");
@@ -145,7 +137,6 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
 
     //**************************************************************************
     //Sorting and eliminating small eigenvalues
-    //<.m: 46-50>
 
     L_eig_vec = matrix_constructor(P, P - Class_number);
 
@@ -155,22 +146,17 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
         }
     }
 
-    if (p_eig) {
+    if (verbose) {
         printf("L_eig_vec, trimmed eigenvectors:\n");
         matrix_print(L_eig_vec, 4);
     }
 
     //**************************************************************************
     //Calculating the eigenvectors of covariance matrix 'C'
-    //<.m: 54>
 
-    V_PCA = matrix_constructor(pixels, P - Class_number);
-
-    //void cblas_dgemm(Order,         TransA,       TransB,       M,      N,                K, alpha, *A,       lda,     *B,               ldb,             beta, *C,           ldc);
-    // cblas_dgemm(       CblasRowMajor, CblasNoTrans, CblasNoTrans, pixels, P - Class_number, P, 1,     *A->data, A->cols, *L_eig_vec->data, L_eig_vec->cols, 0,    *V_PCA->data, V_PCA->cols);
     V_PCA = m_matrix_multiply(A, L_eig_vec, A->cols);
 
-    if (p_vpca) {
+    if (verbose) {
         printf("V_PCA:\n");
         matrix_print(V_PCA, 4);
     }
@@ -182,11 +168,10 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     ProjectedImages_PCA = matrix_constructor(P - Class_number, P);
 
     for (i = 0; i < P; i++) {
-        //cblas_dgemm(Order,       TransA,     TransB,       M,                N, K,      alpha, A,            lda,         B,          ldb,     beta, C,                          ldc);
-        cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, P - Class_number, 1, pixels, 1,     *V_PCA->data, V_PCA->cols, &A->data[0][i], A->cols, 0, &ProjectedImages_PCA->data[0][i], ProjectedImages_PCA->cols);
+    cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, P - Class_number, 1, pixels, 1,     *V_PCA->data, V_PCA->cols, &A->data[0][i], A->cols, 0, &ProjectedImages_PCA->data[0][i], ProjectedImages_PCA->cols);
     }
 
-    if (p_pipca) {
+    if (verbose) {
         printf("ProjectedImages_PCA:\n");
         matrix_print(ProjectedImages_PCA, 2);
     }
@@ -261,7 +246,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
                         *tempMat->data, tempMat->cols, *tempMat->data, tempMat->cols, 1, *Sb->data, Sb->cols); 
     }
     
-    if (p_mPCA) {
+    if (verbose) {
         printf("m_PCA:\n");
         matrix_print(m_PCA, 16);
     }
@@ -270,19 +255,6 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     alphai = matrix_construct(P-Class_number,1);
     alphar = matrix_construct(P-Class_number,1);
     beta = matrix_construct(P-Class_number,1);
-    
-    // 'N' - do not compute left eig. values
-    // 'V' - compute right eig. values
-    // Sb->cols - the size of the matrices (square)
-    // Sb->data - the matrix A in eig(A,B)
-    // Sb->rows - the leading dimension of A
-    // Sw->data - the matrix B in eig(A,B)
-    // Sw->rows - the leading dimension of B
-    // alphai, alphar, beta - dummy values
-    // J_eig_vec - matrix to output eigenvectors
-    // work - integer array output containing intermediate values
-    // -1 - automatically determine the size of work
-    // info - array containing informataion about dggev performance
     
     ddgev('N', 'V', Sb->cols, Sb->data, Sb->rows, Sw->data, Sw->rows, alphar, alphai, beta, NULL, 1, J_eig_vec, J_eig_vec->rows, work, -1, info);
 
@@ -308,13 +280,4 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     matrix_destructor(ProjectedImages_PCA);
 
     return M;
-}
-
-void DestroyFisher(matrix_t **M)
-{
-    matrix_destructor(M[0]);
-//    matrix_destructor(M[1]);
-//    matrix_destructor(M[2]);
-//    matrix_destructor(M[3]);
-    free(M);
 }
