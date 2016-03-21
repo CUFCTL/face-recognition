@@ -568,16 +568,17 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 // UPDATE 03/02/16: make sure to compile time include -llapacke
 // NEEDS VERIFICATION - Greg
 void m_inverseMatrix (matrix_t *M) {
-    assert(M->numRows == M->numCols);
+    //assert(M->numRows == M->numCols);
     int info;
     //int lwork = M->numRows * M->numCols;
     int *ipiv = malloc((M->numRows + 1) * sizeof(int));
     //precision *work = malloc(lwork * sizeof(precision));
     //          (rows   , columns, matrix , lda    , ipiv, info );
-    info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR,M->numRows, M->numCols, M->data, M->numRows, ipiv);
-    if(info){}
+    info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR,M->numCols, M->numRows, M->data, M->numRows, ipiv);
+    if(info!=0) exit(1);
     //          (order  , matrix, Leading Dim, IPIV, 
-    info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->numRows,M->data,M->numRows, ipiv); 
+    info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->numCols,M->data,M->numRows, ipiv); 
+    if(info!=0) exit(1);
 }
 
 /*******************************************************************************
