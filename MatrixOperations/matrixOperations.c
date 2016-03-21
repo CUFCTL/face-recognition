@@ -874,6 +874,7 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
  * void matrix_eig(data_t *out_eig_vect, data_t*out_eig_vals, data_t* matrix, int rows, int cols);
  * Get eigenvalues and eigenvectors of symmetric matrix
  * NOTE: ONLY SYMMETRIC MATRICIES ATM
+ * TODO add static matrix for working room ?
 *******************************************************************************/
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors) {
 /*	gsl_matrix * A = gsl_matrix_alloc (M->numRows, M->numCols);
