@@ -28,8 +28,6 @@
 
  Original version by Amir Hossein Omidvarnia, October 2007
                      Email: aomidvar@ece.ut.ac.ir
-
-TODO : update debug prints to more elegant solution
 *******************************************************************************/
 
 #include <stdio.h>
@@ -53,7 +51,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     double temp_double;
 
     // Verbose mode: debug prints
-    int verbose = 1;
+    int verbose = 0;
 
     // matrix_t types
     matrix_t **M; //What the function returns
@@ -119,7 +117,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
 
     if (verbose) {
         printf("\nL = surrogate of covariance:\n");
-        matrix_print(L, 2);
+        m_fprintf(stdout, L);
     }
 
     // Calculate eigenvectors and eigenvalues
@@ -130,9 +128,9 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
 
     if (verbose) {
         printf("D, eigenvalues:\n");
-        matrix_print(D, 2);
+        m_fprintf(stdout, D);
         printf("V, eigenvectors:\n");
-        matrix_print(V, 4);
+        m_fprintf(stdout, V);
     }
 
     //**************************************************************************
@@ -148,7 +146,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
 
     if (verbose) {
         printf("L_eig_vec, trimmed eigenvectors:\n");
-        matrix_print(L_eig_vec, 4);
+        m_fprintf(stdout, L_eig_vec);
     }
 
     //**************************************************************************
@@ -158,52 +156,90 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
 
     if (verbose) {
         printf("V_PCA:\n");
-        matrix_print(V_PCA, 4);
+        m_fprintf(stdout, V_PCA);
     }
 
     //**************************************************************************
     //Projecting centered image vectors onto eigenspace
-    //<.m: 55-61>
+    // Each column in ProjectedImages_PCA is an image, transposed and multiplied
+    // by the eigenvectors of the difference database to produce the column
 
-    ProjectedImages_PCA = matrix_constructor(P - Class_number, P);
-
-    for (i = 0; i < P; i++) {
-    cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, P - Class_number, 1, pixels, 1,     *V_PCA->data, V_PCA->cols, &A->data[0][i], A->cols, 0, &ProjectedImages_PCA->data[0][i], ProjectedImages_PCA->cols);
-    }
+    ProjectedImages_PCA = m_project(V_PCA, A);
 
     if (verbose) {
         printf("ProjectedImages_PCA:\n");
-        matrix_print(ProjectedImages_PCA, 2);
+        m_fprintf(stdout, ProjectedImages_PCA);
     }
 
     //**************************************************************************
     //Calculating the mean of each class in eigenspace
-    //<.m: 64>
-//    m_PCA = mean(ProjectedImages_PCA,2); % Total mean in eigenspace
-//    m = zeros(P-Class_number,Class_number);
-//    Sw = zeros(P-Class_number,P-Class_number); % Initialization of Within Scatter Matrix
-//    Sb = zeros(P-Class_number,P-Class_number); % Initialization of Between Scatter Matrix
-//
-//    for i = 1 : Class_number
-//        m(:,i) = mean( ( ProjectedImages_PCA(:,((i-1)*Class_population+1):i*Class_population) ), 2 )';
-//
-//        S  = zeros(P-Class_number,P-Class_number);
-//        for j = ( (i-1)*Class_population+1 ) : ( i*Class_population )
-//            S = S + (ProjectedImages_PCA(:,j)-m(:,i))*(ProjectedImages_PCA(:,j)-m(:,i))';
-//        end
-//
-//        Sw = Sw + S; % Within Scatter Matrix
-//        Sb = Sb + (m(:,i)-m_PCA) * (m(:,i)-m_PCA)'; % Between Scatter Matrix
-//    end
 
     m_PCA = matrix_mean(ProjectedImages_PCA);
 
-    m = matrix_constructor(P-Class_number,Class_number);
-    Sw = matrix_constructor(P-Class_number, P-Class_number);
-    Sb = matrix_constructor(P-Class_number, P-Class_number);
-    S = matrix_constructor(P-Class_number,P-Class_number);
+    if (verbose) {
+        printf("m_PCA:\n");
+        m_fprintf(stdout, m_PCA);
+    }
 
+    // Scatter Matrices
+    m_scatter(m_PCA, Sw, Sb);
+
+    if (verbose) {
+        printf("Scatter Matrices:\n");
+        m_fprintf(stdout, Sw);
+        m_fprintf(stdout, Sb);
+    }
     
+    // Fisher bases
+    // Eigenvalues of scatter matrices
+    m_gen_eigenvalues(Sb, Sw, J_eig_vec, J_eig_val);
+
+    if (verbose) {
+        printf("Fisher Space:\n");
+        m_fprintf(stdout, J_eig_vec);
+    }
+
+    // Copy largest eigenvectors
+    for (i = 0; i < Class_number - 1; i++) {
+        for (j = 0; j < P; j++) {
+            V_Fisher[i][j] = J_eig_vec[i][j];
+        }
+    }
+
+    // Project images onto Fisher-Space
+    ProjectedImages_Fisher = m_project(V_Fisher, ProjectedImages_PCA);
+
+    if (verbose) {
+        printf("Fisher Projected Images\n");
+        m_fprintf(stdout, ProjectedImages_Fisher);
+    }
+
+    //**************************************************************************
+
+	//FREE INTERMEDIATES
+    matrix_destructor(Database_matrix);
+    matrix_destructor(A);
+    matrix_destructor(V);
+    matrix_destructor(D);
+    matrix_destructor(L_eig_vec);
+    matrix_destructor(V_PCA);
+    matrix_destructor(ProjectedImages_PCA);
+
+    return M;
+}
+
+// m_project projects the matrix mat over eigenspace
+matrix_t *m_project(matrix_t *eigenspace, matrix_t *mat) {
+    for (i = 0; i < P; i++) {
+    // TODO use cblas correctly
+    cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, P - Class_number, 1, pixels, 1,     *V_PCA->data, V_PCA->cols, &A->data[0][i], A->cols, 0, &ProjectedImages_PCA->data[0][i], ProjectedImages_PCA->cols);
+    }
+}
+
+// scatter
+void m_scatter(matrix_t *mat, matrix_t *Sw, matrix_t *Sb)
+{
+    // TODO put in mat lib
     for (i = 1; i <= Class_number; i++)
     {
         tempMean = matrix_bounded_mean(ProjectedImages_PCA, 0, ProjectedImages_PCA->rows-1, (i-1)*Class_population+1, i*Class_population);
@@ -245,39 +281,4 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, tempMat->rows, 1, 1, 1, 
                         *tempMat->data, tempMat->cols, *tempMat->data, tempMat->cols, 1, *Sb->data, Sb->cols); 
     }
-    
-    if (verbose) {
-        printf("m_PCA:\n");
-        matrix_print(m_PCA, 16);
-    }
-    
-    J_eig_vec = matrix_construct(P-Class_number,P-Class_number);
-    alphai = matrix_construct(P-Class_number,1);
-    alphar = matrix_construct(P-Class_number,1);
-    beta = matrix_construct(P-Class_number,1);
-    
-    ddgev('N', 'V', Sb->cols, Sb->data, Sb->rows, Sw->data, Sw->rows, alphar, alphai, beta, NULL, 1, J_eig_vec, J_eig_vec->rows, work, -1, info);
-
-    for (i = 0; i < P-ClassNumber; i++)
-    {
-        for (j = 0; j < P-ClassNumber / 2; j++)
-        {
-            temp_double = J_eig_vec->data[i][j];
-            J_eig_vec->data[i][j] = J_eig_vec->data[i][P-ClassNumber-j];
-            J_eig_vec->data[i][P-ClassNumber-j] = temp_double;
-        }
-    }
-
-    //**************************************************************************
-
-	//FREE INTERMEDIATES
-    matrix_destructor(Database_matrix);
-    matrix_destructor(A);
-    matrix_destructor(V);
-    matrix_destructor(D);
-    matrix_destructor(L_eig_vec);
-    matrix_destructor(V_PCA);
-    matrix_destructor(ProjectedImages_PCA);
-
-    return M;
 }
