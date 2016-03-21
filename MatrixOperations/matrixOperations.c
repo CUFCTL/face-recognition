@@ -807,6 +807,7 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
  * void multiply_matrices(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols, int k);
  *
  * product of two matrices (matrix multiplication)
+ * TODO these functions should not include maxcols as an argument
 *******************************************************************************/
 matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B, int maxCols) {
 	int i, j, k, numCols;

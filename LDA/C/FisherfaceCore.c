@@ -230,10 +230,9 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
 
 // m_project projects the matrix mat over eigenspace
 matrix_t *m_project(matrix_t *eigenspace, matrix_t *mat) {
-    for (i = 0; i < P; i++) {
-    // TODO use cblas correctly
-    cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, P - Class_number, 1, pixels, 1,     *V_PCA->data, V_PCA->cols, &A->data[0][i], A->cols, 0, &ProjectedImages_PCA->data[0][i], ProjectedImages_PCA->cols);
-    }
+    matrix_t *trans_es = m_transpose(eigenspace);
+
+    return m_matrix_multiply(trans_es, mat, mat->numCols);
 }
 
 // scatter
