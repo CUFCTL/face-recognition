@@ -808,6 +808,7 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
  * void multiply_matrices(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols, int k);
  *
  * product of two matrices (matrix multiplication)
+ * TODO these functions should not include maxcols as an argument
 *******************************************************************************/
 matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B, int maxCols) {
 	int i, j, k, numCols;
@@ -875,6 +876,7 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
  * void matrix_eig(data_t *out_eig_vect, data_t*out_eig_vals, data_t* matrix, int rows, int cols);
  * Get eigenvalues and eigenvectors of symmetric matrix
  * NOTE: ONLY SYMMETRIC MATRICIES ATM
+ * TODO add static matrix for working room ?
 *******************************************************************************/
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors) {
 /*	gsl_matrix * A = gsl_matrix_alloc (M->numRows, M->numCols);
