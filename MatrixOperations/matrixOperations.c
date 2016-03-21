@@ -575,10 +575,17 @@ void m_inverseMatrix (matrix_t *M) {
     //precision *work = malloc(lwork * sizeof(precision));
     //          (rows   , columns, matrix , lda    , ipiv, info );
     info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR,M->numCols, M->numRows, M->data, M->numRows, ipiv);
-    if(info!=0) exit(1);
+    if(info!=0){
+        //printf("\nINFO != 0\n");
+        exit(1);
+    }
+    //printf("\ndgertrf passed\n");
     //          (order  , matrix, Leading Dim, IPIV, 
     info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->numCols,M->data,M->numRows, ipiv); 
-    if(info!=0) exit(1);
+    if(info!=0){
+        //printf("\nINFO2 != 0\n");
+        exit(1);
+    }
 }
 
 /*******************************************************************************
