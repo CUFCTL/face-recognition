@@ -65,7 +65,7 @@ int main (int argc, char **argv) {
 
 		// Project the image into the face space
 		//matrix_t *projectedTestImage = m_matrix_multiply (transposedEigenfaces, NOT_TRANSPOSED, differenceImage, NOT_TRANSPOSED, 0);		// matrixMultiply to m_matrix_multiply
-        matrix_t *projectedTestImage = m_matrix_multiply(transposedEigenfaces,differenceImage,transposedEigenfaces->numCols);
+        matrix_t *projectedTestImage = m_matrix_multiply(transposedEigenfaces,differenceImage,differenceImage->numCols);
 
 		// Calculate the min Euclidean distance between the projectedTestImage and
 		// the projectedImages
