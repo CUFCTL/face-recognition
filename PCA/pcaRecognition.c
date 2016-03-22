@@ -37,9 +37,9 @@ int main (int argc, char **argv) {
 	matrix_t *eigenfaces = fscanMatrix (projectedImagesFile);
 	matrix_t *m = fscanMatrix (projectedImagesFile); */
 
-	matrix_t *projectedImages = m_fread (projectedImagesFile);					//freadMatrix to m_fread
-	matrix_t *transposedEigenfaces = m_fread (projectedImagesFile);				//
-	matrix_t *m = m_fread (projectedImagesFile);								//
+	matrix_t *projectedImages = m_fread (projectedImagesFile);	//freadMatrix to m_fread
+	matrix_t *transposedEigenfaces = m_fread (projectedImagesFile);
+	matrix_t *m = m_fread (projectedImagesFile);		
 
 
 	// Read in the filenames
