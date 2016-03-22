@@ -28,7 +28,7 @@ int main (int argc, char **argv) {
 
 	int i, j;
 	//char databasePath[] = ".//images//";
-	char testPath[] = ".//test_images//";
+	char testPath[] = "..//test_images//";
 	char *path = malloc (200 * sizeof (char));
 	char *testImagePath = malloc (200 * sizeof (char));
 
