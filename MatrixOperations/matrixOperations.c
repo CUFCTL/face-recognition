@@ -817,14 +817,15 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
  * product of two matrices (matrix multiplication)
  * TODO these functions should not include maxcols as an argument
 *******************************************************************************/
-matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B, int maxCols) {
+//matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B, int maxCols) {
+matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B){
 	int i, j, k, numCols;
 	matrix_t *M;
 	numCols = B->numCols;
-	if (B->numCols != maxCols && maxCols != 0) {
+	/*if (B->numCols != maxCols && maxCols != 0) {
 		printf ("Matrix Size changed somewhere");
 		numCols = maxCols;
-	}
+	}*/
 	M = m_initialize (ZEROS, A->numRows, numCols);
 	for (i = 0; i < M->numRows; i++) {
 		for (j = 0; j < M->numCols; j++) {
