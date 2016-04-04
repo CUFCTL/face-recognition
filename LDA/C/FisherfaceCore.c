@@ -164,7 +164,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     // Each column in ProjectedImages_PCA is an image, transposed and multiplied
     // by the eigenvectors of the difference database to produce the column
 
-    ProjectedImages_PCA = m_project(V_PCA, A);
+    ProjectedImages_PCA = m_matrix_multiply(V_PCA, A, A->cols);
 
     if (verbose) {
         printf("ProjectedImages_PCA:\n");
@@ -226,13 +226,6 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     matrix_destructor(ProjectedImages_PCA);
 
     return M;
-}
-
-// m_project projects the matrix mat over eigenspace
-matrix_t *m_project(matrix_t *eigenspace, matrix_t *mat) {
-    matrix_t *trans_es = m_transpose(eigenspace);
-
-    return m_matrix_multiply(trans_es, mat, mat->numCols);
 }
 
 // scatter
