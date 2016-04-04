@@ -46,5 +46,4 @@ Starts with:
 	gcc nnclassFn.c -lm -o nnclassFn
 	to run ./nnclassFn
 
-test
-	
+I have push rights
