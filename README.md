@@ -67,3 +67,8 @@ _Note: When we say verified we are talking about an initial verification step wh
 This list of libraries was updated 11/4/2015 by Miller
 
 If we are going to use the pictures from Future Engineers, you need to do a little preprocessing. Download ImageMagick on linux and navigate to the folder where all the .jpg files are. Then use "mogrify" (look it up on google) to change every file in the folder to a .ppm. IMAGES MUST BE PPM FOR PCA TO WORK.
+
+TO USE PCA:
+  * training set must be .ppm pictures in a directory called test_images . test_images should be in the root directory (outside of PCA). 
+  * run ./pcaCreateDatabase to create various matrices that will be used to compare inputs with
+  * run ./pcaRecognition file_name where file_name is a .txt file of the test set image names, aka the names of the images you wish to recognize
