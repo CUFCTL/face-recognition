@@ -36,7 +36,7 @@ matrix_t * m_initialize (int mode, int numRows, int numCols) {
 		if (mode == IDENTITY) {
 			assert (numRows == numCols);
 			for (i = 0; i < numRows; i++) {
-                elem(M, i, i) = 1;	
+                elem(M, i, i) = 1;
 			}
 		}
 	} else if (mode == UNDEFINED || mode == ONES || mode == FILL){
@@ -58,14 +58,14 @@ matrix_t * m_initialize (int mode, int numRows, int numCols) {
 		printf ("m_initialize, Not valid mode\n");
 		exit (5);
 	}
-	
+
 	return M;
 }
 
 
 /*******************************************************************************
  * m_free
- * 
+ *
  * Frees memory for matrix M
  * ICA:
  *		void free_matrix(data_t **matrix);
@@ -81,7 +81,7 @@ void m_free (matrix_t *M) {
 
 /*******************************************************************************
  * m_fprint
- * 
+ *
  * Prints matrix M to the stream specified
  * Prints numRows, numCols, then each whole row of the matrix (aka [0][0], [0][1]..)
  *
@@ -91,7 +91,7 @@ void m_free (matrix_t *M) {
 void m_fprint (FILE *stream, matrix_t *M) {
 
 	int i, j;
-	
+
 	fprintf (stream, "%d %d\n", M->numRows, M->numCols);
 	for (i = 0; i < M->numRows; i++) {
 		for (j = 0; j < M->numCols; j++) {
@@ -105,7 +105,7 @@ void m_fprint (FILE *stream, matrix_t *M) {
 
 /*******************************************************************************
  * m_fwrite
- * 
+ *
  * Writes matrix M to the stream specified
  * Writes numRows, numCols, then the data
  * NOTE: will not work with submatrixes right now
@@ -133,7 +133,7 @@ matrix_t * m_fscan (FILE *stream) {
 
 	int i, j, numRows, numCols;
 	numRows = 0;
-	numCols = 0;	
+	numCols = 0;
 
 	fscanf (stream, "%d %d", &numRows, &numCols);
 	matrix_t *M = m_initialize(UNDEFINED, numRows, numCols);
@@ -171,11 +171,11 @@ matrix_t * m_fread (FILE *stream) {
 *******************************************************************************/
 matrix_t * m_copy (matrix_t *M) {
 	int i, j;
-	
+
 	matrix_t *C = (matrix_t *) malloc (sizeof(matrix_t));
 	C->numRows = M->numRows;
 	C->numCols = M->numCols;
-	
+
 	C->data = (precision *) malloc (C->numRows * C->numCols * sizeof (precision));
 	if (M->numCols == M->span) {
 		memcpy(C->data, M->data, C->numRows * C->numCols * sizeof (precision));
@@ -196,7 +196,7 @@ matrix_t * m_copy (matrix_t *M) {
 /*******************************************************************************
  * m_flipCols
  *
- * Swaps columns in M from left to right 
+ * Swaps columns in M from left to right
  *
  * ICA:
  * 		void fliplr(data_t *outmatrix, data_t *matrix, int rows, int cols)
@@ -215,7 +215,7 @@ void m_flipCols (matrix_t *M) {
 
 
 /*******************************************************************************
- * void normalize(data_t *outmatrix, data_t *matrix, int rows, int cols); 
+ * void normalize(data_t *outmatrix, data_t *matrix, int rows, int cols);
  *
  * normalizes the matrix
 *******************************************************************************/
@@ -224,7 +224,7 @@ void m_normalize (matrix_t *M) {
 	precision max, min, val;
 	min = elem(M, 0, 0);
 	max = min;
-	
+
 	for (i = 0; i < M->numRows; i++) {
 		for (j = 0; j < M->numCols; j++) {
 			val = elem(M, i, j);
@@ -241,7 +241,7 @@ void m_normalize (matrix_t *M) {
 			elem(M, i, j) = (elem (M, i, j) - min) / (max - min);
 		}
 	}
-	
+
 }
 
 //2.0.1
@@ -256,7 +256,7 @@ void m_normalize (matrix_t *M) {
 void m_elem_truncate (matrix_t *M) {
 	int i, j;
 	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) { 
+		for (j = 0; j < M->numCols; j++) {
 			elem(M, i, j) = ((precision) ((int)elem(M, i, j)));
 		}
 	}
@@ -267,7 +267,7 @@ void m_elem_truncate (matrix_t *M) {
  * m_acosAll
  *
  * applies acos to all matrix elements
- 
+
  *
  * ICA:
  * 		 void matrix_acos(data_t *outmatrix, data_t *matrix, int rows, int cols);
@@ -323,7 +323,7 @@ void m_elem_exp (matrix_t *M) {
 		for (j = 0; j < M->numCols; j++) {
             elem(M, i, j) = exp ( elem(M, i, j) );
 		}
-	}	
+	}
 }
 
 
@@ -368,7 +368,7 @@ void m_elem_divideByConst (matrix_t *M, precision x) {
 		for (j = 0; j < M->numCols; j++) {
             elem(M, i, j) =  elem(M, i, j) / x;
 		}
-	}	
+	}
 }
 
 
@@ -383,7 +383,7 @@ void m_elem_divideByMatrix (matrix_t *M, precision num) {
 		for (j = 0; j < M->numCols; j++) {
             elem(M, i, j) =  num / elem(M, i, j);
 		}
-	}	
+	}
 }
 
 
@@ -435,7 +435,7 @@ matrix_t *m_meanCols (matrix_t *M) {
 	int i;
 	for (i = 0; i < M->numCols; i++) {
 		elem(R, 0, i) = elem(R, 0, i) / M->numRows;
-    }	
+    }
 	return R;
 }
 
@@ -488,7 +488,7 @@ matrix_t *m_meanRows (matrix_t *M) {
 	for (i = 0; i < M->numRows; i++) {
 		elem(R, i, 0) = elem(R, i, 0) / M->numCols;
 	}
-	
+
 	return R;
 }
 
@@ -508,7 +508,7 @@ matrix_t * m_findNonZeros (matrix_t *M) {
 			val = elem(M, i, j);
 			if (val != 0) {
 				elem(R, count, 0) = (precision) (i + 1);
-                count++; 
+                count++;
             }
 		}
 	}
@@ -554,7 +554,7 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 		c2 = i % M->numCols;
 		elem(R, r1, c1) = elem(M, r2, c2);
 	}
-	
+
 	return R;
 }
 
@@ -563,7 +563,7 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 3 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 // Temp moved this here for dependancy issues. Group 3 code person should work on this
-// for right now. 
+// for right now.
 // TODO - Documentation & Free's - Miller 10/30
 // UPDATE 03/02/16: make sure to compile time include -llapacke
 // NEEDS VERIFICATION - Greg
@@ -580,8 +580,8 @@ void m_inverseMatrix (matrix_t *M) {
         exit(1);
     }
     //printf("\ndgertrf passed\n");
-    //          (order  , matrix, Leading Dim, IPIV, 
-    info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->numCols,M->data,M->numRows, ipiv); 
+    //          (order  , matrix, Leading Dim, IPIV,
+    info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->numCols,M->data,M->numRows, ipiv);
     if(info!=0){
         //printf("\nINFO2 != 0\n");
         exit(1);
@@ -591,27 +591,27 @@ void m_inverseMatrix (matrix_t *M) {
 /*******************************************************************************
  * data_t norm(data_t *matrix, int rows, int cols);
  *
- * NOTE: I think the norm def I looked up was different. I kept this one for 
+ * NOTE: I think the norm def I looked up was different. I kept this one for
  * right now but we need to look at that again
 *******************************************************************************/
 precision m_norm (matrix_t *M, int specRow) {
 	int i, j;
 	precision val, sum = 0;
-	
+
 	for (i = 0; i < M->numRows; i++) {
 		for (j = 0; j < M->numCols; j++) {
 			val = elem(M, i, j);
 			sum += val * val;
 		}
 	}
-	
+
 	return sqrt (sum);
 }
 
 
 /*******************************************************************************
  * void matrix_sqrtm(data_t *outmatrix, data_t *matrix, int rows, int cols);
- * 
+ *
  * matrix square root
  *  element-wise square rooting of eigenvalues matrix
  *  divide eigenvectors matrix by the product of the e-vectors and e-values
@@ -622,9 +622,9 @@ matrix_t * m_sqrtm (matrix_t *M) {
 	matrix_t *eigenvalues;
     // TODO: EIGENVALUES NOT CURRENTLY WORKING
 	m_eigenvalues_eigenvectors (M, &eigenvalues, &eigenvectors);
-	
+
 	m_elem_sqrt (eigenvalues);
-	
+
 	matrix_t * temp = m_matrix_multiply (eigenvectors, eigenvalues, 0);
 	m_free (eigenvalues);
 	matrix_t * R = m_matrix_division (temp, eigenvectors);
@@ -646,12 +646,12 @@ precision m_determinant (matrix_t *M) {
     precision det = 0, val;
     matrix_t *A = NULL;
 	assert (M->numCols == M->numRows);
-	
+
     if (M->numRows < 1)   printf("error finding determinant\n");
     else if (M->numRows == 1) det = elem(M, 0, 0); // Shouldn't get used
     else if (M->numRows == 2) det = elem(M, 0, 0) * elem(M, 1, 1) - elem(M, 1, 0) * elem(M, 0, 1);
     else {
-        
+
 		det = 0;
 		A = m_initialize (UNDEFINED, M->numRows - 1, M->numCols - 1);
 		for (j = 0; j < M->numCols; j++) {
@@ -670,7 +670,7 @@ precision m_determinant (matrix_t *M) {
 			det += sign * elem(M, 0, j) * val;
 		}
 		m_free (A);
-						
+
     }
 	return det;
 }
@@ -688,7 +688,7 @@ matrix_t * m_cofactor (matrix_t *M) {
     matrix_t *A = m_initialize (UNDEFINED, M->numRows - 1, M->numCols - 1);
 	matrix_t *R = m_initialize (UNDEFINED, M->numRows, M->numCols);
 	precision val;
-	
+
 	// For every element in M
 	for (i = 0; i < M->numRows; i++) {
 		for (j = 0; j < M->numCols; j++) {
@@ -724,13 +724,13 @@ matrix_t * m_covariance (matrix_t *M) {
 	matrix_t *colAvgs = m_meanCols(M);
 	matrix_t *norm = m_initialize (UNDEFINED, M->numRows, M->numCols);
 	matrix_t *R = m_initialize (UNDEFINED, M->numRows, M->numCols);
-	
+
 	for (j = 0; j < M->numCols; j++) {
 		for (i = 0; i < M->numRows; i++) {
 			val = elem(M, i, j) - elem(colAvgs, 0, j);
 		}
 	}
-	
+
 	for (j = 0; j < M->numCols; j++) {
 		for (k = 0; k < M->numCols; k++) {
 			val = 0;
@@ -741,17 +741,17 @@ matrix_t * m_covariance (matrix_t *M) {
 			elem(R, j, k) = val;
 		}
 	}
-	
+
 	m_free (colAvgs);
 	m_free (norm);
-	
+
 	return R;
 }
 
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 4 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
-/*  These functions manipulate multiple matrices and return a matrix of 
- *   *  equivalent dimensions.  
+/*  These functions manipulate multiple matrices and return a matrix of
+ *   *  equivalent dimensions.
  *    */
 /*******************************************************************************
  *  * void subtract_matrices(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols);
@@ -809,7 +809,7 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
 
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 5 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
-/*  These functions manipulate a multiple matrices but return a matrix of 
+/*  These functions manipulate a multiple matrices but return a matrix of
  *  inequivalent dimensions.*/
 /*******************************************************************************
  * void multiply_matrices(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols, int k);
@@ -834,7 +834,7 @@ matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B){
 			}
 		}
 	}
-	
+
 	return M;
 }
 
@@ -847,7 +847,7 @@ matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B){
 matrix_t * m_matrix_division (matrix_t *A, matrix_t *B) {
 	matrix_t *C = m_copy (B);
 	m_inverseMatrix (C);
-	matrix_t *R = m_matrix_multiply (A, C, 0);
+	matrix_t *R = m_matrix_multiply (A, C);
 	m_free (C);
 	return R;
 }
@@ -866,7 +866,7 @@ matrix_t * m_matrix_division (matrix_t *A, matrix_t *B) {
 *******************************************************************************/
 matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
 	assert (M->numCols == V->numCols && V->numRows == 1);
-	
+
 	int i, j, row;
 	matrix_t *R = m_initialize (UNDEFINED, M->numRows, M->numCols);
 	for (j = 0; j < R->numCols; j++) {

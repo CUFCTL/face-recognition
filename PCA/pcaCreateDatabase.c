@@ -24,7 +24,7 @@ int main (int argc, char **argv) {
 	uint64_t i;
 	uint64_t imgWidth, imgHeight, pixMaxSize;
 	uint64_t numImages, numPixels;
-	
+
 	/* Get # of images and image names from directory */
 	struct dirent **imageList;
     numImages = scandir(databasePath, &imageList, file_select, alphasort);
@@ -32,20 +32,20 @@ int main (int argc, char **argv) {
         perror("scandir");
 		exit (1);
     }
-	
+
 	/* Get the size of the images */
 	sprintf (path, "%s%s", databasePath, imageList[0]->d_name);
 	FILE * sampleImage = fopen (path, "r");
 	fscanf (sampleImage, "%s %" PRIu64 " %" PRIu64 " %" PRIu64 "", header, &imgHeight, &imgWidth, &pixMaxSize);
 	fclose (sampleImage);
 	assert (strcmp (header, "P6") == 0 && pixMaxSize == 255);
-	
+
 	/* Calculate number of pixels per image */
 	numPixels = imgWidth * imgHeight;
-	
+
 	/* Allocate the Image array T */
 	matrix_t *T = m_initialize (UNDEFINED, numPixels,numImages);
-	
+
 	// Load images into the matrix
 	unsigned char *pixels = (unsigned char *) malloc (3 * numPixels * sizeof (unsigned char));
 	if ( pixels == NULL) {
@@ -70,7 +70,7 @@ int main (int argc, char **argv) {
 
 	/* Subtract the mean face from the regular images to produce normalized matrix A */
 	matrix_t *A = T; // To keep naming conventions
-	
+
 	start = clock();
 	for (i = 0; i < numImages; i++) {
 	    m_subtractColumn (A, i, m); //need to test function
@@ -78,7 +78,7 @@ int main (int argc, char **argv) {
 	end = clock();
 	printf("time to calc A, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
-	
+
 	/* Calculate the surrogate matrix L */
 	/* ----- L = (A')*A ----- */
     	matrix_t *At; //= m_initialize(UNDEFINED, A->numRows, A->numCols);
@@ -88,12 +88,12 @@ int main (int argc, char **argv) {
 	start = clock();
 	//matrix_t *L = calcSurrogateMatrix (A);
     	At = m_transpose(A);
-    	matrix_t *L = m_matrix_multiply(At,A,A->numCols);
+    	matrix_t *L = m_matrix_multiply(At,A);
 	end = clock();
 	printf("time to calc surrogate matrix L, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
 
-	
+
 	/* Calculate eigenvectors for L */
 	start = clock();
 	//matrix_t *L_eigenvectors = calcEigenvectorsSymmetric (L);
@@ -111,11 +111,11 @@ int main (int argc, char **argv) {
 
     matrix_t *L_eigenvectors = L;
 	//m_free (L);
-	
+
 	/* Calculate Eigenfaces */
 	/* ----- Eigenfaces = A * L_eigenvectors ----- */
 	start = clock();
-	matrix_t *eigenfaces = m_matrix_multiply (A, L_eigenvectors, L_eigenvectors->numCols);
+	matrix_t *eigenfaces = m_matrix_multiply (A, L_eigenvectors);
 	end = clock();
 	printf("time to calc eigenfaces, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
@@ -134,7 +134,7 @@ int main (int argc, char **argv) {
 	/* Calculate Projected Images */
 	/* ----- ProjectedImages = eigenfaces' * A ----- */
 	start = clock();
-	matrix_t *projectedImages = m_matrix_multiply (transposedEigenfaces, A, A->numCols);
+	matrix_t *projectedImages = m_matrix_multiply (transposedEigenfaces, A);
 	end = clock();
 	printf("time to calc projectedImages, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);
@@ -147,7 +147,7 @@ int main (int argc, char **argv) {
 	/*fprintMatrix (out, projectedImages);
 	fprintMatrix (out, eigenfaces);
 	fprintMatrix (out, m); */
-	
+
 	m_fwrite (out, projectedImages);
 	m_fwrite (out, transposedEigenfaces);
 	m_fwrite (out, m);
@@ -164,13 +164,13 @@ int main (int argc, char **argv) {
 	// Save the mean image	-> this is more of for fun and to make sure
 	//						-> the function I wrote worked
 	writePPMgrayscale("meanImage.ppm", m, 0, imgHeight, imgWidth);
-	
+
 	/* COMMENT - could move these up to help memory */
 	m_free (projectedImages);
 	m_free (transposedEigenfaces);
 	m_free (m);
 
-	
+
 	fclose (out);
 	fclose (filenamesFile);
 
@@ -182,7 +182,7 @@ int main (int argc, char **argv) {
 
 
 int file_select(const struct dirent *entry){
-	
+
     if (strstr(entry->d_name, ".ppm") != NULL) {
         return 1;
     } else {
