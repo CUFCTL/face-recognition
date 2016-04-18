@@ -1,6 +1,6 @@
-#Clemson FCT Facial Recognition
+# Clemson FCT Facial Recognition
 
-##Library Functions
+## Library Functions
 
 Function Name              |PCA  |LDA  |ICA  |Verification Status  |Verify Date|Member|Dataset|Last Edit
 ---                        |:---:|:---:|:---:|---                  |---        |---   |---    |---
@@ -66,9 +66,30 @@ _Note: When we say verified we are talking about an initial verification step wh
 
 This list of libraries was updated 11/4/2015 by Miller
 
-If we are going to use the pictures from Future Engineers, you need to do a little preprocessing. Download ImageMagick on linux and navigate to the folder where all the .jpg files are. Then use "mogrify" (look it up on google) to change every file in the folder to a .ppm. IMAGES MUST BE PPM FOR PCA TO WORK.
+##### Using PCA
 
-TO USE PCA:
-  * training set must be .ppm pictures in a directory called test_images . test_images should be in the root directory (outside of PCA). 
-  * run ./pcaCreateDatabase to create various matrices that will be used to compare inputs with
-  * run ./pcaRecognition file_name where file_name is a .txt file of the test set image names, aka the names of the images you wish to recognize
+To convert JPEG images to PPM, use `ffmpeg` in the containing directory:
+```
+for f in *.jpg
+do ffmpeg -i $f -s 300x200 "$(basename $f .jpg)".ppm
+done
+```
+
+The training set should be located as follows:
+
+    PCA/
+        pcaCreateDatabase
+        pcaRecognition
+    test_images/
+        *.ppm
+
+To use the training set:
+```
+./pcaCreateDatabase
+```
+
+To use a test set:
+```
+./pcaRecognition [input-file]
+```
+where input-file is a text file that lists the test set images
