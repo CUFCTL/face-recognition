@@ -81,14 +81,14 @@ int main (int argc, char **argv) {
 	
 	/* Calculate the surrogate matrix L */
 	/* ----- L = (A')*A ----- */
-    matrix_t *A2 = m_initialize(UNDEFINED, A->numRows, A->numCols);
-    for(i = 0;i < (A->numRows * A->numCols);i++){
-        A2[i] = A[i];
-    }
+    	matrix_t *At; //= m_initialize(UNDEFINED, A->numRows, A->numCols);
+    	//for(i = 0;i < (A->numRows*A->numCols);i++){
+        	//A2->data[i] = A->data[i];
+    	//}
 	start = clock();
 	//matrix_t *L = calcSurrogateMatrix (A);
-    m_inverseMatrix(A);
-    matrix_t *L = m_matrix_multiply(A,A2,A->numCols);
+    	At = m_transpose(A);
+    	matrix_t *L = m_matrix_multiply(At,A,A->numCols);
 	end = clock();
 	printf("time to calc surrogate matrix L, time=%g\n",
             ((double)(end-start))/CLOCKS_PER_SEC);

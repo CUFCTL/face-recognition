@@ -1,6 +1,7 @@
 #include "matrixOperations.h"
 #include <cblas.h>
 #include <lapacke.h>
+#include <math.h>
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 1 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 //  initialization, free, input, output, and copy functions
@@ -564,16 +565,27 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 // Temp moved this here for dependancy issues. Group 3 code person should work on this
 // for right now. 
 // TODO - Documentation & Free's - Miller 10/30
+// UPDATE 03/02/16: make sure to compile time include -llapacke
+// NEEDS VERIFICATION - Greg
 void m_inverseMatrix (matrix_t *M) {
-    assert(M->numRows == M->numCols);
+    //assert(M->numRows == M->numCols);
     int info;
-    int lwork = M->numRows * M->numCols;
+    //int lwork = M->numRows * M->numCols;
     int *ipiv = malloc((M->numRows + 1) * sizeof(int));
-    precision *work = malloc(lwork * sizeof(precision));
+    //precision *work = malloc(lwork * sizeof(precision));
     //          (rows   , columns, matrix , lda    , ipiv, info );
-    cblas_dgetrf(M->numRows, M->numCols, M->data, M->numRows, ipiv, &info);
+    info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR,M->numCols, M->numRows, M->data, M->numRows, ipiv);
+    if(info!=0){
+        //printf("\nINFO != 0\n");
+        exit(1);
+    }
+    //printf("\ndgertrf passed\n");
     //          (order  , matrix, Leading Dim, IPIV, 
-    cblas_dgetri(M->numRows, M     , M->numRows    , ipiv, work, &lwork, &info); 
+    info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->numCols,M->data,M->numRows, ipiv); 
+    if(info!=0){
+        //printf("\nINFO2 != 0\n");
+        exit(1);
+    }
 }
 
 /*******************************************************************************
@@ -803,15 +815,17 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
  * void multiply_matrices(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols, int k);
  *
  * product of two matrices (matrix multiplication)
+ * TODO these functions should not include maxcols as an argument
 *******************************************************************************/
-matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B, int maxCols) {
+//matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B, int maxCols) {
+matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B){
 	int i, j, k, numCols;
 	matrix_t *M;
 	numCols = B->numCols;
-	if (B->numCols != maxCols && maxCols != 0) {
+	/*if (B->numCols != maxCols && maxCols != 0) {
 		printf ("Matrix Size changed somewhere");
 		numCols = maxCols;
-	}
+	}*/
 	M = m_initialize (ZEROS, A->numRows, numCols);
 	for (i = 0; i < M->numRows; i++) {
 		for (j = 0; j < M->numCols; j++) {
@@ -870,6 +884,7 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
  * void matrix_eig(data_t *out_eig_vect, data_t*out_eig_vals, data_t* matrix, int rows, int cols);
  * Get eigenvalues and eigenvectors of symmetric matrix
  * NOTE: ONLY SYMMETRIC MATRICIES ATM
+ * TODO add static matrix for working room ?
 *******************************************************************************/
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors) {
 /*	gsl_matrix * A = gsl_matrix_alloc (M->numRows, M->numCols);

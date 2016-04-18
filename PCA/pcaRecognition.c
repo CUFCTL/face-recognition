@@ -28,7 +28,7 @@ int main (int argc, char **argv) {
 
 	int i, j;
 	//char databasePath[] = ".//images//";
-	char testPath[] = ".//test_images//";
+	char testPath[] = "..//test_images//";
 	char *path = malloc (200 * sizeof (char));
 	char *testImagePath = malloc (200 * sizeof (char));
 
@@ -37,9 +37,9 @@ int main (int argc, char **argv) {
 	matrix_t *eigenfaces = fscanMatrix (projectedImagesFile);
 	matrix_t *m = fscanMatrix (projectedImagesFile); */
 
-	matrix_t *projectedImages = m_fread (projectedImagesFile);					//freadMatrix to m_fread
-	matrix_t *transposedEigenfaces = m_fread (projectedImagesFile);				//
-	matrix_t *m = m_fread (projectedImagesFile);								//
+	matrix_t *projectedImages = m_fread (projectedImagesFile);	//freadMatrix to m_fread
+	matrix_t *transposedEigenfaces = m_fread (projectedImagesFile);
+	matrix_t *m = m_fread (projectedImagesFile);		
 
 
 	// Read in the filenames
@@ -59,12 +59,13 @@ int main (int argc, char **argv) {
 		loadPPMtoMatrixCol (path, testImage, 0, pixels);						// Already using shared library
 
 		// Take the difference image
-		subtractMatrixColumn (testImage, 0, m, 0);								// Needs shared library function
+		//subtractMatrixColumn (testImage, 0, m, 0);								// Needs shared library function
+		m_subtractColumn (testImage, 0, m);								// Needs shared library function
 		matrix_t *differenceImage = testImage; // for naming standards
 
 		// Project the image into the face space
-		matrix_t *projectedTestImage = m_matrix_multiply (transposedEigenfaces, NOT_TRANSPOSED, differenceImage, NOT_TRANSPOSED, 0);		// matrixMultiply to m_matrix_multiply
-
+		//matrix_t *projectedTestImage = m_matrix_multiply (transposedEigenfaces, NOT_TRANSPOSED, differenceImage, NOT_TRANSPOSED, 0);		// matrixMultiply to m_matrix_multiply
+        matrix_t *projectedTestImage = m_matrix_multiply(transposedEigenfaces,differenceImage,differenceImage->numCols);
 
 		// Calculate the min Euclidean distance between the projectedTestImage and
 		// the projectedImages
