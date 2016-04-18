@@ -36,7 +36,7 @@ matrix_t * m_initialize (int mode, int numRows, int numCols) {
 		if (mode == IDENTITY) {
 			assert (numRows == numCols);
 			for (i = 0; i < numRows; i++) {
-                elem(M, i, i) = 1;
+				elem(M, i, i) = 1;
 			}
 		}
 	} else if (mode == UNDEFINED || mode == ONES || mode == FILL){
@@ -241,7 +241,6 @@ void m_normalize (matrix_t *M) {
 			elem(M, i, j) = (elem (M, i, j) - min) / (max - min);
 		}
 	}
-
 }
 
 //2.0.1
@@ -267,7 +266,6 @@ void m_elem_truncate (matrix_t *M) {
  * m_acosAll
  *
  * applies acos to all matrix elements
-
  *
  * ICA:
  * 		 void matrix_acos(data_t *outmatrix, data_t *matrix, int rows, int cols);
