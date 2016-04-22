@@ -14,7 +14,7 @@ int file_select(const struct dirent *entry);
 
 int main (int argc, char **argv) {
 
-	char databasePath[] = "..//test_images//";
+	char databasePath[] = "..//training_images//";
 	char filenameFilePath[] = "filenamesDB.dat";
 	char projectedImagesFilePath[] = "testDB.dat";
 	char *path = (char *) malloc (200 * sizeof (char));
