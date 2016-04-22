@@ -79,6 +79,12 @@ The training set should be located as follows:
 
     PCA/
         pcaCreateDatabase
+    training_images/
+        *.ppm
+
+The test set should be located as follows:
+
+    PCA/
         pcaRecognition
     test_images/
         *.ppm
