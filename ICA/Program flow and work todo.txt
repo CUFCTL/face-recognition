@@ -42,6 +42,10 @@ Starts with:
 				
 				
 	Also if you want compile any of the files run
+
+
+
+Test 
 	for example nnclassFn.c
 	gcc nnclassFn.c -lm -o nnclassFn
 	to run ./nnclassFn
