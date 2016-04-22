@@ -35,16 +35,18 @@
  *
  */
 spherex(data_t *x, data_t *oldx, int rows, int cols, double P, data_t *wz) {
-    data_t* mx;
-	data_t* temp;
-	data_t* c;
-	data_t* temp1;
-	data_t* transp;
-	allocate_matrix(&mx, cols, rows);
-	allocate_matrix(&temp, P, 1);
-	allocate_matrix(&c, cols, rows);
-	allocate_matrix(&temp1, cols, 1);
-	allocate_matrix(&transp, rows,cols);
+    data_t* mx = m_intialize(UNDEFINED, cols, rows);
+	data_t* temp = m_intialize(UNDEFINED, P, 1);
+	data_t* c = m_intialize(UNDEFINED, cols, rows);
+	data_t* temp1 = m_intialize(UNDEFINED, cols, 1);
+	data_t* transp = m_intialize(UNDEFINED, rows, cols);
+
+
+	// allocate_matrix(&mx, cols, rows);
+	// allocate_matrix(&temp, P, 1);
+	// allocate_matrix(&c, cols, rows);
+	// allocate_matrix(&temp1, cols, 1);
+	// allocate_matrix(&transp, rows,cols);
 
 	if (rows!=cols)
 		fprintf(stderr,"spherex : rows!=cols. input matrix must be square  rows=%d,  cols=%d",rows,cols);
@@ -56,24 +58,34 @@ spherex(data_t *x, data_t *oldx, int rows, int cols, double P, data_t *wz) {
 	mean_of_matrix_by_rows(x,oldx,rows,cols);		//same as mean(transpose(x))
     ones(temp,P,1);
 	// there is a problem here temp has p x 1 (deminsions) and mx has cols rows
-    multiply_matrices(temp1, temp, mx, P, rows, ???);
-    subtract_matrices(x, x,temp1, rows?, cols?);             //  x=x-(ones(P,1)*mx)';
+    temp1 = m_multiply_matrices(temp, mx;
+    x = m_dot_subtract(x,temp1);             //  x=x-(ones(P,1)*mx)';
     printf("Calculating whitening filter\n");
-    covariance(c, transp, rows, cols);          	            //  c=cov(x');
-	matrix_sqrt(mx,c,rows);                      //  wz=2*inv(sqrtm(c));
-    inv(c, mx, int rows);
-	scale_matrix(wz, c, int rows, int cols, 2);
+    //covariance(c, transp, rows, cols);          	            //  c=cov(x');
+    c = m_covariance(transp)
+	//matrix_sqrt(mx,c,rows);                      //  wz=2*inv(sqrtm(c));
+    mx = m_sqrtm(c)
+    //inv(c, mx, int rows);
+    c = m_inverseMatrix(mx);
+	//scale_matrix(wz, c, int rows, int cols, 2);
+
+    wz = m_elem_mult (c, 2);
 
     printf("Whitening...\n");
-    free_matrix(&mx);
-    mx=copy(x,rows,cols);
-    multiply_matrices(x, wz, mx);               //  x=wz*x;
+    m_free(mx);
+    mx = m_copy(x);
+    x = m_multiply_matrices(wz, mx);
+    //multiply_matrices(x, wz, mx);               //  x=wz*x;
 
-    free_matrix(&mx);
-    free_matrix(&temp);
-    free_matrix(&c);
-    free_matrix(&temp1);
-    free_matrix(&transp);
+    m_free(mx)
+    m_free(temp);
+    m_free(temp1);
+    m_free(transp)
+    //free_matrix(&mx);
+    // free_matrix(&temp);
+    // free_matrix(&c);
+    // free_matrix(&temp1);
+    // free_matrix(&transp);
     return;
 }
 
