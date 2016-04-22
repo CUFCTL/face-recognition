@@ -716,7 +716,7 @@ matrix_t * m_cofactor (matrix_t *M) {
  *
  * return the covariance matrix
 *******************************************************************************/
-matrix_t * m_covariance (matrix_t *M) {
+matrix_t * m_covariance(matrix_t *M) {
 	int i, j, k;
 	precision val;
 	matrix_t *colAvgs = m_meanCols(M);

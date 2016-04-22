@@ -34,12 +34,12 @@
  *  THIS FUNCTION IS CALLED BY
  *
  */
-spherex(data_t *x, data_t *oldx, int rows, int cols, double P, data_t *wz) {
-    data_t* mx = m_intialize(UNDEFINED, cols, rows);
-	data_t* temp = m_intialize(UNDEFINED, P, 1);
-	data_t* c = m_intialize(UNDEFINED, cols, rows);
-	data_t* temp1 = m_intialize(UNDEFINED, cols, 1);
-	data_t* transp = m_intialize(UNDEFINED, rows, cols);
+spherex(matrix_t *x, matrix_t *oldx, int rows, int cols, double P, matrix_t *wz) {
+    matrix_t* mx = m_intialize(UNDEFINED, cols, rows);
+	matrix_t* temp = m_intialize(UNDEFINED, P, 1);
+	matrix_t* c = m_intialize(UNDEFINED, cols, rows);
+	matrix_t* temp1 = m_intialize(UNDEFINED, cols, 1);
+	matrix_t* transp = m_intialize(UNDEFINED, rows, cols);
 
 
 	// allocate_matrix(&mx, cols, rows);
@@ -104,7 +104,7 @@ spherex(data_t *x, data_t *oldx, int rows, int cols, double P, data_t *wz) {
  *  THIS FUNCTION IS CALLED BY
  *
  */
-sep96(data_t *x, data_t *w, int *perm, int sweep, int count, int N, int M, int P, int B, int L, float angle, int change, data_t **ID) {
+sep96(matrix_t *x, matrix_t *w, int *perm, int sweep, int count, int N, int M, int P, int B, int L, float angle, int change, matrix_t **ID) {
 // % sep96.m implements the learning rule described in Bell \& Sejnowski, Vision
 // % Research, in press for 1997, that contained the natural gradient (w'w).
 // %
@@ -124,53 +124,95 @@ sep96(data_t *x, data_t *w, int *perm, int sweep, int count, int N, int M, int P
 // % This may be copied for personal or academic use.
 // % For commercial use, please contact Tony Bell
 // % (tony@salk.edu) for a commercial license.
-	data_t* BI;
-	data_t* temp_u;
-	data_t* temp_u1;
-    data_t* colon_matrix;
-	data_t* u_transposed;
+	matrix_t* BI = m_intialize(UNDEFINED, rows, rows);
+	matrix_t* temp_u = m_intialize(UNDEFINED, rows, rows);
+	matrix_t* temp_u1 = m_intialize(UNDEFINED, EIGV_NUM, num_pixels);
+    matrix_t* colon_matrix = m_intialize(rows, rows, num_pixels);
+	matrix_t* u_transposed = m_intialize(UNDEFINED, cols, rows);
 
 
-	//allocate_matrix(&BI, ?rows, ?rows);
-  allocate_matrix(&BI, rows, rows); //ZH we believe its rows by rows, BI = B * ID
+// 	//allocate_matrix(&BI, ?rows, ?rows);
+//   allocate_matrix(&BI, rows, rows); //ZH we believe its rows by rows, BI = B * ID
 
-//	allocate_matrix(&temp_u, ?, ?);
-  allocate_matrix(&temp_u, rows, rows); // ZH
+// //	allocate_matrix(&temp_u, ?, ?);
+//   allocate_matrix(&temp_u, rows, rows); // ZH
 
-//  allocate_matrix(&temp_u1, ?, ?);
-//	allocate_matrix(&u_transposed, ?cols, ?rows);
+// //  allocate_matrix(&temp_u1, ?, ?);
+// //	allocate_matrix(&u_transposed, ?cols, ?rows);
 
 
-  allocate_matrix(&temp_u1, rows, rows); // ZH
-	allocate_matrix(&u_transposed, cols, rows); //ZH
-	x = vect_reorder_mat(x, perm);  // x=x(:,perm);
-    sweep=sweep+1; int t=1;             // sweep=sweep+1; t=1;
-    noblocks = fix(P/B);            // noblocks=fix(P/B);
+//   allocate_matrix(&temp_u1, rows, rows); // ZH
+// 	allocate_matrix(&u_transposed, cols, rows); //ZH
+  // x=x(:,perm);
+    x = m_reorder_columns(x,perm)
+    sweep=sweep+1; 
+    int t=1;             // sweep=sweep+1; t=1;
+    noblocks = m_elem_truncate(P/B);            // noblocks=fix(P/B);
+
+    BI = m_elem_mult(ID, B);
     scale_matrix(BI, ID, ?rows, ?, B);  // BI=B*Id;
+    BI = m_multiply_matrices(ID,B);
 
     for(int i = t; i = t - 1 + noblocks * B; i += B) {  // for t=t:B:t-1+noblocks*B, %COMMENT: B (t:B:...)is the increment value here instead of standard value which is 1
         count=count+B;                                  //   count=count+B;
 
-		 allocate_matrix(&colon_matrix, ?rows, ?rows);
-	    multiply_matrices(u, w, );       //   u=w*x(:,t:t+B-1);
+		//allocate_matrix(&colon_matrix, ?rows, ?rows);
+	    //multiply_matrices(u, w, );       //   u=w*x(:,t:t+B-1);
+
+        //u = m_multiply_matrices(w, x);
                                          //   w=w+L*(BI+(1-2*(1./(1+exp(-u))))*u')*w;   => -u, then exp(-u) then 1+ exp(-u) then 1./ (1+exp(-u)) then
 																									//  2(1./ (1+exp(-u))) then (1-2(1./ (1+exp(-u)))
 																									//  then u'(1-2(1./ (1+exp(-u))) then (BI+u'(1-2(1./ (1+exp(-u))))
-		matrix_negate(temp_u, u, ?rows, ?cols);
-		matrix_exp(temp_u1, temp_u, ?rows, ?cols);  //should be same demensions as line above
-		sum_scalar_matrix(temp_u, temp_u1, rows?, cols?, 1);
-		divide_scaler_by_matrix(temp_u1, temp_u, ?rows, ?cols, 1)
-		scale_matrix(temp_u1, temp_u, ?rows, ?cols, 2);
-		sum_scalar_matrix(temp_u, temp_u1, rows?, cols?, -1);
-		transpose(u_transposed, u, ?cols, ?rows);
-		multiply_matrices(temp_u1, temp_u, u_transposed, ?rows, ?cols, ?cols);
+		//matrix_negate(temp_u, u, ?rows, ?cols);
+
+        tempu = m_elem_negate(u);
+
+		//matrix_exp(temp_u1, temp_u, ?rows, ?cols);  //should be same demensions as line above
+
+        temp_u1 = m_elem_exp (temp_u);
+
+		//sum_scalar_matrix(temp_u, temp_u1, rows?, cols?, 1);
+
+        temp_u = m_elem_add(temp_u1, 1);
+
+		//divide_scaler_by_matrix(temp_u1, temp_u, ?rows, ?cols, 1)
+
+        temp_u1 = m_elem_divideByMatrix (temp_u, 1); 
+
+		//scale_matrix(temp_u1, temp_u, ?rows, ?cols, 2);
+
+        temp_u1 = m_elem_mult(temp_u, 2);
+
+		//sum_scalar_matrix(temp_u, temp_u1, rows?, cols?, -1);
+
+       temp_u =  m_elem_add (temp_u1, -1);
+
+		//transpose(u_transposed, u, ?cols, ?rows);
+
+        u_transposed = m_transpose(u)
+
+		//multiply_matrices(temp_u1, temp_u, u_transposed, ?rows, ?cols, ?cols);
+
+        temp_u1 = m_multiply_matrices(temp_u,u_transposed);
+
 		//is BI a scalar? // Next step is BI + temp_u1
 		add_matrices(temp_u, temp_u1, BI, ?rows, ?cols) ;
+
+        temp_u = m_dot_add(temp_u1, BI);
+
 		//then W*L*(BI+temp_u1)
-		multiply_matrices(temp_u1, temp_u, L, ?rows, ?cols, ?cols);
-		multiply_matrices(temp_u, temp_u1, W, ?rows, ?cols, ?cols);
+		//multiply_matrices(temp_u1, temp_u, L, ?rows, ?cols, ?cols);
+
+        temp_u1 = m_multiply_matrices(temp_u, L);
+
+		//multiply_matrices(temp_u, temp_u1, W, ?rows, ?cols, ?cols);
+
+        temp_u = m_multiply_matrices(temp_u1, W);
+
 		//then w = w+(W*L*(BI+temp_u1)
-		add_matrices(w, w, temp_u, ?rows, ?cols);
+		//add_matrices(w, w, temp_u, ?rows, ?cols);
+
+        w = m_dot_add(w,temp_u); 
 
 
         if(count > f) {                                //   if count>F, sepout; count=count-F; end;
@@ -181,8 +223,8 @@ sep96(data_t *x, data_t *w, int *perm, int sweep, int count, int N, int M, int P
          t =
          */
     }
-	free_matrix(&temp_u);
-	free_matrix(&temp_u1);
+	m_free(temp_u);
+	m_free(temp_u1);
 
     return;
 }
@@ -201,11 +243,11 @@ sep96(data_t *x, data_t *w, int *perm, int sweep, int count, int N, int M, int P
  *  THIS FUNCTION IS CALLED BY
  *
  */
-sepout(data_t *oldw, data_t *w, double *olddelta, int sweep, int N, int M, int P, int B, data_t L, int change, int angle) {
+sepout(matrix_t *oldw, matrix_t *w, double *olddelta, int sweep, int N, int M, int P, int B, data_t L, int change, int angle) {
     int i, j;
 	// is this needed anywhere else
-	data_t* detla;
-	allocate_matrix(&delta, rows?, cols?);
+	matrix_t* detla = m_intialize(UNDEFINED, rows, cols);
+	//allocate_matrix(&delta, rows?, cols?);
 
     wchange(change, delta, angle, oldw, w, olddelta, M, N);    // [change,olddelta,angle]=wchange(oldw,w,olddelta);
 
@@ -242,36 +284,51 @@ sepout(data_t *oldw, data_t *w, double *olddelta, int sweep, int N, int M, int P
  *  THIS FUNCTION IS CALLED BY
  *
  */
-wchange(double *change, data_t *delta, double *angle, data_t *w, int wRows, int wCols,
-    data_t *oldw, data_t *olddelta) {
+wchange(matrix_t *change, matrix_t *delta, double *angle, data_t *w, int wRows, int wCols,
+    matrix_t *oldw, matrix_t *olddelta) {
                                                         //  % Calculates stats on most recent weight change - magnitude and angle between
                                                         //  % old and new weight.
                                                         //
                                                         //  function [change,delta,angle]=wchange(w,oldw,olddelta)
-    data_t *tempA, *tempB, *tempC, *tdelta, *oldw_w, tempD;
+    matrix_t *tempA = m_intialize(UNDEFINED, deltaLen, 1);
+    matrix_t *tempB = m_intialize(UNDEFINED, 1, 1);
+    matrix_t *tempC = m_intialize(UNDEFINED, 1, 1);
+    matrix_t *tdelta = m_intialize(UNDEFINED, rows, cols)
+    matrix_t *oldw_w = m_intialize(UNDEFINED, rows, cols), 
+    
+    
+
     int deltaLen = wRows * wCols;
 
-    allocate_matrix(&tempA, deltaLen, 1);
-    allocate_matrix(&tempB, 1, 1);
-    allocate_matrix(&tempC, 1, 1);
-	allocate_matrix(&tdelta, rows?, cols?);
-	allocate_matrix(&oldw_w, rows?, cols?);
+    // allocate_matrix(&tempA, deltaLen);
+ //    allocate_matrix(&tempB, 1, 1);
+ //    allocate_matrix(&tempC, 1, 1);
+	// allocate_matrix(&tdelta, rows?, cols?);
+	// allocate_matrix(&oldw_w, rows?, cols?);
 
-    subtract_matrices(oldw_w, oldw, w, wRows, wCols);
+    oldw_w = m_dot_subtract(oldw, w);
     reshape(delta, 1, deltaLen, oldw_w, wRows, wCols);  //   [M,N]=size(w); delta=reshape(oldw-w,1,M*N);
 
-    transpose(tdelta, delta, 1, deltaLen);
-    multiply_matrices(tempB, delta, tdelta, 1, 1, deltaLen);
+    tdelta = m_transpose(delta);
+    tempB = m_multiply_matrices(delta, tdelta);
+    //multiply_matrices(tempB, delta, tdelta, 1, 1, deltaLen);
     *change = tempB[0];                              //   change=delta*delta';
 
 	/*  olddelta'   */
-    transpose(tempA, olddelta, 1, deltaLen);
+    tempA = m_transpose(olddelta);
     /*  delta*olddelta' */
-    multiply_matrices(tempB, delta, tempA, 1, 1, deltaLen);
+    tempB = m_ multiply_matrices(delta, tempA);
     /*  olddelta*olddelta'  */
-    multiply_matrices(tempC, olddelta, tempA, 1, 1, deltaLen);
+    //multiply_matrices(tempC, olddelta, tempA, 1, 1, deltaLen);
+
+    tempC = m_ multiply_matrices(olddelta, tempA);
+
     /*  sqrt((delta*delta')*(olddelta*olddelta'))   */
-    tempD = sqrt(change[0] * tempC[0]);
+
+    double tempD = sqrt(change[0] * tempC[0]);
+
+    //matrix_t *tempD = m_intialize(UNDEFINED, sqrt(change[0] * tempC[0]), 1);
+
     /*  (delta*olddelta')/sqrt((delta*delta')*(olddelta*olddelta')) */
     tempD = (tempB[0]) / tempD;
     *angle = acos(tempD);
