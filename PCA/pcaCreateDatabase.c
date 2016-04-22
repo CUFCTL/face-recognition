@@ -14,9 +14,9 @@ int file_select(const struct dirent *entry);
 
 int main (int argc, char **argv) {
 
-	char databasePath[] = "..//training_images//";
-	char filenameFilePath[] = "filenamesDB.dat";
-	char projectedImagesFilePath[] = "testDB.dat";
+	char databasePath[] = "..//training_images//"; //where the training images are located
+	char filenameFilePath[] = "filenamesDB.dat"; //list of all the training image names
+	char projectedImagesFilePath[] = "testDB.dat"; //file with projected image matrix, transposed eigenface matrix, and mean matrix
 	char *path = (char *) malloc (200 * sizeof (char));
 	char header[4];
 	clock_t start, end;
