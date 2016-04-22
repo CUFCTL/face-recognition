@@ -5,7 +5,7 @@ Starts with:
 				needs matlab interface to bring in data
 				arch 1 and arch << both need work
 			runica:
-				runcia function < mostly done, check and a few fixes
+				runica function < mostly done, check and a few fixes
 
 	runicaAux.c includes auxiliary functions for runica function
 			spherex:
