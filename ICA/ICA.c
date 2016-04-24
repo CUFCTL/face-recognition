@@ -358,12 +358,24 @@ void runica(matrix_t *matrix, matrix_t *oldx, int rows, int cols, matrix_t *uu, 
     //inv(temp2, wz, int rows);
                                                                                                     // xx=inv(wz)*x;                     % xx thus holds orig. data, w. mean extracted.
     xx = m_multiply_matrices(temp2, x);
-    eye(w, rows);                                                                                   // %******** setup various variables
+
+    w = m_initialize (IDENTITY, rows, rows);
+    //eye(w, rows);                                                                                   // %******** setup various variables
     int count = 0; int sweep = 0;                                                                   // w=eye(N); count=0; perm=randperm(P); sweep=0; Id=eye(M);
     randperm(perm, P);                                                                                  // oldw=w; olddelta=ones(1,N*M); angle=1000; change=1000;
-    eye(ID, rows);
-    eye(oldw, rows);                                                                                // %******** Train. outputs a report every F presentations.
-    ones(olddelta, 1, rows*rows);                                                                   // % Watch "change" get small as it converges. Try annealing learning 
+    //eye(ID, rows);
+    //eye(oldw, rows);
+
+    ID = m_initialize (IDENTITY, rows, rows);
+    oldw = m_initialize (IDENTITY, rows, rows);
+
+
+
+                                                                                    // %******** Train. outputs a report every F presentations.
+    //ones(olddelta, 1, rows*rows);                                                                   // % Watch "change" get small as it converges. Try annealing learning 
+
+    olddelta = m_initialize (ONES, 1, rows*rows);
+
     double angle = 1000;                                                                            // % rate, L, downwards to 0.0001 towards end.
     double change = 1000;                                                                           // % For large numbers of rows in x (e.g. 200), you need to use a low 
                                                                                                     // % learning rate (I used 0.0005). Reduce if the output blows 

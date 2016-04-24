@@ -72,7 +72,7 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 	// data_t *B_mult;						//  %B = datamat';
 	// data_t *B_div;
 	//data_t *temp;
-	data_t *temp_vec;
+	
 	// data_t *index;
 	// data_t *Vsort;
 	// data_t *U_squared;
@@ -82,9 +82,11 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 	// //data_t *wr_matrix;
 	// data_t *wr;
 	// data_t *wi;
+	//data_t *workmatrix;
+
+	data_t *temp_vec;
 	data_t *lefteigenvect;
 	data_t *righteigenvect;
-	//data_t *workmatrix;
 	data_t *B_vector;
 	int integer;
 	
