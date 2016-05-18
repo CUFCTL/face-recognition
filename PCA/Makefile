@@ -1,22 +1,22 @@
-MATRIX_OPERATIONS_DIRECTORY = ../MatrixOperations
+MATRIX_PATH = ../MatrixOperations
+
 CC = gcc
+CFLAGS = -I $(MATRIX_PATH) -g -Wall
+LFLAGS = -L $(MATRIX_PATH)
 
-CFLAGS = -I $(MATRIX_OPERATIONS_DIRECTORY) -g -Wall
-LFLAGS = -L $(MATRIX_OPERATIONS_DIRECTORY)
-#LFLAGS = -L $(MATRIX_OPERATIONS_DIRECTORY) 'pkg-config --libs gsl'
+OBJS = matrixOperations.o
+BINS = pcaCreateDatabase pcaRecognition
 
-OBJ = matrixOperations.o
-
-%.o : $(MATRIX_OPERATIONS_DIRECTORY)/%.c
+%.o: $(MATRIX_PATH)/%.c
 	$(CC) -c $(CFLAGS) $(LFLAGS) $< -o $@
 
-all : pcaCreateDatabase pcaRecognition
+all: $(BINS)
 
-pcaCreateDatabase : pcaCreateDatabase.c $(OBJ)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) pcaCreateDatabase.c -lm -llapacke -o pcaCreateDatabase
+pcaCreateDatabase: $(OBJS) pcaCreateDatabase.c
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) pcaCreateDatabase.c -lm -llapacke -o pcaCreateDatabase
 
-pcaRecognition : pcaRecognition.c $(OBJ)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) pcaRecognition.c -lm -llapacke -o pcaRecognition
+pcaRecognition: $(OBJS) pcaRecognition.c
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) pcaRecognition.c -lm -llapacke -o pcaRecognition
 
-clean :
-	rm -f *.ppm *.o  *.dat pcaCreateDatabase pcaRecognition
+clean:
+	rm -f *.o *.dat *.ppm $(BINS)
