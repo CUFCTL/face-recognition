@@ -901,16 +901,18 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t
     precision* A = M->data;
 
     // Output
-    ALPHAR = (precision *)calloc(N, sizeof(precision)); // Real components
-    ALPHAI = (precision *)calloc(N, sizeof(precision)); // Imaginary components
-    BETA = (precision *)calloc(N, sizeof(precision));   // Scale
-    VR = (precision *)calloc(LDVR, sizeof(Precision));  // Eigenvectors
-    WORK = (precision *)calloc(LWORK, sizeof(Precision));
+    precision *ALPHAR = (precision *)calloc(N, sizeof(precision)); // Real components
+    precision *ALPHAI = (precision *)calloc(N, sizeof(precision)); // Imaginary components
+    precision *BETA = (precision *)calloc(N, sizeof(precision));   // Scale
+    precision *VR = (precision *)calloc(LDVR, sizeof(precision));  // Eigenvectors
+    precision *WORK = (precision *)calloc(LWORK, sizeof(precision));
 
     // ALPHAR on completion is normalized eigenvalues diagonal
     // VR is right eigenvectors
-    dggev('N', 'V', N, A, LDA, (NULL), 1, 1, 1, ALPHAR, ALPHAI, BETA,
-            (NULL), 1, VR, LDVR, WORK, LWORK, &INFO);
+
+	// TODO: compiler says 'undefined reference to dggev'
+    // dggev('N', 'V', N, A, LDA, (NULL), 1, 1, 1, ALPHAR, ALPHAI, BETA,
+    //         (NULL), 1, VR, LDVR, WORK, LWORK, &INFO);
 
     // Free memory
     free(ALPHAI);
