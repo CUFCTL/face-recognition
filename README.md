@@ -68,31 +68,18 @@ This list of libraries was updated 11/4/2015 by Miller
 
 ##### Using PCA
 
-To convert JPEG images to PPM, use `ffmpeg` in the containing directory:
-```
-for f in *.jpg
-do ffmpeg -i $f -s 300x200 "$(basename $f .jpg)".ppm
-done
-```
+To convert JPEG images to PPM with `ffmpeg`:
 
-The training set should be located as follows:
+    cd [images-folder]
+    for f in *.jpg
+    do ffmpeg -i $f -s 300x200 "$(basename $f .jpg)".ppm
+    done
 
-    PCA/
-        pcaCreateDatabase
-    training_images/
-        *.ppm
+To run PCA on a training set of PPM images:
 
-The test set should be located as follows:
-
-    PCA/
-        pcaRecognition
-    test_images/
-        *.ppm
-
-To use the training set:
-```
-./pcaCreateDatabase
-```
+    cd PCA
+    make
+    ./pca-train [images-folder]
 
 To use a test set:
 ```

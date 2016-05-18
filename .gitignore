@@ -3,7 +3,7 @@
 
 # executables
 MatrixOperationsTests/matrixTest
-PCA/pcaCreateDatabase
+PCA/pca-train
 PCA/pcaRecognition
 
 # data files

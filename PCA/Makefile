@@ -5,15 +5,15 @@ CFLAGS = -I $(MATRIX_PATH) -g -Wall
 LFLAGS = -L $(MATRIX_PATH)
 
 OBJS = matrixOperations.o
-BINS = pcaCreateDatabase pcaRecognition
+BINS = pca-train pcaRecognition
 
 %.o: $(MATRIX_PATH)/%.c
 	$(CC) -c $(CFLAGS) $(LFLAGS) $< -o $@
 
 all: $(BINS)
 
-pcaCreateDatabase: $(OBJS) pcaCreateDatabase.c
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) pcaCreateDatabase.c -lm -llapacke -o pcaCreateDatabase
+pca-train: $(OBJS) pca_train.c
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) pca_train.c -lm -llapacke -o pca-train
 
 pcaRecognition: $(OBJS) pcaRecognition.c
 	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) pcaRecognition.c -lm -llapacke -o pcaRecognition
