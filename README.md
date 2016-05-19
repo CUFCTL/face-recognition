@@ -91,10 +91,8 @@ To run PCA on a training set of PPM images:
 
     cd PCA
     make
-    ./pca-train [images-folder]
+    ./pca-train [training-images-folder]
 
-To use a test set:
-```
-./pcaRecognition [input-file]
-```
-where input-file is a text file that lists the test set images
+To test a set of PPM images against the training set:
+
+    ./pca-recognize [test-images-folder]

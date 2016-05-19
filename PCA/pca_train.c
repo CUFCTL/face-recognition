@@ -33,11 +33,11 @@ int is_ppm_image(const struct dirent *entry)
  * @param images  pointer to store list of images
  * @return number of images that were found
  */
-uint64_t get_images(const char* path, char ***images)
+int get_images(const char* path, char ***images)
 {
 	// get list of image entries
     struct dirent **entries;
-    uint64_t num_images = scandir(path, &entries, is_ppm_image, alphasort);
+    int num_images = scandir(path, &entries, is_ppm_image, alphasort);
 
 	if ( num_images <= 0 ) {
         perror("scandir");
@@ -47,7 +47,7 @@ uint64_t get_images(const char* path, char ***images)
     // construct list of image paths
     *images = (char **)malloc(num_images * sizeof(char *));
 
-	uint64_t i;
+	int i;
 	for ( i = 0; i < num_images; i++ ) {
         (*images)[i] = (char *)malloc(strlen(path) + 1 + strlen(entries[i]->d_name) + 1);
 
@@ -74,7 +74,7 @@ uint64_t get_images(const char* path, char ***images)
  * @param num_images  number of images
  * @return image matrix
  */
-matrix_t * get_image_matrix(char **images, uint64_t num_images)
+matrix_t * get_image_matrix(char **images, int num_images)
 {
 	// get the image size from the first image
 	char header[4];
@@ -91,7 +91,7 @@ matrix_t * get_image_matrix(char **images, uint64_t num_images)
 	matrix_t *T = m_initialize(UNDEFINED, num_pixels, num_images);
 	unsigned char *pixels = (unsigned char *)malloc(3 * num_pixels * sizeof(unsigned char));
 
-	uint64_t i;
+	int i;
 	for ( i = 0; i < num_images; i++ ) {
 		loadPPMtoMatrixCol(images[i], T, i, pixels);
 	}
@@ -104,7 +104,7 @@ matrix_t * get_image_matrix(char **images, uint64_t num_images)
 int main(int argc, char **argv)
 {
 	if ( argc != 2 ) {
-		fprintf(stderr, "usage: ./pca-train [images-folder]");
+		fprintf(stderr, "usage: ./pca-train [images-folder]\n");
 		return 1;
 	}
 
@@ -113,11 +113,11 @@ int main(int argc, char **argv)
 	const char *DB_TRAINING_DATA = "./db_training_data.dat";
 
 	clock_t start, end;
-	uint64_t i;
+	int i;
 
     // get image matrix
     char **images;
-    uint64_t num_images = get_images(TRAINING_SET_PATH, &images);
+    int num_images = get_images(TRAINING_SET_PATH, &images);
 
 	start = clock();
 
@@ -164,6 +164,7 @@ int main(int argc, char **argv)
 	// compute eigenvectors for L
 	start = clock();
 
+    // TODO: replace with m_eigenvalues_eigenvectors()
     double w[L->numRows * L->numCols];
     int info = LAPACKE_dsyev(LAPACK_ROW_MAJOR, 'V', 'U', L->numRows, L->data, L->numCols, w);
 
@@ -191,7 +192,7 @@ int main(int argc, char **argv)
 	// transpose eigenfaces
 	start = clock();
 
-	matrix_t *eigenfaces_transposed = m_transpose(eigenfaces);
+	matrix_t *transposed_eigenfaces = m_transpose(eigenfaces);
 
 	end = clock();
 	printf("time to transpose eigenfaces: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
@@ -201,7 +202,7 @@ int main(int argc, char **argv)
 	// compute projected images = eigenfaces' * A
 	start = clock();
 
-	matrix_t *projected_images = m_matrix_multiply(eigenfaces_transposed, A);
+	matrix_t *projected_images = m_matrix_multiply(transposed_eigenfaces, A);
 
 	end = clock();
 	printf("time to calc projected images: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
@@ -223,12 +224,13 @@ int main(int argc, char **argv)
 	FILE *db_training_data = fopen(DB_TRAINING_DATA, "w");
 
 	m_fwrite(db_training_data, projected_images);
-	m_fwrite(db_training_data, eigenfaces_transposed);
+	m_fwrite(db_training_data, transposed_eigenfaces);
 	m_fwrite(db_training_data, M);
 
 	m_free(projected_images);
-	m_free(eigenfaces_transposed);
+	m_free(transposed_eigenfaces);
 	m_free(M);
+
 	fclose(db_training_data);
 
 	return 0;
