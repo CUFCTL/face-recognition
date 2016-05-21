@@ -2,52 +2,52 @@
 
 ## The Matrix Library
 
-Function Name              | PCA | LDA | ICA | Verification Status | Verify Date | Member | Dataset | Last Edit
----                        |:---:|:---:|:---:|---                  |---          |---     |---      |---
-m_initialize               |  x  |     |     | Verified            | 10/21/15    | Taylor
-m_free                     |  x  |     |     | Verified            | 10/21/15    | Taylor
-m_fprint                   |     |     |     | Verified            | 10/21/15    | Taylor
+Function Name              | PCA | LDA | ICA | Verification Status | Verify Date | Member
+---                        |:---:|:---:|:---:|---                  |---          |---       
+m_initialize               |  x  |  x  |  x  | Verified            | 10/21/15    | Taylor
+m_free                     |  x  |  x  |  x  | Verified            | 10/21/15    | Taylor
+m_fprint                   |     |  x  |     | Verified            | 10/21/15    | Taylor
 m_fwrite                   |  x  |     |     | Verified            | 10/21/15    | Taylor
 m_fscan                    |     |     |     | Verified            | 10/21/15    | Taylor
 m_fread                    |  x  |     |     | Verified            | 10/21/15    | Taylor
-m_copy                     |     |     |     | Verified            | 10/21/15    | Taylor
+m_copy                     |     |     |  x  | Verified            | 10/21/15    | Taylor
                            |     |     |     |                     |             |
-m_flipCols                 |     |     |     | Verified            | 10/02/15    | James
+m_flipCols                 |     |     |  x  | Verified            | 10/02/15    | James
 m_normalize                |     |     |     | Verified            | 10/02/2015  | James
-m_elem_mult                |     |     |     | Verified            | 10/02/2015  | James
-m_elem_truncate            |     |     |     | Verified            | 10/02/2015  | James
-m_elem_divideByConst       |     |     |     | Verified            | 10/02/2015  | James
+m_elem_mult                |     |     |  x  | Verified            | 10/02/2015  | James
+m_elem_truncate            |     |     |  x  | Verified            | 10/02/2015  | James
+m_elem_divideByConst       |     |     |  x  | Verified            | 10/02/2015  | James
 m_elem_acos                |     |     |     | Verified            | 10/02/2015  | James
-m_elem_sqrt                |     |     |     | Verified            | 10/02/2015  | James
-m_elem_negate              |     |     |     | Verified            | 10/02/2015  | James
-m_elem_exp                 |     |     |     | Verified            | 10/02/2015  | James
-m_elem_pow                 |     |     |     | Verified            | 10/02/2015  | James
-m_elem_divideByMatrix      |     |     |     | Verified            | 10/02/2015  | James
-m_elem_add                 |     |     |     | Verified            | 10/02/2015  | James
-m_sumCols                  |     |     |     | Verified            | 10/02/2015  | James
-m_meanCols                 |     |     |     | Verified            | 10/02/2015  | James
+m_elem_sqrt                |     |     |  x  | Verified            | 10/02/2015  | James
+m_elem_negate              |     |     |  x  | Verified            | 10/02/2015  | James
+m_elem_exp                 |     |     |  x  | Verified            | 10/02/2015  | James
+m_elem_pow                 |     |     |  x  | Verified            | 10/02/2015  | James
+m_elem_divideByMatrix      |     |     |  x  | Verified            | 10/02/2015  | James
+m_elem_add                 |     |     |  x  | Verified            | 10/02/2015  | James
+m_sumCols                  |     |     |  x  | Verified            | 10/02/2015  | James
+m_meanCols                 |     |  x  |     | Verified            | 10/02/2015  | James
 m_sumRows                  |     |     |     | Verified            | 10/02/2015  | James
 m_meanRows                 |  x  |     |     | Verified            | 10/06/2015  | James
 m_findNonZeros             |     |     |     | Verified            | 10/06/2015  | James
 m_subtractColumn           |  x  |     |     | Not Verified        |             |
-m_transpose                |  x  |     |     | Verified            | 10/06/2015  | James
+m_transpose                |  x  |  x  |  x  | Verified            | 10/06/2015  | James
 m_reshape                  |     |     |     | Verified            | 10/06/2015  | James
                            |     |     |     |                     |             |
-m_inverseMatrix            |  x  |     |     | Not Verified        | 10/07/15    | Miller
+m_inverseMatrix            |     |     |  x  | Not Verified        | 10/07/15    | Miller
 m_norm                     |     |     |     | Not Verified        | 10/07/15    | Miller
-m_sqrtm                    |     |     |     | Not Verified        | 10/07/15    | Miller
+m_sqrtm                    |     |     |  x  | Not Verified        | 10/07/15    | Miller
 m_determinant              |     |     |     | Not Verified        | 10/07/15    | Miller
 m_cofactor                 |     |     |     | Not Verified        | 10/07/15    | Miller
-m_covariance               |     |     |     | Verified            | 11/05/15    | Greg
+m_covariance               |     |     |  x  | Verified            | 11/05/15    | Greg
                            |     |     |     |                     |             |
-m_dot_subtract             |     |     |     | Verified            | 10/21/15    | Taylor
-m_dot_add                  |     |     |     | Verified            | 10/21/15    | Taylor
-m_dot_division             |     |     |     | Verified            | 11/03/15    | Greg
-m_matrix_multiply          |  x  |     |     | Verified            | 10/21/15    | Taylor
+m_dot_subtract             |     |     |  x  | Verified            | 10/21/15    | Taylor
+m_dot_add                  |     |     |  x  | Verified            | 10/21/15    | Taylor
+m_dot_division             |     |     |  x  | Verified            | 11/03/15    | Greg
+m_matrix_multiply          |  x  |  x  |  x  | Verified            | 10/21/15    | Taylor
 m_matrix_division          |     |     |     | Not Verified        | 10/21/15    | Taylor
-m_reorder_columns          |     |     |     | Not Verified        | 10/21/15    | Taylor
+m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
                            |     |     |     |                     |             |
-m_eigenvalues_eigenvectors |  x  |     |     | Not Verified        | 10/22/15    | Colin
+m_eigenvalues_eigenvectors |  x  |  x  |  x  | Not Verified        | 10/22/15    | Colin
 m_getSubMatrix             |     |     |     | Not Verified        | 10/22/15    | Colin
 loadPPMtoMatrixCol         |  x  |     |     | Not Verified        | 10/22/15    | Colin
 writePPMgrayscale          |  x  |     |     | Not Verified        | 10/22/15    | Colin
