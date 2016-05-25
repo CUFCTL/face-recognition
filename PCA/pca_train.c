@@ -98,7 +98,7 @@ matrix_t * get_image_matrix(char **images, int num_images)
 	uint64_t num_pixels = image_width * image_height;
 
 	// read each image into a column of the matrix
-	matrix_t *T = m_initialize(UNDEFINED, num_pixels, num_images);
+	matrix_t *T = m_initialize(num_pixels, num_images);
 	unsigned char *pixels = (unsigned char *)malloc(3 * num_pixels * sizeof(unsigned char));
 
 	int i;

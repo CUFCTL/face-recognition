@@ -12,189 +12,160 @@
 #include <string.h>
 #include <stdint.h>
 
-#include <cblas.h>
 #include <lapacke.h>
 #include "matrix.h"
 
-/*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 1 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
-//  initialization, free, input, output, and copy functions
-/*******************************************************************************
- * m_initialize
+/**
+ * Construct a matrix.
  *
- * Returns a matrix pointer to a matrix of size M x N
+ * @param rows
+ * @param cols
+ * @return pointer to a new matrix
+ */
+matrix_t * m_initialize (int rows, int cols)
+{
+	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
+	M->numRows = rows;
+	M->numCols = cols;
+	M->data = (precision *) malloc(rows * cols * sizeof(precision));
+
+	return M;
+}
+
+/**
+ * Construct an identity matrix.
  *
- * Depending on the input variable "mode", data is either a 2D matrix of
- * 		1. ZEROS = zeros
- *		2. IDENTITY = identity matrix
- *		3. UNDEFINED = undefined values
- * 		4. ONES = all ones
- *		5. FILL = each element increases by one
- *
- * ICA:
- *		void allocate_matrix(data_t **vector, int rows, int cols);
- *		void allocate_vector(data_t **vector, int length);
- *		void ones(data_t *onesMat, int rows, int cols);
- * 		void eye(data_t *identity, int dimension);
- * 		void fill_matrix(data_t *matrix, int rows, int cols);
-*******************************************************************************/
-matrix_t * m_initialize (int mode, int numRows, int numCols) {
-	int i, j;
-	matrix_t *M = (matrix_t *) malloc (sizeof (matrix_t));
-	M->numRows = numRows;
-	M->numCols = numCols;
-	M->span = numCols;
-	M->type = PARENT; // not submatrix
-	if (mode == ZEROS || mode == IDENTITY) {
-		M->data = (precision *) calloc (numRows * numCols, sizeof (precision));
-		if (mode == IDENTITY) {
-			assert (numRows == numCols);
-			for (i = 0; i < numRows; i++) {
-				elem(M, i, i) = 1;
-			}
-		}
-	} else if (mode == UNDEFINED || mode == ONES || mode == FILL){
-		M->data = (precision *) malloc (numRows * numCols * sizeof (precision));
-		if (mode == ONES) {
-			for (i = 0; i < numRows; i++) {
-                for (j = 0; j < numCols; j++) {
-				    elem(M, i, j) = 1.0;
-                }
-			}
-		} else if (mode == FILL) {
-			for (i = 0; i < numRows; i++) {
-                for (j = 0; j < numCols; j++) {
-				    elem(M, i, j) = i * numRows + j;
-                }
-			}
-		}
-	} else {
-		printf ("m_initialize, Not valid mode\n");
-		exit (5);
+ * @param rows
+ * @return pointer to a new identity matrix
+ */
+matrix_t * m_identity (int rows)
+{
+	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
+	M->numRows = rows;
+	M->numCols = rows;
+	M->data = (precision *) malloc(rows * rows * sizeof(precision));
+
+	int i;
+	for ( i = 0; i < rows; i++ ) {
+		elem(M, i, i) = 1;
 	}
 
 	return M;
 }
 
-/*******************************************************************************
- * m_free
+/**
+ * Construct a zero matrix.
  *
- * Frees memory for matrix M
- * ICA:
- *		void free_matrix(data_t **matrix);
- *		void free_vector(data_t **vector);
-*******************************************************************************/
-void m_free (matrix_t *M) {
-	if (M->type != SUBMATRIX) {
-		free (M->data);
-	}
-	free (M);
-}
-
-/*******************************************************************************
- * m_fprint
- *
- * Prints matrix M to the stream specified
- * Prints numRows, numCols, then each whole row of the matrix (aka [0][0], [0][1]..)
- *
- * ICA:
- *		void print_matrix(data_t *matrix, int rows, int cols);
-*******************************************************************************/
-void m_fprint (FILE *stream, matrix_t *M) {
-
-	int i, j;
-
-	fprintf (stream, "%d %d\n", M->numRows, M->numCols);
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
-			fprintf (stream, "%lf ", elem(M, i, j));
-		}
-		fprintf (stream, "\n");
-	}
-	fflush (stream);
-}
-
-/*******************************************************************************
- * m_fwrite
- *
- * Writes matrix M to the stream specified
- * Writes numRows, numCols, then the data
- * NOTE: will not work with submatrixes right now
-*******************************************************************************/
-void m_fwrite (FILE *stream, matrix_t *M) {
-	fwrite (&M->numRows, sizeof (unsigned long int), 1, stream);
-	fwrite (&M->numCols, sizeof (unsigned long int), 1, stream);
-	if (M->type == PARENT) {
-		fwrite (M->data, sizeof (precision), M->numRows * M->numCols, stream);
-	} else {
-		int i;
-		for (i = 0; M->numRows; i++) {
-			fwrite (&(M->data[i * M->span]), sizeof (precision), M->numCols, stream);
-		}
-	}
-}
-
-/*******************************************************************************
- * m_fscan
- *
- * Scans matrix written by printMatrix in stream specified
-*******************************************************************************/
-matrix_t * m_fscan (FILE *stream) {
-
-	int i, j, numRows, numCols;
-	numRows = 0;
-	numCols = 0;
-
-	fscanf (stream, "%d %d", &numRows, &numCols);
-	matrix_t *M = m_initialize(UNDEFINED, numRows, numCols);
-	for (i = 0; i < numRows; i++) {
-		for (j = 0; j < numCols; j++) {
-			fscanf (stream, "%lf", &(elem(M, i, j)));
-		}
-	}
+ * @param rows
+ * @param cols
+ * @return pointer to a new zero matrix
+ */
+matrix_t * m_zeros (int rows, int cols)
+{
+	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
+	M->numRows = rows;
+	M->numCols = cols;
+	M->data = (precision *) calloc(rows * cols, sizeof(precision));
 
 	return M;
 }
 
-/*******************************************************************************
- * m_fread
+/**
+ * Copy a matrix.
  *
- * reads matrix written by printMatrix in stream specified
-*******************************************************************************/
-matrix_t * m_fread (FILE *stream) {
-	int numRows, numCols;
-	fread (&numRows, sizeof (unsigned long int), 1, stream);
-	fread (&numCols, sizeof (unsigned long int), 1, stream);
-	matrix_t *M = m_initialize (UNDEFINED, numRows, numCols);
-	fread (M->data, sizeof (precision), M->numRows * M->numCols, stream);
-	return M;
-}
+ * @param M  pointer to matrix
+ * @return pointer to copy of M
+ */
+matrix_t * m_copy (matrix_t *M)
+{
+	matrix_t *C = m_initialize(M->numRows, M->numCols);
 
-/*******************************************************************************
- * m_copy
- *
- * Copies matrix M into a new matrix
- *
- * ICA:
- * 		data_t* copy(data_t* orig,int rows,int cols);
-*******************************************************************************/
-matrix_t * m_copy (matrix_t *M) {
-	int i, j;
+	memcpy(C->data, M->data, C->numRows * C->numCols * sizeof(precision));
 
-	matrix_t *C = (matrix_t *) malloc (sizeof(matrix_t));
-	C->numRows = M->numRows;
-	C->numCols = M->numCols;
-
-	C->data = (precision *) malloc (C->numRows * C->numCols * sizeof (precision));
-	if (M->numCols == M->span) {
-		memcpy(C->data, M->data, C->numRows * C->numCols * sizeof (precision));
-	} else {
-		for (i = 0; i < C->numRows; i++) {
-			for (j = 0; j < C->numCols; j++) {
-                elem(C, i, j) = elem(M, i, j);
-            }
-		}
-	}
 	return C;
+}
+
+/**
+ * Deconstruct a matrix.
+ *
+ * @param M  pointer to matrix
+ */
+void m_free (matrix_t *M)
+{
+	free(M->data);
+	free(M);
+}
+
+/**
+ * Write a matrix in text format to a stream.
+ *
+ * @param stream  pointer to file stream
+ * @param M       pointer to matrix
+ */
+void m_fprint (FILE *stream, matrix_t *M)
+{
+	fprintf(stream, "%d %d\n", M->numRows, M->numCols);
+
+	int i, j;
+	for ( i = 0; i < M->numRows; i++ ) {
+		for ( j = 0; j < M->numCols; j++ ) {
+			fprintf(stream, "%lf ", elem(M, i, j));
+		}
+		fprintf(stream, "\n");
+	}
+}
+
+/**
+ * Write a matrix in binary format to a stream.
+ *
+ * @param stream  pointer to file stream
+ * @param M       pointer to matrix
+ */
+void m_fwrite (FILE *stream, matrix_t *M)
+{
+	fwrite(&M->numRows, sizeof(int), 1, stream);
+	fwrite(&M->numCols, sizeof(int), 1, stream);
+	fwrite(M->data, sizeof(precision), M->numRows * M->numCols, stream);
+}
+
+/**
+ * Read a matrix in text format from a stream.
+ *
+ * @param stream  pointer to file stream
+ * @return pointer to new matrix
+ */
+matrix_t * m_fscan (FILE *stream)
+{
+	int numRows, numCols;
+	fscanf(stream, "%d %d", &numRows, &numCols);
+
+	matrix_t *M = m_initialize(numRows, numCols);
+	int i, j;
+	for ( i = 0; i < numRows; i++ ) {
+		for ( j = 0; j < numCols; j++ ) {
+			fscanf(stream, "%lf", &(elem(M, i, j)));
+		}
+	}
+
+	return M;
+}
+
+/**
+ * Read a matrix in binary format from a stream.
+ *
+ * @param stream  pointer to file stream
+ * @return pointer to new matrix
+ */
+matrix_t * m_fread (FILE *stream)
+{
+	int numRows, numCols;
+	fread(&numRows, sizeof(int), 1, stream);
+	fread(&numCols, sizeof(int), 1, stream);
+
+	matrix_t *M = m_initialize(numRows, numCols);
+	fread(M->data, sizeof(precision), M->numRows * M->numCols, stream);
+
+	return M;
 }
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 2 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
@@ -407,7 +378,7 @@ void m_elem_add (matrix_t *M, precision x) {
  * sums the columns of a matrix, returns a row vector
 *******************************************************************************/
 matrix_t * m_sumCols (matrix_t *M) {
-	matrix_t *R = m_initialize (UNDEFINED, 1, M->numCols);
+	matrix_t *R = m_initialize(1, M->numCols);
 	int i, j;
 	precision val;
 	for (j = 0; j < M->numCols; j++) {
@@ -458,7 +429,7 @@ void m_subtractColumn(matrix_t *M,int i,matrix_t *m){
  * sums the rows of a matrix, returns a col vect
 *******************************************************************************/
 matrix_t * m_sumRows (matrix_t *M) {
-	matrix_t *R = m_initialize (UNDEFINED, M->numRows, 1);
+	matrix_t *R = m_initialize(M->numRows, 1);
 	int i, j;
 	precision val;
 	for (i = 0; i < M->numRows; i++) {
@@ -494,7 +465,7 @@ matrix_t *m_meanRows (matrix_t *M) {
  * This vector has additional, non-used space, not sure what to do about this -miller
 *******************************************************************************/
 matrix_t * m_findNonZeros (matrix_t *M) {
-	matrix_t *R = m_initialize (ZEROS, M->numRows * M->numCols, 1);
+	matrix_t *R = m_zeros(M->numRows * M->numCols, 1);
 	precision val;
 	int i, j, count = 0;
 	for (i = 0; i < M->numRows; i++) {
@@ -520,7 +491,7 @@ matrix_t * m_findNonZeros (matrix_t *M) {
 *******************************************************************************/
 matrix_t * m_transpose (matrix_t *M) {
 	int i, j;
-	matrix_t *T = m_initialize (UNDEFINED, M->numCols, M->numRows);
+	matrix_t *T = m_initialize(M->numCols, M->numRows);
 
 	for (i = 0; i < T->numRows; i++) {
 		for (j = 0; j < T->numCols; j++) {
@@ -539,7 +510,7 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 	assert (M->numRows * M->numCols == newNumRows * newNumCols);
 	int i;
 	int r1, c1, r2, c2;
-	matrix_t *R = m_initialize (UNDEFINED, newNumRows, newNumCols);
+	matrix_t *R = m_initialize(newNumRows, newNumCols);
 	for (i = 0; i < newNumRows * newNumCols; i++) {
 		r1 = i / newNumCols;
 		c1 = i % newNumCols;
@@ -641,7 +612,7 @@ precision m_determinant (matrix_t *M) {
     else {
 
 		det = 0;
-		A = m_initialize (UNDEFINED, M->numRows - 1, M->numCols - 1);
+		A = m_initialize(M->numRows - 1, M->numCols - 1);
 		for (j = 0; j < M->numCols; j++) {
 			// Fill matrix
 			c = 0;
@@ -672,8 +643,8 @@ matrix_t * m_cofactor (matrix_t *M) {
 	//int i, j, ii, jj, i1, j1;
 	int i, j, r, c, row, col, sign;
 	assert (M->numRows == M->numCols);
-    matrix_t *A = m_initialize (UNDEFINED, M->numRows - 1, M->numCols - 1);
-	matrix_t *R = m_initialize (UNDEFINED, M->numRows, M->numCols);
+    matrix_t *A = m_initialize(M->numRows - 1, M->numCols - 1);
+	matrix_t *R = m_initialize(M->numRows, M->numCols);
 	precision val;
 
 	// For every element in M
@@ -708,8 +679,8 @@ matrix_t * m_covariance(matrix_t *M) {
 	int i, j, k;
 	precision val;
 	matrix_t *colAvgs = m_meanCols(M);
-	matrix_t *norm = m_initialize (UNDEFINED, M->numRows, M->numCols);
-	matrix_t *R = m_initialize (UNDEFINED, M->numRows, M->numCols);
+	matrix_t *norm = m_initialize(M->numRows, M->numCols);
+	matrix_t *R = m_initialize(M->numRows, M->numCols);
 
 	for (j = 0; j < M->numCols; j++) {
 		for (i = 0; i < M->numRows; i++) {
@@ -745,7 +716,7 @@ matrix_t * m_covariance(matrix_t *M) {
  *    *******************************************************************************/
 matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B) {
     assert (A->numRows == B->numRows && A->numCols == B->numCols);
-    matrix_t *R = m_initialize (UNDEFINED, A->numRows, A->numCols);
+    matrix_t *R = m_initialize(A->numRows, A->numCols);
     int i, j;
     for (i = 0; i < A->numRows; i++) {
         for (j = 0; j < A->numCols; j++) {
@@ -762,7 +733,7 @@ matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B) {
  *    *******************************************************************************/
 matrix_t * m_dot_add (matrix_t *A, matrix_t *B) {
     assert (A->numRows == B->numRows && A->numCols == B->numCols);
-    matrix_t *R = m_initialize (UNDEFINED, A->numRows, A->numCols);
+    matrix_t *R = m_initialize(A->numRows, A->numCols);
     int i, j;
     for (i = 0; i < A->numRows; i++) {
         for (j = 0; j < A->numCols; j++) {
@@ -779,7 +750,7 @@ matrix_t * m_dot_add (matrix_t *A, matrix_t *B) {
  *    *******************************************************************************/
 matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
     assert (A->numRows == B->numRows && A->numCols == B->numCols);
-    matrix_t *R = m_initialize (UNDEFINED, A->numRows, A->numCols);
+    matrix_t *R = m_initialize(A->numRows, A->numCols);
     int i, j;
     for (i = 0; i < A->numRows; i++) {
         for (j = 0; j < A->numCols; j++) {
@@ -807,7 +778,7 @@ matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B){
 		printf ("Matrix Size changed somewhere");
 		numCols = maxCols;
 	}*/
-	M = m_initialize (ZEROS, A->numRows, numCols);
+	M = m_zeros(A->numRows, numCols);
 	for (i = 0; i < M->numRows; i++) {
 		for (j = 0; j < M->numCols; j++) {
 			for (k = 0; k < A->numCols; k++) {
@@ -847,7 +818,7 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
 	assert (M->numCols == V->numCols && V->numRows == 1);
 
 	int i, j, row;
-	matrix_t *R = m_initialize (UNDEFINED, M->numRows, M->numCols);
+	matrix_t *R = m_initialize(M->numRows, M->numCols);
 	for (j = 0; j < R->numCols; j++) {
 		row = elem(V, 1, j);
 		for (i = 0; i < R->numRows; i++) {
@@ -898,21 +869,6 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t
     free(WORK);
 
     // Return values
-}
-
-/*******************************************************************************
- * void submatrix(data_t *outmatrix, data_t *matrix, int rows, int cols, int start_row, int start_col, int end_row, int end_col);
- * NOTE: THIS DIRECTLY MANIPULATES THE PARENTS DATA
-*******************************************************************************/
-matrix_t * m_getSubMatrix (matrix_t *M, int startRow, int startCol, int numRows, int numCols) {
-	matrix_t *sub = (matrix_t *) malloc (sizeof (matrix_t));
-	sub->numRows = numRows;
-	sub->numCols = numCols;
-	sub->span = M->span;
-	sub->type = SUBMATRIX;
-	sub->data = &(M->data[numRows * M->span + numCols]);
-
-	return sub;
 }
 
 /*******************************************************************************

@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 	unsigned char *pixels = (unsigned char *)malloc(3 * a->numRows * sizeof(unsigned char));
 
 	for ( i = 0; i < num_test_images; i++ ) {
-		matrix_t *T_i = m_initialize(UNDEFINED, a->numRows, 1);
+		matrix_t *T_i = m_initialize(a->numRows, 1);
 
 		loadPPMtoMatrixCol(test_images[i], T_i, 0, pixels);
 

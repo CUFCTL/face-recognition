@@ -6,8 +6,6 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#define precision double
-
 #define UNDEFINED 0
 #define ZEROS 1
 #define ONES 2
@@ -28,24 +26,26 @@
 
 #define IS_COLOR GRAYSCALE
 
+typedef double precision;
+
 typedef struct {
 	precision *data;
 	int numRows;
 	int numCols;
-	int span;
-	int type;
 } matrix_t;
 
 #define elem(M, i, j) (M)->data[(j) * (M)->numRows + (i)]
 
-// Group 1 - initialization, input, output, and copy ops
-matrix_t * m_initialize (int mode, int numRows, int numCols);
+matrix_t * m_initialize (int rows, int rols);
+matrix_t * m_identity (int rows);
+matrix_t * m_zeros (int rows, int rols);
+matrix_t * m_copy (matrix_t *M);
 void m_free (matrix_t *M);
+
 void m_fprint (FILE *stream, matrix_t *M);
 void m_fwrite (FILE *stream, matrix_t *M);
 matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
-matrix_t * m_copy (matrix_t *M);
 
 /***************** Group 2 - Operations on a single matrix *******************/
 /***** 2.0 - No return values, operate directly on M's data *****/
@@ -113,7 +113,6 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);
 
 // Group 6 - other, doesn;t really fit in anywhere
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors);
-matrix_t * m_getSubMatrix (matrix_t *M, int startRow, int startCol, int numRows, int numCols);
 
 void loadPPMtoMatrixCol (const char *filename, matrix_t *M, int specCol, unsigned char *pixels);
 void writePPMgrayscale (const char *filename, matrix_t *M, int specCOl, int height, int width);
