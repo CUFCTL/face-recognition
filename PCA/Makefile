@@ -1,10 +1,10 @@
-MATRIX_PATH = ../MatrixOperations
+MATRIX_PATH = ../matrix
 
 CC = gcc
 CFLAGS = -I $(MATRIX_PATH) -g -Wall
 LFLAGS = -L $(MATRIX_PATH)
 
-OBJS = matrixOperations.o
+OBJS = matrix.o
 BINS = pca-train pca-recognize
 
 %.o: $(MATRIX_PATH)/%.c
@@ -13,10 +13,10 @@ BINS = pca-train pca-recognize
 all: $(BINS)
 
 pca-train: $(OBJS) pca_train.c
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) pca_train.c -lm -llapacke -o pca-train
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -lm -llapacke pca_train.c -o $@
 
 pca-recognize: $(OBJS) pca_recognize.c
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) pca_recognize.c -lm -llapacke -o pca-recognize
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -lm -llapacke pca_recognize.c -o $@
 
 clean:
 	rm -f *.o *.dat *.ppm $(BINS)

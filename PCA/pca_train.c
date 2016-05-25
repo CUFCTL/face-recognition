@@ -1,7 +1,18 @@
 /**
  * @file pca_train.c
  *
- * Create a database of faces from a training set of images.
+ * Create a database of eigenfaces from a training set of images.
+ *
+ * This code implements the following algorithm (needs verification):
+ *   m = number of dimensions per image
+ *   n = number of images
+ *   T = [T_1 ... T_n] (image matrix) (m-by-n)
+ *   a = sum(T_i, 1:i:n) / n (mean face) (m-by-1)
+ *   A = [(T_1 - a) ... (T_n - a)] (norm. image matrix) (m-by-n)
+ *   L = A' * A (surrogate matrix) (n-by-n)
+ *   L_ev = eigenvectors of L (n-by-n)
+ *   E = A * L_ev (eigenfaces) (m-by-n)
+ *   P = E' * A (projected images) (n-by-n)
  */
 #include <assert.h>
 #include <dirent.h>
@@ -9,10 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include <lapacke.h>
-#include "matrixOperations.h"
+#include "matrix.h"
 
 /**
  * Get whether a file is a PPM image based on the
@@ -23,44 +33,44 @@
  */
 int is_ppm_image(const struct dirent *entry)
 {
-    return strstr(entry->d_name, ".ppm") != NULL;
+	return strstr(entry->d_name, ".ppm") != NULL;
 }
 
 /**
  * Get a list of images in a directory.
  *
- * @param path    directory path to scan
+ * @param path	directory path to scan
  * @param images  pointer to store list of images
  * @return number of images that were found
  */
 int get_images(const char* path, char ***images)
 {
 	// get list of image entries
-    struct dirent **entries;
-    int num_images = scandir(path, &entries, is_ppm_image, alphasort);
+	struct dirent **entries;
+	int num_images = scandir(path, &entries, is_ppm_image, alphasort);
 
 	if ( num_images <= 0 ) {
-        perror("scandir");
+		perror("scandir");
 		exit(1);
-    }
+	}
 
-    // construct list of image paths
-    *images = (char **)malloc(num_images * sizeof(char *));
+	// construct list of image paths
+	*images = (char **)malloc(num_images * sizeof(char *));
 
 	int i;
 	for ( i = 0; i < num_images; i++ ) {
-        (*images)[i] = (char *)malloc(strlen(path) + 1 + strlen(entries[i]->d_name) + 1);
+		(*images)[i] = (char *)malloc(strlen(path) + 1 + strlen(entries[i]->d_name) + 1);
 
 		sprintf((*images)[i], "%s/%s", path, entries[i]->d_name);
 	}
 
-    // clean up
-    for ( i = 0; i < num_images; i++ ) {
-        free(entries[i]);
-    }
-    free(entries);
+	// clean up
+	for ( i = 0; i < num_images; i++ ) {
+		free(entries[i]);
+	}
+	free(entries);
 
-    return num_images;
+	return num_images;
 }
 
 /**
@@ -70,7 +80,7 @@ int get_images(const char* path, char ***images)
  * pixels in each image and n is the number of images. The
  * images in the training set must all have the same size.
  *
- * @param images      pointer to array of image paths
+ * @param images	  pointer to array of image paths
  * @param num_images  number of images
  * @return image matrix
  */
@@ -98,7 +108,7 @@ matrix_t * get_image_matrix(char **images, int num_images)
 
 	free(pixels);
 
-    return T;
+	return T;
 }
 
 int main(int argc, char **argv)
@@ -112,100 +122,57 @@ int main(int argc, char **argv)
 	const char *DB_TRAINING_SET = "./db_training_set.dat";
 	const char *DB_TRAINING_DATA = "./db_training_data.dat";
 
-	clock_t start, end;
 	int i;
 
-    // get image matrix
-    char **images;
-    int num_images = get_images(TRAINING_SET_PATH, &images);
+	// get image matrix
+	char **images;
+	int num_images = get_images(TRAINING_SET_PATH, &images);
 
-	start = clock();
-
-    matrix_t *T = get_image_matrix(images, num_images);
-
-	end = clock();
-	printf("time to load image matrix T: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
+	matrix_t *T = get_image_matrix(images, num_images);
 
 	// compute the mean face
-	start = clock();
-
-	matrix_t *M = m_meanRows(T);
-
-	end = clock();
-	printf("time to calc mean face M: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
+	matrix_t *a = m_meanRows(T);
 
 	// save the mean image (for fun and verification)
-	// writePPMgrayscale("mean_image.ppm", M, 0, image_height, image_width);
+	// writePPMgrayscale("mean_image.ppm", a, 0, image_height, image_width);
 
 	// normalize each face with the mean face
 	matrix_t *A = T;
 
-	start = clock();
-
 	for ( i = 0; i < num_images; i++ ) {
-        // TODO: test this function
-	    m_subtractColumn(A, i, M);
+		m_subtractColumn(A, i, a);
 	}
 
-	end = clock();
-	printf("time to calc norm matrix A: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
-
 	// compute the surrogate matrix L = A' * A
-	start = clock();
+	matrix_t *A_tr = m_transpose(A);
+	matrix_t *L = m_matrix_multiply(A_tr, A);
 
-    matrix_t *At = m_transpose(A);
-	matrix_t *L = m_matrix_multiply(At, A);
-
-	end = clock();
-	printf("time to calc surrogate matrix L: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
-
-    m_free(At);
+	m_free(A_tr);
 
 	// compute eigenvectors for L
-	start = clock();
+	// TODO: replace with m_eigenvalues_eigenvectors()
+	double w[L->numRows * L->numCols];
+	int info = LAPACKE_dsyev(LAPACK_ROW_MAJOR, 'V', 'U', L->numRows, L->data, L->numCols, w);
 
-    // TODO: replace with m_eigenvalues_eigenvectors()
-    double w[L->numRows * L->numCols];
-    int info = LAPACKE_dsyev(LAPACK_ROW_MAJOR, 'V', 'U', L->numRows, L->data, L->numCols, w);
+	if ( info > 0 ) {
+		fprintf(stderr, "The algorithm failed to compute eigenvalues.\n");
+		exit(1);
+	}
 
-    if ( info > 0 ) {
-        fprintf(stderr, "The algorithm failed to compute eigenvalues.\n");
-        exit(1);
-    }
+	matrix_t *L_ev = L;
 
-	end = clock();
-	printf("time to calc eigenvectors: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
+	// compute eigenfaces E = A * L_ev
+	matrix_t *E = m_matrix_multiply(A, L_ev);
 
-	// m_free(L);
-    matrix_t *L_eigenvectors = L;
+	m_free(L_ev);
 
-	// compute eigenfaces = A * L_eigenvectors
-	start = clock();
+	// compute transposed eigenfaces E'
+	matrix_t *E_tr = m_transpose(E);
 
-	matrix_t *eigenfaces = m_matrix_multiply(A, L_eigenvectors);
+	m_free(E);
 
-	end = clock();
-	printf("time to calc eigenfaces: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
-
-	m_free(L_eigenvectors);
-
-	// transpose eigenfaces
-	start = clock();
-
-	matrix_t *transposed_eigenfaces = m_transpose(eigenfaces);
-
-	end = clock();
-	printf("time to transpose eigenfaces: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
-
-	m_free(eigenfaces);
-
-	// compute projected images = eigenfaces' * A
-	start = clock();
-
-	matrix_t *projected_images = m_matrix_multiply(transposed_eigenfaces, A);
-
-	end = clock();
-	printf("time to calc projected images: %.3f s\n", (double)(end - start)/CLOCKS_PER_SEC);
+	// compute projected images P = E' * A
+	matrix_t *P = m_matrix_multiply(E_tr, A);
 
 	m_free(A);
 
@@ -223,13 +190,13 @@ int main(int argc, char **argv)
 	// save the projected images, transposed eigenfaces, and mean face
 	FILE *db_training_data = fopen(DB_TRAINING_DATA, "w");
 
-	m_fwrite(db_training_data, projected_images);
-	m_fwrite(db_training_data, transposed_eigenfaces);
-	m_fwrite(db_training_data, M);
+	m_fwrite(db_training_data, P);
+	m_fwrite(db_training_data, E_tr);
+	m_fwrite(db_training_data, a);
 
-	m_free(projected_images);
-	m_free(transposed_eigenfaces);
-	m_free(M);
+	m_free(P);
+	m_free(E_tr);
+	m_free(a);
 
 	fclose(db_training_data);
 
