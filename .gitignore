@@ -2,7 +2,6 @@
 *.o
 
 # executables
-MatrixOperationsTests/matrixTest
 PCA/pca-train
 PCA/pca-recognize
 
@@ -12,4 +11,7 @@ PCA/pca-recognize
 # vim swap files
 *.swp
 
-# add other files to ignore here
+# image files
+*.jpg
+*.jpeg
+*.ppm

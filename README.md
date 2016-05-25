@@ -68,6 +68,37 @@ Much of the code in this project depends on blas. In order to run it properly, i
 
 This list of libraries was updated 11/4/2015 by Miller
 
+##### Install LAPACK and BLAS on Mac
+
+Confirmed to run on Mac OS 10.11.1
+
+Download LAPACK 3.5.0 at http://www.netlib.org/lapack/
+Download BLAS 3.5.0 at http://www.netlib.org/blas/
+
+Download gfortran 5.2 for OS X (10.10 - 10.11.x)
+http://coudert.name/software/gfortran-5.2-Yosemite.dmg
+
+Download gfortran 4.8.2 for OS X (10.7 - 10.9)
+http://coudert.name/software/gfortran-4.8.2-MountainLion.dmg
+
+###### BLAS
+
+run 'make' inside the BLAS-3.5.0 directory
+
+    mv blas-LINUX.a libblas.a
+    sudo cp libblas.a /usr/local/lib/
+
+###### LAPACK
+
+open make.inc.example in a text editor
+set BLASLIB on line 68 equal to ‘/usr/local/lib/libblas.a’
+
+rename make.inc.example to make.inc
+
+run 'make' inside the lapack-3.5.0 directory
+
+    sudo cp liblapack.a /usr/local/lib
+
 ## The Algorithms
 
 ### ICA
