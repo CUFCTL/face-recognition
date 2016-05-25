@@ -1,31 +1,32 @@
-#ifndef __matrixOperations__
-#define __matrixOperations__
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <stdint.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdint.h>
-#include <math.h>
+/**
+ * @file matrix.h
+ *
+ * Interface definitions for the matrix library.
+ */
+#ifndef MATRIX_H
+#define MATRIX_H
 
 #define precision double
+
 #define UNDEFINED 0
 #define ZEROS 1
 #define ONES 2
 #define FILL 3
 #define IDENTITY 4
+
 #define NOT_TRANSPOSED 0
 #define TRANSPOSED 1
+
 #define HORZ 0
 #define VERT 1
+
 #define COLOR 0
 #define GRAYSCALE 1
+
 #define PARENT 0
 #define SUBMATRIX 1
-#define IS_COLOR GRAYSCALE
 
+#define IS_COLOR GRAYSCALE
 
 typedef struct {
 	precision *data;
@@ -37,8 +38,6 @@ typedef struct {
 
 #define elem(M, i, j) (M)->data[(j) * (M)->numRows + (i)]
 
-#endif
-
 // Group 1 - initialization, input, output, and copy ops
 matrix_t * m_initialize (int mode, int numRows, int numCols);
 void m_free (matrix_t *M);
@@ -47,7 +46,6 @@ void m_fwrite (FILE *stream, matrix_t *M);
 matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
 matrix_t * m_copy (matrix_t *M);
-
 
 /***************** Group 2 - Operations on a single matrix *******************/
 /***** 2.0 - No return values, operate directly on M's data *****/
@@ -96,14 +94,12 @@ matrix_t * m_reshape (matrix_t *M, int newNumRows, int newNumCols);
 // TEMPORARILY INCLUDED WHILE TESTING
 void m_inverseMatrix (matrix_t *M);
 
-
 // Group 3 - complex linear algebra functions of a single matrix
 precision m_norm (matrix_t *M, int specRow);
 matrix_t * m_sqrtm (matrix_t *M);
 precision m_determinant (matrix_t *M);
 matrix_t * m_cofactor (matrix_t *M);
 matrix_t * m_covariance (matrix_t *M);
-
 
 // Group 4 - ops with 2 matrices that return a matrix of same size
 matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B);
@@ -115,15 +111,11 @@ matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B);
 matrix_t * m_matrix_division (matrix_t *A, matrix_t *B);
 matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);
 
-
-// You need to install these to get it to work
-//#include <gsl/gsl_matrix.h>
-//#include <gsl/gsl_eigen.h>
-
 // Group 6 - other, doesn;t really fit in anywhere
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors);
 matrix_t * m_getSubMatrix (matrix_t *M, int startRow, int startCol, int numRows, int numCols);
 
 void loadPPMtoMatrixCol (char *path, matrix_t *M, int specCol, unsigned char *pixels);
-
 void writePPMgrayscale (char *filename, matrix_t *M, int specCOl, int height, int width);
+
+#endif

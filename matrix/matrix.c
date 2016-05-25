@@ -1,7 +1,20 @@
-#include "matrixOperations.h"
+/**
+ * @file matrix.c
+ *
+ * Implementation of the matrix library.
+ */
+#include <assert.h>
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+
 #include <cblas.h>
 #include <lapacke.h>
-#include <math.h>
+#include "matrix.h"
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 1 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 //  initialization, free, input, output, and copy functions
@@ -62,9 +75,6 @@ matrix_t * m_initialize (int mode, int numRows, int numCols) {
 	return M;
 }
 
-
-
-
 /*******************************************************************************
  * m_free
  *
@@ -79,7 +89,6 @@ void m_free (matrix_t *M) {
 	}
 	free (M);
 }
-
 
 /*******************************************************************************
  * m_fprint
@@ -104,7 +113,6 @@ void m_fprint (FILE *stream, matrix_t *M) {
 	fflush (stream);
 }
 
-
 /*******************************************************************************
  * m_fwrite
  *
@@ -124,7 +132,6 @@ void m_fwrite (FILE *stream, matrix_t *M) {
 		}
 	}
 }
-
 
 /*******************************************************************************
  * m_fscan
@@ -161,7 +168,6 @@ matrix_t * m_fread (FILE *stream) {
 	fread (M->data, sizeof (precision), M->numRows * M->numCols, stream);
 	return M;
 }
-
 
 /*******************************************************************************
  * m_copy
@@ -215,7 +221,6 @@ void m_flipCols (matrix_t *M) {
 	}
 }
 
-
 /*******************************************************************************
  * void normalize(data_t *outmatrix, data_t *matrix, int rows, int cols);
  *
@@ -263,7 +268,6 @@ void m_elem_truncate (matrix_t *M) {
 	}
 }
 
-
 /*******************************************************************************
  * m_acosAll
  *
@@ -296,7 +300,6 @@ void m_elem_sqrt (matrix_t *M) {
 	}
 }
 
-
 /*******************************************************************************
  * void matrix_negate(data_t *outmatrix, data_t *matrix, int rows, int cols);
  *
@@ -310,7 +313,6 @@ void m_elem_negate (matrix_t *M) {
 		}
 	}
 }
-
 
 /*******************************************************************************
  * void matrix_exp(data_t *outmatrix, data_t *matrix, int rows, int cols);
@@ -326,7 +328,6 @@ void m_elem_exp (matrix_t *M) {
 	}
 }
 
-
 //2.0.2
 /*******************************************************************************
  * void raise_matrix_to_power(data_t *outmatrix, data_t *matrix, int rows, int cols, int scalar);
@@ -341,7 +342,6 @@ void m_elem_pow (matrix_t *M, precision num) {
 		}
 	}
 }
-
 
 /*******************************************************************************
  * void scale_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, int scalar);
@@ -371,7 +371,6 @@ void m_elem_divideByConst (matrix_t *M, precision x) {
 	}
 }
 
-
 /*******************************************************************************
  * void divide_scaler_by_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar) ;
  *
@@ -386,7 +385,6 @@ void m_elem_divideByMatrix (matrix_t *M, precision num) {
 	}
 }
 
-
 /*******************************************************************************
  * void sum_scalar_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar);
  *
@@ -400,7 +398,6 @@ void m_elem_add (matrix_t *M, precision x) {
 		}
 	}
 }
-
 
 //2.1
 //2.1.0
@@ -423,7 +420,6 @@ matrix_t * m_sumCols (matrix_t *M) {
 
 	return R;
 }
-
 
 /*******************************************************************************
  * void mean_of_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols);
@@ -476,7 +472,6 @@ matrix_t * m_sumRows (matrix_t *M) {
 	return R;
 }
 
-
 /*******************************************************************************
  * void mean_of_matrix_by_rows(data_t *outmatrix,data_t *matrix,int rows,int cols);
  *
@@ -491,7 +486,6 @@ matrix_t *m_meanRows (matrix_t *M) {
 
 	return R;
 }
-
 
 /*******************************************************************************
  * void find(data_t *outvect, data_t **matrix, int rows, int cols);
@@ -514,7 +508,6 @@ matrix_t * m_findNonZeros (matrix_t *M) {
 	}
 	return R;
 }
-
 
 //2.1.2
 /*******************************************************************************
@@ -557,9 +550,6 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 
 	return R;
 }
-
-
-
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 3 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 // Temp moved this here for dependancy issues. Group 3 code person should work on this
@@ -608,7 +598,6 @@ precision m_norm (matrix_t *M, int specRow) {
 	return sqrt (sum);
 }
 
-
 /*******************************************************************************
  * void matrix_sqrtm(data_t *outmatrix, data_t *matrix, int rows, int cols);
  *
@@ -633,7 +622,6 @@ matrix_t * m_sqrtm (matrix_t *M) {
 	return R;*/
     return M;
 }
-
 
 /*******************************************************************************
  * void determinant(data_t *matrix, int rows, double *determ);
@@ -675,7 +663,6 @@ precision m_determinant (matrix_t *M) {
 	return det;
 }
 
-
 /*******************************************************************************
  * void cofactor(data_t *outmatrix,data_t *matrix, int rows);
  *
@@ -712,7 +699,6 @@ matrix_t * m_cofactor (matrix_t *M) {
 	return R;
 }
 
-
 /*******************************************************************************
  * void covariance(data_t *outmatrix, data_t *matrix, int rows, int cols);
  *
@@ -748,7 +734,6 @@ matrix_t * m_covariance(matrix_t *M) {
 	return R;
 }
 
-
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 4 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 /*  These functions manipulate multiple matrices and return a matrix of
  *   *  equivalent dimensions.
@@ -770,7 +755,6 @@ matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B) {
     return R;
 }
 
-
 /*******************************************************************************
  *  * void add_matrices(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols);
  *   *
@@ -788,7 +772,6 @@ matrix_t * m_dot_add (matrix_t *A, matrix_t *B) {
     return R;
 }
 
-
 /*******************************************************************************
  *  * void matrix_dot_division(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols);
  *   *
@@ -805,8 +788,6 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
     }
     return R;
 }
-
-
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 5 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 /*  These functions manipulate a multiple matrices but return a matrix of
@@ -838,7 +819,6 @@ matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B){
 	return M;
 }
 
-
 /*******************************************************************************
  * void matrix_division(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows1, int cols1, int rows2, int cols2);
  *
@@ -851,7 +831,6 @@ matrix_t * m_matrix_division (matrix_t *A, matrix_t *B) {
 	m_free (C);
 	return R;
 }
-
 
 /*******************************************************************************
  * m_reorderCols
@@ -877,7 +856,6 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
 	}
 	return R;
 }
-
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 6 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 /*******************************************************************************
@@ -922,7 +900,6 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t
     // Return values
 }
 
-
 /*******************************************************************************
  * void submatrix(data_t *outmatrix, data_t *matrix, int rows, int cols, int start_row, int start_col, int end_row, int end_col);
  * NOTE: THIS DIRECTLY MANIPULATES THE PARENTS DATA
@@ -937,7 +914,6 @@ matrix_t * m_getSubMatrix (matrix_t *M, int startRow, int startCol, int numRows,
 
 	return sub;
 }
-
 
 /*******************************************************************************
  * Helper functio just used for function below
@@ -1018,7 +994,6 @@ void loadPPMtoMatrixCol (char *path, matrix_t *M, int specCol, unsigned char *pi
 
 	fclose (in);
 }
-
 
 /*******************************************************************************
  * writePPMgrayscale
