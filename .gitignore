@@ -5,6 +5,7 @@
 PCA/pca-train
 PCA/pca-recognize
 test/image/ppm-test
+test/matrix/matrix-test
 
 # data files
 *.dat
@@ -16,3 +17,6 @@ test/image/ppm-test
 *.jpg
 *.jpeg
 *.ppm
+
+# log files
+*.log

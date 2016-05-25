@@ -1,25 +1,29 @@
-// matrix test
-#define XDIM 6
-#define YDIM 6
-
+/**
+ * @file matrix_test.c
+ *
+ * Test suite for the matrix library.
+ */
 #include <stdio.h>
 #include <stdlib.h>
-#include "matrixOperations1.h"
-#include "matrixOperations2.h"
-#include "matrixOperations3.h"
-#include "matrixOperations4.h"
-#include "matrixOperations5.h"
-//#include "matrixOperations6.h"
+#include "matrix.h"
 
-int main (void) {
-	
-	FILE *output = fopen ("testResults.txt", "w");
+#define ROWS 6
+#define COLS 6
 
-	matrix_t *M = m_initialize (FILL, XDIM, YDIM);
+int main (int argc, char **argv)
+{
+	FILE *output = fopen("test.log", "w");
+	matrix_t *M;
 
-	fprintf (output, "M = \n");
-	m_fprint (output, M);
+	// identity matrix
+	M = m_identity(ROWS);
 
+	fprintf(output, "M = \n");
+	m_fprint(output, M);
+
+	m_free(M);
+
+/*
 	// Test Group 2.0.0
 	fprintf (output, "\n-------------Test Group 2.0.0 -------------\n");
 	m_flipCols (M);
@@ -27,13 +31,13 @@ int main (void) {
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_normalize (M);
 	fprintf (output, "m_normalize(M) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_normalize (M);
     m_elem_mult(M, 35);
     fprintf (output, "m_normalize(M)\n");
@@ -41,13 +45,13 @@ int main (void) {
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_inverseMatrix (M);
 	fprintf (output, "m_inverseMatrix(M) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
-    M = m_initialize (IDENTITY, XDIM, YDIM);
+    M = m_initialize (IDENTITY, ROWS, COLS);
     m_inverseMatrix (M);
     fprintf (output, "This test will take the inverse of the identity\n");
     fprintf (output, "m_inverseMatrix(M) = \n");
@@ -56,13 +60,13 @@ int main (void) {
 
 	// Test Group 2.0.1
 	fprintf (output, "\n-------------Test Group 2.0.1 -------------\n");
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_truncate (M);
 	fprintf (output, "m_elem_truncate(M) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
     m_elem_divideByConst(M, 6);
 	m_elem_truncate (M);
     fprintf (output, "m_divide_by_constant(M, 6)\n");
@@ -70,25 +74,25 @@ int main (void) {
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_acos (M);
 	fprintf (output, "m_elem_acos(M) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_sqrt (M);
 	fprintf (output, "m_elem_sqrt(M) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_negate (M);
 	fprintf (output, "m_elem_negate(M) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_exp (M);
 	fprintf (output, "m_elem_exp(M) = \n");
 	m_fprint (output, M);
@@ -97,32 +101,32 @@ int main (void) {
 	// Test Group 2.0.2
 	fprintf (output, "\n-------------Test Group 2.0.2 -------------\n");
 	precision x = 2.0;
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_pow (M, x);
 	fprintf (output, "m_elem_pow(M, x) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_mult (M, x);
 	fprintf (output, "m_elem_mult(M, x) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_divideByConst (M, x);
 	fprintf (output, "m_elem_divideByConst(M, x) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_divideByMatrix (M, x);
 	fprintf (output, "m_elem_divideByMatrix(M, x) = \n");
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, XDIM, YDIM);
+	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_add (M, x);
 	fprintf (output, "m_elem_add(M, x) = \n");
 	m_fprint (output, M);
@@ -131,8 +135,8 @@ int main (void) {
 	// Test Group 2.1.0
 	fprintf (output, "\n-------------Test Group 2.1.0 -------------\n");
 	matrix_t *R;
-	M = m_initialize (FILL, XDIM, YDIM);
-	
+	M = m_initialize (FILL, ROWS, COLS);
+
 	R = m_sumCols (M);
 	fprintf (output, "m_sumCols(M) = \n");
 	m_fprint (output, R);
@@ -165,32 +169,32 @@ int main (void) {
 
 	// Test Group 2.1.2
 	fprintf (output, "\n-------------Test Group 2.1.2 -------------\n");
-	matrix_t *A = m_initialize (FILL, XDIM, YDIM);
+	matrix_t *A = m_initialize (FILL, ROWS, COLS);
 	fprintf (output, "A = \n");
 	m_fprint (output, A);
-	
+
 	R = m_transpose (A);
 	fprintf (output, "m_transpose (A) = \n");
 	m_fprint (output, R);
 	m_free (R);
 
-	R = m_reshape (A, XDIM / 2, YDIM * 2);
-	fprintf (output, "m_reshape (A, XDIM / 2, YDIM * 2) = \n");
+	R = m_reshape (A, ROWS / 2, COLS * 2);
+	fprintf (output, "m_reshape (A, ROWS / 2, COLS * 2) = \n");
 	m_fprint (output, R);
 	m_free (R);
 
 	// Test Group 3
 	fprintf (output, "\n-------------Test Group 3 -------------\n");
-	M = m_initialize (FILL, XDIM, YDIM);
-	
+	M = m_initialize (FILL, ROWS, COLS);
+
 	fprintf (output, "m_norm (M, specRow) is SKIPPED IN THIS TEST\n");
-	
+
 	R = m_sqrtm (M);
 	fprintf (output, "m_sqrtm(M) = \n");
 	m_fprint (output, R);
 	m_free (R);
 
-	
+
 	precision val = m_determinant (M);
 	fprintf (output, "m_determinant(M) = %lf\n", val);
 
@@ -215,7 +219,7 @@ int main (void) {
 	m_free (R);
     m_free (N);
 
-    N = m_initialize (IDENTITY, XDIM, YDIM);
+    N = m_initialize (IDENTITY, ROWS, COLS);
 	R = m_cofactor (N);
     fprintf (output, "Identity matrix 6x6 N\n");
     fprintf (output, "m_determinant(N)\n");
@@ -272,11 +276,11 @@ int main (void) {
 
 	// Test Group 4
 	fprintf (output, "\n-------------Test Group 4 -------------\n");
-	matrix_t *B = m_initialize (FILL, XDIM, YDIM);
+	matrix_t *B = m_initialize (FILL, ROWS, COLS);
 	m_elem_add (B, -10.0);
 	fprintf (output, "B =\n");
 	m_fprint (output, B);
-	
+
 	R = m_dot_subtract (M, B);
 	fprintf (output, "m_dot_subtract(M, B) = \n");
 	m_fprint (output, R);
@@ -306,24 +310,24 @@ int main (void) {
 	m_free (R);
 
 	matrix_t *V = m_initialize (UNDEFINED, 1, 6);
-	V->data[0] = 4; V->data[1] = 5; V->data[2] = 2; V->data[3] = 1; 
+	V->data[0] = 4; V->data[1] = 5; V->data[2] = 2; V->data[3] = 1;
 	V->data[4] = 0; V->data[5] = 3;
 	fprintf (output, "V = \n");
 	m_fprint (output, V);
-	
+
 	R = m_reorder_columns (M, V);
 	fprintf (output, "m_reorderCols (M, V) = \n");
 	m_fprint (output, R);
 	m_free (R);
 
-	// Test Group 6	
-    /*	fprintf (output, "\n-------------Test Group 6 -------------\n");
+	// Test Group 6
+	fprintf (output, "\n-------------Test Group 6 -------------\n");
 
 	matrix_t *eigenvalues, *eigenvectors;
 	m_eigenvalues_eigenvectors (M, &eigenvalues, &eigenvectors);
 	fprintf (output, "M's eigenvalues =  \n");
 	m_fprint (output, eigenvalues);
-	
+
 	fprintf (output, "M's eigenvectors = \n");
 	m_fprint (output, eigenvectors);
 
@@ -331,16 +335,8 @@ int main (void) {
 	fprintf (output, "m_getSubMatrix (M, 2, 2, 3, 3) = \n");
 	m_fprint (output, R);
 */
-	// Test Group 7
-	fprintf (output, "\n GROUP 7 IS NOT TESTED IN THIS TEST\n");
 
-	//m_free (eigenvectors);
-	//m_free (eigenvalues);
-	m_free (M);
-	m_free (B);
-	m_free (A);
-	m_free (R);
+	fclose(output);
 
 	return 0;
 }
-
