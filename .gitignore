@@ -4,6 +4,7 @@
 # executables
 PCA/pca-train
 PCA/pca-recognize
+test/image/ppm-test
 
 # data files
 *.dat

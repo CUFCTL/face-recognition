@@ -957,8 +957,8 @@ void skip_to_next_value(FILE* in)
  * up execution time if this function is called multiple times on the same size
  * image as it doesn't have to malloc and free that array every time.
 *******************************************************************************/
-void loadPPMtoMatrixCol (char *path, matrix_t *M, int specCol, unsigned char *pixels) {
-	FILE *in = fopen (path, "r");
+void loadPPMtoMatrixCol (const char *filename, matrix_t *M, int specCol, unsigned char *pixels) {
+	FILE *in = fopen (filename, "r");
 	char header[4];
 	int height, width, size, i;
 	int numPixels = M->numRows;
@@ -1002,7 +1002,7 @@ void loadPPMtoMatrixCol (char *path, matrix_t *M, int specCol, unsigned char *pi
  * grayscale ppm image. The height and width of the image must be specified
  *
 *******************************************************************************/
-void writePPMgrayscale (char * filename, matrix_t *M, int specCol, int height, int width) {
+void writePPMgrayscale (const char *filename, matrix_t *M, int specCol, int height, int width) {
 
 	int i;
 	char c;

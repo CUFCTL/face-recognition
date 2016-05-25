@@ -1,20 +1,19 @@
-MATRIX_OPERATIONS_DIRECTORY = ../MatrixOperations
+MATRIX_PATH = ../../matrix
+
 CC = gcc
+CFLAGS = -I $(MATRIX_PATH) -g -Wall
+LFLAGS = -L $(MATRIX_PATH)
 
-CFLAGS = -I $(MATRIX_OPERATIONS_DIRECTORY) -g -Wall
-LFLAGS = -L $(MATRIX_OPERATIONS_DIRECTORY)
-#LFLAGS = -L $(MATRIX_OPERATIONS_DIRECTORY) 'pkg-config --libs gsl'
+OBJS = matrix.o
+BINS = ppm-test
 
-OBJ = matrixOperations.o
-
-%.o : $(MATRIX_OPERATIONS_DIRECTORY)/%.c
+%.o: $(MATRIX_PATH)/%.c
 	$(CC) -c $(CFLAGS) $(LFLAGS) $< -o $@
 
-all : ppmTest
+all: $(BINS)
 
+ppm-test: $(OBJS) ppm_test.c
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -lm -llapacke ppm_test.c -o $@
 
-ppmTest : ppmTest.c $(OBJ)
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJ) ppmTest.c -o ppmTest
-
-clean :
-	rm -f *.ppm *.o  *.dat ppmTest
+clean:
+	rm -f *.o *.dat *.ppm $(BINS)

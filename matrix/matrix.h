@@ -115,7 +115,7 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors);
 matrix_t * m_getSubMatrix (matrix_t *M, int startRow, int startCol, int numRows, int numCols);
 
-void loadPPMtoMatrixCol (char *path, matrix_t *M, int specCol, unsigned char *pixels);
-void writePPMgrayscale (char *filename, matrix_t *M, int specCOl, int height, int width);
+void loadPPMtoMatrixCol (const char *filename, matrix_t *M, int specCol, unsigned char *pixels);
+void writePPMgrayscale (const char *filename, matrix_t *M, int specCOl, int height, int width);
 
 #endif
