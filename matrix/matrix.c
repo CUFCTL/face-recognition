@@ -168,6 +168,42 @@ matrix_t * m_fread (FILE *stream)
 	return M;
 }
 
+/**
+ * Subtract a "mean" column vector from each column in a matrix.
+ *
+ * @param M  pointer to matrix
+ * @param a  pointer to column vector
+ */
+void m_normalize_columns (matrix_t *M, matrix_t *a)
+{
+    int i, j;
+	for ( i = 0; i < M->numCols; i++ ) {
+		for ( j = 0; j < M->numRows; j++ ) {
+			elem(M, j, i) -= elem(a, j, 0);
+		}
+	}
+}
+
+/**
+ * Compute the transpose of a matrix.
+ *
+ * @param M  pointer to matrix
+ * @return pointer to new transposed matrix
+ */
+matrix_t * m_transpose (matrix_t *M)
+{
+	matrix_t *T = m_initialize(M->numCols, M->numRows);
+
+	int i, j;
+	for ( i = 0; i < T->numRows; i++ ) {
+		for ( j = 0; j < T->numCols; j++ ) {
+			elem(T, i, j) = elem(M, j, i);
+		}
+	}
+
+	return T;
+}
+
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 2 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 // These operate on input matrix M and will change the data stored in M
 //2.0
@@ -406,22 +442,6 @@ matrix_t *m_meanCols (matrix_t *M) {
 	return R;
 }
 
-/*
- * inputs: column vector m will be subtracted from column i
- *         of matrix A
- * outputs: void.  subtraction is done on A
- * note: initially made for PCA
-*/
-void m_subtractColumn(matrix_t *M,int i,matrix_t *m){
-    int r;
-    int c;
-    c = i;
-    for(r = 0;r < M->numRows;r++){
-        M->data[c * M->numRows + r] -= m->data[r];
-        //elem(M,r,c) = elem(M,r,c) - elem(m,r,0);
-    }
-}
-
 //2.1.1
 /*******************************************************************************
  * void sum_rows(data_t *outmatrix, data_t *matrix, int rows, int cols);
@@ -481,26 +501,6 @@ matrix_t * m_findNonZeros (matrix_t *M) {
 }
 
 //2.1.2
-/*******************************************************************************
- * transpose matrix
- *
- * This function transposes a matrix
- *
- * ICA:
- * 		void transpose(data_t *outmatrix, data_t *matrix, int rows, int cols);
-*******************************************************************************/
-matrix_t * m_transpose (matrix_t *M) {
-	int i, j;
-	matrix_t *T = m_initialize(M->numCols, M->numRows);
-
-	for (i = 0; i < T->numRows; i++) {
-		for (j = 0; j < T->numCols; j++) {
-			elem(T, i, j) = elem(M, j, i);
-		}
-	}
-	return T;
-}
-
 /*******************************************************************************
  * void reshape(data_t **outmatrix, int outRows, int outCols, data_t **matrix, int rows, int cols)
  *

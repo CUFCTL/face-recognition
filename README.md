@@ -5,12 +5,12 @@
 Function Name              | PCA | LDA | ICA | Verification Status | Verify Date | Member
 ---                        |:---:|:---:|:---:|---                  |---          |---       
 m_initialize               |  x  |  x  |  x  | Verified            | 10/21/15    | Taylor
+m_copy                     |     |     |  x  | Verified            | 10/21/15    | Taylor
 m_free                     |  x  |  x  |  x  | Verified            | 10/21/15    | Taylor
 m_fprint                   |     |  x  |     | Verified            | 10/21/15    | Taylor
 m_fwrite                   |  x  |     |     | Verified            | 10/21/15    | Taylor
 m_fscan                    |     |     |     | Verified            | 10/21/15    | Taylor
 m_fread                    |  x  |     |     | Verified            | 10/21/15    | Taylor
-m_copy                     |     |     |  x  | Verified            | 10/21/15    | Taylor
                            |     |     |     |                     |             |
 m_flipCols                 |     |     |  x  | Verified            | 10/02/15    | James
 m_normalize                |     |     |     | Verified            | 10/02/2015  | James
@@ -29,7 +29,7 @@ m_meanCols                 |     |  x  |     | Verified            | 10/02/2015 
 m_sumRows                  |     |     |     | Verified            | 10/02/2015  | James
 m_meanRows                 |  x  |     |     | Verified            | 10/06/2015  | James
 m_findNonZeros             |     |     |     | Verified            | 10/06/2015  | James
-m_subtractColumn           |  x  |     |     | Not Verified        |             |
+m_normalize_columns        |  x  |     |     | Verified            |             |
 m_transpose                |  x  |  x  |  x  | Verified            | 10/06/2015  | James
 m_reshape                  |     |     |     | Verified            | 10/06/2015  | James
                            |     |     |     |                     |             |

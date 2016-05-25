@@ -6,23 +6,8 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#define UNDEFINED 0
-#define ZEROS 1
-#define ONES 2
-#define FILL 3
-#define IDENTITY 4
-
-#define NOT_TRANSPOSED 0
-#define TRANSPOSED 1
-
-#define HORZ 0
-#define VERT 1
-
 #define COLOR 0
 #define GRAYSCALE 1
-
-#define PARENT 0
-#define SUBMATRIX 1
 
 #define IS_COLOR GRAYSCALE
 
@@ -46,6 +31,9 @@ void m_fprint (FILE *stream, matrix_t *M);
 void m_fwrite (FILE *stream, matrix_t *M);
 matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
+
+void m_normalize_columns (matrix_t *M, matrix_t *a);
+matrix_t * m_transpose (matrix_t *M);
 
 /***************** Group 2 - Operations on a single matrix *******************/
 /***** 2.0 - No return values, operate directly on M's data *****/
@@ -87,8 +75,6 @@ matrix_t * m_meanRows (matrix_t *M);
 matrix_t * m_findNonZeros (matrix_t *M);
 // 2.1.2
 //	- reshapes data in matrix to new form
-void m_subtractColumn(matrix_t *A, int i, matrix_t *m);
-matrix_t * m_transpose (matrix_t *M);
 matrix_t * m_reshape (matrix_t *M, int newNumRows, int newNumCols);
 
 // TEMPORARILY INCLUDED WHILE TESTING

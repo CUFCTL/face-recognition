@@ -4,11 +4,23 @@
  * Test suite for the matrix library.
  */
 #include <stdio.h>
-#include <stdlib.h>
 #include "matrix.h"
 
 #define ROWS 6
 #define COLS 6
+
+/**
+ * Helper function to fill a matrix with a constant value.
+ */
+void fill_matrix(matrix_t *M, int c)
+{
+	int i, j;
+	for ( i = 0; i < M->numRows; i++ ) {
+		for ( j = 0; j < M->numCols; j++ ) {
+			elem(M, i, j) = c;
+		}
+	}
+}
 
 int main (int argc, char **argv)
 {
@@ -22,6 +34,52 @@ int main (int argc, char **argv)
 	m_fprint(output, M);
 
 	m_free(M);
+
+	// zero matrix
+	M = m_zeros(ROWS, COLS);
+
+	fprintf(output, "M = \n");
+	m_fprint(output, M);
+
+	m_free(M);
+
+	// column normalization
+	matrix_t *a;
+
+	M = m_initialize(ROWS, COLS);
+	a = m_initialize(ROWS, 1);
+
+	fill_matrix(M, 5);
+	fill_matrix(a, 1);
+
+	fprintf(output, "M = \n");
+	m_fprint(output, M);
+
+	fprintf(output, "a = \n");
+	m_fprint(output, a);
+
+	m_normalize_columns(M, a);
+
+	fprintf(output, "m_normalize_columns (M, a) = \n");
+	m_fprint(output, M);
+
+	m_free(M);
+	m_free(a);
+
+	// matrix transpose
+	matrix_t *T;
+
+	M = m_zeros(ROWS + 2, COLS);
+	T = m_transpose(M);
+
+	fprintf(output, "M = \n");
+	m_fprint(output, M);
+
+	fprintf(output, "m_transpose (M) = \n");
+	m_fprint(output, T);
+
+	m_free(M);
+	m_free(T);
 
 /*
 	// Test Group 2.0.0
@@ -172,11 +230,6 @@ int main (int argc, char **argv)
 	matrix_t *A = m_initialize (FILL, ROWS, COLS);
 	fprintf (output, "A = \n");
 	m_fprint (output, A);
-
-	R = m_transpose (A);
-	fprintf (output, "m_transpose (A) = \n");
-	m_fprint (output, R);
-	m_free (R);
 
 	R = m_reshape (A, ROWS / 2, COLS * 2);
 	fprintf (output, "m_reshape (A, ROWS / 2, COLS * 2) = \n");

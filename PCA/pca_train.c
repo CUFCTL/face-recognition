@@ -137,13 +137,10 @@ int main(int argc, char **argv)
 	// writePPMgrayscale("mean_image.ppm", a, 0, image_height, image_width);
 
 	// normalize each face with the mean face
-	matrix_t *A = T;
-
-	for ( i = 0; i < num_images; i++ ) {
-		m_subtractColumn(A, i, a);
-	}
+	m_normalize_columns(T, a);
 
 	// compute the surrogate matrix L = A' * A
+	matrix_t *A = T;
 	matrix_t *A_tr = m_transpose(A);
 	matrix_t *L = m_matrix_multiply(A_tr, A);
 

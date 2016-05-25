@@ -123,7 +123,7 @@ int main(int argc, char **argv)
 		loadPPMtoMatrixCol(test_images[i], T_i, 0, pixels);
 
 		// normalize the test image
-		m_subtractColumn(T_i, 0, a);
+		m_normalize_columns(T_i, a);
 
 		// project the test image into the face space
 		matrix_t *T_i_proj = m_matrix_multiply(E_tr, T_i);
