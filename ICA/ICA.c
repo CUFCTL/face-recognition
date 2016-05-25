@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
                                                     //                   % overwritten by a sphered version of x.
     //multiply_matrices(temp, w, wz, EIGV_NUM, EIGV_NUM, EIGV_NUM);
 
-    matrix_t *temp = m_matrix_multiply(w, wz, ?); // ? is for MaxCols which should not be a parameter
+    matrix_t *temp = m_matrix_multiply(w, wz); 
     matrix_t *temp2 = m_inverseMatrix(temp);
 
 
@@ -338,8 +338,8 @@ void runica(matrix_t *matrix, matrix_t *oldx, int rows, int cols, matrix_t *uu, 
     
     matrix_t *olddelta = m_intialize(UNDEFINED, 1, rows*rows);
     matrix_t *temp  = m_intialize(UNDEFINED, rows, cols); 
-    matrix_t *temp2 = m_intialize(UNDEFINED, ??, ??); 
-    matrix_t *temp3 = m_intialize(UNDEFINED, ??, ?? );
+    matrix_t *temp2 = m_intialize(UNDEFINED, EIGV_NUM, EIGV_NUM); 
+    matrix_t *temp3 = m_intialize(UNDEFINED, EIGV_NUM, EIGV_NUM);
     
     /*  Start OF ARRAY ALLOCATION */
     // allocate_matrix(xx, rows, cols);  //
@@ -354,7 +354,7 @@ void runica(matrix_t *matrix, matrix_t *oldx, int rows, int cols, matrix_t *uu, 
     
     int n = rows; int m = rows; int P = cols;                                                       // N=size(x,1); P=size(x,2); M=N;    %M is dimension of the ICA output
     spherex(matrix, oldx, rows, cols P, wz);                                                        // spherex;                          % remove first and second order stats from x
-    temp 2 = m_inverseMatrix(wz)
+    temp2 = m_inverseMatrix(wz)
     //inv(temp2, wz, int rows);
                                                                                                     // xx=inv(wz)*x;                     % xx thus holds orig. data, w. mean extracted.
     xx = m_multiply_matrices(temp2, x);
