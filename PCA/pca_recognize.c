@@ -135,7 +135,6 @@ int main(int argc, char **argv)
 		int j;
 		for ( j = 0; j < P->numCols; j++ ) {
 			// compute the Euclidean distance between the two images
-			// TODO: could use m_column_norm()
 			double dist = 0;
 
 			int k;

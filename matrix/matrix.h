@@ -35,6 +35,7 @@ matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
 
 // getter functions
+matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B);
 matrix_t * m_mean_column (matrix_t *M);
 matrix_t * m_transpose (matrix_t *M);
 
@@ -98,7 +99,6 @@ matrix_t * m_dot_add (matrix_t *A, matrix_t *B);
 matrix_t * m_dot_division (matrix_t *A, matrix_t *B);
 
 // Group 5 - ops with 2 matrices that return a matrix of diff size
-matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B);
 matrix_t * m_matrix_division (matrix_t *A, matrix_t *B);
 matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);
 

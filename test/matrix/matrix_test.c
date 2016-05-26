@@ -43,11 +43,36 @@ int main (int argc, char **argv)
 
 	m_free(M);
 
+	// matrix product
+	matrix_t *A;
+	matrix_t *B;
+
+	A = m_initialize(ROWS, COLS + 2);
+	B = m_initialize(COLS + 2, COLS);
+
+	fill_matrix(A, 2);
+	fill_matrix(B, 3);
+
+	M = m_matrix_multiply(A, B);
+
+	fprintf(output, "A = \n");
+	m_fprint(output, A);
+
+	fprintf(output, "B = \n");
+	m_fprint(output, B);
+
+	fprintf(output, "m_matrix_multiply (A, B) = \n");
+	m_fprint(output, M);
+
+	m_free(A);
+	m_free(B);
+	m_free(M);
+
 	// mean column
 	matrix_t *a;
 
 	M = m_identity(ROWS);
- 	a = m_mean_column(M);
+	a = m_mean_column(M);
 
 	fprintf(output, "M = \n");
 	m_fprint(output, M);
@@ -248,8 +273,6 @@ int main (int argc, char **argv)
 	fprintf (output, "\n-------------Test Group 3 -------------\n");
 	M = m_initialize (FILL, ROWS, COLS);
 
-	fprintf (output, "m_norm (M, specRow) is SKIPPED IN THIS TEST\n");
-
 	R = m_sqrtm (M);
 	fprintf (output, "m_sqrtm(M) = \n");
 	m_fprint (output, R);
@@ -359,11 +382,6 @@ int main (int argc, char **argv)
 
 	// Test Group 5
 	fprintf (output, "\n-------------Test Group 5 -------------\n");
-
-	R = m_matrix_multiply(M, B, 0);
-	fprintf (output, "m_matrix_multiply(M, B, 0) = \n");
-	m_fprint (output, R);
-	m_free (R);
 
 	R = m_matrix_division(M, B);
 	fprintf (output, "m_matrix_division(M, B) = \n");

@@ -169,6 +169,31 @@ matrix_t * m_fread (FILE *stream)
 }
 
 /**
+ * Get the product of two matrices.
+ *
+ * @param A  pointer to left matrix
+ * @param B  pointer to right matrix
+ * @return pointer to new matrix equal to A * B
+ */
+matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B)
+{
+	assert(A->numCols == B->numRows);
+
+	matrix_t *M = m_zeros(A->numRows, B->numCols);
+
+	int i, j, k;
+	for ( i = 0; i < M->numRows; i++ ) {
+		for ( j = 0; j < M->numCols; j++ ) {
+			for ( k = 0; k < A->numCols; k++ ) {
+				elem(M, i, j) += elem(A, i, k) * elem(B, k, j);
+			}
+		}
+	}
+
+	return M;
+}
+
+/**
  * Get the mean column of a matrix.
  *
  * @param M  pointer to matrix
@@ -193,7 +218,7 @@ matrix_t * m_mean_column (matrix_t *M)
 }
 
 /**
- * Compute the transpose of a matrix.
+ * Get the transpose of a matrix.
  *
  * @param M  pointer to matrix
  * @return pointer to new transposed matrix
@@ -772,33 +797,6 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 5 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
 /*  These functions manipulate a multiple matrices but return a matrix of
  *  inequivalent dimensions.*/
-/*******************************************************************************
- * void multiply_matrices(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols, int k);
- *
- * product of two matrices (matrix multiplication)
- * TODO these functions should not include maxcols as an argument
-*******************************************************************************/
-//matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B, int maxCols) {
-matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B){
-	int i, j, k, numCols;
-	matrix_t *M;
-	numCols = B->numCols;
-	/*if (B->numCols != maxCols && maxCols != 0) {
-		printf ("Matrix Size changed somewhere");
-		numCols = maxCols;
-	}*/
-	M = m_zeros(A->numRows, numCols);
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
-			for (k = 0; k < A->numCols; k++) {
-				elem(M, i, j) += elem(A, i, k) * elem(B, k, j);
-			}
-		}
-	}
-
-	return M;
-}
-
 /*******************************************************************************
  * void matrix_division(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows1, int cols1, int rows2, int cols2);
  *

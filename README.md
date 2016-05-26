@@ -48,7 +48,6 @@ m_matrix_division          |     |     |     | Not Verified        | 10/21/15   
 m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
                            |     |     |     |                     |             |
 m_eigenvalues_eigenvectors |  x  |  x  |  x  | Not Verified        | 10/22/15    | Colin
-m_getSubMatrix             |     |     |     | Not Verified        | 10/22/15    | Colin
 loadPPMtoMatrixCol         |  x  |     |     | Not Verified        | 10/22/15    | Colin
 writePPMgrayscale          |  x  |     |     | Not Verified        | 10/22/15    | Colin
 
