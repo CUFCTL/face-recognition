@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 	matrix_t *T = get_image_matrix(images, num_images);
 
 	// compute the mean face
-	matrix_t *a = m_meanRows(T);
+	matrix_t *a = m_mean_column(T);
 
 	// save the mean image (for fun and verification)
 	// writePPMgrayscale("mean_image.ppm", a, 0, image_height, image_width);

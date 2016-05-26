@@ -30,7 +30,7 @@ int main (int argc, char **argv)
 	// identity matrix
 	M = m_identity(ROWS);
 
-	fprintf(output, "M = \n");
+	fprintf(output, "m_identity (%d) = \n", ROWS);
 	m_fprint(output, M);
 
 	m_free(M);
@@ -38,14 +38,42 @@ int main (int argc, char **argv)
 	// zero matrix
 	M = m_zeros(ROWS, COLS);
 
-	fprintf(output, "M = \n");
+	fprintf(output, "m_zeros (%d, %d) = \n", ROWS, COLS);
 	m_fprint(output, M);
 
 	m_free(M);
 
-	// column normalization
+	// mean column
 	matrix_t *a;
 
+	M = m_identity(ROWS);
+ 	a = m_mean_column(M);
+
+	fprintf(output, "M = \n");
+	m_fprint(output, M);
+
+	fprintf(output, "m_mean_column (M) = \n");
+	m_fprint(output, a);
+
+	m_free(M);
+	m_free(a);
+
+	// matrix transpose
+	matrix_t *T;
+
+	M = m_zeros(ROWS + 2, COLS);
+	T = m_transpose(M);
+
+	fprintf(output, "M = \n");
+	m_fprint(output, M);
+
+	fprintf(output, "m_transpose (M) = \n");
+	m_fprint(output, T);
+
+	m_free(M);
+	m_free(T);
+
+	// column normalization
 	M = m_initialize(ROWS, COLS);
 	a = m_initialize(ROWS, 1);
 
@@ -65,21 +93,6 @@ int main (int argc, char **argv)
 
 	m_free(M);
 	m_free(a);
-
-	// matrix transpose
-	matrix_t *T;
-
-	M = m_zeros(ROWS + 2, COLS);
-	T = m_transpose(M);
-
-	fprintf(output, "M = \n");
-	m_fprint(output, M);
-
-	fprintf(output, "m_transpose (M) = \n");
-	m_fprint(output, T);
-
-	m_free(M);
-	m_free(T);
 
 /*
 	// Test Group 2.0.0
@@ -209,11 +222,6 @@ int main (int argc, char **argv)
 	fprintf (output, "\n-------------Test Group 2.1.1 -------------\n");
 	R = m_sumRows (M);
 	fprintf (output, "m_sumRows(M) = \n");
-	m_fprint (output, R);
-	m_free (R);
-
-	R = m_meanRows (M);
-	fprintf (output, "m_meanRows(M) = \n");
 	m_fprint (output, R);
 	m_free (R);
 

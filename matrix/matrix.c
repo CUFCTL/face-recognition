@@ -43,7 +43,7 @@ matrix_t * m_identity (int rows)
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
 	M->numRows = rows;
 	M->numCols = rows;
-	M->data = (precision *) malloc(rows * rows * sizeof(precision));
+	M->data = (precision *) calloc(rows * rows, sizeof(precision));
 
 	int i;
 	for ( i = 0; i < rows; i++ ) {
@@ -169,19 +169,27 @@ matrix_t * m_fread (FILE *stream)
 }
 
 /**
- * Subtract a "mean" column vector from each column in a matrix.
+ * Get the mean column of a matrix.
  *
  * @param M  pointer to matrix
- * @param a  pointer to column vector
+ * @return pointer to mean column vector
  */
-void m_normalize_columns (matrix_t *M, matrix_t *a)
+matrix_t * m_mean_column (matrix_t *M)
 {
-    int i, j;
+	matrix_t *a = m_zeros(M->numRows, 1);
+
+	int i, j;
 	for ( i = 0; i < M->numCols; i++ ) {
 		for ( j = 0; j < M->numRows; j++ ) {
-			elem(M, j, i) -= elem(a, j, 0);
+			elem(a, j, 0) += elem(M, j, i);
 		}
 	}
+
+	for ( i = 0; i < M->numRows; i++ ) {
+		elem(a, i, 0) /= M->numCols;
+	}
+
+	return a;
 }
 
 /**
@@ -202,6 +210,22 @@ matrix_t * m_transpose (matrix_t *M)
 	}
 
 	return T;
+}
+
+/**
+ * Subtract a "mean" column vector from each column in a matrix.
+ *
+ * @param M  pointer to matrix
+ * @param a  pointer to column vector
+ */
+void m_normalize_columns (matrix_t *M, matrix_t *a)
+{
+    int i, j;
+	for ( i = 0; i < M->numCols; i++ ) {
+		for ( j = 0; j < M->numRows; j++ ) {
+			elem(M, j, i) -= elem(a, j, 0);
+		}
+	}
 }
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 2 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
@@ -458,21 +482,6 @@ matrix_t * m_sumRows (matrix_t *M) {
 			val += elem(M, i, j);
 		}
 		elem(R, i, 0) = val;
-	}
-
-	return R;
-}
-
-/*******************************************************************************
- * void mean_of_matrix_by_rows(data_t *outmatrix,data_t *matrix,int rows,int cols);
- *
- * takes the mean of the rows of a matrix, returns a col vect
-*******************************************************************************/
-matrix_t *m_meanRows (matrix_t *M) {
-	matrix_t *R = m_sumRows (M);
-	int i;
-	for (i = 0; i < M->numRows; i++) {
-		elem(R, i, 0) = elem(R, i, 0) / M->numCols;
 	}
 
 	return R;

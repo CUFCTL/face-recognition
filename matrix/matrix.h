@@ -21,19 +21,25 @@ typedef struct {
 
 #define elem(M, i, j) (M)->data[(j) * (M)->numRows + (i)]
 
+// constructor, destructor functions
 matrix_t * m_initialize (int rows, int rols);
 matrix_t * m_identity (int rows);
 matrix_t * m_zeros (int rows, int rols);
 matrix_t * m_copy (matrix_t *M);
 void m_free (matrix_t *M);
 
+// I/O functions
 void m_fprint (FILE *stream, matrix_t *M);
 void m_fwrite (FILE *stream, matrix_t *M);
 matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
 
-void m_normalize_columns (matrix_t *M, matrix_t *a);
+// getter functions
+matrix_t * m_mean_column (matrix_t *M);
 matrix_t * m_transpose (matrix_t *M);
+
+// mutator functions
+void m_normalize_columns (matrix_t *M, matrix_t *a);
 
 /***************** Group 2 - Operations on a single matrix *******************/
 /***** 2.0 - No return values, operate directly on M's data *****/
@@ -71,7 +77,6 @@ matrix_t * m_meanCols (matrix_t *M);
 // 2.1.1
 //	- returns column vector
 matrix_t * m_sumRows (matrix_t *M);
-matrix_t * m_meanRows (matrix_t *M);
 matrix_t * m_findNonZeros (matrix_t *M);
 // 2.1.2
 //	- reshapes data in matrix to new form
