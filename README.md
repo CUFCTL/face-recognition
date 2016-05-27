@@ -67,7 +67,7 @@ Much of the code in this project depends on BLAS and LAPACK. In order to run it 
 
 ##### Ubuntu
 
-    sudo apt-get install liblapacke-dev
+    sudo apt-get install libblas-dev liblapacke-dev
 
 ##### Mac
 

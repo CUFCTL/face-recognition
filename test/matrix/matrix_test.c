@@ -12,12 +12,25 @@
 /**
  * Helper function to fill a matrix with a constant value.
  */
-void fill_matrix(matrix_t *M, int c)
+void fill_matrix_constant(matrix_t *M, double c)
 {
 	int i, j;
 	for ( i = 0; i < M->numRows; i++ ) {
 		for ( j = 0; j < M->numCols; j++ ) {
 			elem(M, i, j) = c;
+		}
+	}
+}
+
+/**
+ * Helper function to fill a matrix with an increasing value.
+ */
+void fill_matrix_linear(matrix_t *M)
+{
+	int i, j;
+	for ( i = 0; i < M->numRows; i++ ) {
+		for ( j = 0; j < M->numCols; j++ ) {
+			elem(M, i, j) = j * M->numRows + i;
 		}
 	}
 }
@@ -48,10 +61,10 @@ int main (int argc, char **argv)
 	matrix_t *B;
 
 	A = m_initialize(ROWS, COLS + 2);
-	B = m_initialize(COLS + 2, COLS);
+	B = m_initialize(COLS + 2, COLS + 1);
 
-	fill_matrix(A, 2);
-	fill_matrix(B, 3);
+	fill_matrix_linear(A);
+	fill_matrix_linear(B);
 
 	M = m_matrix_multiply(A, B);
 
@@ -102,8 +115,8 @@ int main (int argc, char **argv)
 	M = m_initialize(ROWS, COLS);
 	a = m_initialize(ROWS, 1);
 
-	fill_matrix(M, 5);
-	fill_matrix(a, 1);
+	fill_matrix_linear(M);
+	fill_matrix_linear(a);
 
 	fprintf(output, "M = \n");
 	m_fprint(output, M);

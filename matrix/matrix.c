@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdint.h>
 
+#include <cblas.h>
 #include <lapacke.h>
 #include "matrix.h"
 
@@ -179,18 +180,15 @@ matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B)
 {
 	assert(A->numCols == B->numRows);
 
-	matrix_t *M = m_zeros(A->numRows, B->numCols);
+	matrix_t *C = m_zeros(A->numRows, B->numCols);
 
-	int i, j, k;
-	for ( i = 0; i < M->numRows; i++ ) {
-		for ( j = 0; j < M->numCols; j++ ) {
-			for ( k = 0; k < A->numCols; k++ ) {
-				elem(M, i, j) += elem(A, i, k) * elem(B, k, j);
-			}
-		}
-	}
+	// C := alpha * op(A) * op(B) + beta * C, alpha = 1, beta = 0
+	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+		A->numRows, B->numCols, A->numCols,
+		1, A->data, A->numRows, B->data, B->numRows,
+		0, C->data, C->numRows);
 
-	return M;
+	return C;
 }
 
 /**

@@ -13,7 +13,7 @@ BINS = matrix-test
 all: $(BINS)
 
 matrix-test: $(OBJS) matrix_test.c
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -lm -llapacke matrix_test.c -o $@
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -lm -lblas -llapacke matrix_test.c -o $@
 
 clean:
 	rm -f *.o *.log $(BINS)

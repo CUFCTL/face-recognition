@@ -2,6 +2,9 @@
  * @file matrix.h
  *
  * Interface definitions for the matrix library.
+ *
+ * NOTE: Unlike C, which stores static arrays in row-major
+ * order, this library stores matrices in column-major order.
  */
 #ifndef MATRIX_H
 #define MATRIX_H

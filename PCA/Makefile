@@ -13,10 +13,10 @@ BINS = pca-train pca-recognize
 all: $(BINS)
 
 pca-train: $(OBJS) pca_train.c
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -lm -llapacke pca_train.c -o $@
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -lm -lblas -llapacke pca_train.c -o $@
 
 pca-recognize: $(OBJS) pca_recognize.c
-	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -lm -llapacke pca_recognize.c -o $@
+	$(CC) $(CFLAGS) $(LFLAGS) $(OBJS) -lm -lblas -llapacke pca_recognize.c -o $@
 
 clean:
 	rm -f *.o *.dat *.ppm $(BINS)
