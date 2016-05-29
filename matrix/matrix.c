@@ -837,43 +837,11 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
 /*******************************************************************************
  * void matrix_eig(data_t *out_eig_vect, data_t*out_eig_vals, data_t* matrix, int rows, int cols);
  * Get eigenvalues and eigenvectors of symmetric matrix
- * TODO Change to allow for submatrix maybe
  * TODO Change to allow for passing in of work space?
 *******************************************************************************/
-void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors) {
-    // Right eigenvector of (A,B)
-    // Satisfies A * v = \lambda * B * v
-    // In this case, B = IDENT
-
-    assert(M->numCols == M->numRows);
-
-    int N = M->numCols; // Order of all matrices involved
-    int LDA = M->numCols; // Leading dimension of A
-    int LDVR = M->numCols;
-    int LWORK = M->numCols;
-    int INFO;
-    precision* A = M->data;
-
-    // Output
-    precision *ALPHAR = (precision *)calloc(N, sizeof(precision)); // Real components
-    precision *ALPHAI = (precision *)calloc(N, sizeof(precision)); // Imaginary components
-    precision *BETA = (precision *)calloc(N, sizeof(precision));   // Scale
-    precision *VR = (precision *)calloc(LDVR, sizeof(precision));  // Eigenvectors
-    precision *WORK = (precision *)calloc(LWORK, sizeof(precision));
-
-    // ALPHAR on completion is normalized eigenvalues diagonal
-    // VR is right eigenvectors
-
-	// TODO: compiler says 'undefined reference to dggev'
-    // dggev('N', 'V', N, A, LDA, (NULL), 1, 1, 1, ALPHAR, ALPHAI, BETA,
-    //         (NULL), 1, VR, LDVR, WORK, LWORK, &INFO);
-
-    // Free memory
-    free(ALPHAI);
-    free(BETA);
-    free(WORK);
-
-    // Return values
+void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors)
+{
+    // dgeev
 }
 
 /*******************************************************************************
