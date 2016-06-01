@@ -837,11 +837,18 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
 /*******************************************************************************
  * void matrix_eig(data_t *out_eig_vect, data_t*out_eig_vals, data_t* matrix, int rows, int cols);
  * Get eigenvalues and eigenvectors of symmetric matrix
- * TODO Change to allow for passing in of work space?
+ * TODO The argument types are going to throw errors but I wanted to
+ *      have somethign in here at least
 *******************************************************************************/
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors)
 {
-    // dgeev
+    matrix_t *WORK = m_initialize(M->rows, M->cols);
+    matrix_t *LWORK = M->cols;
+    int INFO;
+
+    dgeev('N', 'V', M->cols, M->data, M->rows, (*p_eigenvalues)->data,
+            (NULL), M->rows, (*p_eigenvectors)->data, M->rows,
+            WORK, LWORK, &INFO);
 }
 
 /*******************************************************************************
