@@ -38,6 +38,7 @@ matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
 
 // getter functions
+void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec);
 matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B);
 matrix_t * m_mean_column (matrix_t *M);
 matrix_t * m_transpose (matrix_t *M);
@@ -106,8 +107,6 @@ matrix_t * m_matrix_division (matrix_t *A, matrix_t *B);
 matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);
 
 // Group 6 - other, doesn;t really fit in anywhere
-void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t **p_eigenvalues, matrix_t **p_eigenvectors);
-
 void loadPPMtoMatrixCol (const char *filename, matrix_t *M, int specCol, unsigned char *pixels);
 void writePPMgrayscale (const char *filename, matrix_t *M, int specCOl, int height, int width);
 

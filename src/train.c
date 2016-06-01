@@ -129,16 +129,17 @@ matrix_t * get_projection_matrix_pca(matrix_t *A)
 	m_free(A_tr);
 
 	// compute eigenvectors for L
-	// TODO: replace with m_eigenvalues_eigenvectors()
-	double w[L->numRows * L->numCols];
-	LAPACKE_dsyev(LAPACK_ROW_MAJOR, 'V', 'U', L->numRows, L->data, L->numCols, w);
+	matrix_t *L_eval = m_initialize(L->numRows, 1);
+	matrix_t *L_evec = m_initialize(L->numRows, L->numCols);
 
-	matrix_t *L_ev = L;
+	m_eigenvalues_eigenvectors(L, L_eval, L_evec);
 
-	// compute eigenfaces W = A * L_ev
-	matrix_t *W = m_matrix_multiply(A, L_ev);
+	// compute eigenfaces W = A * L_evec
+	matrix_t *W = m_matrix_multiply(A, L_evec);
 
-	m_free(L_ev);
+	m_free(L);
+	m_free(L_eval);
+	m_free(L_evec);
 
 	return W;
 }

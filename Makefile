@@ -4,10 +4,10 @@ CFLAGS = -g -Wall
 OBJS = matrix.o
 BINS = test-matrix test-ppm train recognize
 
-%.o: src/%.h src/%.c
-	$(CC) -c $(CFLAGS) src/%.c -o $@
-
 all: $(BINS)
+
+matrix.o: src/matrix.h src/matrix.c
+	$(CC) -c $(CFLAGS) src/matrix.c -o $@
 
 test-matrix: $(OBJS) src/test_matrix.c
 	$(CC) $(CFLAGS) $(OBJS) -lm -lblas -llapacke src/test_matrix.c -o $@

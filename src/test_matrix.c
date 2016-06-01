@@ -37,24 +37,59 @@ void fill_matrix_linear(matrix_t *M)
 
 int main (int argc, char **argv)
 {
-	FILE *output = fopen("test.log", "w");
 	matrix_t *M;
 
 	// identity matrix
 	M = m_identity(ROWS);
 
-	fprintf(output, "m_identity (%d) = \n", ROWS);
-	m_fprint(output, M);
+	printf("m_identity (%d) = \n", ROWS);
+	m_fprint(stdout, M);
 
 	m_free(M);
 
 	// zero matrix
 	M = m_zeros(ROWS, COLS);
 
-	fprintf(output, "m_zeros (%d, %d) = \n", ROWS, COLS);
-	m_fprint(output, M);
+	printf("m_zeros (%d, %d) = \n", ROWS, COLS);
+	m_fprint(stdout, M);
 
 	m_free(M);
+
+	// eigenvalues and eigenvectors
+	precision data[3][3] = {
+		{ 2, 0, 0 },
+		{ 0, 3, 4 },
+		{ 0, 4, 9 }
+	};
+
+	matrix_t *M_eval;
+	matrix_t *M_evec;
+
+	M = m_initialize(3, 3);
+	M_eval = m_initialize(3, 1);
+	M_evec = m_initialize(3, 3);
+
+	int i, j;
+	for ( i = 0; i < 3; i++ ) {
+		for ( j = 0; j < 3; j++ ) {
+			elem(M, i, j) = data[i][j];
+		}
+	}
+
+	m_eigenvalues_eigenvectors(M, M_eval, M_evec);
+
+	printf("M = \n");
+	m_fprint(stdout, M);
+
+	printf("eigenvalues of M = \n");
+	m_fprint(stdout, M_eval);
+
+	printf("eigenvectors of M = \n");
+	m_fprint(stdout, M_evec);
+
+	m_free(M);
+	m_free(M_eval);
+	m_free(M_evec);
 
 	// matrix product
 	matrix_t *A;
@@ -68,14 +103,14 @@ int main (int argc, char **argv)
 
 	M = m_matrix_multiply(A, B);
 
-	fprintf(output, "A = \n");
-	m_fprint(output, A);
+	printf("A = \n");
+	m_fprint(stdout, A);
 
-	fprintf(output, "B = \n");
-	m_fprint(output, B);
+	printf("B = \n");
+	m_fprint(stdout, B);
 
-	fprintf(output, "m_matrix_multiply (A, B) = \n");
-	m_fprint(output, M);
+	printf("m_matrix_multiply (A, B) = \n");
+	m_fprint(stdout, M);
 
 	m_free(A);
 	m_free(B);
@@ -87,11 +122,11 @@ int main (int argc, char **argv)
 	M = m_identity(ROWS);
 	a = m_mean_column(M);
 
-	fprintf(output, "M = \n");
-	m_fprint(output, M);
+	printf("M = \n");
+	m_fprint(stdout, M);
 
-	fprintf(output, "m_mean_column (M) = \n");
-	m_fprint(output, a);
+	printf("m_mean_column (M) = \n");
+	m_fprint(stdout, a);
 
 	m_free(M);
 	m_free(a);
@@ -102,11 +137,11 @@ int main (int argc, char **argv)
 	M = m_zeros(ROWS + 2, COLS);
 	T = m_transpose(M);
 
-	fprintf(output, "M = \n");
-	m_fprint(output, M);
+	printf("M = \n");
+	m_fprint(stdout, M);
 
-	fprintf(output, "m_transpose (M) = \n");
-	m_fprint(output, T);
+	printf("m_transpose (M) = \n");
+	m_fprint(stdout, T);
 
 	m_free(M);
 	m_free(T);
@@ -118,16 +153,16 @@ int main (int argc, char **argv)
 	fill_matrix_linear(M);
 	fill_matrix_linear(a);
 
-	fprintf(output, "M = \n");
-	m_fprint(output, M);
+	printf("M = \n");
+	m_fprint(stdout, M);
 
-	fprintf(output, "a = \n");
-	m_fprint(output, a);
+	printf("a = \n");
+	m_fprint(stdout, a);
 
 	m_normalize_columns(M, a);
 
-	fprintf(output, "m_normalize_columns (M, a) = \n");
-	m_fprint(output, M);
+	printf("m_normalize_columns (M, a) = \n");
+	m_fprint(stdout, M);
 
 	m_free(M);
 	m_free(a);
@@ -427,8 +462,6 @@ int main (int argc, char **argv)
 	fprintf (output, "m_getSubMatrix (M, 2, 2, 3, 3) = \n");
 	m_fprint (output, R);
 */
-
-	fclose(output);
 
 	return 0;
 }
