@@ -9,6 +9,8 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#include <stdio.h>
+
 #define COLOR 0
 #define GRAYSCALE 1
 

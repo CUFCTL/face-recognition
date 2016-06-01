@@ -8,7 +8,9 @@ Git is a _very_ powerful version control system with a lot of features, so this 
 
 ### Setup
 
-If you haven't used Git before, you will need to install git and configure your username:
+If you haven't used Git before, you will need to install git. For Linux distributions, git can be installed through the package manager. For Windows and Mac, you should either set up a dual boot with Linux or use [Git Bash](https://git-scm.com/downloads). __Do not use a GUI client for Git or Github!__ Unless you are very experienced with git, you will very likely cause problems if you use any of the GUI clients for git.
+
+With git installed, configure your username:
 
     git config --global user.name [name]
     git config --global user.email [email-address]

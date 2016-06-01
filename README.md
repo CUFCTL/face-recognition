@@ -7,15 +7,26 @@ Images should __not__ be stored in this repository! Instead, images should be do
 ## The Matrix Library
 
 Function Name              | PCA | LDA | ICA | Verification Status | Verify Date | Member
----                        |:---:|:---:|:---:|---                  |---          |---       
-m_initialize               |  x  |  x  |  x  | Verified            | 10/21/15    | Taylor
-m_copy                     |     |     |  x  | Verified            | 10/21/15    | Taylor
-m_free                     |  x  |  x  |  x  | Verified            | 10/21/15    | Taylor
-m_fprint                   |     |  x  |     | Verified            | 10/21/15    | Taylor
-m_fwrite                   |  x  |     |     | Verified            | 10/21/15    | Taylor
-m_fscan                    |     |     |     | Verified            | 10/21/15    | Taylor
-m_fread                    |  x  |     |     | Verified            | 10/21/15    | Taylor
-                           |     |     |     |                     |             |
+---                        |:---:|:---:|:---:|---                  |---          |---
+_Constructors, Destructor_ |     |     |     |                     |             |
+m_initialize               |  x  |  x  |  x  | Verified            |             |
+m_identity                 |     |     |  x  | Verified            |             |
+m_zeros                    |     |     |  x  | Verified            |             |
+m_copy                     |     |     |  x  | Verified            |             |
+m_free                     |  x  |  x  |  x  | Verified            |             |
+_Input/Output_             |     |     |     |                     |             |
+m_fprint                   |     |  x  |     | Verified            |             |
+m_fwrite                   |  x  |     |     | Verified            |             |
+m_fscan                    |     |     |     | Verified            |             |
+m_fread                    |  x  |     |     | Verified            |             |
+_Getters_                  |     |     |     |                     |             |
+m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ LAPACK  |             |
+m_matrix_multiply          |  x  |  x  |  x  | Verified w/ BLAS    |             |
+m_mean_column              |  x  |     |     | Verified            |             |
+m_transpose                |  x  |  x  |  x  | Verified            |             |
+_Mutators_                 |     |     |     |                     |             |
+m_normalize_columns        |  x  |     |     | Verified            |             |
+_To review_                |     |     |     |                     |             |
 m_flipCols                 |     |     |  x  | Verified            | 10/02/15    | James
 m_normalize                |     |     |     | Verified            | 10/02/2015  | James
 m_elem_mult                |     |     |  x  | Verified            | 10/02/2015  | James
@@ -31,31 +42,21 @@ m_elem_add                 |     |     |  x  | Verified            | 10/02/2015 
 m_sumCols                  |     |     |  x  | Verified            | 10/02/2015  | James
 m_meanCols                 |     |  x  |     | Verified            | 10/02/2015  | James
 m_sumRows                  |     |     |     | Verified            | 10/02/2015  | James
-m_meanRows                 |  x  |     |     | Verified            | 10/06/2015  | James
 m_findNonZeros             |     |     |     | Verified            | 10/06/2015  | James
-m_normalize_columns        |  x  |     |     | Verified            |             |
-m_transpose                |  x  |  x  |  x  | Verified            | 10/06/2015  | James
 m_reshape                  |     |     |     | Verified            | 10/06/2015  | James
-                           |     |     |     |                     |             |
 m_inverseMatrix            |     |     |  x  | Not Verified        | 10/07/15    | Miller
 m_norm                     |     |     |     | Not Verified        | 10/07/15    | Miller
 m_sqrtm                    |     |     |  x  | Not Verified        | 10/07/15    | Miller
 m_determinant              |     |     |     | Not Verified        | 10/07/15    | Miller
 m_cofactor                 |     |     |     | Not Verified        | 10/07/15    | Miller
 m_covariance               |     |     |  x  | Verified            | 11/05/15    | Greg
-                           |     |     |     |                     |             |
 m_dot_subtract             |     |     |  x  | Verified            | 10/21/15    | Taylor
 m_dot_add                  |     |     |  x  | Verified            | 10/21/15    | Taylor
 m_dot_division             |     |     |  x  | Verified            | 11/03/15    | Greg
-m_matrix_multiply          |  x  |  x  |  x  | Verified            | 10/21/15    | Taylor
 m_matrix_division          |     |     |     | Not Verified        | 10/21/15    | Taylor
 m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
-                           |     |     |     |                     |             |
-m_eigenvalues_eigenvectors |  x  |  x  |  x  | Not Verified        | 10/22/15    | Colin
 loadPPMtoMatrixCol         |  x  |     |     | Not Verified        | 10/22/15    | Colin
 writePPMgrayscale          |  x  |     |     | Not Verified        | 10/22/15    | Colin
-
-_Note: When we say verified we are talking about an initial verification step which does not mean the function is fully trustworthy in the final code. There will be an additional possibility for this column: "Verified using BLAS" which will mean that the library function has be implemented in blas and is ready to be used in the final code_
 
 #### BLAS and LAPACK
 
@@ -86,35 +87,53 @@ http://coudert.name/software/gfortran-5.2-Yosemite.dmg
 Download gfortran 4.8.2 for OS X (10.7 - 10.9)
 http://coudert.name/software/gfortran-4.8.2-MountainLion.dmg
 
-###### BLAS
+    # in BLAS directory
+    make
+    sudo cp blas-LINUX.a /usr/local/lib/libblas.a
 
-run 'make' inside the BLAS-3.5.0 directory
-
-    mv blas-LINUX.a libblas.a
-    sudo cp libblas.a /usr/local/lib/
-
-###### LAPACK
-
-open make.inc.example in a text editor
-set BLASLIB on line 68 equal to ‘/usr/local/lib/libblas.a’
-
-rename make.inc.example to make.inc
-
-run 'make' inside the lapack-3.5.0 directory
-
+    # in LAPACK directory
+    mv make.inc.example make.inc
+    # set BLASLIB in make.inc line 68 equal to ‘/usr/local/lib/libblas.a’
+    make
     sudo cp liblapack.a /usr/local/lib
 
 ## The Algorithms
 
-### ICA
+Here is the working flow graph for the combined algorithm:
 
-TODO
+    m = number of dimensions per image
+    n = number of images
 
-### LDA
+    train: T -> (a, W', P)
+        T = [T_1 ... T_n] (image matrix) (m-by-n)
+        a = sum(T_i, 1:i:n) / n (mean face) (m-by-1)
+        A = [(T_1 - a) ... (T_n - a)] (norm. image matrix) (m-by-n)
+        W = pca(A), lda(A), ica(...) (projection matrix) (m-by-n)
+        P = W' * A (projected images) (n-by-n)
 
-TODO
+    recognize: (a, W', P, T_i) -> P_match
+        a = mean face (m-by-1)
+        W = projection matrix (m-by-n)
+        P = [P_1 ... P_n] (projected images) (n-by-n)
+        T_i = test image (m-by-1)
+        T_i_proj = W' * (T_i - a) (n-by-1)
+        P_match = P_j that minimizes abs(P_j - T_i), 1:j:n (n-by-1)
 
-### PCA
+    pca: A -> W_pca
+        T = [T_1 ... T_n] (image matrix) (m-by-n)
+        L = A' * A (surrogate matrix) (n-by-n)
+        L_ev = eigenvectors of L (n-by-n)
+        W_pca = A * L_ev (eigenfaces) (m-by-n)
+
+    lda: A -> W_opt
+        S_b = (scatter around overall mean) (?-by-?)
+        S_w = (scatter around mean of each class) (?-by-?)
+        W_lda = c - 1 largest eigenvectors of S_w^-1 * S_b (m-by-(c - 1))
+        W_pca = pca(A) (eigenfaces) (m-by-(n - c))
+        W_opt' = W_lda' W_pca'
+
+    ica: A -> W_ica
+        ...
 
 To convert JPEG images to PPM with `ffmpeg`:
 
@@ -125,10 +144,9 @@ To convert JPEG images to PPM with `ffmpeg`:
 
 To run PCA on a training set of PPM images:
 
-    cd PCA
     make
-    ./pca-train [training-images-folder]
+    ./train [training-images-folder]
 
 To test a set of PPM images against the training set:
 
-    ./pca-recognize [test-images-folder]
+    ./recognize [test-images-folder]
