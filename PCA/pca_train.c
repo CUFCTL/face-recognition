@@ -11,8 +11,8 @@
  *   A = [(T_1 - a) ... (T_n - a)] (norm. image matrix) (m-by-n)
  *   L = A' * A (surrogate matrix) (n-by-n)
  *   L_ev = eigenvectors of L (n-by-n)
- *   E = A * L_ev (eigenfaces) (m-by-n)
- *   P = E' * A (projected images) (n-by-n)
+ *   W = A * L_ev (projection matrix / eigenfaces) (m-by-n)
+ *   P = W' * A (projected images) (n-by-n)
  */
 #include <assert.h>
 #include <dirent.h>
@@ -111,6 +111,38 @@ matrix_t * get_image_matrix(char **images, int num_images)
 	return T;
 }
 
+/**
+ * Compute the principal components of a training set.
+ *
+ * Currently, this function returns all of the n computed
+ * eigenvectors, where n is the number of training images.
+ *
+ * @param A  mean-subtracted image matrix
+ * @return projection matrix W_pca
+ */
+matrix_t * get_projection_matrix_pca(matrix_t *A)
+{
+	// compute the surrogate matrix L = A' * A
+	matrix_t *A_tr = m_transpose(A);
+	matrix_t *L = m_matrix_multiply(A_tr, A);
+
+	m_free(A_tr);
+
+	// compute eigenvectors for L
+	// TODO: replace with m_eigenvalues_eigenvectors()
+	double w[L->numRows * L->numCols];
+	LAPACKE_dsyev(LAPACK_ROW_MAJOR, 'V', 'U', L->numRows, L->data, L->numCols, w);
+
+	matrix_t *L_ev = L;
+
+	// compute eigenfaces W = A * L_ev
+	matrix_t *W = m_matrix_multiply(A, L_ev);
+
+	m_free(L_ev);
+
+	return W;
+}
+
 int main(int argc, char **argv)
 {
 	if ( argc != 2 ) {
@@ -124,52 +156,30 @@ int main(int argc, char **argv)
 
 	int i;
 
-	// get image matrix
+	// get image matrix T
 	char **images;
 	int num_images = get_images(TRAINING_SET_PATH, &images);
 
-	matrix_t *T = get_image_matrix(images, num_images);
+	matrix_t *A = get_image_matrix(images, num_images);
 
-	// compute the mean face
-	matrix_t *a = m_mean_column(T);
+	// compute the mean face a
+	matrix_t *a = m_mean_column(A);
 
 	// save the mean image (for fun and verification)
 	// writePPMgrayscale("mean_image.ppm", a, 0, image_height, image_width);
 
-	// normalize each face with the mean face
-	m_normalize_columns(T, a);
+	// compute mean-subtracted image matrix A
+	m_normalize_columns(A, a);
 
-	// compute the surrogate matrix L = A' * A
-	matrix_t *A = T;
-	matrix_t *A_tr = m_transpose(A);
-	matrix_t *L = m_matrix_multiply(A_tr, A);
+	// compute projection matrix W
+	matrix_t *W = get_projection_matrix_pca(A);
 
-	m_free(A_tr);
+	// compute projected images P = W' * A
+	matrix_t *W_tr = m_transpose(W);
 
-	// compute eigenvectors for L
-	// TODO: replace with m_eigenvalues_eigenvectors()
-	double w[L->numRows * L->numCols];
-	int info = LAPACKE_dsyev(LAPACK_ROW_MAJOR, 'V', 'U', L->numRows, L->data, L->numCols, w);
+	m_free(W);
 
-	if ( info > 0 ) {
-		fprintf(stderr, "The algorithm failed to compute eigenvalues.\n");
-		exit(1);
-	}
-
-	matrix_t *L_ev = L;
-
-	// compute eigenfaces E = A * L_ev
-	matrix_t *E = m_matrix_multiply(A, L_ev);
-
-	m_free(L_ev);
-
-	// compute transposed eigenfaces E'
-	matrix_t *E_tr = m_transpose(E);
-
-	m_free(E);
-
-	// compute projected images P = E' * A
-	matrix_t *P = m_matrix_multiply(E_tr, A);
+	matrix_t *P = m_matrix_multiply(W_tr, A);
 
 	m_free(A);
 
@@ -188,11 +198,11 @@ int main(int argc, char **argv)
 	FILE *db_training_data = fopen(DB_TRAINING_DATA, "w");
 
 	m_fwrite(db_training_data, P);
-	m_fwrite(db_training_data, E_tr);
+	m_fwrite(db_training_data, W_tr);
 	m_fwrite(db_training_data, a);
 
 	m_free(P);
-	m_free(E_tr);
+	m_free(W_tr);
 	m_free(a);
 
 	fclose(db_training_data);

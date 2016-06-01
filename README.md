@@ -1,5 +1,9 @@
 # Clemson FCT Facial Recognition
 
+This repository contains the code for facial recognition software that combines three popular algorithms PCA, LDA, and ICA.
+
+Images should __not__ be stored in this repository! Instead, images should be downloaded separately. Face databases are widely available on the Internet, such as [here](http://web.mit.edu/emeyers/www/face_databases.html) and [here](http://face-rec.org/databases/).
+
 ## The Matrix Library
 
 Function Name              | PCA | LDA | ICA | Verification Status | Verify Date | Member

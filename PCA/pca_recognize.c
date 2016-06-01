@@ -1,16 +1,16 @@
 /**
  * @file pca_recognize.c
  *
- * Test a set of images against a database of eigenfaces.
+ * Test a set of images against a database of faces.
  *
  * This code implements the following algorithm:
  *   m = number of dimensions per image
  *   n = number of images
  *   a = mean face (m-by-1)
- *   E = eigenfaces (m-by-n)
+ *   W = projection matrix / eigenfaces (m-by-n)
  *   P = [P_1 ... P_n] (projected images) (n-by-n)
  *   T_i = test image (m-by-1)
- *   T_i_proj = E' * (T_i - a) (n-by-1)
+ *   T_i_proj = W' * (T_i - a) (n-by-1)
  *   P_match = P_j that minimizes abs(P_j - T_i), 1:j:n (n-by-1)
  *
  * TODO: Things to cuda-ize (technical term)
@@ -28,6 +28,7 @@
 
 #include "matrix.h"
 
+// TODO; duplicated from pca_train.c
 /**
  * Get whether a file is a PPM image based on the
  * file extension.
@@ -92,7 +93,7 @@ int main(int argc, char **argv)
 	FILE *db_training_data = fopen(DB_TRAINING_DATA, "r");
 
 	matrix_t *P = m_fread(db_training_data);
-	matrix_t *E_tr = m_fread(db_training_data);
+	matrix_t *W_tr = m_fread(db_training_data);
 	matrix_t *a = m_fread(db_training_data);
 
 	fclose(db_training_data);
@@ -126,7 +127,7 @@ int main(int argc, char **argv)
 		m_normalize_columns(T_i, a);
 
 		// project the test image into the face space
-		matrix_t *T_i_proj = m_matrix_multiply(E_tr, T_i);
+		matrix_t *T_i_proj = m_matrix_multiply(W_tr, T_i);
 
 		// find the training image with the minimum Euclidean distance from the test image
 		int min_index = -1;
@@ -171,7 +172,7 @@ int main(int argc, char **argv)
 	free(test_images);
 
 	m_free(P);
-	m_free(E_tr);
+	m_free(W_tr);
 	m_free(a);
 
 	return 0;

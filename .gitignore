@@ -7,16 +7,15 @@ PCA/pca-recognize
 test/image/ppm-test
 test/matrix/matrix-test
 
-# data files
-*.dat
-
-# vim swap files
-*.swp
-
 # image files
 *.jpg
 *.jpeg
 *.ppm
 
-# log files
+# data, log files
+*.dat
 *.log
+
+# miscellaneous
+*.swp
+.DS_Store
