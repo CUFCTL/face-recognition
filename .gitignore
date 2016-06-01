@@ -2,10 +2,10 @@
 *.o
 
 # executables
-PCA/pca-train
-PCA/pca-recognize
-test/image/ppm-test
-test/matrix/matrix-test
+test-matrix
+test-ppm
+train
+recognize
 
 # image files
 *.jpg

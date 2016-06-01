@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
 	// read the image into a column vector
 	unsigned char *pixels = (unsigned char *)malloc(3 * image_width * image_height * sizeof(unsigned char));
-	matrix_t *image_matrix = m_initialize(UNDEFINED, image_width * image_height, 1);
+	matrix_t *image_matrix = m_initialize(image_width * image_height, 1);
 
 	loadPPMtoMatrixCol(IMAGE_FILENAME, image_matrix, 0, pixels);
 
