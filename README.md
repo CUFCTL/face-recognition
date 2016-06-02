@@ -19,6 +19,8 @@ m_fprint                   |     |  x  |     | Verified            |            
 m_fwrite                   |  x  |     |     | Verified            |             |
 m_fscan                    |     |     |     | Verified            |             |
 m_fread                    |  x  |     |     | Verified            |             |
+m_ppm_read                 |  x  |     |     | Verified            |             |
+m_ppm_write                |  x  |     |     | Verified            |             |
 _Getters_                  |     |     |     |                     |             |
 m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ LAPACK  |             |
 m_matrix_multiply          |  x  |  x  |  x  | Verified w/ BLAS    |             |
@@ -55,8 +57,6 @@ m_dot_add                  |     |     |  x  | Verified            | 10/21/15   
 m_dot_division             |     |     |  x  | Verified            | 11/03/15    | Greg
 m_matrix_division          |     |     |     | Not Verified        | 10/21/15    | Taylor
 m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
-loadPPMtoMatrixCol         |  x  |     |     | Not Verified        | 10/22/15    | Colin
-writePPMgrayscale          |  x  |     |     | Not Verified        | 10/22/15    | Colin
 
 #### BLAS and LAPACK
 

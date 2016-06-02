@@ -1,5 +1,5 @@
 /**
- * @file matrix_test.c
+ * @file test_matrix.c
  *
  * Test suite for the matrix library.
  */
@@ -446,21 +446,6 @@ int main (int argc, char **argv)
 	fprintf (output, "m_reorderCols (M, V) = \n");
 	m_fprint (output, R);
 	m_free (R);
-
-	// Test Group 6
-	fprintf (output, "\n-------------Test Group 6 -------------\n");
-
-	matrix_t *eigenvalues, *eigenvectors;
-	m_eigenvalues_eigenvectors (M, &eigenvalues, &eigenvectors);
-	fprintf (output, "M's eigenvalues =  \n");
-	m_fprint (output, eigenvalues);
-
-	fprintf (output, "M's eigenvectors = \n");
-	m_fprint (output, eigenvectors);
-
-	R = m_getSubMatrix (M, 2, 2, 3, 3);
-	fprintf (output, "m_getSubMatrix (M, 2, 2, 3, 3) = \n");
-	m_fprint (output, R);
 */
 
 	return 0;

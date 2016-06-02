@@ -4,12 +4,9 @@
  * Implementation of the matrix library.
  */
 #include <assert.h>
-#include <ctype.h>
 #include <math.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 
 #include <cblas.h>
 #include <lapacke.h>
@@ -166,6 +163,45 @@ matrix_t * m_fread (FILE *stream)
 	fread(M->data, sizeof(precision), M->numRows * M->numCols, stream);
 
 	return M;
+}
+
+/**
+ * Read a column vector from a PPM image.
+ *
+ * Color images are converted to grayscale.
+ *
+ * @param M      pointer to matrix
+ * @param col    column index
+ * @param image  pointer to PPM image
+ */
+void m_ppm_read (matrix_t *M, int col, ppm_t *image)
+{
+	assert(M->numRows == image->height * image->width);
+
+	int i;
+	for ( i = 0; i < M->numRows; i++ ) {
+		elem(M, i, col) =
+			0.299 * (precision) image->pixels[3 * i] +
+			0.587 * (precision) image->pixels[3 * i + 1] +
+			0.114 * (precision) image->pixels[3 * i + 2];
+	}
+}
+
+/**
+ * Write a column of a matrix to a PPM image.
+ *
+ * @param M      pointer to matrix
+ * @param col    column index
+ * @param image  pointer to PPM image
+ */
+void m_ppm_write (matrix_t *M, int col, ppm_t *image)
+{
+	assert(M->numRows == image->height * image->width);
+
+	int i;
+	for ( i = 0; i < M->numRows; i++ ) {
+		memset(&image->pixels[3 * i], (char) elem(M, i, col), 3);
+	}
 }
 
 /**
@@ -856,113 +892,4 @@ matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
 		}
 	}
 	return R;
-}
-
-/*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 6 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
-/*******************************************************************************
- * Helper functio just used for function below
-*******************************************************************************/
-void skip_to_next_value(FILE* in)
-{
-   char ch = fgetc(in);
-   while(ch == '#' || isspace(ch))
-   {
-	   if(ch == '#')
-	   {
-		  while(ch != '\n')
-		  {
-			 ch = fgetc(in);
-		  }
-	   }
-	   else
-	   {
-		  while(isspace(ch))
-		  {
-			 ch = fgetc(in);
-		  }
-	   }
-   }
-
-   ungetc(ch,in); //return last read value
-}
-
-/*******************************************************************************
- * loadPPMtoMatrixCol
- *
- * This function loads the pixel data of a PPM image as a single column vector
- * in the preinitialized matrix M. It will load it into the column specified as
- * the specCol parameter.
- *
- * This function automatically turns any picture to grayscale if it is not
- * already
- * NOTE : currently this is set manually with the #define IS_COLOR in matrix.h
- *
- * NOTE : pixels is a matrix that must be allocated beforehand. This is to speed
- * up execution time if this function is called multiple times on the same size
- * image as it doesn't have to malloc and free that array every time.
-*******************************************************************************/
-void loadPPMtoMatrixCol (const char *filename, matrix_t *M, int specCol, unsigned char *pixels) {
-	FILE *in = fopen (filename, "r");
-	char header[4];
-	int height, width, size, i;
-	int numPixels = M->numRows;
-	precision intensity;
-
-	fscanf (in, "%s", header);
-	if (strcmp (header, "P3") == 0) {
-		skip_to_next_value (in);
-		fscanf (in, "%d", &height);
-		skip_to_next_value (in);
-		fscanf (in, "%d", &width);
-		skip_to_next_value (in);
-		fscanf (in, "%d", &size);
-		skip_to_next_value (in);
-		for (i = 0; i < numPixels * 3; i++) {
-			fscanf(in, "%c", &pixels[i]);
-		}
-	} else if (strcmp (header, "P6") == 0){
-		fscanf (in, "%d %d %d", &height, &width, &size);
-		skip_to_next_value(in);
-		fread (pixels, 3 * sizeof (unsigned char), numPixels, in);
-	} else {
-		printf ("Error not a P3 or P6 PPM");
-		exit (8);
-	}
-
-	for (i = 0; i < numPixels; i++) {
-		intensity = 0.299 * (precision)pixels[3*i] +
-					0.587 * (precision)pixels[3*i+1] +
-					0.114 * (precision) pixels[3*i+2];
-		elem(M, i, specCol) = intensity;
-	}
-
-	fclose (in);
-}
-
-/*******************************************************************************
- * writePPMgrayscale
- *
- * This writes a column vector of M (column specified by specCol) as a
- * grayscale ppm image. The height and width of the image must be specified
- *
-*******************************************************************************/
-void writePPMgrayscale (const char *filename, matrix_t *M, int specCol, int height, int width) {
-
-	int i;
-	char c;
-
-	assert (height * width == M->numRows); // Number of pixels must match
-	FILE * out = fopen (filename, "w");
-
-	// Write file header
-	fprintf (out, "P6\n%d\n%d\n255\n", height, width);
-
-	// Write pixel data
-	for (i = 0; i < M->numRows; i++) {
-		c = (char) elem(M, i, specCol);
-		fputc (c, out);
-		fputc (c, out);
-		fputc (c, out);
-	}
-	fclose (out);
 }

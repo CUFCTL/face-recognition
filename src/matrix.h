@@ -10,11 +10,7 @@
 #define MATRIX_H
 
 #include <stdio.h>
-
-#define COLOR 0
-#define GRAYSCALE 1
-
-#define IS_COLOR GRAYSCALE
+#include "ppm.h"
 
 typedef double precision;
 
@@ -38,6 +34,8 @@ void m_fprint (FILE *stream, matrix_t *M);
 void m_fwrite (FILE *stream, matrix_t *M);
 matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
+void m_ppm_read (matrix_t *M, int col, ppm_t *image);
+void m_ppm_write (matrix_t *M, int col, ppm_t *image);
 
 // getter functions
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec);
@@ -107,9 +105,5 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B);
 // Group 5 - ops with 2 matrices that return a matrix of diff size
 matrix_t * m_matrix_division (matrix_t *A, matrix_t *B);
 matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);
-
-// Group 6 - other, doesn;t really fit in anywhere
-void loadPPMtoMatrixCol (const char *filename, matrix_t *M, int specCol, unsigned char *pixels);
-void writePPMgrayscale (const char *filename, matrix_t *M, int specCOl, int height, int width);
 
 #endif

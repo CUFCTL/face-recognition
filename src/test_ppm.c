@@ -1,42 +1,35 @@
 /**
- * @file ppm_test.c
+ * @file test_ppm.c
  *
  * Test suite for the image library.
  */
-#include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "matrix.h"
+#include "ppm.h"
 
 int main(int argc, char **argv)
 {
 	if ( argc != 2 ) {
-		fprintf(stderr, "usage: ./ppm-test [image-file]\n");
+		fprintf(stderr, "usage: ./test-ppm [image-file]\n");
 		return 1;
 	}
 
-	const char *IMAGE_FILENAME = argv[1];
-	char header[4];
-	int image_height, image_width, max_brightness;
+	const char *FILENAME_IN = argv[1];
+	const char *FILENAME_OUT = "wahaha.ppm";
 
-	// read the image meta-data
-	FILE *image_file = fopen(IMAGE_FILENAME, "r");
-	fscanf(image_file, "%s %d %d %d", header, &image_height, &image_width, &max_brightness);
-	fclose(image_file);
-	assert(strcmp(header, "P6") == 0 && max_brightness == 255);
+	// read a column vector from an image
+	ppm_t *image = ppm_construct();
+	ppm_read(image, FILENAME_IN);
 
-	// read the image into a column vector
-	unsigned char *pixels = (unsigned char *)malloc(3 * image_width * image_height * sizeof(unsigned char));
-	matrix_t *image_matrix = m_initialize(image_width * image_height, 1);
+	matrix_t *x = m_initialize(image->width * image->height, 1);
+	m_ppm_read(x, 0, image);
 
-	loadPPMtoMatrixCol(IMAGE_FILENAME, image_matrix, 0, pixels);
+	// write the column vector to an image
+	m_ppm_write(x, 0, image);
+	ppm_write(image, FILENAME_OUT);
 
-	// write the matrix to a new image file
-	writePPMgrayscale(".//wahaha.ppm", image_matrix, 0, image_height, image_width);
-
-	m_free(image_matrix);
-	free(pixels);
+	ppm_destruct(image);
+	m_free(x);
 
 	return 0;
 }

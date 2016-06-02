@@ -3,13 +3,12 @@
  *
  * Implementation of the face database.
  */
-#include <assert.h>
 #include <dirent.h>
-#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "database.h"
+#include "ppm.h"
 
 /**
  * Get whether a file is a PPM image based on the
@@ -61,39 +60,35 @@ int get_image_names(const char* path, char ***image_names)
 }
 
 /**
- * Load a collection of PPM images into a matrix.
+ * Map a collection of PPM images to column vectors.
  *
  * The image matrix has size m x n, where m is the number of
  * pixels in each image and n is the number of images. The
- * images in the training set must all have the same size.
+ * images must all have the same size.
  *
  * @param image_names  pointer to list of image names
  * @param num_images   number of images
- * @return image matrix
+ * @return pointer to image matrix
  */
 matrix_t * get_image_matrix(char **image_names, int num_images)
 {
 	// get the image size from the first image
-	char header[4];
-	uint64_t image_width, image_height, max_brightness;
+	ppm_t *image = ppm_construct();
 
-	FILE *image = fopen(image_names[0], "r");
-	fscanf(image, "%s %" PRIu64 " %" PRIu64 " %" PRIu64 "", header, &image_height, &image_width, &max_brightness);
-	fclose(image);
-	assert(strcmp(header, "P6") == 0 && max_brightness == 255);
+	ppm_read(image, image_names[0]);
 
-	uint64_t num_pixels = image_width * image_height;
+	matrix_t *T = m_initialize(image->height * image->width, num_images);
 
-	// read each image into a column of the matrix
-	matrix_t *T = m_initialize(num_pixels, num_images);
-	unsigned char *pixels = (unsigned char *)malloc(3 * num_pixels * sizeof(unsigned char));
+	// map each image to a column vector
+	m_ppm_read(T, 0, image);
 
 	int i;
-	for ( i = 0; i < num_images; i++ ) {
-		loadPPMtoMatrixCol(image_names[i], T, i, pixels);
+	for ( i = 1; i < num_images; i++ ) {
+		ppm_read(image, image_names[i]);
+		m_ppm_read(T, i, image);
 	}
 
-	free(pixels);
+	ppm_destruct(image);
 
 	return T;
 }
@@ -240,14 +235,14 @@ void db_recognize(database_t *db, const char *path)
 	int num_test_images = get_image_names(path, &image_names);
 
 	// test each image against the database
-	unsigned char *pixels = (unsigned char *)malloc(3 * db->num_dimensions * sizeof(unsigned char));
+	ppm_t *image = ppm_construct();
+	matrix_t *T_i = m_initialize(db->num_dimensions, 1);
 
     int i;
 	for ( i = 0; i < num_test_images; i++ ) {
 		// compute the mean-subtracted test image
-		matrix_t *T_i = m_initialize(db->num_dimensions, 1);
-
-		loadPPMtoMatrixCol(image_names[i], T_i, 0, pixels);
+		ppm_read(image, image_names[i]);
+		m_ppm_read(T_i, 0, image);
 		m_normalize_columns(T_i, db->mean_face);
 
 		// compute the projected test image T_i_proj = W' * T_i
@@ -278,10 +273,10 @@ void db_recognize(database_t *db, const char *path)
 		printf("test image \'%s\' -> \'%s\'\n", image_names[i], db->image_names[min_index]);
 
 		m_free(T_i_proj);
-		m_free(T_i);
 	}
 
-	free(pixels);
+	ppm_destruct(image);
+	m_free(T_i);
 
 	for ( i = 0; i < num_test_images; i++ ) {
 		free(image_names[i]);
