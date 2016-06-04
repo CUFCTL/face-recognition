@@ -12,11 +12,11 @@
 /**
  * Helper function to fill a matrix with a constant value.
  */
-void fill_matrix_constant(matrix_t *M, double c)
+void fill_matrix_constant(matrix_t *M, precision_t c)
 {
 	int i, j;
-	for ( i = 0; i < M->numRows; i++ ) {
-		for ( j = 0; j < M->numCols; j++ ) {
+	for ( i = 0; i < M->rows; i++ ) {
+		for ( j = 0; j < M->cols; j++ ) {
 			elem(M, i, j) = c;
 		}
 	}
@@ -28,9 +28,9 @@ void fill_matrix_constant(matrix_t *M, double c)
 void fill_matrix_linear(matrix_t *M)
 {
 	int i, j;
-	for ( i = 0; i < M->numRows; i++ ) {
-		for ( j = 0; j < M->numCols; j++ ) {
-			elem(M, i, j) = j * M->numRows + i;
+	for ( i = 0; i < M->rows; i++ ) {
+		for ( j = 0; j < M->cols; j++ ) {
+			elem(M, i, j) = j * M->rows + i;
 		}
 	}
 }
@@ -56,7 +56,7 @@ int main (int argc, char **argv)
 	m_free(M);
 
 	// eigenvalues and eigenvectors
-	precision data[3][3] = {
+	precision_t data[3][3] = {
 		{ 2, 0, 0 },
 		{ 0, 3, 4 },
 		{ 0, 4, 9 }
@@ -244,7 +244,7 @@ int main (int argc, char **argv)
 
 	// Test Group 2.0.2
 	fprintf (output, "\n-------------Test Group 2.0.2 -------------\n");
-	precision x = 2.0;
+	precision_t x = 2.0;
 	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_pow (M, x);
 	fprintf (output, "m_elem_pow(M, x) = \n");
@@ -327,7 +327,7 @@ int main (int argc, char **argv)
 	m_free (R);
 
 
-	precision val = m_determinant (M);
+	precision_t val = m_determinant (M);
 	fprintf (output, "m_determinant(M) = %lf\n", val);
 
 	R = m_cofactor (M);

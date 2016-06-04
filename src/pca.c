@@ -24,8 +24,8 @@ matrix_t * get_projection_matrix_PCA(matrix_t *A)
 	m_free(A_tr);
 
 	// compute eigenvectors for L
-	matrix_t *L_eval = m_initialize(L->numRows, 1);
-	matrix_t *L_evec = m_initialize(L->numRows, L->numCols);
+	matrix_t *L_eval = m_initialize(L->rows, 1);
+	matrix_t *L_evec = m_initialize(L->rows, L->cols);
 
 	m_eigenvalues_eigenvectors(L, L_eval, L_evec);
 

@@ -22,9 +22,9 @@
 matrix_t * m_initialize (int rows, int cols)
 {
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
-	M->numRows = rows;
-	M->numCols = cols;
-	M->data = (precision *) malloc(rows * cols * sizeof(precision));
+	M->rows = rows;
+	M->cols = cols;
+	M->data = (precision_t *) malloc(rows * cols * sizeof(precision_t));
 
 	return M;
 }
@@ -38,9 +38,9 @@ matrix_t * m_initialize (int rows, int cols)
 matrix_t * m_identity (int rows)
 {
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
-	M->numRows = rows;
-	M->numCols = rows;
-	M->data = (precision *) calloc(rows * rows, sizeof(precision));
+	M->rows = rows;
+	M->cols = rows;
+	M->data = (precision_t *) calloc(rows * rows, sizeof(precision_t));
 
 	int i;
 	for ( i = 0; i < rows; i++ ) {
@@ -60,9 +60,9 @@ matrix_t * m_identity (int rows)
 matrix_t * m_zeros (int rows, int cols)
 {
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
-	M->numRows = rows;
-	M->numCols = cols;
-	M->data = (precision *) calloc(rows * cols, sizeof(precision));
+	M->rows = rows;
+	M->cols = cols;
+	M->data = (precision_t *) calloc(rows * cols, sizeof(precision_t));
 
 	return M;
 }
@@ -75,9 +75,9 @@ matrix_t * m_zeros (int rows, int cols)
  */
 matrix_t * m_copy (matrix_t *M)
 {
-	matrix_t *C = m_initialize(M->numRows, M->numCols);
+	matrix_t *C = m_initialize(M->rows, M->cols);
 
-	memcpy(C->data, M->data, C->numRows * C->numCols * sizeof(precision));
+	memcpy(C->data, M->data, C->rows * C->cols * sizeof(precision_t));
 
 	return C;
 }
@@ -101,11 +101,11 @@ void m_free (matrix_t *M)
  */
 void m_fprint (FILE *stream, matrix_t *M)
 {
-	fprintf(stream, "%d %d\n", M->numRows, M->numCols);
+	fprintf(stream, "%d %d\n", M->rows, M->cols);
 
 	int i, j;
-	for ( i = 0; i < M->numRows; i++ ) {
-		for ( j = 0; j < M->numCols; j++ ) {
+	for ( i = 0; i < M->rows; i++ ) {
+		for ( j = 0; j < M->cols; j++ ) {
 			fprintf(stream, "%lg ", elem(M, i, j));
 		}
 		fprintf(stream, "\n");
@@ -120,9 +120,9 @@ void m_fprint (FILE *stream, matrix_t *M)
  */
 void m_fwrite (FILE *stream, matrix_t *M)
 {
-	fwrite(&M->numRows, sizeof(int), 1, stream);
-	fwrite(&M->numCols, sizeof(int), 1, stream);
-	fwrite(M->data, sizeof(precision), M->numRows * M->numCols, stream);
+	fwrite(&M->rows, sizeof(int), 1, stream);
+	fwrite(&M->cols, sizeof(int), 1, stream);
+	fwrite(M->data, sizeof(precision_t), M->rows * M->cols, stream);
 }
 
 /**
@@ -133,13 +133,13 @@ void m_fwrite (FILE *stream, matrix_t *M)
  */
 matrix_t * m_fscan (FILE *stream)
 {
-	int numRows, numCols;
-	fscanf(stream, "%d %d", &numRows, &numCols);
+	int rows, cols;
+	fscanf(stream, "%d %d", &rows, &cols);
 
-	matrix_t *M = m_initialize(numRows, numCols);
+	matrix_t *M = m_initialize(rows, cols);
 	int i, j;
-	for ( i = 0; i < numRows; i++ ) {
-		for ( j = 0; j < numCols; j++ ) {
+	for ( i = 0; i < rows; i++ ) {
+		for ( j = 0; j < cols; j++ ) {
 			fscanf(stream, "%lf", &(elem(M, i, j)));
 		}
 	}
@@ -155,12 +155,12 @@ matrix_t * m_fscan (FILE *stream)
  */
 matrix_t * m_fread (FILE *stream)
 {
-	int numRows, numCols;
-	fread(&numRows, sizeof(int), 1, stream);
-	fread(&numCols, sizeof(int), 1, stream);
+	int rows, cols;
+	fread(&rows, sizeof(int), 1, stream);
+	fread(&cols, sizeof(int), 1, stream);
 
-	matrix_t *M = m_initialize(numRows, numCols);
-	fread(M->data, sizeof(precision), M->numRows * M->numCols, stream);
+	matrix_t *M = m_initialize(rows, cols);
+	fread(M->data, sizeof(precision_t), M->rows * M->cols, stream);
 
 	return M;
 }
@@ -176,14 +176,14 @@ matrix_t * m_fread (FILE *stream)
  */
 void m_ppm_read (matrix_t *M, int col, ppm_t *image)
 {
-	assert(M->numRows == image->height * image->width);
+	assert(M->rows == image->height * image->width);
 
 	int i;
-	for ( i = 0; i < M->numRows; i++ ) {
+	for ( i = 0; i < M->rows; i++ ) {
 		elem(M, i, col) =
-			0.299 * (precision) image->pixels[3 * i] +
-			0.587 * (precision) image->pixels[3 * i + 1] +
-			0.114 * (precision) image->pixels[3 * i + 2];
+			0.299 * (precision_t) image->pixels[3 * i] +
+			0.587 * (precision_t) image->pixels[3 * i + 1] +
+			0.114 * (precision_t) image->pixels[3 * i + 2];
 	}
 }
 
@@ -196,10 +196,10 @@ void m_ppm_read (matrix_t *M, int col, ppm_t *image)
  */
 void m_ppm_write (matrix_t *M, int col, ppm_t *image)
 {
-	assert(M->numRows == image->height * image->width);
+	assert(M->rows == image->height * image->width);
 
 	int i;
-	for ( i = 0; i < M->numRows; i++ ) {
+	for ( i = 0; i < M->rows; i++ ) {
 		memset(&image->pixels[3 * i], (char) elem(M, i, col), 3);
 	}
 }
@@ -218,13 +218,13 @@ void m_ppm_write (matrix_t *M, int col, ppm_t *image)
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec)
 {
 	matrix_t *M_work = m_copy(M);
-	precision *wi = (precision *)malloc(M->numRows * sizeof(precision));
+	precision_t *wi = (precision_t *)malloc(M->rows * sizeof(precision_t));
 
 	LAPACKE_dgeev(LAPACK_COL_MAJOR, 'N', 'V',
-		M->numCols, M_work->data, M->numRows,  // input matrix
+		M->cols, M_work->data, M->rows,  // input matrix
 		M_eval->data, wi,					  // real, imag eigenvalues
-		NULL, M->numRows,					  // left eigenvectors
-		M_evec->data, M->numRows);			 // right eigenvectors
+		NULL, M->rows,					  // left eigenvectors
+		M_evec->data, M->rows);			 // right eigenvectors
 
 	m_free(M_work);
 	free(wi);
@@ -239,15 +239,15 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec
  */
 matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B)
 {
-	assert(A->numCols == B->numRows);
+	assert(A->cols == B->rows);
 
-	matrix_t *C = m_zeros(A->numRows, B->numCols);
+	matrix_t *C = m_zeros(A->rows, B->cols);
 
 	// C := alpha * op(A) * op(B) + beta * C, alpha = 1, beta = 0
 	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-		A->numRows, B->numCols, A->numCols,
-		1, A->data, A->numRows, B->data, B->numRows,
-		0, C->data, C->numRows);
+		A->rows, B->cols, A->cols,
+		1, A->data, A->rows, B->data, B->rows,
+		0, C->data, C->rows);
 
 	return C;
 }
@@ -260,17 +260,17 @@ matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B)
  */
 matrix_t * m_mean_column (matrix_t *M)
 {
-	matrix_t *a = m_zeros(M->numRows, 1);
+	matrix_t *a = m_zeros(M->rows, 1);
 
 	int i, j;
-	for ( i = 0; i < M->numCols; i++ ) {
-		for ( j = 0; j < M->numRows; j++ ) {
+	for ( i = 0; i < M->cols; i++ ) {
+		for ( j = 0; j < M->rows; j++ ) {
 			elem(a, j, 0) += elem(M, j, i);
 		}
 	}
 
-	for ( i = 0; i < M->numRows; i++ ) {
-		elem(a, i, 0) /= M->numCols;
+	for ( i = 0; i < M->rows; i++ ) {
+		elem(a, i, 0) /= M->cols;
 	}
 
 	return a;
@@ -284,11 +284,11 @@ matrix_t * m_mean_column (matrix_t *M)
  */
 matrix_t * m_transpose (matrix_t *M)
 {
-	matrix_t *T = m_initialize(M->numCols, M->numRows);
+	matrix_t *T = m_initialize(M->cols, M->rows);
 
 	int i, j;
-	for ( i = 0; i < T->numRows; i++ ) {
-		for ( j = 0; j < T->numCols; j++ ) {
+	for ( i = 0; i < T->rows; i++ ) {
+		for ( j = 0; j < T->cols; j++ ) {
 			elem(T, i, j) = elem(M, j, i);
 		}
 	}
@@ -305,8 +305,8 @@ matrix_t * m_transpose (matrix_t *M)
 void m_normalize_columns (matrix_t *M, matrix_t *a)
 {
 	int i, j;
-	for ( i = 0; i < M->numCols; i++ ) {
-		for ( j = 0; j < M->numRows; j++ ) {
+	for ( i = 0; i < M->cols; i++ ) {
+		for ( j = 0; j < M->rows; j++ ) {
 			elem(M, j, i) -= elem(a, j, 0);
 		}
 	}
@@ -326,12 +326,12 @@ void m_normalize_columns (matrix_t *M, matrix_t *a)
 *******************************************************************************/
 void m_flipCols (matrix_t *M) {
 	int i, j;
-	precision temp;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols / 2; j++) {
+	precision_t temp;
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols / 2; j++) {
 			temp = elem(M, i, j);
-			elem(M, i, j) = elem(M, i, M->numCols - j - 1);
-			elem(M, i, M->numCols - j - 1) = temp;
+			elem(M, i, j) = elem(M, i, M->cols - j - 1);
+			elem(M, i, M->cols - j - 1) = temp;
 		}
 	}
 }
@@ -343,12 +343,12 @@ void m_flipCols (matrix_t *M) {
 *******************************************************************************/
 void m_normalize (matrix_t *M) {
 	int i, j;
-	precision max, min, val;
+	precision_t max, min, val;
 	min = elem(M, 0, 0);
 	max = min;
 
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			val = elem(M, i, j);
 			if (min > val) {
 				min = val;
@@ -358,8 +358,8 @@ void m_normalize (matrix_t *M) {
 			}
 		}
 	}
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) = (elem (M, i, j) - min) / (max - min);
 		}
 	}
@@ -376,9 +376,9 @@ void m_normalize (matrix_t *M) {
 *******************************************************************************/
 void m_elem_truncate (matrix_t *M) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
-			elem(M, i, j) = ((precision) ((int)elem(M, i, j)));
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
+			elem(M, i, j) = ((precision_t) ((int)elem(M, i, j)));
 		}
 	}
 }
@@ -393,8 +393,8 @@ void m_elem_truncate (matrix_t *M) {
 *******************************************************************************/
 void m_elem_acos (matrix_t *M) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) = acos (elem(M, i, j));
 		}
 	}
@@ -408,8 +408,8 @@ void m_elem_acos (matrix_t *M) {
 
 void m_elem_sqrt (matrix_t *M) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) = sqrt(elem(M, i, j));
 		}
 	}
@@ -422,8 +422,8 @@ void m_elem_sqrt (matrix_t *M) {
 *******************************************************************************/
 void m_elem_negate (matrix_t *M) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) = - elem(M, i, j);
 		}
 	}
@@ -436,8 +436,8 @@ void m_elem_negate (matrix_t *M) {
 *******************************************************************************/
 void m_elem_exp (matrix_t *M) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) = exp ( elem(M, i, j) );
 		}
 	}
@@ -449,10 +449,10 @@ void m_elem_exp (matrix_t *M) {
  *
  * raises all matrix elements to a power
 *******************************************************************************/
-void m_elem_pow (matrix_t *M, precision num) {
+void m_elem_pow (matrix_t *M, precision_t num) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) = pow ( elem(M, i, j) , num);
 		}
 	}
@@ -463,10 +463,10 @@ void m_elem_pow (matrix_t *M, precision num) {
  *
  * scales matrix by contant
 *******************************************************************************/
-void m_elem_mult (matrix_t *M, precision x) {
+void m_elem_mult (matrix_t *M, precision_t x) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) =  elem(M, i, j) * x;
 		}
 	}
@@ -477,10 +477,10 @@ void m_elem_mult (matrix_t *M, precision x) {
  *
  * divides matrix by contant
 *******************************************************************************/
-void m_elem_divideByConst (matrix_t *M, precision x) {
+void m_elem_divideByConst (matrix_t *M, precision_t x) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) =  elem(M, i, j) / x;
 		}
 	}
@@ -491,10 +491,10 @@ void m_elem_divideByConst (matrix_t *M, precision x) {
  *
  * divides constant by matrix element-wise
 *******************************************************************************/
-void m_elem_divideByMatrix (matrix_t *M, precision num) {
+void m_elem_divideByMatrix (matrix_t *M, precision_t num) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) =  num / elem(M, i, j);
 		}
 	}
@@ -505,10 +505,10 @@ void m_elem_divideByMatrix (matrix_t *M, precision num) {
  *
  * adds element-wise matrix to contant
 *******************************************************************************/
-void m_elem_add (matrix_t *M, precision x) {
+void m_elem_add (matrix_t *M, precision_t x) {
 	int i, j;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			elem(M, i, j) =  elem(M, i, j) + x;
 		}
 	}
@@ -522,12 +522,12 @@ void m_elem_add (matrix_t *M, precision x) {
  * sums the columns of a matrix, returns a row vector
 *******************************************************************************/
 matrix_t * m_sumCols (matrix_t *M) {
-	matrix_t *R = m_initialize(1, M->numCols);
+	matrix_t *R = m_initialize(1, M->cols);
 	int i, j;
-	precision val;
-	for (j = 0; j < M->numCols; j++) {
+	precision_t val;
+	for (j = 0; j < M->cols; j++) {
 		val = 0;
-		for (i = 0; i < M->numRows; i++) {
+		for (i = 0; i < M->rows; i++) {
 			val += elem(M, i, j);
 		}
 		elem(R, 0, j) = val;
@@ -544,8 +544,8 @@ matrix_t * m_sumCols (matrix_t *M) {
 matrix_t *m_meanCols (matrix_t *M) {
 	matrix_t *R = m_sumCols (M);
 	int i;
-	for (i = 0; i < M->numCols; i++) {
-		elem(R, 0, i) = elem(R, 0, i) / M->numRows;
+	for (i = 0; i < M->cols; i++) {
+		elem(R, 0, i) = elem(R, 0, i) / M->rows;
 	}
 	return R;
 }
@@ -557,12 +557,12 @@ matrix_t *m_meanCols (matrix_t *M) {
  * sums the rows of a matrix, returns a col vect
 *******************************************************************************/
 matrix_t * m_sumRows (matrix_t *M) {
-	matrix_t *R = m_initialize(M->numRows, 1);
+	matrix_t *R = m_initialize(M->rows, 1);
 	int i, j;
-	precision val;
-	for (i = 0; i < M->numRows; i++) {
+	precision_t val;
+	for (i = 0; i < M->rows; i++) {
 		val = 0;
-		for (j = 0; j < M->numCols; j++) {
+		for (j = 0; j < M->cols; j++) {
 			val += elem(M, i, j);
 		}
 		elem(R, i, 0) = val;
@@ -578,14 +578,14 @@ matrix_t * m_sumRows (matrix_t *M) {
  * This vector has additional, non-used space, not sure what to do about this -miller
 *******************************************************************************/
 matrix_t * m_findNonZeros (matrix_t *M) {
-	matrix_t *R = m_zeros(M->numRows * M->numCols, 1);
-	precision val;
+	matrix_t *R = m_zeros(M->rows * M->cols, 1);
+	precision_t val;
 	int i, j, count = 0;
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			val = elem(M, i, j);
 			if (val != 0) {
-				elem(R, count, 0) = (precision) (i + 1);
+				elem(R, count, 0) = (precision_t) (i + 1);
 				count++;
 			}
 		}
@@ -600,15 +600,15 @@ matrix_t * m_findNonZeros (matrix_t *M) {
  * reshapes matrix by changing dimensions, keeping data
 *******************************************************************************/
 matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
-	assert (M->numRows * M->numCols == newNumRows * newNumCols);
+	assert (M->rows * M->cols == newNumRows * newNumCols);
 	int i;
 	int r1, c1, r2, c2;
 	matrix_t *R = m_initialize(newNumRows, newNumCols);
 	for (i = 0; i < newNumRows * newNumCols; i++) {
 		r1 = i / newNumCols;
 		c1 = i % newNumCols;
-		r2 = i / M->numCols;
-		c2 = i % M->numCols;
+		r2 = i / M->cols;
+		c2 = i % M->cols;
 		elem(R, r1, c1) = elem(M, r2, c2);
 	}
 
@@ -622,20 +622,20 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 // UPDATE 03/02/16: make sure to compile time include -llapacke
 // NEEDS VERIFICATION - Greg
 void m_inverseMatrix (matrix_t *M) {
-	//assert(M->numRows == M->numCols);
+	//assert(M->rows == M->cols);
 	int info;
-	//int lwork = M->numRows * M->numCols;
-	int *ipiv = malloc((M->numRows + 1) * sizeof(int));
-	//precision *work = malloc(lwork * sizeof(precision));
+	//int lwork = M->rows * M->cols;
+	int *ipiv = malloc((M->rows + 1) * sizeof(int));
+	//precision_t *work = malloc(lwork * sizeof(precision_t));
 	//		  (rows   , columns, matrix , lda	, ipiv, info );
-	info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR,M->numCols, M->numRows, M->data, M->numRows, ipiv);
+	info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR,M->cols, M->rows, M->data, M->rows, ipiv);
 	if(info!=0){
 		//printf("\nINFO != 0\n");
 		exit(1);
 	}
 	//printf("\ndgertrf passed\n");
 	//		  (order  , matrix, Leading Dim, IPIV,
-	info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->numCols,M->data,M->numRows, ipiv);
+	info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->cols,M->data,M->rows, ipiv);
 	if(info!=0){
 		//printf("\nINFO2 != 0\n");
 		exit(1);
@@ -648,12 +648,12 @@ void m_inverseMatrix (matrix_t *M) {
  * NOTE: I think the norm def I looked up was different. I kept this one for
  * right now but we need to look at that again
 *******************************************************************************/
-precision m_norm (matrix_t *M, int specRow) {
+precision_t m_norm (matrix_t *M, int specRow) {
 	int i, j;
-	precision val, sum = 0;
+	precision_t val, sum = 0;
 
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			val = elem(M, i, j);
 			sum += val * val;
 		}
@@ -692,26 +692,26 @@ matrix_t * m_sqrtm (matrix_t *M) {
  *
  * find the determinant of the matrix
 *******************************************************************************/
-precision m_determinant (matrix_t *M) {
+precision_t m_determinant (matrix_t *M) {
 	//int i, j, j1, j2;
 	int i, j, r, c, k, sign;
-	precision det = 0, val;
+	precision_t det = 0, val;
 	matrix_t *A = NULL;
-	assert (M->numCols == M->numRows);
+	assert (M->cols == M->rows);
 
-	if (M->numRows < 1)   printf("error finding determinant\n");
-	else if (M->numRows == 1) det = elem(M, 0, 0); // Shouldn't get used
-	else if (M->numRows == 2) det = elem(M, 0, 0) * elem(M, 1, 1) - elem(M, 1, 0) * elem(M, 0, 1);
+	if (M->rows < 1)   printf("error finding determinant\n");
+	else if (M->rows == 1) det = elem(M, 0, 0); // Shouldn't get used
+	else if (M->rows == 2) det = elem(M, 0, 0) * elem(M, 1, 1) - elem(M, 1, 0) * elem(M, 0, 1);
 	else {
 
 		det = 0;
-		A = m_initialize(M->numRows - 1, M->numCols - 1);
-		for (j = 0; j < M->numCols; j++) {
+		A = m_initialize(M->rows - 1, M->cols - 1);
+		for (j = 0; j < M->cols; j++) {
 			// Fill matrix
 			c = 0;
-			for (k = 0; k < M->numCols; k++) {
+			for (k = 0; k < M->cols; k++) {
 				if (k == j) continue; // skip over columns that are the same
-				for (i = 1; i < M->numRows; i++) {
+				for (i = 1; i < M->rows; i++) {
 					r = i - 1;
 					elem(A, r, c) = elem(M, i, k);
 				}
@@ -735,18 +735,18 @@ precision m_determinant (matrix_t *M) {
 matrix_t * m_cofactor (matrix_t *M) {
 	//int i, j, ii, jj, i1, j1;
 	int i, j, r, c, row, col, sign;
-	assert (M->numRows == M->numCols);
-	matrix_t *A = m_initialize(M->numRows - 1, M->numCols - 1);
-	matrix_t *R = m_initialize(M->numRows, M->numCols);
-	precision val;
+	assert (M->rows == M->cols);
+	matrix_t *A = m_initialize(M->rows - 1, M->cols - 1);
+	matrix_t *R = m_initialize(M->rows, M->cols);
+	precision_t val;
 
 	// For every element in M
-	for (i = 0; i < M->numRows; i++) {
-		for (j = 0; j < M->numCols; j++) {
+	for (i = 0; i < M->rows; i++) {
+		for (j = 0; j < M->cols; j++) {
 			// Make matrix of values not sharing this column/row
-			for (r = 0, row = 0; r < M->numRows; r++) {
+			for (r = 0, row = 0; r < M->rows; r++) {
 				if (i == r) continue;
-				for (c = 0, col = 0; c < M->numCols; c++) {
+				for (c = 0, col = 0; c < M->cols; c++) {
 					if (j == c) continue;
 					elem(A, row, col) = elem(M, r, c);
 					col++;
@@ -770,24 +770,24 @@ matrix_t * m_cofactor (matrix_t *M) {
 *******************************************************************************/
 matrix_t * m_covariance(matrix_t *M) {
 	int i, j, k;
-	precision val;
+	precision_t val;
 	matrix_t *colAvgs = m_meanCols(M);
-	matrix_t *norm = m_initialize(M->numRows, M->numCols);
-	matrix_t *R = m_initialize(M->numRows, M->numCols);
+	matrix_t *norm = m_initialize(M->rows, M->cols);
+	matrix_t *R = m_initialize(M->rows, M->cols);
 
-	for (j = 0; j < M->numCols; j++) {
-		for (i = 0; i < M->numRows; i++) {
+	for (j = 0; j < M->cols; j++) {
+		for (i = 0; i < M->rows; i++) {
 			val = elem(M, i, j) - elem(colAvgs, 0, j);
 		}
 	}
 
-	for (j = 0; j < M->numCols; j++) {
-		for (k = 0; k < M->numCols; k++) {
+	for (j = 0; j < M->cols; j++) {
+		for (k = 0; k < M->cols; k++) {
 			val = 0;
-			for (i = 0; i < M->numRows; i++) {
+			for (i = 0; i < M->rows; i++) {
 				val += elem(norm, i, j) * elem(norm, i, j);
 			}
-			val /= M->numCols - 1;
+			val /= M->cols - 1;
 			elem(R, j, k) = val;
 		}
 	}
@@ -808,11 +808,11 @@ matrix_t * m_covariance(matrix_t *M) {
  *	* return the difference of two matrices element-wise
  *	*******************************************************************************/
 matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B) {
-	assert (A->numRows == B->numRows && A->numCols == B->numCols);
-	matrix_t *R = m_initialize(A->numRows, A->numCols);
+	assert (A->rows == B->rows && A->cols == B->cols);
+	matrix_t *R = m_initialize(A->rows, A->cols);
 	int i, j;
-	for (i = 0; i < A->numRows; i++) {
-		for (j = 0; j < A->numCols; j++) {
+	for (i = 0; i < A->rows; i++) {
+		for (j = 0; j < A->cols; j++) {
 			elem(R, i, j) = elem(A, i, j) - elem(B, i, j);
 		}
 	}
@@ -825,11 +825,11 @@ matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B) {
  *	* element wise sum of two matrices
  *	*******************************************************************************/
 matrix_t * m_dot_add (matrix_t *A, matrix_t *B) {
-	assert (A->numRows == B->numRows && A->numCols == B->numCols);
-	matrix_t *R = m_initialize(A->numRows, A->numCols);
+	assert (A->rows == B->rows && A->cols == B->cols);
+	matrix_t *R = m_initialize(A->rows, A->cols);
 	int i, j;
-	for (i = 0; i < A->numRows; i++) {
-		for (j = 0; j < A->numCols; j++) {
+	for (i = 0; i < A->rows; i++) {
+		for (j = 0; j < A->cols; j++) {
 			elem(R, i, j) = elem(A, i, j) + elem(B, i, j);
 		}
 	}
@@ -842,11 +842,11 @@ matrix_t * m_dot_add (matrix_t *A, matrix_t *B) {
  *	* element wise division of two matrices
  *	*******************************************************************************/
 matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
-	assert (A->numRows == B->numRows && A->numCols == B->numCols);
-	matrix_t *R = m_initialize(A->numRows, A->numCols);
+	assert (A->rows == B->rows && A->cols == B->cols);
+	matrix_t *R = m_initialize(A->rows, A->cols);
 	int i, j;
-	for (i = 0; i < A->numRows; i++) {
-		for (j = 0; j < A->numCols; j++) {
+	for (i = 0; i < A->rows; i++) {
+		for (j = 0; j < A->cols; j++) {
 			elem(R, i, j) = elem(A, i, j) / elem(B, i, j);
 		}
 	}
@@ -881,13 +881,13 @@ matrix_t * m_matrix_division (matrix_t *A, matrix_t *B) {
  * 		void reorder_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t *rowVect);
 *******************************************************************************/
 matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
-	assert (M->numCols == V->numCols && V->numRows == 1);
+	assert (M->cols == V->cols && V->rows == 1);
 
 	int i, j, row;
-	matrix_t *R = m_initialize(M->numRows, M->numCols);
-	for (j = 0; j < R->numCols; j++) {
+	matrix_t *R = m_initialize(M->rows, M->cols);
+	for (j = 0; j < R->cols; j++) {
 		row = elem(V, 1, j);
-		for (i = 0; i < R->numRows; i++) {
+		for (i = 0; i < R->rows; i++) {
 			elem(R, i, j) = elem(M, row, j);
 		}
 	}

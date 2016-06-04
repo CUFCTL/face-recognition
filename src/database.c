@@ -140,7 +140,7 @@ void db_train(database_t *db, const char *path)
     // compute mean-subtracted image matrix A
     matrix_t *A = get_image_matrix(db->image_names, db->num_images);
 
-    db->num_dimensions = A->numRows;
+    db->num_dimensions = A->rows;
     db->mean_face = m_mean_column(A);
 
 	m_normalize_columns(A, db->mean_face);
@@ -203,8 +203,8 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 	db->W_pca_tr = m_fread(db_training_data);
 	db->images_proj = m_fread(db_training_data);
 
-    db->num_images = db->images_proj->numCols;
-    db->num_dimensions = db->mean_face->numRows;
+    db->num_images = db->images_proj->cols;
+    db->num_dimensions = db->mean_face->rows;
 
 	fclose(db_training_data);
 
@@ -234,15 +234,15 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
  * @param j  column index of B
  * @return L2 distance between A_i and B_j
  */
-precision dist_L2(matrix_t *A, int i, matrix_t *B, int j)
+precision_t dist_L2(matrix_t *A, int i, matrix_t *B, int j)
 {
-	// assert(A->numRows == B->numRows);
+	// assert(A->rows == B->rows);
 
-	precision dist = 0;
+	precision_t dist = 0;
 
 	int k;
-	for ( k = 0; k < A->numRows; k++ ) {
-		precision diff = elem(A, k, i) - elem(B, k, j);
+	for ( k = 0; k < A->rows; k++ ) {
+		precision_t diff = elem(A, k, i) - elem(B, k, j);
 		dist += diff * diff;
 	}
 
@@ -277,12 +277,12 @@ void db_recognize(database_t *db, const char *path)
 
 		// find the training image with the minimum distance from the test image
 		int min_index = -1;
-		precision min_dist = -1;
+		precision_t min_dist = -1;
 
 		int j;
 		for ( j = 0; j < db->num_images; j++ ) {
 			// compute the distance between the two images
-			precision dist = dist_L2(T_i_proj, 0, db->images_proj, j);
+			precision_t dist = dist_L2(T_i_proj, 0, db->images_proj, j);
 
 			// update the running minimum
 			if ( min_dist == -1 || dist < min_dist ) {
