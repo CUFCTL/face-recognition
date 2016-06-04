@@ -223,6 +223,33 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 }
 
 /**
+ * Compute the L2 distance between two column vectors.
+ *
+ * L2 is the square of the Euclidean distance:
+ * d_L2(v1, v2) = ||v1 - v2||^2
+ *
+ * @param A  pointer to matrix
+ * @param i  column index of A
+ * @param B  pointer to matrix
+ * @param j  column index of B
+ * @return L2 distance between A_i and B_j
+ */
+precision dist_L2(matrix_t *A, int i, matrix_t *B, int j)
+{
+	// assert(A->numRows == B->numRows);
+
+	precision dist = 0;
+
+	int k;
+	for ( k = 0; k < A->numRows; k++ ) {
+		precision diff = elem(A, k, i) - elem(B, k, j);
+		dist += diff * diff;
+	}
+
+	return dist;
+}
+
+/**
  * Test a set of images against a database.
  *
  * @param db    pointer to database
@@ -248,20 +275,14 @@ void db_recognize(database_t *db, const char *path)
 		// compute the projected test image T_i_proj = W' * T_i
 		matrix_t *T_i_proj = m_matrix_multiply(db->W_pca_tr, T_i);
 
-		// find the training image with the minimum Euclidean distance from the test image
+		// find the training image with the minimum distance from the test image
 		int min_index = -1;
-		double min_dist = -1;
+		precision min_dist = -1;
 
 		int j;
 		for ( j = 0; j < db->num_images; j++ ) {
-			// compute the Euclidean distance between the two images
-			double dist = 0;
-
-			int k;
-			for ( k = 0; k < T_i_proj->numRows; k++ ) {
-				double diff = elem(T_i_proj, k, 0) - elem(db->images_proj, k, j);
-				dist += diff * diff;
-			}
+			// compute the distance between the two images
+			precision dist = dist_L2(T_i_proj, 0, db->images_proj, j);
 
 			// update the running minimum
 			if ( min_dist == -1 || dist < min_dist ) {
