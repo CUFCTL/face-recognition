@@ -102,7 +102,6 @@ void ppm_read(ppm_t *image, const char *path)
 		image->pixels = (unsigned char *)malloc(num * sizeof(unsigned char));
 	}
 
-	skip_to_next_value(in);
 	fread(image->pixels, sizeof(unsigned char), num, in);
 
 	fclose(in);

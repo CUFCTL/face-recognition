@@ -11,15 +11,29 @@
 #include "ppm.h"
 
 /**
- * Get whether a file is a PGM or PPM image based
+ * Get whether an entry is a PGM or PPM image based
  * on the file extension.
  *
  * @param entry
- * @return 1 if file is PGM or PPM image, 0 otherwise
+ * @return 1 if entry is PGM or PPM image, 0 otherwise
  */
 int is_valid_image(const struct dirent *entry)
 {
-	return strstr(entry->d_name, ".pgm") != NULL || strstr(entry->d_name, ".ppm") != NULL;
+	return strstr(entry->d_name, ".pgm") != NULL
+		|| strstr(entry->d_name, ".ppm") != NULL;
+}
+
+/**
+ * Get whether an entry is a directory, excluding "." and "..".
+ *
+ * @param entry
+ * @return 1 if entry is a directory, 0 otherwise
+ */
+int is_directory(const struct dirent *entry)
+{
+	return entry->d_type == DT_DIR
+		&& strcmp(entry->d_name, ".") != 0
+		&& strcmp(entry->d_name, "..") != 0;
 }
 
 /**
@@ -60,22 +74,89 @@ int get_image_names(const char* path, char ***image_names)
 }
 
 /**
+ * Get a list of image entries in a directory.
+ *
+ * The directory should contain a subdirectory for each
+ * class, and each subdirectory should contain the images
+ * of its class.
+ *
+ * @param path           directory path
+ * @param image_entries  pointer to store image entries
+ * @return number of images that were found
+ */
+int get_image_entries(const char *path, database_entry_t **image_entries)
+{
+	// get list of classes
+	struct dirent **entries;
+	int num_classes = scandir(path, &entries, is_directory, alphasort);
+
+	if ( num_classes <= 0 ) {
+		perror("scandir");
+		exit(1);
+	}
+
+	// get list of image names for each class
+	char ***classes = (char ***)malloc(num_classes * sizeof(char **));
+	int *class_sizes = (int *)malloc(num_classes * sizeof(int *));
+
+	int num_images = 0;
+
+	int i;
+	for ( i = 0; i < num_classes; i++ ) {
+		char *class_path = (char *)malloc(strlen(path) + 1 + strlen(entries[i]->d_name) + 1);
+
+		sprintf(class_path, "%s/%s", path, entries[i]->d_name);
+
+		class_sizes[i] = get_image_names(class_path, &classes[i]);
+		num_images += class_sizes[i];
+
+		free(class_path);
+	}
+
+	// flatten image name lists into a list of entries
+	*image_entries = (database_entry_t *)malloc(num_images * sizeof(database_entry_t));
+
+	int num, j;
+	for ( num = 0, i = 0; i < num_classes; i++ ) {
+		for ( j = 0; j < class_sizes[i]; j++ ) {
+			(*image_entries)[num] = (database_entry_t) {
+				.class = i,
+				.name = classes[i][j]
+			};
+
+			num++;
+		}
+	}
+
+	// clean up
+	for ( i = 0; i < num_classes; i++ ) {
+		free(entries[i]);
+		free(classes[i]);
+	}
+	free(entries);
+	free(classes);
+	free(class_sizes);
+
+	return num_images;
+}
+
+/**
  * Map a collection of images to column vectors.
  *
  * The image matrix has size m x n, where m is the number of
  * pixels in each image and n is the number of images. The
  * images must all have the same size.
  *
- * @param image_names  pointer to list of image names
- * @param num_images   number of images
+ * @param entries     pointer to list of image entries
+ * @param num_images  number of images
  * @return pointer to image matrix
  */
-matrix_t * get_image_matrix(char **image_names, int num_images)
+matrix_t * get_image_matrix(database_entry_t *entries, int num_images)
 {
 	// get the image size from the first image
 	ppm_t *image = ppm_construct();
 
-	ppm_read(image, image_names[0]);
+	ppm_read(image, entries[0].name);
 
 	matrix_t *T = m_initialize(image->channels * image->height * image->width, num_images);
 
@@ -84,7 +165,7 @@ matrix_t * get_image_matrix(char **image_names, int num_images)
 
 	int i;
 	for ( i = 1; i < num_images; i++ ) {
-		ppm_read(image, image_names[i]);
+		ppm_read(image, entries[i].name);
 		m_ppm_read(T, i, image);
 	}
 
@@ -114,9 +195,9 @@ void db_destruct(database_t *db)
 {
 	int i;
 	for ( i = 0; i < db->num_images; i++ ) {
-		free(db->image_names[i]);
+		free(db->entries[i].name);
 	}
-	free(db->image_names);
+	free(db->entries);
 
     m_free(db->mean_face);
 	m_free(db->W_pca_tr);
@@ -135,10 +216,10 @@ void db_destruct(database_t *db)
  */
 void db_train(database_t *db, const char *path)
 {
-    db->num_images = get_image_names(path, &db->image_names);
+    db->num_images = get_image_entries(path, &db->entries);
 
     // compute mean-subtracted image matrix A
-    matrix_t *A = get_image_matrix(db->image_names, db->num_images);
+    matrix_t *A = get_image_matrix(db->entries, db->num_images);
 
     db->num_dimensions = A->rows;
     db->mean_face = m_mean_column(A);
@@ -174,7 +255,7 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 
 	int i;
 	for ( i = 0; i < db->num_images; i++ ) {
-		fprintf(tset, "%s\n", db->image_names[i]);
+		fprintf(tset, "%d %s\n", db->entries[i].class, db->entries[i].name);
 	}
 	fclose(tset);
 
@@ -211,12 +292,12 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 	// get image filenames
 	FILE *db_training_set = fopen(path_tset, "r");
 
-	db->image_names = (char **)malloc(db->num_images * sizeof(char *));
+	db->entries = (database_entry_t *)malloc(db->num_images * sizeof(database_entry_t));
 
 	int i;
 	for ( i = 0; i < db->num_images; i++ ) {
-		db->image_names[i] = (char *)malloc(64 * sizeof(char));
-		fscanf(db_training_set, "%s", db->image_names[i]);
+		db->entries[i].name = (char *)malloc(64 * sizeof(char));
+		fscanf(db_training_set, "%d %s", &db->entries[i].class, db->entries[i].name);
 	}
 
 	fclose(db_training_set);
@@ -249,6 +330,7 @@ precision_t dist_L2(matrix_t *A, int i, matrix_t *B, int j)
 	return dist;
 }
 
+// TODO: maybe return class and name of matching image
 /**
  * Test a set of images against a database.
  *
@@ -291,7 +373,7 @@ void db_recognize(database_t *db, const char *path)
 			}
 		}
 
-		printf("test image \'%s\' -> \'%s\'\n", image_names[i], db->image_names[min_index]);
+		printf("test image \'%s\' -> \'%s\'\n", image_names[i], db->entries[min_index].name);
 
 		m_free(T_i_proj);
 	}

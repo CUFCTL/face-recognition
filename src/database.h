@@ -9,9 +9,14 @@
 #include "matrix.h"
 
 typedef struct {
+	int class;
+	char *name;
+} database_entry_t;
+
+typedef struct {
 	int num_images;
 	int num_dimensions;
-	char **image_names;
+	database_entry_t *entries;
 	matrix_t *mean_face;
 	matrix_t *W_pca_tr;
 //	matrix_t *W_lda_tr;
