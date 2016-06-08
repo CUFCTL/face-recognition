@@ -303,33 +303,6 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 	fclose(db_training_set);
 }
 
-/**
- * Compute the L2 distance between two column vectors.
- *
- * L2 is the square of the Euclidean distance:
- * d_L2(v1, v2) = ||v1 - v2||^2
- *
- * @param A  pointer to matrix
- * @param i  column index of A
- * @param B  pointer to matrix
- * @param j  column index of B
- * @return L2 distance between A_i and B_j
- */
-precision_t dist_L2(matrix_t *A, int i, matrix_t *B, int j)
-{
-	// assert(A->rows == B->rows);
-
-	precision_t dist = 0;
-
-	int k;
-	for ( k = 0; k < A->rows; k++ ) {
-		precision_t diff = elem(A, k, i) - elem(B, k, j);
-		dist += diff * diff;
-	}
-
-	return dist;
-}
-
 // TODO: maybe return class and name of matching image
 /**
  * Test a set of images against a database.
@@ -364,7 +337,7 @@ void db_recognize(database_t *db, const char *path)
 		int j;
 		for ( j = 0; j < db->num_images; j++ ) {
 			// compute the distance between the two images
-			precision_t dist = dist_L2(T_i_proj, 0, db->images_proj, j);
+			precision_t dist = m_dist_L2(T_i_proj, 0, db->images_proj, j);
 
 			// update the running minimum
 			if ( min_dist == -1 || dist < min_dist ) {

@@ -23,6 +23,19 @@ void fill_matrix_constant(matrix_t *M, precision_t c)
 }
 
 /**
+ * Helper function to fill a matrix with arbitrary data.
+ */
+void fill_matrix_data(matrix_t *M, precision_t data[][M->cols])
+{
+	int i, j;
+	for ( i = 0; i < M->rows; i++ ) {
+		for ( j = 0; j < M->cols; j++ ) {
+			elem(M, i, j) = data[i][j];
+		}
+	}
+}
+
+/**
  * Helper function to fill a matrix with an increasing value.
  */
 void fill_matrix_linear(matrix_t *M)
@@ -38,6 +51,9 @@ void fill_matrix_linear(matrix_t *M)
 int main (int argc, char **argv)
 {
 	matrix_t *M;
+
+	matrix_t *A;
+	matrix_t *B;
 
 	// identity matrix
 	M = m_identity(ROWS);
@@ -55,8 +71,30 @@ int main (int argc, char **argv)
 
 	m_free(M);
 
+	// COS, L1, L2 distance
+	precision_t data1[][2] = {
+		{ 1, 0 },
+		{ 0, 1 },
+		{ 0, 0 }
+	};
+
+	M = m_zeros(3, 2);
+
+	fill_matrix_data(M, data1);
+
+	printf("M = \n");
+	m_fprint(stdout, M);
+
+	printf("d_COS(M[0], M[1]) = %lf\n", m_dist_COS(M, 0, M, 1));
+
+	printf("d_L1(M[0], M[1]) = %lf\n", m_dist_L1(M, 0, M, 1));
+
+	printf("d_L2(M[0], B[1]) = %lf\n", m_dist_L2(M, 0, M, 1));
+
+	m_free(M);
+
 	// eigenvalues and eigenvectors
-	precision_t data[3][3] = {
+	precision_t data2[][3] = {
 		{ 2, 0, 0 },
 		{ 0, 3, 4 },
 		{ 0, 4, 9 }
@@ -69,12 +107,7 @@ int main (int argc, char **argv)
 	M_eval = m_initialize(3, 1);
 	M_evec = m_initialize(3, 3);
 
-	int i, j;
-	for ( i = 0; i < 3; i++ ) {
-		for ( j = 0; j < 3; j++ ) {
-			elem(M, i, j) = data[i][j];
-		}
-	}
+	fill_matrix_data(M, data2);
 
 	m_eigenvalues_eigenvectors(M, M_eval, M_evec);
 
@@ -92,9 +125,6 @@ int main (int argc, char **argv)
 	m_free(M_evec);
 
 	// matrix product
-	matrix_t *A;
-	matrix_t *B;
-
 	A = m_initialize(ROWS, COLS + 2);
 	B = m_initialize(COLS + 2, COLS + 1);
 

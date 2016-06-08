@@ -200,6 +200,89 @@ void m_ppm_write (matrix_t *M, int col, ppm_t *image)
 }
 
 /**
+ * Compute the COS distance between two column vectors.
+ *
+ * COS is the cosine angle:
+ * d_cos(x, y) = -x * y / (||x|| * ||y||)
+ *
+ * @param A  pointer to matrix
+ * @param i  column index of A
+ * @param B  pointer to matrix
+ * @param j  column index of B
+ * @return COS distance between A_i and B_j
+ */
+precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
+{
+	assert(A->rows == B->rows);
+
+	// compute x * y
+	precision_t x_dot_y = 0;
+
+	int k;
+	for ( k = 0; k < A->rows; k++ ) {
+		x_dot_y += elem(A, k, i) * elem(B, k, j);
+	}
+
+	// compute ||x|| and ||y||
+	precision_t abs_x = 0;
+	precision_t abs_y = 0;
+
+	for ( k = 0; k < A->rows; k++ ) {
+		abs_x += elem(A, k, i) * elem(A, k, i);
+		abs_y += elem(B, k, j) * elem(B, k, j);
+	}
+
+	abs_x = sqrt(abs_x);
+	abs_y = sqrt(abs_y);
+
+	return -x_dot_y / (abs_x * abs_y);
+}
+
+/**
+ * Compute the L1 distance between two column vectors.
+ *
+ * L1 is the Euclidean distance:
+ * d_L1(x, y) = ||x - y||
+ *
+ * @param A  pointer to matrix
+ * @param i  column index of A
+ * @param B  pointer to matrix
+ * @param j  column index of B
+ * @return L1 distance between A_i and B_j
+ */
+precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j)
+{
+	return sqrt(m_dist_L2(A, i, B, j));
+}
+
+/**
+ * Compute the L2 distance between two column vectors.
+ *
+ * L2 is the square of the Euclidean distance:
+ * d_L2(x, y) = ||x - y||^2
+ *
+ * @param A  pointer to matrix
+ * @param i  column index of A
+ * @param B  pointer to matrix
+ * @param j  column index of B
+ * @return L2 distance between A_i and B_j
+ */
+precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
+{
+	assert(A->rows == B->rows);
+
+	precision_t dist = 0;
+
+	int k;
+	for ( k = 0; k < A->rows; k++ ) {
+		precision_t diff = elem(A, k, i) - elem(B, k, j);
+		dist += diff * diff;
+	}
+
+	return dist;
+}
+
+/**
  * Compute the real eigenvalues and right eigenvectors of a matrix.
  *
  * The eigenvalues are returned as a column vector, and the
