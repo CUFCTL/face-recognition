@@ -17,14 +17,14 @@ int main(int argc, char **argv)
 	const char *FILENAME_IN = argv[1];
 	const char *FILENAME_OUT = "wahaha.ppm";
 
-	// read a column vector from an image
+	// map an image to a column vector
 	ppm_t *image = ppm_construct();
 	ppm_read(image, FILENAME_IN);
 
-	matrix_t *x = m_initialize(image->width * image->height, 1);
+	matrix_t *x = m_initialize(image->channels * image->width * image->height, 1);
 	m_ppm_read(x, 0, image);
 
-	// write the column vector to an image
+	// map a column vector to an image
 	m_ppm_write(x, 0, image);
 	ppm_write(image, FILENAME_OUT);
 

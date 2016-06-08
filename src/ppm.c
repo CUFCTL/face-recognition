@@ -1,7 +1,11 @@
 /**
  * @file ppm.c
  *
- * Implementation of the PPM image type.
+ * Implementation of the image type.
+ *
+ * The following formats are supported:
+ * - binary PGM (P5)
+ * - binary PPM (P6)
  */
 #include <ctype.h>
 #include <stdio.h>
@@ -16,13 +20,14 @@
  */
 ppm_t * ppm_construct()
 {
-    ppm_t *image = (ppm_t *)malloc(sizeof(ppm_t));
-    image->height = 0;
-    image->width = 0;
-    image->max_value = 0;
-    image->pixels = NULL;
+	ppm_t *image = (ppm_t *)malloc(sizeof(ppm_t));
+	image->channels = 0;
+	image->height = 0;
+	image->width = 0;
+	image->max_value = 0;
+	image->pixels = NULL;
 
-    return image;
+	return image;
 }
 
 /**
@@ -32,8 +37,8 @@ ppm_t * ppm_construct()
  */
 void ppm_destruct(ppm_t *image)
 {
-    free(image->pixels);
-    free(image);
+	free(image->pixels);
+	free(image);
 }
 
 /**
@@ -71,8 +76,14 @@ void ppm_read(ppm_t *image, const char *path)
 	char header[4];
 
 	fscanf(in, "%s", header);
-	if ( strcmp(header, "P3") != 0 && strcmp(header, "P6") != 0 ) {
-		fprintf(stderr, "error: PPM is not P3 or P6\n");
+	if ( strcmp(header, "P5") == 0 ) {
+		image->channels = 1;
+	}
+	else if ( strcmp(header, "P6") == 0 ) {
+		image->channels = 3;
+	}
+	else {
+		fprintf(stderr, "error: cannot read image \'%s\'\n", path);
 		exit(1);
 	}
 
@@ -85,12 +96,14 @@ void ppm_read(ppm_t *image, const char *path)
 	skip_to_next_value(in);
 	fscanf(in, "%d", &image->max_value);
 
-    if ( image->pixels == NULL ) {
-        image->pixels = (unsigned char *)malloc(3 * image->height * image->width * sizeof(unsigned char));
-    }
+	int num = image->channels * image->height * image->width;
+
+	if ( image->pixels == NULL ) {
+		image->pixels = (unsigned char *)malloc(num * sizeof(unsigned char));
+	}
 
 	skip_to_next_value(in);
-	fread(image->pixels, sizeof(unsigned char), 3 * image->height * image->width, in);
+	fread(image->pixels, sizeof(unsigned char), num, in);
 
 	fclose(in);
 }
@@ -106,10 +119,21 @@ void ppm_write(ppm_t *image, const char *path)
 	FILE *out = fopen(path, "w");
 
 	// write image header
-	fprintf(out, "P6 %d %d %d\n", image->height, image->width, image->max_value);
+	if ( image->channels == 1 ) {
+		fprintf(out, "P5");
+	}
+	else if ( image->channels == 3 ) {
+		fprintf(out, "P6");
+	}
+	else {
+		fprintf(stderr, "error: cannot write image \'%s\'\n", path);
+		exit(1);
+	}
+
+	fprintf(out, "%d %d %d\n", image->height, image->width, image->max_value);
 
 	// write pixel data
-	fwrite(image->pixels, sizeof(unsigned char), 3 * image->height * image->width, out);
+	fwrite(image->pixels, sizeof(unsigned char), image->channels * image->height * image->width, out);
 
 	fclose(out);
 }

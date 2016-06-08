@@ -11,15 +11,15 @@
 #include "ppm.h"
 
 /**
- * Get whether a file is a PPM image based on the
- * file extension.
+ * Get whether a file is a PGM or PPM image based
+ * on the file extension.
  *
  * @param entry
- * @return 1 if file is PPM image, 0 otherwise
+ * @return 1 if file is PGM or PPM image, 0 otherwise
  */
-int is_ppm_image(const struct dirent *entry)
+int is_valid_image(const struct dirent *entry)
 {
-	return strstr(entry->d_name, ".ppm") != NULL;
+	return strstr(entry->d_name, ".pgm") != NULL || strstr(entry->d_name, ".ppm") != NULL;
 }
 
 /**
@@ -33,7 +33,7 @@ int get_image_names(const char* path, char ***image_names)
 {
 	// get list of image entries
 	struct dirent **entries;
-	int num_images = scandir(path, &entries, is_ppm_image, alphasort);
+	int num_images = scandir(path, &entries, is_valid_image, alphasort);
 
 	if ( num_images <= 0 ) {
 		perror("scandir");
@@ -60,7 +60,7 @@ int get_image_names(const char* path, char ***image_names)
 }
 
 /**
- * Map a collection of PPM images to column vectors.
+ * Map a collection of images to column vectors.
  *
  * The image matrix has size m x n, where m is the number of
  * pixels in each image and n is the number of images. The
@@ -77,7 +77,7 @@ matrix_t * get_image_matrix(char **image_names, int num_images)
 
 	ppm_read(image, image_names[0]);
 
-	matrix_t *T = m_initialize(image->height * image->width, num_images);
+	matrix_t *T = m_initialize(image->channels * image->height * image->width, num_images);
 
 	// map each image to a column vector
 	m_ppm_read(T, 0, image);

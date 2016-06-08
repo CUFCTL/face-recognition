@@ -10,6 +10,7 @@ recognize
 # image files
 *.jpg
 *.jpeg
+*.pgm
 *.ppm
 
 # data, log files

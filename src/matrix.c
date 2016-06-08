@@ -166,41 +166,36 @@ matrix_t * m_fread (FILE *stream)
 }
 
 /**
- * Read a column vector from a PPM image.
- *
- * Color images are converted to grayscale.
+ * Read a column vector from an image.
  *
  * @param M      pointer to matrix
  * @param col    column index
- * @param image  pointer to PPM image
+ * @param image  pointer to image
  */
 void m_ppm_read (matrix_t *M, int col, ppm_t *image)
 {
-	assert(M->rows == image->height * image->width);
+	assert(M->rows == image->channels * image->height * image->width);
 
 	int i;
 	for ( i = 0; i < M->rows; i++ ) {
-		elem(M, i, col) =
-			0.299 * (precision_t) image->pixels[3 * i] +
-			0.587 * (precision_t) image->pixels[3 * i + 1] +
-			0.114 * (precision_t) image->pixels[3 * i + 2];
+		elem(M, i, col) = (precision_t) image->pixels[i];
 	}
 }
 
 /**
- * Write a column of a matrix to a PPM image.
+ * Write a column of a matrix to an image.
  *
  * @param M      pointer to matrix
  * @param col    column index
- * @param image  pointer to PPM image
+ * @param image  pointer to image
  */
 void m_ppm_write (matrix_t *M, int col, ppm_t *image)
 {
-	assert(M->rows == image->height * image->width);
+	assert(M->rows == image->channels * image->height * image->width);
 
 	int i;
 	for ( i = 0; i < M->rows; i++ ) {
-		memset(&image->pixels[3 * i], (char) elem(M, i, col), 3);
+		image->pixels[i] = (unsigned char) elem(M, i, col);
 	}
 }
 

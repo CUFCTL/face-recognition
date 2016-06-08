@@ -6,7 +6,10 @@
 #ifndef PPM_H
 #define PPM_H
 
+#define GREY(p) (0.299 * (p)[0] + 0.587 * (p)[1] + 0.114 * (p)[2])
+
 typedef struct {
+	int channels;
 	int height;
 	int width;
 	int max_value;

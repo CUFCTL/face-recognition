@@ -2,7 +2,19 @@
 
 This repository contains the code for facial recognition software that combines three popular algorithms PCA, LDA, and ICA.
 
-Images should __not__ be stored in this repository! Instead, images should be downloaded separately. Face databases are widely available on the Internet, such as [here](http://web.mit.edu/emeyers/www/face_databases.html) and [here](http://face-rec.org/databases/).
+## The Image Library
+
+This software currently supports a subset of the [Netpbm](https://en.wikipedia.org/wiki/Netpbm_format) format, particularly with PGM and PPM images.
+
+Images should __not__ be stored in this repository! Instead, images should be downloaded separately. Face databases are widely available on the Internet, such as [here](http://web.mit.edu/emeyers/www/face_databases.html) and [here](http://face-rec.org/databases/). I am currently using [this database](http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html).
+
+To convert JPEG images to PPM with ImageMagick:
+
+```
+for f in [images-folder]/**/*.jpg
+do convert $f -size 300x200 "$(basename $f .jpg)".ppm
+done
+```
 
 ## The Matrix Library
 
@@ -78,14 +90,13 @@ Much of the code in this project depends on BLAS and LAPACK. In order to run it 
 
 Confirmed to run on Mac OS 10.11.1
 
-Download LAPACK 3.5.0 at http://www.netlib.org/lapack/
-Download BLAS 3.5.0 at http://www.netlib.org/blas/
+Download LAPACK 3.5.0 http://www.netlib.org/lapack/
 
-Download gfortran 5.2 for OS X (10.10 - 10.11.x)
-http://coudert.name/software/gfortran-5.2-Yosemite.dmg
+Download BLAS 3.5.0 http://www.netlib.org/blas/
 
-Download gfortran 4.8.2 for OS X (10.7 - 10.9)
-http://coudert.name/software/gfortran-4.8.2-MountainLion.dmg
+(10.10 - 10.11) Download gfortran 5.2 http://coudert.name/software/gfortran-5.2-Yosemite.dmg
+
+(10.7 - 10.9) Download gfortran 4.8.2 http://coudert.name/software/gfortran-4.8.2-MountainLion.dmg
 
     # in BLAS directory
     make
@@ -135,18 +146,11 @@ Here is the working flow graph for the combined algorithm:
     ica: A -> W_ica
         ...
 
-To convert JPEG images to PPM with `ffmpeg`:
-
-    cd [images-folder]
-    for f in *.jpg
-    do ffmpeg -i $f -s 300x200 "$(basename $f .jpg)".ppm
-    done
-
-To run PCA on a training set of PPM images:
+To run PCA on a training set of images:
 
     make
     ./train [training-images-folder]
 
-To test a set of PPM images against the training set:
+To test a set of images against the training set:
 
     ./recognize [test-images-folder]
