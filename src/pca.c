@@ -1,7 +1,7 @@
 /**
  * @file pca.c
  *
- * Implementation of the PCA algorithm.
+ * Implementation of PCA (Turk and Pentland, 1991).
  */
 #include "database.h"
 #include "matrix.h"
