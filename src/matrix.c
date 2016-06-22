@@ -401,6 +401,39 @@ matrix_t * m_transpose (matrix_t *M)
 }
 
 /**
+ * Add a matrix to another matrix.
+ *
+ * @param A  pointer to matrix
+ * @param B  pointer to matrix
+ */
+void m_add (matrix_t *A, matrix_t *B) {
+	assert(A->rows == B->rows && A->cols == B->cols);
+
+	int i, j;
+	for ( i = 0; i < A->rows; i++ ) {
+		for ( j = 0; j < A->cols; j++ ) {
+			elem(A, i, j) += elem(B, i, j);
+		}
+	}
+}
+
+/**
+ * Multiply a matrix by a scalar.
+ *
+ * @param M  pointer to matrix
+ * @param c  scalar
+ */
+void m_elem_mult (matrix_t *M, precision_t c)
+{
+	int i, j;
+	for ( i = 0; i < M->rows; i++ ) {
+		for ( j = 0; j < M->cols; j++ ) {
+			elem(M, i, j) *= c;
+		}
+	}
+}
+
+/**
  * Subtract a "mean" column vector from each column in a matrix.
  *
  * @param M  pointer to matrix
@@ -563,34 +596,6 @@ void m_elem_pow (matrix_t *M, precision_t num) {
 }
 
 /*******************************************************************************
- * void scale_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, int scalar);
- *
- * scales matrix by contant
-*******************************************************************************/
-void m_elem_mult (matrix_t *M, precision_t x) {
-	int i, j;
-	for (i = 0; i < M->rows; i++) {
-		for (j = 0; j < M->cols; j++) {
-			elem(M, i, j) =  elem(M, i, j) * x;
-		}
-	}
-}
-
-/*******************************************************************************
- * void divide_by_constant(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar);
- *
- * divides matrix by contant
-*******************************************************************************/
-void m_elem_divideByConst (matrix_t *M, precision_t x) {
-	int i, j;
-	for (i = 0; i < M->rows; i++) {
-		for (j = 0; j < M->cols; j++) {
-			elem(M, i, j) =  elem(M, i, j) / x;
-		}
-	}
-}
-
-/*******************************************************************************
  * void divide_scaler_by_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t scalar) ;
  *
  * divides constant by matrix element-wise
@@ -637,20 +642,6 @@ matrix_t * m_sumCols (matrix_t *M) {
 		elem(R, 0, j) = val;
 	}
 
-	return R;
-}
-
-/*******************************************************************************
- * void mean_of_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols);
- *
- * takes the mean value of each column
-*******************************************************************************/
-matrix_t *m_meanCols (matrix_t *M) {
-	matrix_t *R = m_sumCols (M);
-	int i;
-	for (i = 0; i < M->cols; i++) {
-		elem(R, 0, i) = elem(R, 0, i) / M->rows;
-	}
 	return R;
 }
 
@@ -849,7 +840,7 @@ matrix_t * m_cofactor (matrix_t *M) {
 matrix_t * m_covariance(matrix_t *M) {
 	int i, j, k;
 	precision_t val;
-	matrix_t *colAvgs = m_meanCols(M);
+	matrix_t *colAvgs = m_mean_column(M);
 	matrix_t *norm = m_initialize(M->rows, M->cols);
 	matrix_t *R = m_initialize(M->rows, M->cols);
 
@@ -892,23 +883,6 @@ matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B) {
 	for (i = 0; i < A->rows; i++) {
 		for (j = 0; j < A->cols; j++) {
 			elem(R, i, j) = elem(A, i, j) - elem(B, i, j);
-		}
-	}
-	return R;
-}
-
-/*******************************************************************************
- *  * void add_matrices(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols);
- *   *
- *	* element wise sum of two matrices
- *	*******************************************************************************/
-matrix_t * m_dot_add (matrix_t *A, matrix_t *B) {
-	assert (A->rows == B->rows && A->cols == B->cols);
-	matrix_t *R = m_initialize(A->rows, A->cols);
-	int i, j;
-	for (i = 0; i < A->rows; i++) {
-		for (j = 0; j < A->cols; j++) {
-			elem(R, i, j) = elem(A, i, j) + elem(B, i, j);
 		}
 	}
 	return R;

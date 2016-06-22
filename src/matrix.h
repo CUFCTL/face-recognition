@@ -48,6 +48,8 @@ matrix_t * m_mean_column (matrix_t *M);
 matrix_t * m_transpose (matrix_t *M);
 
 // mutator functions
+void m_add (matrix_t *A, matrix_t *B);
+void m_elem_mult (matrix_t *M, precision_t c);
 void m_normalize_columns (matrix_t *M, matrix_t *a);
 
 /***************** Group 2 - Operations on a single matrix *******************/
@@ -70,8 +72,6 @@ void m_elem_exp (matrix_t *M);
 //	- element wise math operation
 //	- has a second input operation relies on
 void m_elem_pow (matrix_t *M, precision_t x);
-void m_elem_mult (matrix_t *M, precision_t x);
-void m_elem_divideByConst (matrix_t *M, precision_t x);
 void m_elem_divideByMatrix (matrix_t *M, precision_t x);
 void m_elem_add (matrix_t *M, precision_t x);
 
@@ -80,7 +80,6 @@ void m_elem_add (matrix_t *M, precision_t x);
 // 2.1.0
 //	- returns row vector
 matrix_t * m_sumCols (matrix_t *M);
-matrix_t * m_meanCols (matrix_t *M);
 // 2.1.1
 //	- returns column vector
 matrix_t * m_sumRows (matrix_t *M);
@@ -98,7 +97,6 @@ matrix_t * m_covariance (matrix_t *M);
 
 // Group 4 - ops with 2 matrices that return a matrix of same size
 matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B);
-matrix_t * m_dot_add (matrix_t *A, matrix_t *B);
 matrix_t * m_dot_division (matrix_t *A, matrix_t *B);
 
 // Group 5 - ops with 2 matrices that return a matrix of diff size

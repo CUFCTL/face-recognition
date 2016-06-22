@@ -245,16 +245,64 @@ void test_m_product()
 void test_m_transpose()
 {
 	matrix_t *M = m_zeros(ROWS + 2, COLS);
-	matrix_t *T = m_transpose(M);
+	fill_matrix_linear(M);
+
+	matrix_t *M_tr = m_transpose(M);
 
 	printf("M = \n");
 	m_fprint(stdout, M);
 
 	printf("m_transpose (M) = \n");
-	m_fprint(stdout, T);
+	m_fprint(stdout, M_tr);
 
 	m_free(M);
-	m_free(T);
+	m_free(M_tr);
+}
+
+/**
+ * Test matrix addition.
+ */
+void test_m_add()
+{
+	matrix_t *A = m_initialize(ROWS, COLS);
+	matrix_t *B = m_initialize(ROWS, COLS);
+
+	fill_matrix_linear(A);
+	fill_matrix_linear(B);
+
+	printf("A = \n");
+	m_fprint(stdout, A);
+	printf("B = \n");
+	m_fprint(stdout, B);
+
+	m_add(A, B);
+
+	printf("A + B = \n");
+	m_fprint(stdout, A);
+
+	m_free(A);
+	m_free(B);
+}
+
+/**
+ * Test matrix multiplication by scalar.
+ */
+void test_m_elem_mult()
+{
+	matrix_t *M = m_initialize(ROWS, COLS);
+	precision_t c = 2.0;
+
+	fill_matrix_linear(M);
+
+	printf("M = \n");
+	m_fprint(stdout, M);
+
+	m_elem_mult(M, c);
+
+	printf("%g * M = \n", c);
+	m_fprint(stdout, M);
+
+	m_free(M);
 }
 
 /**
@@ -293,6 +341,8 @@ int main (int argc, char **argv)
 		test_m_mean_column,
 		test_m_product,
 		test_m_transpose,
+		test_m_add,
+		test_m_elem_mult,
 		test_m_normalize_columns
 	};
 	int num_tests = sizeof(tests) / sizeof(test_func_t);
@@ -376,19 +426,6 @@ int main (int argc, char **argv)
 	m_fprint (output, M);
 	m_free (M);
 
-
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_mult (M, x);
-	fprintf (output, "m_elem_mult(M, x) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_divideByConst (M, x);
-	fprintf (output, "m_elem_divideByConst(M, x) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
 	M = m_initialize (FILL, ROWS, COLS);
 	m_elem_divideByMatrix (M, x);
 	fprintf (output, "m_elem_divideByMatrix(M, x) = \n");
@@ -408,11 +445,6 @@ int main (int argc, char **argv)
 
 	R = m_sumCols (M);
 	fprintf (output, "m_sumCols(M) = \n");
-	m_fprint (output, R);
-	m_free (R);
-
-	R = m_meanCols (M);
-	fprintf (output, "m_meanCols(M) = \n");
 	m_fprint (output, R);
 	m_free (R);
 
@@ -540,11 +572,6 @@ int main (int argc, char **argv)
 
 	R = m_dot_subtract (M, B);
 	fprintf (output, "m_dot_subtract(M, B) = \n");
-	m_fprint (output, R);
-	m_free (R);
-
-	R = m_dot_add (M, B);
-	fprintf (output, "m_dot_add(M, B) = \n");
 	m_fprint (output, R);
 	m_free (R);
 
