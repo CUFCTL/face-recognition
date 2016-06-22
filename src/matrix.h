@@ -43,7 +43,7 @@ precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j);
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec);
 matrix_t * m_inverse (matrix_t *M);
-matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B);
+matrix_t * m_product (matrix_t *A, matrix_t *B);
 matrix_t * m_mean_column (matrix_t *M);
 matrix_t * m_transpose (matrix_t *M);
 

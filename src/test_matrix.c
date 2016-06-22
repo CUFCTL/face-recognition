@@ -138,7 +138,7 @@ void test_m_inverse()
 	// identity matrix
     matrix_t *M = m_identity(ROWS);
 	matrix_t *M_inv = m_inverse(M);
-	matrix_t *M_prod = m_matrix_multiply(M, M_inv);
+	matrix_t *M_prod = m_product(M, M_inv);
 
     printf("M = \n");
     m_fprint(stdout, M);
@@ -161,7 +161,7 @@ void test_m_inverse()
 	fill_matrix_data(M, data);
 
 	M_inv = m_inverse(M);
-	M_prod = m_matrix_multiply(M, M_inv);
+	M_prod = m_product(M, M_inv);
 
     printf("M = \n");
     m_fprint(stdout, M);
@@ -180,7 +180,7 @@ void test_m_inverse()
 	fill_matrix_linear(M);
 
 	M_inv = m_inverse(M);
-	M_prod = m_matrix_multiply(M, M_inv);
+	M_prod = m_product(M, M_inv);
 
     fprintf(stdout, "M = \n");
     m_fprint(stdout, M);
@@ -192,33 +192,6 @@ void test_m_inverse()
     m_free(M);
 	m_free(M_inv);
 	m_free(M_prod);
-}
-
-/**
- * Test matrix product.
- */
-void test_m_product()
-{
-	matrix_t *A = m_initialize(ROWS, COLS + 2);
-	matrix_t *B = m_initialize(COLS + 2, COLS + 1);
-
-	fill_matrix_linear(A);
-	fill_matrix_linear(B);
-
-	matrix_t *M = m_matrix_multiply(A, B);
-
-	printf("A = \n");
-	m_fprint(stdout, A);
-
-	printf("B = \n");
-	m_fprint(stdout, B);
-
-	printf("A * B = \n");
-	m_fprint(stdout, M);
-
-	m_free(A);
-	m_free(B);
-	m_free(M);
 }
 
 /**
@@ -237,6 +210,33 @@ void test_m_mean_column()
 
 	m_free(M);
 	m_free(a);
+}
+
+/**
+ * Test matrix product.
+ */
+void test_m_product()
+{
+	matrix_t *A = m_initialize(ROWS, COLS + 2);
+	matrix_t *B = m_initialize(COLS + 2, COLS + 1);
+
+	fill_matrix_linear(A);
+	fill_matrix_linear(B);
+
+	matrix_t *M = m_product(A, B);
+
+	printf("A = \n");
+	m_fprint(stdout, A);
+
+	printf("B = \n");
+	m_fprint(stdout, B);
+
+	printf("A * B = \n");
+	m_fprint(stdout, M);
+
+	m_free(A);
+	m_free(B);
+	m_free(M);
 }
 
 /**

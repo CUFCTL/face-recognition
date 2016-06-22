@@ -35,8 +35,9 @@ m_ppm_read                 |  x  |     |     | Verified            |            
 m_ppm_write                |  x  |     |     | Verified            |             |
 _Getters_                  |     |     |     |                     |             |
 m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ LAPACK  |             |
-m_matrix_multiply          |  x  |  x  |  x  | Verified w/ BLAS    |             |
+m_inverse                  |     |  x  |  x  | Not Verified        | 10/07/15    | Miller
 m_mean_column              |  x  |     |     | Verified            |             |
+m_product                  |  x  |  x  |  x  | Verified w/ BLAS    |             |
 m_transpose                |  x  |  x  |  x  | Verified            |             |
 _Mutators_                 |     |     |     |                     |             |
 m_normalize_columns        |  x  |     |     | Verified            |             |
@@ -58,7 +59,6 @@ m_meanCols                 |     |  x  |     | Verified            | 10/02/2015 
 m_sumRows                  |     |     |     | Verified            | 10/02/2015  | James
 m_findNonZeros             |     |     |     | Verified            | 10/06/2015  | James
 m_reshape                  |     |     |     | Verified            | 10/06/2015  | James
-m_inverseMatrix            |     |     |  x  | Not Verified        | 10/07/15    | Miller
 m_norm                     |     |     |     | Not Verified        | 10/07/15    | Miller
 m_sqrtm                    |     |     |  x  | Not Verified        | 10/07/15    | Miller
 m_determinant              |     |     |     | Not Verified        | 10/07/15    | Miller

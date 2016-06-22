@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
                                                     //                   % overwritten by a sphered version of x.
     //multiply_matrices(temp, w, wz, EIGV_NUM, EIGV_NUM, EIGV_NUM);
 
-    matrix_t *temp = m_matrix_multiply(w, wz); 
+    matrix_t *temp = m_product(w, wz); 
     matrix_t *temp2 = m_inverseMatrix(temp);
 
 
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 
     matrix_t *temp_R = m_getSubMatrix(R, 0, 0, num_images, num_images);
 
-    matrix_t *F = m_matrix_multiply(temp_R, temp2);
+    matrix_t *F = m_product(temp_R, temp2);
 
     //multiply_matrices(F, temp_R, temp2, num_images, EIGV_NUM, EIGV_NUM);                                                //                                  % ICA1 rep of an image
                                                                         //
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
     //Ftest = Rtest(:,1:116) * inv(w * wz);                               //  Ftest = Rtest(:,1:116) * inv(w*wz);
     Rtest(:,1:116);
 
-    Ftest = m_matrix_multiply(Rtest, temp2);
+    Ftest = m_product(Rtest, temp2);
 
     //multiply_matrices(Ftest, Rtest, temp2, int rows, int cols, int k);                                                  //
                                                     //  % Test nearest neighbor classification using cosine, not euclidean distance, 

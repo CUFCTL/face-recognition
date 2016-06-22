@@ -238,7 +238,7 @@ void db_train(database_t *db, const char *path)
 	m_free(W_pca);
 
 	// compute projected images P = W_pca' * A
-	db->P_pca = m_matrix_multiply(db->W_pca_tr, A);
+	db->P_pca = m_product(db->W_pca_tr, A);
 
     m_free(A);
 }
@@ -330,7 +330,7 @@ void db_recognize(database_t *db, const char *path)
 		m_normalize_columns(T_i, db->mean_face);
 
 		// compute the projected test image T_i_proj = W' * T_i
-		matrix_t *T_i_proj = m_matrix_multiply(db->W_pca_tr, T_i);
+		matrix_t *T_i_proj = m_product(db->W_pca_tr, T_i);
 
 		// find the training image with the minimum distance from the test image
 		int min_index = -1;

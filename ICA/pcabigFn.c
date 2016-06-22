@@ -163,9 +163,9 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
     matrix_t *B_zmtrans = m_transpose(B_zeromean);
 
 	//multiply_matrices(B_mult, B_zmtrans, B_zeromean, num_images, num_images, num_pixels);
-	B_mult = m_matrix_multiply(B_zmtrans, B_zeromean);
+	B_mult = m_product(B_zmtrans, B_zeromean);
 	//multiply_matrices(outmatrix, matrix1, temp, rows1, cols2, rows2);
-	matrix_t * outmatrix = m_matrix_multiply(matrix1, temp);
+	matrix_t * outmatrix = m_product(matrix1, temp);
 
 	//divide_by_constant(B_div, B_mult, num_images, num_images, (data_t)num_images - 1);
 	B_div = m_elem_divideByConst(B_mult, (data_t)num_images - 1);
@@ -193,7 +193,7 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 
                                                 //  %********Reconstruct
     //multiply_matrices(U, B_zeromean, Vsort, num_pixels, num_images, num_images); 
-    U = m_matrix_multiply(B_zeromean, Vsort);       //  U = B*Vsort;  % Cols of U are Bvi. (N-dim Eigvecs)
+    U = m_product(B_zeromean, Vsort);       //  U = B*Vsort;  % Cols of U are Bvi. (N-dim Eigvecs)
                                                 //
                                                 //  %********Give eigvecs unit length.  Improves classification.
 												//  length = sqrt (sum (U.^2)); 
@@ -209,13 +209,13 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 	//ones(length_ones, rows, 1);	
 	length_ones = m_intialize(ONES, rows, 1);				//  U = U ./ (ones(N,1) * length);
 	//multiply_matrices(length_matrix, length_ones, temp_vec, rows, cols, 1);
-	length_matrix = m_matrix_multiply(length_ones, temp_vec);
+	length_matrix = m_product(length_ones, temp_vec);
 
 	//matrix_dot_division(U, U, length_ones, rows, cols);
 	U = m_dot_division(U, length_ones);
 
 	//multiply_matrices(R, matrix_t, U, cols, cols, rows);
-	R = m_matrix_multiply(matrix_t, U);      //  R = B'*U;  % Rows of R are pcarep of each image.
+	R = m_product(matrix_t, U);      //  R = B'*U;  % Rows of R are pcarep of each image.
     
 	// IS wr matrix = sorted eigvals but not set convert wr to matrix and here?
 	//fliplr(wr, wr, cols, cols);          //  E = fliplr(seigvals); 

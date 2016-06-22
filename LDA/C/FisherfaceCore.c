@@ -112,7 +112,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     //Calculate L, surrogate of covariance matrix, L = A'*A
 
     At = m_transpose(A);
-    L = m_matrix_multiply(A, At, A->cols);
+    L = m_product(A, At, A->cols);
     m_free(At);
 
     if (verbose) {
@@ -152,7 +152,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     //**************************************************************************
     //Calculating the eigenvectors of covariance matrix 'C'
 
-    V_PCA = m_matrix_multiply(A, L_eig_vec, A->cols);
+    V_PCA = m_product(A, L_eig_vec, A->cols);
 
     if (verbose) {
         printf("V_PCA:\n");
@@ -164,7 +164,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
     // Each column in ProjectedImages_PCA is an image, transposed and multiplied
     // by the eigenvectors of the difference database to produce the column
 
-    ProjectedImages_PCA = m_matrix_multiply(V_PCA, A, A->cols);
+    ProjectedImages_PCA = m_product(V_PCA, A, A->cols);
 
     if (verbose) {
         printf("ProjectedImages_PCA:\n");
@@ -189,7 +189,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
         m_fprintf(stdout, Sw);
         m_fprintf(stdout, Sb);
     }
-    
+
     // Fisher bases
     // Eigenvalues of scatter matrices
     m_gen_eigenvalues(Sb, Sw, J_eig_vec, J_eig_val);
@@ -235,28 +235,28 @@ void m_scatter(matrix_t *mat, matrix_t *Sw, matrix_t *Sb)
     for (i = 1; i <= Class_number; i++)
     {
         tempMean = matrix_bounded_mean(ProjectedImages_PCA, 0, ProjectedImages_PCA->rows-1, (i-1)*Class_population+1, i*Class_population);
-        
+
         for (j = 0; j < m->rows; j++)
         {
            m->data[j][i] = tempMean->data[j][1];
         }
-        
+
         matrix_destructor(tempMean);
-        
+
         for (j = ((i-1)*Class_population+1); j <= (i*Class_population); j++)
         {
             tempMat = matrix_constructor(P-Class_number, 1);
-            
+
             for (k = 0; k < (P-Class_number); k++)
             {
                 tempMat->data[k][0] = ProjectedImages_PCA->data[k][j] - m->data[k][i];
             }
-                
-            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, tempMat->rows, 1, 1, 1, 
-                        *tempMat->data, tempMat->cols, *tempMat->data, tempMat->cols, 1, *S->data, S->cols);  
-                        
+
+            cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, tempMat->rows, 1, 1, 1,
+                        *tempMat->data, tempMat->cols, *tempMat->data, tempMat->cols, 1, *S->data, S->cols);
+
         }
-        
+
         for (j = 0; j < Sw->rows; j++)
         {
            for (k = 0; k < Sw->rows; k++)
@@ -264,13 +264,13 @@ void m_scatter(matrix_t *mat, matrix_t *Sw, matrix_t *Sb)
                Sw->data[j][k] += S->data[j][k];
            }
         }
-        
+
         for (k = 0; k < Sb->rows; k++)
         {
             tempMat->data[k][0] = m[k][i] - m_PCA[k][0];
         }
-        
-        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, tempMat->rows, 1, 1, 1, 
-                        *tempMat->data, tempMat->cols, *tempMat->data, tempMat->cols, 1, *Sb->data, Sb->cols); 
+
+        cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasTrans, tempMat->rows, 1, 1, 1,
+                        *tempMat->data, tempMat->cols, *tempMat->data, tempMat->cols, 1, *Sb->data, Sb->cols);
     }
 }

@@ -341,7 +341,7 @@ matrix_t * m_inverse (matrix_t *M)
  * @param B  pointer to right matrix
  * @return pointer to new matrix equal to A * B
  */
-matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B)
+matrix_t * m_product (matrix_t *A, matrix_t *B)
 {
 	assert(A->cols == B->rows);
 
@@ -756,7 +756,7 @@ matrix_t * m_sqrtm (matrix_t *M) {
 
 	m_elem_sqrt (eigenvalues);
 
-	matrix_t * temp = m_matrix_multiply (eigenvectors, eigenvalues, 0);
+	matrix_t * temp = m_product (eigenvectors, eigenvalues, 0);
 	m_free (eigenvalues);
 	matrix_t * R = m_matrix_division (temp, eigenvectors);
 	m_free (temp);
