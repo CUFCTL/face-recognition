@@ -67,7 +67,6 @@ m_covariance               |     |     |  x  | Verified            | 11/05/15   
 m_dot_subtract             |     |     |  x  | Verified            | 10/21/15    | Taylor
 m_dot_add                  |     |     |  x  | Verified            | 10/21/15    | Taylor
 m_dot_division             |     |     |  x  | Verified            | 11/03/15    | Greg
-m_matrix_division          |     |     |     | Not Verified        | 10/21/15    | Taylor
 m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
 
 #### BLAS and LAPACK
@@ -119,8 +118,11 @@ Here is the working flow graph for the combined algorithm:
         T = [T_1 ... T_n] (image matrix) (m-by-n)
         a = sum(T_i, 1:i:n) / n (mean face) (m-by-1)
         A = [(T_1 - a) ... (T_n - a)] (norm. image matrix) (m-by-n)
-        W = pca(A), lda(A), ica(...) (projection matrix) (m-by-n)
-        P = W' * A (projected images) (n-by-n)
+        W_pca = pca(A) (PCA projection matrix) (m-by-n)
+        P_pca = W_pca' * A (PCA projected images) (n-by-n)
+        W_lda = lda(W_pca, P_pca) (LDA projection matrix) (m-by-n)
+        P_lda = W_lda' * A (LDA projected images) (n-by-n)
+        W_ica = ica(...)
 
     recognize: (a, W', P, T_i) -> P_match
         a = mean face (m-by-1)
@@ -136,11 +138,10 @@ Here is the working flow graph for the combined algorithm:
         L_ev = eigenvectors of L (n-by-n)
         W_pca = A * L_ev (eigenfaces) (m-by-n)
 
-    lda: P_pca -> W_opt
+    lda: (W_pca, P_pca) -> W_opt
         S_b = (scatter around overall mean) (n-by-n)
         S_w = (scatter around mean of each class) (n-by-n)
-        W_lda = c - 1 largest eigenvectors of S_w^-1 * S_b (m-by-(c - 1))
-        W_pca = pca(A) (eigenfaces) (m-by-(n - c))
+        W_lda = eigenvectors of S_w^-1 * S_b (n-by-n)
         W_opt' = W_lda' W_pca'
 
     ica: A -> W_ica

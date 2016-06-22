@@ -9,6 +9,8 @@
 #define ROWS 6
 #define COLS 6
 
+typedef void (*test_func_t)(void);
+
 /**
  * Helper function to fill a matrix with a constant value.
  */
@@ -48,15 +50,13 @@ void fill_matrix_linear(matrix_t *M)
 	}
 }
 
-int main (int argc, char **argv)
+/**
+ * Test the matrix initializers.
+ */
+void test_m_initialize()
 {
-	matrix_t *M;
-
-	matrix_t *A;
-	matrix_t *B;
-
 	// identity matrix
-	M = m_identity(ROWS);
+	matrix_t *M = m_identity(ROWS);
 
 	printf("m_identity (%d) = \n", ROWS);
 	m_fprint(stdout, M);
@@ -70,44 +70,49 @@ int main (int argc, char **argv)
 	m_fprint(stdout, M);
 
 	m_free(M);
+}
 
-	// COS, L1, L2 distance
-	precision_t data1[][2] = {
+/**
+ * Test the vector distance functions.
+ */
+void test_m_distance()
+{
+	precision_t data[][2] = {
 		{ 1, 0 },
 		{ 0, 1 },
 		{ 0, 0 }
 	};
 
-	M = m_zeros(3, 2);
+	matrix_t *M = m_zeros(3, 2);
 
-	fill_matrix_data(M, data1);
+	fill_matrix_data(M, data);
 
 	printf("M = \n");
 	m_fprint(stdout, M);
 
 	printf("d_COS(M[0], M[1]) = %lf\n", m_dist_COS(M, 0, M, 1));
-
 	printf("d_L1(M[0], M[1]) = %lf\n", m_dist_L1(M, 0, M, 1));
-
 	printf("d_L2(M[0], B[1]) = %lf\n", m_dist_L2(M, 0, M, 1));
 
 	m_free(M);
+}
 
-	// eigenvalues and eigenvectors
-	precision_t data2[][3] = {
+/**
+ * Test eigenvalues, eigenvectors.
+ */
+void test_m_eigenvalues_eigenvectors()
+{
+	precision_t data[][3] = {
 		{ 2, 0, 0 },
 		{ 0, 3, 4 },
 		{ 0, 4, 9 }
 	};
 
-	matrix_t *M_eval;
-	matrix_t *M_evec;
+	matrix_t *M = m_initialize(3, 3);
+	matrix_t *M_eval = m_initialize(3, 1);
+	matrix_t *M_evec = m_initialize(3, 3);
 
-	M = m_initialize(3, 3);
-	M_eval = m_initialize(3, 1);
-	M_evec = m_initialize(3, 3);
-
-	fill_matrix_data(M, data2);
+	fill_matrix_data(M, data);
 
 	m_eigenvalues_eigenvectors(M, M_eval, M_evec);
 
@@ -123,42 +128,46 @@ int main (int argc, char **argv)
 	m_free(M);
 	m_free(M_eval);
 	m_free(M_evec);
+}
 
-	// matrix inverse
-	matrix_t *M_inv;
-	matrix_t *M_prod;
+/**
+ * Test matrix inverse.
+ */
+void test_m_inverse()
+{
+	// identity matrix
+    matrix_t *M = m_identity(ROWS);
+	matrix_t *M_inv = m_inverse(M);
+	matrix_t *M_prod = m_matrix_multiply(M, M_inv);
 
-    M = m_identity(ROWS);
-	M_inv = m_inverse(M);
-	M_prod = m_matrix_multiply(M, M_inv);
-
-    fprintf(stdout, "M = \n");
+    printf("M = \n");
     m_fprint(stdout, M);
-    fprintf(stdout, "M^-1 = \n");
+    printf("M^-1 = \n");
     m_fprint(stdout, M_inv);
-    fprintf(stdout, "M * M^-1 = \n");
+    printf("M * M^-1 = \n");
     m_fprint(stdout, M_prod);
 
     m_free(M);
 	m_free(M_inv);
 	m_free(M_prod);
 
-	precision_t data3[][3] = {
+	// 3-by-3 matrix, arbitrary data
+	precision_t data[][3] = {
 		{ 4, 1, 1 },
 		{ 2, 1, -1 },
 		{ 1, 1, 1 }
 	};
 	M = m_initialize(3, 3);
-	fill_matrix_data(M, data3);
+	fill_matrix_data(M, data);
 
 	M_inv = m_inverse(M);
 	M_prod = m_matrix_multiply(M, M_inv);
 
-    fprintf(stdout, "M = \n");
+    printf("M = \n");
     m_fprint(stdout, M);
-    fprintf(stdout, "M^-1 = \n");
+    printf("M^-1 = \n");
     m_fprint(stdout, M_inv);
-    fprintf(stdout, "M * M^-1 = \n");
+    printf("M * M^-1 = \n");
     m_fprint(stdout, M_prod);
 
     m_free(M);
@@ -166,6 +175,7 @@ int main (int argc, char **argv)
 	m_free(M_prod);
 
 	// TODO: this test does not provide the correct inverse
+	// ROWS-by-ROWS matrix, linear fill
 	M = m_initialize(ROWS, ROWS);
 	fill_matrix_linear(M);
 
@@ -182,15 +192,20 @@ int main (int argc, char **argv)
     m_free(M);
 	m_free(M_inv);
 	m_free(M_prod);
+}
 
-	// matrix product
-	A = m_initialize(ROWS, COLS + 2);
-	B = m_initialize(COLS + 2, COLS + 1);
+/**
+ * Test matrix product.
+ */
+void test_m_product()
+{
+	matrix_t *A = m_initialize(ROWS, COLS + 2);
+	matrix_t *B = m_initialize(COLS + 2, COLS + 1);
 
 	fill_matrix_linear(A);
 	fill_matrix_linear(B);
 
-	M = m_matrix_multiply(A, B);
+	matrix_t *M = m_matrix_multiply(A, B);
 
 	printf("A = \n");
 	m_fprint(stdout, A);
@@ -198,18 +213,21 @@ int main (int argc, char **argv)
 	printf("B = \n");
 	m_fprint(stdout, B);
 
-	printf("m_matrix_multiply (A, B) = \n");
+	printf("A * B = \n");
 	m_fprint(stdout, M);
 
 	m_free(A);
 	m_free(B);
 	m_free(M);
+}
 
-	// mean column
-	matrix_t *a;
-
-	M = m_identity(ROWS);
-	a = m_mean_column(M);
+/**
+ * Test matrix mean column.
+ */
+void test_m_mean_column()
+{
+	matrix_t *M = m_identity(ROWS);
+	matrix_t *a = m_mean_column(M);
 
 	printf("M = \n");
 	m_fprint(stdout, M);
@@ -219,12 +237,15 @@ int main (int argc, char **argv)
 
 	m_free(M);
 	m_free(a);
+}
 
-	// matrix transpose
-	matrix_t *T;
-
-	M = m_zeros(ROWS + 2, COLS);
-	T = m_transpose(M);
+/**
+ * Test matrix transpose.
+ */
+void test_m_transpose()
+{
+	matrix_t *M = m_zeros(ROWS + 2, COLS);
+	matrix_t *T = m_transpose(M);
 
 	printf("M = \n");
 	m_fprint(stdout, M);
@@ -234,10 +255,15 @@ int main (int argc, char **argv)
 
 	m_free(M);
 	m_free(T);
+}
 
-	// column normalization
-	M = m_initialize(ROWS, COLS);
-	a = m_initialize(ROWS, 1);
+/**
+ * Test matrix column normalization.
+ */
+void test_m_normalize_columns()
+{
+	matrix_t *M = m_initialize(ROWS, COLS);
+	matrix_t *a = m_initialize(ROWS, 1);
 
 	fill_matrix_linear(M);
 	fill_matrix_linear(a);
@@ -255,6 +281,29 @@ int main (int argc, char **argv)
 
 	m_free(M);
 	m_free(a);
+}
+
+int main (int argc, char **argv)
+{
+	test_func_t tests[] = {
+		test_m_initialize,
+		test_m_distance,
+		test_m_eigenvalues_eigenvectors,
+		test_m_inverse,
+		test_m_mean_column,
+		test_m_product,
+		test_m_transpose,
+		test_m_normalize_columns
+	};
+	int num_tests = sizeof(tests) / sizeof(test_func_t);
+
+	int i;
+	for ( i = 0; i < num_tests; i++ ) {
+		test_func_t test = tests[i];
+
+		test();
+		putchar('\n');
+	}
 
 /*
 	// Test Group 2.0.0

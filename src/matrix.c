@@ -935,19 +935,6 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
 /*  These functions manipulate a multiple matrices but return a matrix of
  *  inequivalent dimensions.*/
 /*******************************************************************************
- * void matrix_division(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows1, int cols1, int rows2, int cols2);
- *
- * multiply one matrix by the inverse of another
-*******************************************************************************/
-matrix_t * m_matrix_division (matrix_t *A, matrix_t *B) {
-	matrix_t *C = m_copy (B);
-	m_inverse (C);
-	matrix_t *R = m_matrix_multiply (A, C);
-	m_free (C);
-	return R;
-}
-
-/*******************************************************************************
  * m_reorderCols
  *
  * This reorders the columns of input matrix M to the order specified by V into output matrix R
