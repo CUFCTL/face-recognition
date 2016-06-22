@@ -42,6 +42,7 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j);
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec);
+matrix_t * m_inverse (matrix_t *M);
 matrix_t * m_matrix_multiply (matrix_t *A, matrix_t *B);
 matrix_t * m_mean_column (matrix_t *M);
 matrix_t * m_transpose (matrix_t *M);
@@ -56,8 +57,6 @@ void m_normalize_columns (matrix_t *M, matrix_t *a);
 //	- no extra inputs
 void m_flipCols (matrix_t *M);
 void m_normalize (matrix_t *M);
-// THIS IS INCLUDED FOR GROUP 3 FOR TESTING TEMPORARILY
-//void m_inverseMatrix (matrix_t *M); // Must be square matrix
 
 // 2.0.1
 //	- element wise math operation
@@ -89,9 +88,6 @@ matrix_t * m_findNonZeros (matrix_t *M);
 // 2.1.2
 //	- reshapes data in matrix to new form
 matrix_t * m_reshape (matrix_t *M, int newNumRows, int newNumCols);
-
-// TEMPORARILY INCLUDED WHILE TESTING
-void m_inverseMatrix (matrix_t *M);
 
 // Group 3 - complex linear algebra functions of a single matrix
 precision_t m_norm (matrix_t *M, int specRow);

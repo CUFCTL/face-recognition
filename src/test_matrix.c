@@ -124,6 +124,65 @@ int main (int argc, char **argv)
 	m_free(M_eval);
 	m_free(M_evec);
 
+	// matrix inverse
+	matrix_t *M_inv;
+	matrix_t *M_prod;
+
+    M = m_identity(ROWS);
+	M_inv = m_inverse(M);
+	M_prod = m_matrix_multiply(M, M_inv);
+
+    fprintf(stdout, "M = \n");
+    m_fprint(stdout, M);
+    fprintf(stdout, "M^-1 = \n");
+    m_fprint(stdout, M_inv);
+    fprintf(stdout, "M * M^-1 = \n");
+    m_fprint(stdout, M_prod);
+
+    m_free(M);
+	m_free(M_inv);
+	m_free(M_prod);
+
+	precision_t data3[][3] = {
+		{ 4, 1, 1 },
+		{ 2, 1, -1 },
+		{ 1, 1, 1 }
+	};
+	M = m_initialize(3, 3);
+	fill_matrix_data(M, data3);
+
+	M_inv = m_inverse(M);
+	M_prod = m_matrix_multiply(M, M_inv);
+
+    fprintf(stdout, "M = \n");
+    m_fprint(stdout, M);
+    fprintf(stdout, "M^-1 = \n");
+    m_fprint(stdout, M_inv);
+    fprintf(stdout, "M * M^-1 = \n");
+    m_fprint(stdout, M_prod);
+
+    m_free(M);
+	m_free(M_inv);
+	m_free(M_prod);
+
+	// TODO: this test does not provide the correct inverse
+	M = m_initialize(ROWS, ROWS);
+	fill_matrix_linear(M);
+
+	M_inv = m_inverse(M);
+	M_prod = m_matrix_multiply(M, M_inv);
+
+    fprintf(stdout, "M = \n");
+    m_fprint(stdout, M);
+    fprintf(stdout, "M^-1 = \n");
+    m_fprint(stdout, M_inv);
+    fprintf(stdout, "M * M^-1 = \n");
+    m_fprint(stdout, M_prod);
+
+    m_free(M);
+	m_free(M_inv);
+	m_free(M_prod);
+
 	// matrix product
 	A = m_initialize(ROWS, COLS + 2);
 	B = m_initialize(COLS + 2, COLS + 1);
@@ -218,19 +277,6 @@ int main (int argc, char **argv)
 	fprintf (output, "m_elem_mult(M, 35) =\n");
 	m_fprint (output, M);
 	m_free (M);
-
-	M = m_initialize (FILL, ROWS, COLS);
-	m_inverseMatrix (M);
-	fprintf (output, "m_inverseMatrix(M) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-    M = m_initialize (IDENTITY, ROWS, COLS);
-    m_inverseMatrix (M);
-    fprintf (output, "This test will take the inverse of the identity\n");
-    fprintf (output, "m_inverseMatrix(M) = \n");
-    m_fprint (output, M);
-    m_free (M);
 
 	// Test Group 2.0.1
 	fprintf (output, "\n-------------Test Group 2.0.1 -------------\n");

@@ -300,12 +300,38 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec
 
 	LAPACKE_dgeev(LAPACK_COL_MAJOR, 'N', 'V',
 		M->cols, M_work->data, M->rows,  // input matrix
-		M_eval->data, wi,					  // real, imag eigenvalues
-		NULL, M->rows,					  // left eigenvectors
-		M_evec->data, M->rows);			 // right eigenvectors
+		M_eval->data, wi,                // real, imag eigenvalues
+		NULL, M->rows,                   // left eigenvectors
+		M_evec->data, M->rows);          // right eigenvectors
 
 	m_free(M_work);
 	free(wi);
+}
+
+/**
+ * Compute the inverse of a square matrix.
+ *
+ * @param M  pointer to matrix
+ * @return pointer to new matrix equal to M^-1
+ */
+matrix_t * m_inverse (matrix_t *M)
+{
+	assert(M->rows == M->cols);
+
+	matrix_t *M_inv = m_copy(M);
+	int *ipiv = malloc(M->rows * sizeof(int));
+
+	LAPACKE_dgetrf(LAPACK_COL_MAJOR,
+		M->rows, M->cols, M_inv->data, M->rows,
+		ipiv);
+
+	LAPACKE_dgetri(LAPACK_COL_MAJOR,
+		M->cols, M_inv->data, M->rows,
+		ipiv);
+
+	free(ipiv);
+
+	return M_inv;
 }
 
 /**
@@ -694,32 +720,6 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 }
 
 /*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 3 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
-// Temp moved this here for dependancy issues. Group 3 code person should work on this
-// for right now.
-// TODO - Documentation & Free's - Miller 10/30
-// UPDATE 03/02/16: make sure to compile time include -llapacke
-// NEEDS VERIFICATION - Greg
-void m_inverseMatrix (matrix_t *M) {
-	//assert(M->rows == M->cols);
-	int info;
-	//int lwork = M->rows * M->cols;
-	int *ipiv = malloc((M->rows + 1) * sizeof(int));
-	//precision_t *work = malloc(lwork * sizeof(precision_t));
-	//		  (rows   , columns, matrix , lda	, ipiv, info );
-	info=LAPACKE_dgetrf(LAPACK_ROW_MAJOR,M->cols, M->rows, M->data, M->rows, ipiv);
-	if(info!=0){
-		//printf("\nINFO != 0\n");
-		exit(1);
-	}
-	//printf("\ndgertrf passed\n");
-	//		  (order  , matrix, Leading Dim, IPIV,
-	info=LAPACKE_dgetri(LAPACK_ROW_MAJOR,M->cols,M->data,M->rows, ipiv);
-	if(info!=0){
-		//printf("\nINFO2 != 0\n");
-		exit(1);
-	}
-}
-
 /*******************************************************************************
  * data_t norm(data_t *matrix, int rows, int cols);
  *
@@ -941,7 +941,7 @@ matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
 *******************************************************************************/
 matrix_t * m_matrix_division (matrix_t *A, matrix_t *B) {
 	matrix_t *C = m_copy (B);
-	m_inverseMatrix (C);
+	m_inverse (C);
 	matrix_t *R = m_matrix_multiply (A, C);
 	m_free (C);
 	return R;
