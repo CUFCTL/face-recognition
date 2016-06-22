@@ -14,6 +14,7 @@ typedef struct {
 } database_entry_t;
 
 typedef struct {
+	int num_classes;
 	int num_images;
 	int num_dimensions;
 	database_entry_t *entries;
@@ -21,7 +22,8 @@ typedef struct {
 	matrix_t *W_pca_tr;
 //	matrix_t *W_lda_tr;
 //	matrix_t *W_ica_tr;
-	matrix_t *images_proj;
+	matrix_t *P_pca;
+//	matrix_t *P_lda;
 } database_t;
 
 database_t * db_construct();

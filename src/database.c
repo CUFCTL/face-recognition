@@ -43,7 +43,7 @@ int is_directory(const struct dirent *entry)
  * @param image_names  pointer to store list of images
  * @return number of images that were found
  */
-int get_image_names(const char* path, char ***image_names)
+int get_image_names(const char *path, char ***image_names)
 {
 	// get list of image entries
 	struct dirent **entries;
@@ -82,27 +82,28 @@ int get_image_names(const char* path, char ***image_names)
  *
  * @param path           directory path
  * @param image_entries  pointer to store image entries
+ * @param num_classes    pointer to store number of classes
  * @return number of images that were found
  */
-int get_image_entries(const char *path, database_entry_t **image_entries)
+int get_image_entries(const char *path, database_entry_t **image_entries, int *num_classes)
 {
 	// get list of classes
 	struct dirent **entries;
-	int num_classes = scandir(path, &entries, is_directory, alphasort);
+	*num_classes = scandir(path, &entries, is_directory, alphasort);
 
-	if ( num_classes <= 0 ) {
+	if ( (*num_classes) <= 0 ) {
 		perror("scandir");
 		exit(1);
 	}
 
 	// get list of image names for each class
-	char ***classes = (char ***)malloc(num_classes * sizeof(char **));
-	int *class_sizes = (int *)malloc(num_classes * sizeof(int *));
+	char ***classes = (char ***)malloc((*num_classes) * sizeof(char **));
+	int *class_sizes = (int *)malloc((*num_classes) * sizeof(int *));
 
 	int num_images = 0;
 
 	int i;
-	for ( i = 0; i < num_classes; i++ ) {
+	for ( i = 0; i < (*num_classes); i++ ) {
 		char *class_path = (char *)malloc(strlen(path) + 1 + strlen(entries[i]->d_name) + 1);
 
 		sprintf(class_path, "%s/%s", path, entries[i]->d_name);
@@ -117,7 +118,7 @@ int get_image_entries(const char *path, database_entry_t **image_entries)
 	*image_entries = (database_entry_t *)malloc(num_images * sizeof(database_entry_t));
 
 	int num, j;
-	for ( num = 0, i = 0; i < num_classes; i++ ) {
+	for ( num = 0, i = 0; i < (*num_classes); i++ ) {
 		for ( j = 0; j < class_sizes[i]; j++ ) {
 			(*image_entries)[num] = (database_entry_t) {
 				.class = i,
@@ -129,7 +130,7 @@ int get_image_entries(const char *path, database_entry_t **image_entries)
 	}
 
 	// clean up
-	for ( i = 0; i < num_classes; i++ ) {
+	for ( i = 0; i < (*num_classes); i++ ) {
 		free(entries[i]);
 		free(classes[i]);
 	}
@@ -203,7 +204,8 @@ void db_destruct(database_t *db)
 	m_free(db->W_pca_tr);
 //	m_free(db->W_lda_tr);
 //	m_free(db->W_ica_tr);
-    m_free(db->images_proj);
+    m_free(db->P_pca);
+//  m_free(db->P_lda);
 
     free(db);
 }
@@ -216,7 +218,7 @@ void db_destruct(database_t *db)
  */
 void db_train(database_t *db, const char *path)
 {
-    db->num_images = get_image_entries(path, &db->entries);
+    db->num_images = get_image_entries(path, &db->entries, &db->num_classes);
 
     // compute mean-subtracted image matrix A
     matrix_t *A = get_image_matrix(db->entries, db->num_images);
@@ -236,7 +238,7 @@ void db_train(database_t *db, const char *path)
 	m_free(W_pca);
 
 	// compute projected images P = W_pca' * A
-	db->images_proj = m_matrix_multiply(db->W_pca_tr, A);
+	db->P_pca = m_matrix_multiply(db->W_pca_tr, A);
 
     m_free(A);
 }
@@ -264,7 +266,7 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 
 	m_fwrite(tdata, db->mean_face);
 	m_fwrite(tdata, db->W_pca_tr);
-	m_fwrite(tdata, db->images_proj);
+	m_fwrite(tdata, db->P_pca);
 	fclose(tdata);
 }
 
@@ -282,9 +284,9 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 
 	db->mean_face = m_fread(db_training_data);
 	db->W_pca_tr = m_fread(db_training_data);
-	db->images_proj = m_fread(db_training_data);
+	db->P_pca = m_fread(db_training_data);
 
-    db->num_images = db->images_proj->cols;
+    db->num_images = db->P_pca->cols;
     db->num_dimensions = db->mean_face->rows;
 
 	fclose(db_training_data);
@@ -337,7 +339,7 @@ void db_recognize(database_t *db, const char *path)
 		int j;
 		for ( j = 0; j < db->num_images; j++ ) {
 			// compute the distance between the two images
-			precision_t dist = m_dist_L2(T_i_proj, 0, db->images_proj, j);
+			precision_t dist = m_dist_L2(T_i_proj, 0, db->P_pca, j);
 
 			// update the running minimum
 			if ( min_dist == -1 || dist < min_dist ) {

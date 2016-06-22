@@ -136,9 +136,9 @@ Here is the working flow graph for the combined algorithm:
         L_ev = eigenvectors of L (n-by-n)
         W_pca = A * L_ev (eigenfaces) (m-by-n)
 
-    lda: A -> W_opt
-        S_b = (scatter around overall mean) (?-by-?)
-        S_w = (scatter around mean of each class) (?-by-?)
+    lda: P_pca -> W_opt
+        S_b = (scatter around overall mean) (n-by-n)
+        S_w = (scatter around mean of each class) (n-by-n)
         W_lda = c - 1 largest eigenvectors of S_w^-1 * S_b (m-by-(c - 1))
         W_pca = pca(A) (eigenfaces) (m-by-(n - c))
         W_opt' = W_lda' W_pca'
