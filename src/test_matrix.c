@@ -73,6 +73,30 @@ void test_m_initialize()
 }
 
 /**
+ * Test the matrix copy constructor.
+ */
+void test_m_copy()
+{
+	matrix_t *M = m_initialize(ROWS, COLS);
+	fill_matrix_linear(M);
+
+	printf("M = \n");
+	m_fprint(stdout, M);
+
+	matrix_t *C1 = m_copy(M);
+	matrix_t *C2 = m_copy_columns(M, 1, COLS - 2);
+
+	printf("C1 = \n");
+	m_fprint(stdout, C1);
+	printf("C2 = \n");
+	m_fprint(stdout, C2);
+
+	m_free(M);
+	m_free(C1);
+	m_free(C2);
+}
+
+/**
  * Test the vector distance functions.
  */
 void test_m_distance()
@@ -260,27 +284,34 @@ void test_m_transpose()
 }
 
 /**
- * Test matrix addition.
+ * Test matrix addition and subtraction.
  */
-void test_m_add()
+void test_m_add_subtract()
 {
-	matrix_t *A = m_initialize(ROWS, COLS);
+	matrix_t *A1 = m_initialize(ROWS, COLS);
+	matrix_t *A2 = m_initialize(ROWS, COLS);
 	matrix_t *B = m_initialize(ROWS, COLS);
 
-	fill_matrix_linear(A);
+	fill_matrix_linear(A1);
+	fill_matrix_linear(A2);
 	fill_matrix_linear(B);
 
 	printf("A = \n");
-	m_fprint(stdout, A);
+	m_fprint(stdout, A1);
 	printf("B = \n");
 	m_fprint(stdout, B);
 
-	m_add(A, B);
+	m_add(A1, B);
+	m_subtract(A2, B);
 
 	printf("A + B = \n");
-	m_fprint(stdout, A);
+	m_fprint(stdout, A1);
 
-	m_free(A);
+	printf("A - B = \n");
+	m_fprint(stdout, A2);
+
+	m_free(A1);
+	m_free(A2);
 	m_free(B);
 }
 
@@ -335,13 +366,14 @@ int main (int argc, char **argv)
 {
 	test_func_t tests[] = {
 		test_m_initialize,
+		test_m_copy,
 		test_m_distance,
 		test_m_eigenvalues_eigenvectors,
 		test_m_inverse,
 		test_m_mean_column,
 		test_m_product,
 		test_m_transpose,
-		test_m_add,
+		test_m_add_subtract,
 		test_m_elem_mult,
 		test_m_normalize_columns
 	};
@@ -563,30 +595,8 @@ int main (int argc, char **argv)
 	m_fprint (output, R);
 	m_free (R);
 
-	// Test Group 4
-	fprintf (output, "\n-------------Test Group 4 -------------\n");
-	matrix_t *B = m_initialize (FILL, ROWS, COLS);
-	m_elem_add (B, -10.0);
-	fprintf (output, "B =\n");
-	m_fprint (output, B);
-
-	R = m_dot_subtract (M, B);
-	fprintf (output, "m_dot_subtract(M, B) = \n");
-	m_fprint (output, R);
-	m_free (R);
-
-	R = m_dot_division (M, B);
-	fprintf (output, "m_dot_division(M, B) = \n");
-	m_fprint (output, R);
-	m_free (R);
-
 	// Test Group 5
 	fprintf (output, "\n-------------Test Group 5 -------------\n");
-
-	R = m_matrix_division(M, B);
-	fprintf (output, "m_matrix_division(M, B) = \n");
-	m_fprint (output, R);
-	m_free (R);
 
 	matrix_t *V = m_initialize (UNDEFINED, 1, 6);
 	V->data[0] = 4; V->data[1] = 5; V->data[2] = 2; V->data[3] = 1;

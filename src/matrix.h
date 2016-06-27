@@ -27,6 +27,7 @@ matrix_t * m_initialize (int rows, int cols);
 matrix_t * m_identity (int rows);
 matrix_t * m_zeros (int rows, int cols);
 matrix_t * m_copy (matrix_t *M);
+matrix_t * m_copy_columns (matrix_t *M, int begin, int end);
 void m_free (matrix_t *M);
 
 // I/O functions
@@ -49,6 +50,7 @@ matrix_t * m_transpose (matrix_t *M);
 
 // mutator functions
 void m_add (matrix_t *A, matrix_t *B);
+void m_subtract (matrix_t *A, matrix_t *B);
 void m_elem_mult (matrix_t *M, precision_t c);
 void m_normalize_columns (matrix_t *M, matrix_t *a);
 
@@ -94,10 +96,6 @@ matrix_t * m_sqrtm (matrix_t *M);
 precision_t m_determinant (matrix_t *M);
 matrix_t * m_cofactor (matrix_t *M);
 matrix_t * m_covariance (matrix_t *M);
-
-// Group 4 - ops with 2 matrices that return a matrix of same size
-matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B);
-matrix_t * m_dot_division (matrix_t *A, matrix_t *B);
 
 // Group 5 - ops with 2 matrices that return a matrix of diff size
 matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);

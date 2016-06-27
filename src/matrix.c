@@ -75,9 +75,24 @@ matrix_t * m_zeros (int rows, int cols)
  */
 matrix_t * m_copy (matrix_t *M)
 {
-	matrix_t *C = m_initialize(M->rows, M->cols);
+	return m_copy_columns(M, 0, M->cols);
+}
 
-	memcpy(C->data, M->data, C->rows * C->cols * sizeof(precision_t));
+/**
+ * Copy a range of columns in a matrix.
+ *
+ * @param M      pointer to matrix
+ * @param begin  begin index
+ * @param end    end index
+ * @return pointer to copy of columns [begin, end) of M
+ */
+matrix_t * m_copy_columns (matrix_t *M, int begin, int end)
+{
+	assert(0 <= begin && begin < end && end <= M->cols);
+
+	matrix_t *C = m_initialize(M->rows, end - begin);
+
+	memcpy(C->data, &elem(M, 0, begin), C->rows * C->cols * sizeof(precision_t));
 
 	return C;
 }
@@ -406,13 +421,32 @@ matrix_t * m_transpose (matrix_t *M)
  * @param A  pointer to matrix
  * @param B  pointer to matrix
  */
-void m_add (matrix_t *A, matrix_t *B) {
+void m_add (matrix_t *A, matrix_t *B)
+{
 	assert(A->rows == B->rows && A->cols == B->cols);
 
 	int i, j;
 	for ( i = 0; i < A->rows; i++ ) {
 		for ( j = 0; j < A->cols; j++ ) {
 			elem(A, i, j) += elem(B, i, j);
+		}
+	}
+}
+
+/**
+ * Subtract a matrix from another matrix.
+ *
+ * @param A  pointer to matrix
+ * @param B  pointer to matrix
+ */
+void m_subtract (matrix_t *A, matrix_t *B)
+{
+	assert(A->rows == B->rows && A->cols == B->cols);
+
+	int i, j;
+	for ( i = 0; i < A->rows; i++ ) {
+		for ( j = 0; j < A->cols; j++ ) {
+			elem(A, i, j) -= elem(B, i, j);
 		}
 	}
 }
@@ -864,44 +898,6 @@ matrix_t * m_covariance(matrix_t *M) {
 	m_free (colAvgs);
 	m_free (norm);
 
-	return R;
-}
-
-/*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 4 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
-/*  These functions manipulate multiple matrices and return a matrix of
- *   *  equivalent dimensions.
- *	*/
-/*******************************************************************************
- *  * void subtract_matrices(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols);
- *   *
- *	* return the difference of two matrices element-wise
- *	*******************************************************************************/
-matrix_t * m_dot_subtract (matrix_t *A, matrix_t *B) {
-	assert (A->rows == B->rows && A->cols == B->cols);
-	matrix_t *R = m_initialize(A->rows, A->cols);
-	int i, j;
-	for (i = 0; i < A->rows; i++) {
-		for (j = 0; j < A->cols; j++) {
-			elem(R, i, j) = elem(A, i, j) - elem(B, i, j);
-		}
-	}
-	return R;
-}
-
-/*******************************************************************************
- *  * void matrix_dot_division(data_t *outmatrix, data_t *matrix1, data_t *matrix2, int rows, int cols);
- *   *
- *	* element wise division of two matrices
- *	*******************************************************************************/
-matrix_t * m_dot_division (matrix_t *A, matrix_t *B) {
-	assert (A->rows == B->rows && A->cols == B->cols);
-	matrix_t *R = m_initialize(A->rows, A->cols);
-	int i, j;
-	for (i = 0; i < A->rows; i++) {
-		for (j = 0; j < A->cols; j++) {
-			elem(R, i, j) = elem(A, i, j) / elem(B, i, j);
-		}
-	}
 	return R;
 }
 
