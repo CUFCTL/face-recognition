@@ -182,9 +182,9 @@ matrix_t * get_image_matrix(database_entry_t *entries, int num_images)
  */
 database_t * db_construct()
 {
-    database_t *db = (database_t *)malloc(sizeof(database_t));
+	database_t *db = (database_t *)malloc(sizeof(database_t));
 
-    return db;
+	return db;
 }
 
 /**
@@ -200,53 +200,49 @@ void db_destruct(database_t *db)
 	}
 	free(db->entries);
 
-    m_free(db->mean_face);
+	m_free(db->mean_face);
 	m_free(db->W_pca_tr);
-//	m_free(db->W_lda_tr);
+	m_free(db->W_lda_tr);
 //	m_free(db->W_ica_tr);
-    m_free(db->P_pca);
-//  m_free(db->P_lda);
+	m_free(db->P_pca);
+	m_free(db->P_lda);
 
-    free(db);
+	free(db);
 }
 
 /**
  * Train a database with a set of images.
  *
- * @param db    pointer to database
+ * @param db	pointer to database
  * @param path  directory of training images
  */
 void db_train(database_t *db, const char *path)
 {
-    db->num_images = get_image_entries(path, &db->entries, &db->num_classes);
+	db->num_images = get_image_entries(path, &db->entries, &db->num_classes);
 
-    // compute mean-subtracted image matrix A
-    matrix_t *A = get_image_matrix(db->entries, db->num_images);
+	// compute mean-subtracted image matrix A
+	matrix_t *A = get_image_matrix(db->entries, db->num_images);
 
-    db->num_dimensions = A->rows;
-    db->mean_face = m_mean_column(A);
+	db->num_dimensions = A->rows;
+	db->mean_face = m_mean_column(A);
 
 	m_normalize_columns(A, db->mean_face);
 
-	// compute projection matrix W_pca'
-	matrix_t *W_pca = get_projection_matrix_PCA(A);
-//	matrix_t *W_lda = get_projection_matrix_LDA(A);
-//	matrix_t *W_ica = get_projection_matrix_ICA(A);
-
-	db->W_pca_tr = m_transpose(W_pca);
-
-	m_free(W_pca);
-
-	// compute projected images P = W_pca' * A
+	// compute projected images from PCA
+	db->W_pca_tr = get_projection_matrix_PCA(A);
 	db->P_pca = m_product(db->W_pca_tr, A);
 
-    m_free(A);
+	// compute projected images from LDA
+	db->W_lda_tr = get_projection_matrix_LDA(db);
+	db->P_lda = m_product(db->W_lda_tr, A);
+
+	m_free(A);
 }
 
 /**
  * Save a database to the file system.
  *
- * @param db          pointer to database
+ * @param db		  pointer to database
  * @param path_tset   path to save image filenames
  * @param path_tdata  path to save matrix data
  */
@@ -261,12 +257,14 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 	}
 	fclose(tset);
 
-	// save the mean face, projection matrix, and projected images
+	// save the mean face, PCA output, and LDA output
 	FILE *tdata = fopen(path_tdata, "w");
 
 	m_fwrite(tdata, db->mean_face);
 	m_fwrite(tdata, db->W_pca_tr);
 	m_fwrite(tdata, db->P_pca);
+	m_fwrite(tdata, db->W_lda_tr);
+	m_fwrite(tdata, db->P_lda);
 	fclose(tdata);
 }
 
@@ -279,15 +277,17 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
  */
 void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 {
-	// get mean face, projection matrix, and projected images
+	// get mean face, PDA output, and LDA output
 	FILE *db_training_data = fopen(path_tdata, "r");
 
 	db->mean_face = m_fread(db_training_data);
 	db->W_pca_tr = m_fread(db_training_data);
 	db->P_pca = m_fread(db_training_data);
+	db->W_lda_tr = m_fread(db_training_data);
+	db->P_lda = m_fread(db_training_data);
 
-    db->num_images = db->P_pca->cols;
-    db->num_dimensions = db->mean_face->rows;
+	db->num_images = db->P_pca->cols;
+	db->num_dimensions = db->mean_face->rows;
 
 	fclose(db_training_data);
 
@@ -306,6 +306,7 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 }
 
 // TODO: maybe return class and name of matching image
+// TODO: run recognition for LDA information
 /**
  * Test a set of images against a database.
  *
@@ -322,7 +323,7 @@ void db_recognize(database_t *db, const char *path)
 	ppm_t *image = ppm_construct();
 	matrix_t *T_i = m_initialize(db->num_dimensions, 1);
 
-    int i;
+	int i;
 	for ( i = 0; i < num_test_images; i++ ) {
 		// compute the mean-subtracted test image
 		ppm_read(image, image_names[i]);

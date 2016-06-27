@@ -13,7 +13,7 @@
  * eigenvectors, where n is the number of training images.
  *
  * @param A  mean-subtracted image matrix
- * @return projection matrix W_pca
+ * @return projection matrix W_pca'
  */
 matrix_t * get_projection_matrix_PCA(matrix_t *A)
 {
@@ -31,10 +31,12 @@ matrix_t * get_projection_matrix_PCA(matrix_t *A)
 
 	// compute eigenfaces W_pca = A * L_evec
 	matrix_t *W_pca = m_product(A, L_evec);
+	matrix_t *W_pca_tr = m_transpose(W_pca);
 
 	m_free(L);
 	m_free(L_eval);
 	m_free(L_evec);
+	m_free(W_pca);
 
-	return W_pca;
+	return W_pca_tr;
 }

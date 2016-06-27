@@ -20,10 +20,10 @@ typedef struct {
 	database_entry_t *entries;
 	matrix_t *mean_face;
 	matrix_t *W_pca_tr;
-//	matrix_t *W_lda_tr;
+	matrix_t *W_lda_tr;
 //	matrix_t *W_ica_tr;
 	matrix_t *P_pca;
-//	matrix_t *P_lda;
+	matrix_t *P_lda;
 } database_t;
 
 database_t * db_construct();
@@ -36,7 +36,7 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata);
 void db_recognize(database_t *db, const char *path);
 
 matrix_t * get_projection_matrix_PCA(matrix_t *A);
-matrix_t * get_projection_matrix_LDA(matrix_t *W_pca_tr, matrix_t *P_pca, int c);
+matrix_t * get_projection_matrix_LDA(database_t *db);
 matrix_t * get_projection_matrix_ICA(matrix_t *A);
 
 #endif
