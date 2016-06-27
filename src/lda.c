@@ -95,7 +95,7 @@ void m_scatter(database_t *db, matrix_t *S_b, matrix_t *S_w)
  * @param db  pointer to database
  * @return projection matrix W_opt'
  */
-matrix_t * get_projection_matrix_LDA(database_t *db)
+matrix_t * LDA(database_t *db)
 {
     // TODO: take only the first n - c columns of P_pca
 

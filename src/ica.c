@@ -12,7 +12,7 @@
  * @param A  mean-subtracted image matrix
  * @return projection matrix W_ica
  */
-matrix_t * get_projection_matrix_ICA(matrix_t *A)
+matrix_t * ICA(matrix_t *A)
 {
     return NULL;
 }

@@ -229,11 +229,11 @@ void db_train(database_t *db, const char *path)
 	m_subtract_columns(A, db->mean_face);
 
 	// compute projected images from PCA
-	db->W_pca_tr = get_projection_matrix_PCA(A);
+	db->W_pca_tr = PCA(A);
 	db->P_pca = m_product(db->W_pca_tr, A);
 
 	// compute projected images from LDA
-	db->W_lda_tr = get_projection_matrix_LDA(db);
+	db->W_lda_tr = LDA(db);
 	db->P_lda = m_product(db->W_lda_tr, A);
 
 	m_free(A);

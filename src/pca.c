@@ -15,7 +15,7 @@
  * @param A  mean-subtracted image matrix
  * @return projection matrix W_pca'
  */
-matrix_t * get_projection_matrix_PCA(matrix_t *A)
+matrix_t * PCA(matrix_t *A)
 {
 	// compute the surrogate matrix L = A' * A
 	matrix_t *A_tr = m_transpose(A);
