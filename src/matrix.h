@@ -52,7 +52,7 @@ matrix_t * m_transpose (matrix_t *M);
 void m_add (matrix_t *A, matrix_t *B);
 void m_subtract (matrix_t *A, matrix_t *B);
 void m_elem_mult (matrix_t *M, precision_t c);
-void m_normalize_columns (matrix_t *M, matrix_t *a);
+void m_subtract_columns (matrix_t *M, matrix_t *a);
 
 /***************** Group 2 - Operations on a single matrix *******************/
 /***** 2.0 - No return values, operate directly on M's data *****/

@@ -226,7 +226,7 @@ void db_train(database_t *db, const char *path)
 	db->num_dimensions = A->rows;
 	db->mean_face = m_mean_column(A);
 
-	m_normalize_columns(A, db->mean_face);
+	m_subtract_columns(A, db->mean_face);
 
 	// compute projected images from PCA
 	db->W_pca_tr = get_projection_matrix_PCA(A);
@@ -328,7 +328,7 @@ void db_recognize(database_t *db, const char *path)
 		// compute the mean-subtracted test image
 		ppm_read(image, image_names[i]);
 		m_ppm_read(T_i, 0, image);
-		m_normalize_columns(T_i, db->mean_face);
+		m_subtract_columns(T_i, db->mean_face);
 
 		// compute the projected test image T_i_proj = W' * T_i
 		matrix_t *T_i_proj = m_product(db->W_pca_tr, T_i);

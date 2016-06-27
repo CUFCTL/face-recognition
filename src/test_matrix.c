@@ -339,7 +339,7 @@ void test_m_elem_mult()
 /**
  * Test matrix column normalization.
  */
-void test_m_normalize_columns()
+void test_m_subtract_columns()
 {
 	matrix_t *M = m_initialize(ROWS, COLS);
 	matrix_t *a = m_initialize(ROWS, 1);
@@ -353,9 +353,9 @@ void test_m_normalize_columns()
 	printf("a = \n");
 	m_fprint(stdout, a);
 
-	m_normalize_columns(M, a);
+	m_subtract_columns(M, a);
 
-	printf("m_normalize_columns (M, a) = \n");
+	printf("m_subtract_columns (M, a) = \n");
 	m_fprint(stdout, M);
 
 	m_free(M);
@@ -375,7 +375,7 @@ int main (int argc, char **argv)
 		test_m_transpose,
 		test_m_add_subtract,
 		test_m_elem_mult,
-		test_m_normalize_columns
+		test_m_subtract_columns
 	};
 	int num_tests = sizeof(tests) / sizeof(test_func_t);
 

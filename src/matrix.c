@@ -473,7 +473,7 @@ void m_elem_mult (matrix_t *M, precision_t c)
  * @param M  pointer to matrix
  * @param a  pointer to column vector
  */
-void m_normalize_columns (matrix_t *M, matrix_t *a)
+void m_subtract_columns (matrix_t *M, matrix_t *a)
 {
 	int i, j;
 	for ( i = 0; i < M->cols; i++ ) {

@@ -42,7 +42,8 @@ m_transpose                |  x  |  x  |  x  | Verified            |            
 _Mutators_                 |     |     |     |                     |             |
 m_add                      |     |  x  |  x  | Verified            |             |
 m_elem_mult                |     |  x  |  x  | Verified            |             |
-m_normalize_columns        |  x  |     |     | Verified            |             |
+m_subtract                 |     |  x  |  x  | Verified            |             |
+m_subtract_columns         |  x  |     |     | Verified            |             |
 _To review_                |     |     |     |                     |             |
 m_flipCols                 |     |     |  x  | Verified            | 10/02/15    | James
 m_normalize                |     |     |     | Verified            | 10/02/2015  | James
@@ -63,8 +64,6 @@ m_sqrtm                    |     |     |  x  | Not Verified        | 10/07/15   
 m_determinant              |     |     |     | Not Verified        | 10/07/15    | Miller
 m_cofactor                 |     |     |     | Not Verified        | 10/07/15    | Miller
 m_covariance               |     |     |  x  | Verified            | 11/05/15    | Greg
-m_dot_subtract             |     |     |  x  | Verified            | 10/21/15    | Taylor
-m_dot_division             |     |     |  x  | Verified            | 11/03/15    | Greg
 m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
 
 #### BLAS and LAPACK

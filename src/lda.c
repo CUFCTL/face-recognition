@@ -65,7 +65,7 @@ void m_scatter(database_t *db, matrix_t *S_b, matrix_t *S_w)
         m_add(S_b, S_b_i);
 
         // compute S_w_i = M_class_norm * M_class_norm'
-        m_normalize_columns(M_class, U[i]);
+        m_subtract_columns(M_class, U[i]);
 
         matrix_t *M_class_tr = m_transpose(M_class);
         matrix_t *S_w_i = m_product(M_class, M_class_tr);
