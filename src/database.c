@@ -305,8 +305,35 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 	fclose(db_training_set);
 }
 
-// TODO: maybe return class and name of matching image
-// TODO: run recognition for LDA information
+/**
+ * Find the column vector in a matrix P with minimum distance from
+ * a test vector P_test.
+ *
+ * @param P          pointer to matrix
+ * @param P_test     pointer to column vector
+ * @param dist_func  pointer to distance function
+ * @return index of matching column in P
+ */
+int find_match(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
+{
+	int min_index = -1;
+	precision_t min_dist = -1;
+
+	int j;
+	for ( j = 0; j < P->cols; j++ ) {
+		// compute the distance between the two images
+		precision_t dist = dist_func(P_test, 0, P, j);
+
+		// update the running minimum
+		if ( min_dist == -1 || dist < min_dist ) {
+			min_index = j;
+			min_dist = dist;
+		}
+	}
+
+	return min_index;
+}
+
 /**
  * Test a set of images against a database.
  *
@@ -325,35 +352,31 @@ void db_recognize(database_t *db, const char *path)
 
 	int i;
 	for ( i = 0; i < num_test_images; i++ ) {
-		// compute the mean-subtracted test image
+		// read the test image T_i
 		ppm_read(image, image_names[i]);
 		m_ppm_read(T_i, 0, image);
-		m_subtract_columns(T_i, db->mean_face);
+		m_subtract(T_i, db->mean_face);
 
-		// compute the projected test image T_i_proj = W' * T_i
-		matrix_t *T_i_proj = m_product(db->W_pca_tr, T_i);
+		// compute the projected test image P_test = W' * (T_i - a)
+		matrix_t *P_test_pca = m_product(db->W_pca_tr, T_i);
+		matrix_t *P_test_lda = m_product(db->W_lda_tr, T_i);
 
-		// find the training image with the minimum distance from the test image
-		int min_index = -1;
-		precision_t min_dist = -1;
+		// find the matches for each algorithm
+		int index_pca = find_match(db->P_pca, P_test_pca, m_dist_L2);
+		int index_lda = find_match(db->P_lda, P_test_lda, m_dist_L2);
 
-		int j;
-		for ( j = 0; j < db->num_images; j++ ) {
-			// compute the distance between the two images
-			precision_t dist = m_dist_L2(T_i_proj, 0, db->P_pca, j);
+		// print results
+		printf("test image: \'%s\'\n", image_names[i]);
+		printf("\tPCA: (class %d) \'%s\'\n", db->entries[index_pca].class, db->entries[index_pca].name);
+		printf("\tLDA: (class %d) \'%s\'\n", db->entries[index_lda].class, db->entries[index_lda].name);
+		putchar('\n');
 
-			// update the running minimum
-			if ( min_dist == -1 || dist < min_dist ) {
-				min_index = j;
-				min_dist = dist;
-			}
-		}
-
-		printf("test image \'%s\' -> \'%s\'\n", image_names[i], db->entries[min_index].name);
-
-		m_free(T_i_proj);
+		// cleanup
+		m_free(P_test_pca);
+		m_free(P_test_lda);
 	}
 
+	// cleanup
 	ppm_destruct(image);
 	m_free(T_i);
 
