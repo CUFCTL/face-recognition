@@ -92,9 +92,6 @@ matrix_t * m_findNonZeros (matrix_t *M);
 matrix_t * m_reshape (matrix_t *M, int newNumRows, int newNumCols);
 
 // Group 3 - complex linear algebra functions of a single matrix
-precision_t m_norm (matrix_t *M, int specRow);
-precision_t m_determinant (matrix_t *M);
-matrix_t * m_cofactor (matrix_t *M);
 matrix_t * m_covariance (matrix_t *M);
 
 // Group 5 - ops with 2 matrices that return a matrix of diff size

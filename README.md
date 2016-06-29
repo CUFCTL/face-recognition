@@ -60,9 +60,6 @@ m_sumCols                  |     |     |  x  | Verified            | 10/02/2015 
 m_sumRows                  |     |     |     | Verified            | 10/02/2015  | James
 m_findNonZeros             |     |     |     | Verified            | 10/06/2015  | James
 m_reshape                  |     |     |     | Verified            | 10/06/2015  | James
-m_norm                     |     |     |     | Not Verified        | 10/07/15    | Miller
-m_determinant              |     |     |     | Not Verified        | 10/07/15    | Miller
-m_cofactor                 |     |     |     | Not Verified        | 10/07/15    | Miller
 m_covariance               |     |     |  x  | Verified            | 11/05/15    | Greg
 m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
 
