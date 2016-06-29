@@ -49,18 +49,7 @@ m_subtract_columns         |  x  |     |     | Verified            |            
 _To review_                |     |     |     |                     |             |
 m_flipCols                 |     |     |  x  | Verified            | 10/02/15    | James
 m_normalize                |     |     |     | Verified            | 10/02/2015  | James
-m_elem_truncate            |     |     |  x  | Verified            | 10/02/2015  | James
-m_elem_acos                |     |     |     | Verified            | 10/02/2015  | James
-m_elem_sqrt                |     |     |  x  | Verified            | 10/02/2015  | James
-m_elem_negate              |     |     |  x  | Verified            | 10/02/2015  | James
-m_elem_exp                 |     |     |  x  | Verified            | 10/02/2015  | James
-m_elem_pow                 |     |     |  x  | Verified            | 10/02/2015  | James
-m_elem_divideByMatrix      |     |     |  x  | Verified            | 10/02/2015  | James
-m_elem_add                 |     |     |  x  | Verified            | 10/02/2015  | James
-m_sumCols                  |     |     |  x  | Verified            | 10/02/2015  | James
-m_sumRows                  |     |     |     | Verified            | 10/02/2015  | James
-m_findNonZeros             |     |     |     | Verified            | 10/06/2015  | James
-m_reshape                  |     |     |     | Verified            | 10/06/2015  | James
+m_reshape                  |     |     |  x  | Verified            | 10/06/2015  | James
 m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
 
 #### BLAS and LAPACK

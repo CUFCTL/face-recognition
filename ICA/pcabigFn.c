@@ -4,18 +4,18 @@
  *  Edited by William Halsey and Scott Rodgers
  *  whalsey@g.clemson.edu
  *  srodger@g.clemson.edu
- *  
+ *
  *  This file contains
  *      pcabigFn
- *  
+ *
  *  Lasted Edited: Jul. 3, 2013
  *
- *  Changes made: major changes to last section 
+ *  Changes made: major changes to last section
  *
  */
 
  #include "levelTwoOps.c"
- #include "matrix_manipulation.h" 
+ #include "matrix_manipulation.h"
 /*==================================================================================================
  *  pcabigFn
  *
@@ -34,14 +34,14 @@
  *  THIS FUNCTION CALLS
  *
  *  THIS FUNCTION IS CALLED BY
- *      
+ *
  */
 void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B, int num_pixels, int num_images) {
                                                 //  %function [U,R,E] = pcabigFn(B);
                                                 //  %Compute PCA by calculating smaller covariance matrix and reconstructing
                                                 //  %eigenvectors of large cov matrix by linear combinations of original data
-                                                //  %given by the eigenvecs of the smaller cov matrix. 
-                                                //  %Data in Cols of B. Third version.  
+                                                //  %given by the eigenvecs of the smaller cov matrix.
+                                                //  %Data in Cols of B. Third version.
                                                 //  %
                                                 //  %***** justification
                                                 //  %
@@ -72,11 +72,11 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 	// data_t *B_mult;						//  %B = datamat';
 	// data_t *B_div;
 	//data_t *temp;
-	
+
 	// data_t *index;
 	// data_t *Vsort;
 	// data_t *U_squared;
-	
+
 	//data_t *righteignm;
 	// data_t *length_matrix;
 	// //data_t *wr_matrix;
@@ -89,7 +89,7 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 	data_t *righteigenvect;
 	data_t *B_vector;
 	int integer;
-	
+
 	/*  Allocation of all arrays    */
 	//allocate_matrix(&B_zeromean, num_pixels, num_images);
 	matrix_t *B_zeromean = m_intialize(UNDEFINED, num_pixels, num_images);
@@ -100,8 +100,8 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 	// temp vars are used to move matrix from on function to another
 	//allocate_matrix(&temp_vec, 1, cols);
 	matrix_t *temp_vec = m_intialize(UNDEFINED, 1, cols);
-	
-    //allocate_matrix(&index, 1, cols);			//  [N,P] = size(B);    -   sizes found in matlab code                 
+
+    //allocate_matrix(&index, 1, cols);			//  [N,P] = size(B);    -   sizes found in matlab code
 	matrix_t *index = m_intialize(UNDEFINED, 1, cols);
 
 	//allocate_matrix(&Vsort, num_images, num_images);
@@ -137,8 +137,8 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 	//allocate_matrix(&R, cols, cols);
 	matrix_t *R = m_intialize(UNDEFINED, cols, cols);
 	//allocate_matrix(&wr_matrix, cols, cols);
-	
-	
+
+
 	// there seems to be a problem here, don't know the value for rows to be passed to the function
 	//allocate_matrix(&wr, cols);
 	matrix_t *wr = m_intialize(UNDEFINED, ???, cols);
@@ -147,12 +147,12 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 
 	allocate_vector(&lefteigenvect, num_images);
 	allocate_vector(&righteigenvect, num_images);
-	
+
 	//allocate_matrix(&workmatrix, cols);
 	matrix_t *workmatrix = m_intialize(UNDEFINED, ???, cols);
 
 	/*  END OF ARRAY ALLOCATION */
-	
+
     /*  zero_mean() subtracts out the mean  */  //  %********subtract mean
     zero_mean(B_zeromean, B, num_pixels, num_images);      //  mb=mean(B');
                                                 //  B=B-(ones(P,1)*mb)';
@@ -172,11 +172,11 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 
 	//matrix_to_vector function is not declared in matrix_manipulation.h
 	matrix_to_vector(B_vector, B_div, num_images, num_images);
-	
+
 
 	matrix_eig(righteignm, wr?, B_vector, num_pixels, num_images);
 	//DGEEV('N', 'V', cols, vector, cols, wr, wi, lefteigenvect, 0, righteigenvect, cols + 1, workmatrix, -1, integer);
-    /*  from lapacke    */                      //  %magnitude for large cov mat 
+    /*  from lapacke    */                      //  %magnitude for large cov mat
 												//  %(assuming sample cov)
                                                 //  %********Sort eigenvectors
                                                 //  eigvalvec = max(D); -   handled by lapack function
@@ -184,7 +184,7 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 	//eigSort isn't in matrix_manipulation.h
 	eigSort(righteignm, (data_t*)wr, num_images, num_pixels);
 	//fliplr(index, index, rows, cols);
-	
+
 	//fliplr(Vsort, righteignm, num_images, num_images);
 	Vsort = m_flipCols(righteignm);
 												//Vsort = V(:,fliplr(index));
@@ -192,21 +192,22 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
         !the corresponding eigenvectors also will need to be switched                   !   */
 
                                                 //  %********Reconstruct
-    //multiply_matrices(U, B_zeromean, Vsort, num_pixels, num_images, num_images); 
+    //multiply_matrices(U, B_zeromean, Vsort, num_pixels, num_images, num_images);
     U = m_product(B_zeromean, Vsort);       //  U = B*Vsort;  % Cols of U are Bvi. (N-dim Eigvecs)
-                                                //
-                                                //  %********Give eigvecs unit length.  Improves classification.
-												//  length = sqrt (sum (U.^2)); 
-												//temp = sum_along_rows(temp); <<worng?
-	//raise_matrix_to_power(U_squared, U, num_pixels, num_images, 2);
-	U_squared = m_elem_pow(U, 2);
 
-	//sum_columns(temp, temp_vec, rows, cols);
-	temp = m_sumCols(temp_vec);
-	//matrix_sqrt(temp_vec, temp_vec, rows, cols);
-	temp_vec = m_elem_sqrt(temp_vec);
-    
-	//ones(length_ones, rows, 1);	
+    // length = sqrt(sum(U .^ 2))
+    int i, j;
+    for ( j = 0; j < U->cols; j++ ) {
+        precision_t sum = 0;
+
+        for ( i = 0; i < U->rows; i++ ) {
+            sum += elem(U, i, j) * elem(U, i, j);
+        }
+
+        elem(temp_vec, 0, j) = sqrt(sum);
+    }
+
+	//ones(length_ones, rows, 1);
 	length_ones = m_intialize(ONES, rows, 1);				//  U = U ./ (ones(N,1) * length);
 	//multiply_matrices(length_matrix, length_ones, temp_vec, rows, cols, 1);
 	length_matrix = m_product(length_ones, temp_vec);
@@ -216,12 +217,12 @@ void pcabigFn(data_t **U, data_t **R, data_t **E, int rows, int cols, data_t **B
 
 	//multiply_matrices(R, matrix_t, U, cols, cols, rows);
 	R = m_product(matrix_t, U);      //  R = B'*U;  % Rows of R are pcarep of each image.
-    
+
 	// IS wr matrix = sorted eigvals but not set convert wr to matrix and here?
-	//fliplr(wr, wr, cols, cols);          //  E = fliplr(seigvals); 
+	//fliplr(wr, wr, cols, cols);          //  E = fliplr(seigvals);
 	//fliplr(E, wr, cols, cols);
 	E = m_flipCols(wr);
-	
+
 	//free_matrix(&temp);
 	m_free(temp);
 	//free_matrix(&temp_vec);

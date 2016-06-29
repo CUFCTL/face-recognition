@@ -145,55 +145,35 @@ sep96(matrix_t *x, matrix_t *w, int *perm, int sweep, int count, int N, int M, i
 // 	allocate_matrix(&u_transposed, cols, rows); //ZH
   // x=x(:,perm);
     x = m_reorder_columns(x,perm)
-    sweep=sweep+1; 
+    sweep=sweep+1;
     int t=1;             // sweep=sweep+1; t=1;
-    noblocks = m_elem_truncate(P/B);            // noblocks=fix(P/B);
+
+    // noblocks=fix(P/B);
+    noblocks = (int) ((double) P / B);
 
     BI = m_elem_mult(ID, B);
     scale_matrix(BI, ID, ?rows, ?, B);  // BI=B*Id;
     BI = m_multiply_matrices(ID,B);
 
-    for(int i = t; i = t - 1 + noblocks * B; i += B) {  // for t=t:B:t-1+noblocks*B, %COMMENT: B (t:B:...)is the increment value here instead of standard value which is 1
-        count=count+B;                                  //   count=count+B;
+    // for t=t:B:t + noblocks * B - 1
+    int i, j;
+    for ( i = t; i = t - 1 + noblocks * B; i += B ) {
+        // count = count + B;
+        count=count+B;
 
 		//allocate_matrix(&colon_matrix, ?rows, ?rows);
-	    //multiply_matrices(u, w, );       //   u=w*x(:,t:t+B-1);
 
-        //u = m_multiply_matrices(w, x);
-                                         //   w=w+L*(BI+(1-2*(1./(1+exp(-u))))*u')*w;   => -u, then exp(-u) then 1+ exp(-u) then 1./ (1+exp(-u)) then
-																									//  2(1./ (1+exp(-u))) then (1-2(1./ (1+exp(-u)))
-																									//  then u'(1-2(1./ (1+exp(-u))) then (BI+u'(1-2(1./ (1+exp(-u))))
-		//matrix_negate(temp_u, u, ?rows, ?cols);
+	    // u = w * x(:, t:t + B - 1);
+        temp_u = m_product(w, x);
 
-        tempu = m_elem_negate(u);
-
-		//matrix_exp(temp_u1, temp_u, ?rows, ?cols);  //should be same demensions as line above
-
-        temp_u1 = m_elem_exp (temp_u);
-
-		//sum_scalar_matrix(temp_u, temp_u1, rows?, cols?, 1);
-
-        temp_u = m_elem_add(temp_u1, 1);
-
-		//divide_scaler_by_matrix(temp_u1, temp_u, ?rows, ?cols, 1)
-
-        temp_u1 = m_elem_divideByMatrix (temp_u, 1); 
-
-		//scale_matrix(temp_u1, temp_u, ?rows, ?cols, 2);
-
-        temp_u1 = m_elem_mult(temp_u, 2);
-
-		//sum_scalar_matrix(temp_u, temp_u1, rows?, cols?, -1);
-
-       temp_u =  m_elem_add (temp_u1, -1);
-
-		//transpose(u_transposed, u, ?cols, ?rows);
+        // w = w + L * (BI + (1 - 2 * (1. / (1 + exp(-u)))) * u') * w;
+        for ( j = 0; j < u->cols; j++ ) {
+            elem(temp_u, j, 0) = 1 - 2 * (1 / (1 + exp(-elem(temp_u, j, 0))));
+        }
 
         u_transposed = m_transpose(u)
 
-		//multiply_matrices(temp_u1, temp_u, u_transposed, ?rows, ?cols, ?cols);
-
-        temp_u1 = m_multiply_matrices(temp_u,u_transposed);
+        temp_u1 = m_product(temp_u, u_transposed);
 
 		//is BI a scalar? // Next step is BI + temp_u1
 		add_matrices(temp_u, temp_u1, BI, ?rows, ?cols) ;
@@ -212,7 +192,7 @@ sep96(matrix_t *x, matrix_t *w, int *perm, int sweep, int count, int N, int M, i
 		//then w = w+(W*L*(BI+temp_u1)
 		//add_matrices(w, w, temp_u, ?rows, ?cols);
 
-        w = m_dot_add(w,temp_u); 
+        w = m_dot_add(w,temp_u);
 
 
         if(count > f) {                                //   if count>F, sepout; count=count-F; end;
@@ -293,10 +273,8 @@ wchange(matrix_t *change, matrix_t *delta, double *angle, data_t *w, int wRows, 
     matrix_t *tempA = m_intialize(UNDEFINED, deltaLen, 1);
     matrix_t *tempB = m_intialize(UNDEFINED, 1, 1);
     matrix_t *tempC = m_intialize(UNDEFINED, 1, 1);
-    matrix_t *tdelta = m_intialize(UNDEFINED, rows, cols)
-    matrix_t *oldw_w = m_intialize(UNDEFINED, rows, cols), 
-    
-    
+    matrix_t *tdelta = m_intialize(UNDEFINED, rows, cols);
+    matrix_t *oldw_w = m_intialize(UNDEFINED, rows, cols);
 
     int deltaLen = wRows * wCols;
 

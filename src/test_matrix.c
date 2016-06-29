@@ -444,7 +444,6 @@ int main (int argc, char **argv)
 	}
 
 /*
-	// Test Group 2.0.0
 	fprintf (output, "\n-------------Test Group 2.0.0 -------------\n");
 	m_flipCols (M);
 	fprintf (output, "m_flipCols(M) = \n");
@@ -457,101 +456,6 @@ int main (int argc, char **argv)
 	m_fprint (output, M);
 	m_free (M);
 
-	M = m_initialize (FILL, ROWS, COLS);
-	m_normalize (M);
-    m_elem_mult(M, 35);
-    fprintf (output, "m_normalize(M)\n");
-	fprintf (output, "m_elem_mult(M, 35) =\n");
-	m_fprint (output, M);
-	m_free (M);
-
-	// Test Group 2.0.1
-	fprintf (output, "\n-------------Test Group 2.0.1 -------------\n");
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_truncate (M);
-	fprintf (output, "m_elem_truncate(M) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	M = m_initialize (FILL, ROWS, COLS);
-    m_elem_divideByConst(M, 6);
-	m_elem_truncate (M);
-    fprintf (output, "m_divide_by_constant(M, 6)\n");
-	fprintf (output, "m_elem_truncate(M) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_acos (M);
-	fprintf (output, "m_elem_acos(M) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_sqrt (M);
-	fprintf (output, "m_elem_sqrt(M) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_negate (M);
-	fprintf (output, "m_elem_negate(M) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_exp (M);
-	fprintf (output, "m_elem_exp(M) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	// Test Group 2.0.2
-	fprintf (output, "\n-------------Test Group 2.0.2 -------------\n");
-	precision_t x = 2.0;
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_pow (M, x);
-	fprintf (output, "m_elem_pow(M, x) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_divideByMatrix (M, x);
-	fprintf (output, "m_elem_divideByMatrix(M, x) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	M = m_initialize (FILL, ROWS, COLS);
-	m_elem_add (M, x);
-	fprintf (output, "m_elem_add(M, x) = \n");
-	m_fprint (output, M);
-	m_free (M);
-
-	// Test Group 2.1.0
-	fprintf (output, "\n-------------Test Group 2.1.0 -------------\n");
-	matrix_t *R;
-	M = m_initialize (FILL, ROWS, COLS);
-
-	R = m_sumCols (M);
-	fprintf (output, "m_sumCols(M) = \n");
-	m_fprint (output, R);
-	m_free (R);
-
-	// Test Group 2.1.1
-	fprintf (output, "\n-------------Test Group 2.1.1 -------------\n");
-	R = m_sumRows (M);
-	fprintf (output, "m_sumRows(M) = \n");
-	m_fprint (output, R);
-	m_free (R);
-
-	elem (M, 1, 2) = 0.0;  elem (M, 5, 5) = 0.0;
-	elem (M, 4, 5) = 0.0;  elem (M, 5, 4) = 0.0;
-	R = m_findNonZeros (M);
-	fprintf (output, "m_findNonZeros(M) = \n");
-	m_fprint (output, R);
-	m_free (R);
-	m_free (M);
-
-	// Test Group 2.1.2
 	fprintf (output, "\n-------------Test Group 2.1.2 -------------\n");
 	matrix_t *A = m_initialize (FILL, ROWS, COLS);
 	fprintf (output, "A = \n");
@@ -562,7 +466,6 @@ int main (int argc, char **argv)
 	m_fprint (output, R);
 	m_free (R);
 
-	// Test Group 5
 	fprintf (output, "\n-------------Test Group 5 -------------\n");
 
 	matrix_t *V = m_initialize (UNDEFINED, 1, 6);
