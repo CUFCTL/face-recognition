@@ -310,6 +310,9 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
  */
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec)
 {
+	assert(M_eval->rows == M->rows && M_eval->cols == 1);
+	assert(M_evec->rows == M->rows && M_evec->cols == M->cols);
+
 	matrix_t *M_work = m_copy(M);
 	precision_t *wi = (precision_t *)malloc(M->rows * sizeof(precision_t));
 
@@ -393,6 +396,50 @@ matrix_t * m_mean_column (matrix_t *M)
 	}
 
 	return a;
+}
+
+/**
+ * Compute the principal square root of a square matrix. That is,
+ * compute X such that X * X = M and X is the unique square root for
+ * which every eigenvalue has non-negative real part.
+ *
+ * @param M  pointer to matrix
+ * @return pointer to square root matrix
+ */
+matrix_t * m_sqrtm (matrix_t *M)
+{
+	assert(M->rows == M->cols);
+
+	// compute eigenvalues, eigenvectors
+	matrix_t *M_eval = m_initialize(M->rows, 1);
+	matrix_t *M_evec = m_initialize(M->rows, M->cols);
+
+	m_eigenvalues_eigenvectors(M, M_eval, M_evec);
+
+	// compute B = M_evec * sqrt(D),
+	//   D = eigenvalues of M in the diagonal
+	matrix_t *B = m_copy(M_evec);
+
+	int i, j;
+	for ( j = 0; j < B->cols; j++ ) {
+		precision_t lambda = sqrt(elem(M_eval, j, 0));
+
+		for ( i = 0; i < B->rows; i++ ) {
+			elem(B, i, j) *= lambda;
+		}
+	}
+
+	free(M_eval);
+
+	// compute X = B * M_evec^-1
+	matrix_t *M_evec_inv = m_inverse(M_evec);
+	matrix_t *X = m_product(B, M_evec_inv);
+
+	free(B);
+	free(M_evec);
+	free(M_evec_inv);
+
+	return X;
 }
 
 /**
@@ -763,31 +810,6 @@ precision_t m_norm (matrix_t *M, int specRow) {
 	}
 
 	return sqrt (sum);
-}
-
-/*******************************************************************************
- * void matrix_sqrtm(data_t *outmatrix, data_t *matrix, int rows, int cols);
- *
- * matrix square root
- *  element-wise square rooting of eigenvalues matrix
- *  divide eigenvectors matrix by the product of the e-vectors and e-values
-*******************************************************************************/
-matrix_t * m_sqrtm (matrix_t *M) {
-	/*
-	matrix_t *eigenvectors;
-	matrix_t *eigenvalues;
-	// TODO: EIGENVALUES NOT CURRENTLY WORKING
-	m_eigenvalues_eigenvectors (M, &eigenvalues, &eigenvectors);
-
-	m_elem_sqrt (eigenvalues);
-
-	matrix_t * temp = m_product (eigenvectors, eigenvalues, 0);
-	m_free (eigenvalues);
-	matrix_t * R = m_matrix_division (temp, eigenvectors);
-	m_free (temp);
-	m_free(eigenvectors);
-	return R;*/
-	return M;
 }
 
 /*******************************************************************************

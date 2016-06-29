@@ -38,6 +38,7 @@ m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ LAPACK  |            
 m_inverse                  |     |  x  |  x  | Not Verified        | 10/07/15    | Miller
 m_mean_column              |  x  |  x  |     | Verified            |             |
 m_product                  |  x  |  x  |  x  | Verified w/ BLAS    |             |
+m_sqrtm                    |     |     |  x  | Verified            |             |
 m_transpose                |  x  |  x  |  x  | Verified            |             |
 _Mutators_                 |     |     |     |                     |             |
 m_add                      |     |  x  |  x  | Verified            |             |
@@ -60,7 +61,6 @@ m_sumRows                  |     |     |     | Verified            | 10/02/2015 
 m_findNonZeros             |     |     |     | Verified            | 10/06/2015  | James
 m_reshape                  |     |     |     | Verified            | 10/06/2015  | James
 m_norm                     |     |     |     | Not Verified        | 10/07/15    | Miller
-m_sqrtm                    |     |     |  x  | Not Verified        | 10/07/15    | Miller
 m_determinant              |     |     |     | Not Verified        | 10/07/15    | Miller
 m_cofactor                 |     |     |     | Not Verified        | 10/07/15    | Miller
 m_covariance               |     |     |  x  | Verified            | 11/05/15    | Greg

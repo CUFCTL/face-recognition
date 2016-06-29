@@ -264,6 +264,33 @@ void test_m_product()
 }
 
 /**
+ * Test matrix square root.
+ */
+void test_m_sqrtm()
+{
+	precision_t data[][2] = {
+		{ 7, 10 },
+		{ 15, 22 }
+	};
+	matrix_t *M = m_initialize(2, 2);
+
+	fill_matrix_data(M, data);
+
+	matrix_t *X = m_sqrtm(M);
+	matrix_t *X_sq = m_product(X, X);
+
+	printf("M = \n");
+	m_fprint(stdout, M);
+	printf("X = m_sqrtm(M) = \n");
+	m_fprint(stdout, X);
+	printf("X * X = \n");
+	m_fprint(stdout, X_sq);
+
+	m_free(M);
+	m_free(X);
+}
+
+/**
  * Test matrix transpose.
  */
 void test_m_transpose()
@@ -372,6 +399,7 @@ int main (int argc, char **argv)
 		test_m_inverse,
 		test_m_mean_column,
 		test_m_product,
+		test_m_sqrtm,
 		test_m_transpose,
 		test_m_add_subtract,
 		test_m_elem_mult,
@@ -509,12 +537,6 @@ int main (int argc, char **argv)
 	// Test Group 3
 	fprintf (output, "\n-------------Test Group 3 -------------\n");
 	M = m_initialize (FILL, ROWS, COLS);
-
-	R = m_sqrtm (M);
-	fprintf (output, "m_sqrtm(M) = \n");
-	m_fprint (output, R);
-	m_free (R);
-
 
 	precision_t val = m_determinant (M);
 	fprintf (output, "m_determinant(M) = %lf\n", val);

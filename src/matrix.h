@@ -44,8 +44,9 @@ precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j);
 void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec);
 matrix_t * m_inverse (matrix_t *M);
-matrix_t * m_product (matrix_t *A, matrix_t *B);
 matrix_t * m_mean_column (matrix_t *M);
+matrix_t * m_product (matrix_t *A, matrix_t *B);
+matrix_t * m_sqrtm (matrix_t *M);
 matrix_t * m_transpose (matrix_t *M);
 
 // mutator functions
@@ -92,7 +93,6 @@ matrix_t * m_reshape (matrix_t *M, int newNumRows, int newNumCols);
 
 // Group 3 - complex linear algebra functions of a single matrix
 precision_t m_norm (matrix_t *M, int specRow);
-matrix_t * m_sqrtm (matrix_t *M);
 precision_t m_determinant (matrix_t *M);
 matrix_t * m_cofactor (matrix_t *M);
 matrix_t * m_covariance (matrix_t *M);
