@@ -34,6 +34,7 @@ m_fread                    |  x  |     |     | Verified            |            
 m_ppm_read                 |  x  |     |     | Verified            |             |
 m_ppm_write                |  x  |     |     | Verified            |             |
 _Getters_                  |     |     |     |                     |             |
+m_covariance               |     |     |  x  | Verified            |             |
 m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ LAPACK  |             |
 m_inverse                  |     |  x  |  x  | Not Verified        | 10/07/15    | Miller
 m_mean_column              |  x  |  x  |     | Verified            |             |
@@ -60,7 +61,6 @@ m_sumCols                  |     |     |  x  | Verified            | 10/02/2015 
 m_sumRows                  |     |     |     | Verified            | 10/02/2015  | James
 m_findNonZeros             |     |     |     | Verified            | 10/06/2015  | James
 m_reshape                  |     |     |     | Verified            | 10/06/2015  | James
-m_covariance               |     |     |  x  | Verified            | 11/05/15    | Greg
 m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
 
 #### BLAS and LAPACK

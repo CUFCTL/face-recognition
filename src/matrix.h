@@ -39,6 +39,7 @@ void m_ppm_read (matrix_t *M, int col, ppm_t *image);
 void m_ppm_write (matrix_t *M, int col, ppm_t *image);
 
 // getter functions
+matrix_t * m_covariance (matrix_t *M);
 precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j);
@@ -90,9 +91,6 @@ matrix_t * m_findNonZeros (matrix_t *M);
 // 2.1.2
 //	- reshapes data in matrix to new form
 matrix_t * m_reshape (matrix_t *M, int newNumRows, int newNumCols);
-
-// Group 3 - complex linear algebra functions of a single matrix
-matrix_t * m_covariance (matrix_t *M);
 
 // Group 5 - ops with 2 matrices that return a matrix of diff size
 matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);

@@ -215,6 +215,41 @@ void m_ppm_write (matrix_t *M, int col, ppm_t *image)
 }
 
 /**
+ * Compute the covariance matrix of a matrix.
+ *
+ * @param M  pointer to matrix
+ * @param pointer to covariance matrix of M
+ */
+matrix_t * m_covariance(matrix_t *M)
+{
+	// compute the mean-subtracted matrix A
+	matrix_t *A = m_copy(M);
+	matrix_t *mean = m_mean_column(A);
+
+	m_subtract_columns(A, mean);
+
+	// compute C = A * A'
+	matrix_t *C = m_zeros(A->rows, A->rows);
+
+	// C := alpha * A * A_tr + beta * C, alpha = 1, beta = 0
+	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
+		A->rows, A->rows, A->cols,
+		1, A->data, A->rows, A->data, A->rows,
+		0, C->data, C->rows);
+
+	// normalize C
+	precision_t c = (M->cols > 1)
+		? M->cols - 1
+		: 1;
+	m_elem_mult(C, 1 / c);
+
+	free(A);
+	free(mean);
+
+	return C;
+}
+
+/**
  * Compute the COS distance between two column vectors.
  *
  * COS is the cosine angle:
@@ -787,42 +822,6 @@ matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
 		c2 = i % M->cols;
 		elem(R, r1, c1) = elem(M, r2, c2);
 	}
-
-	return R;
-}
-
-/*  ~~~~~~~~~~~~~~~~~~~~~~~~~~~ GROUP 3 FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~~  */
-/*******************************************************************************
- * void covariance(data_t *outmatrix, data_t *matrix, int rows, int cols);
- *
- * return the covariance matrix
-*******************************************************************************/
-matrix_t * m_covariance(matrix_t *M) {
-	int i, j, k;
-	precision_t val;
-	matrix_t *colAvgs = m_mean_column(M);
-	matrix_t *norm = m_initialize(M->rows, M->cols);
-	matrix_t *R = m_initialize(M->rows, M->cols);
-
-	for (j = 0; j < M->cols; j++) {
-		for (i = 0; i < M->rows; i++) {
-			val = elem(M, i, j) - elem(colAvgs, 0, j);
-		}
-	}
-
-	for (j = 0; j < M->cols; j++) {
-		for (k = 0; k < M->cols; k++) {
-			val = 0;
-			for (i = 0; i < M->rows; i++) {
-				val += elem(norm, i, j) * elem(norm, i, j);
-			}
-			val /= M->cols - 1;
-			elem(R, j, k) = val;
-		}
-	}
-
-	m_free (colAvgs);
-	m_free (norm);
 
 	return R;
 }

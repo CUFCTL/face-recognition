@@ -97,6 +97,33 @@ void test_m_copy()
 }
 
 /**
+ * Test the matrix convariance.
+ */
+void test_m_covariance()
+{
+	precision_t data[][3] = {
+		{ 5, 1, 4 },
+		{ 0, -5, 9 },
+		{ 3, 7, 8 },
+		{ 7, 3, 10 }
+	};
+
+	matrix_t *M = m_initialize(4, 3);
+
+	fill_matrix_data(M, data);
+
+	matrix_t *C = m_covariance(M);
+
+	printf("M = \n");
+	m_fprint(stdout, M);
+	printf("m_covariance(M) = \n");
+	m_fprint(stdout, C);
+
+	m_free(M);
+	m_free(C);
+}
+
+/**
  * Test the vector distance functions.
  */
 void test_m_distance()
@@ -394,6 +421,7 @@ int main (int argc, char **argv)
 	test_func_t tests[] = {
 		test_m_initialize,
 		test_m_copy,
+		test_m_covariance,
 		test_m_distance,
 		test_m_eigenvalues_eigenvectors,
 		test_m_inverse,
@@ -531,15 +559,6 @@ int main (int argc, char **argv)
 
 	R = m_reshape (A, ROWS / 2, COLS * 2);
 	fprintf (output, "m_reshape (A, ROWS / 2, COLS * 2) = \n");
-	m_fprint (output, R);
-	m_free (R);
-
-	// Test Group 3
-	fprintf (output, "\n-------------Test Group 3 -------------\n");
-	M = m_initialize (FILL, ROWS, COLS);
-
-    R = m_covariance (M);
-	fprintf (output, "m_covariance(M) = \n");
 	m_fprint (output, R);
 	m_free (R);
 
