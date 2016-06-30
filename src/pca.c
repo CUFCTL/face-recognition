@@ -12,14 +12,14 @@
  * Currently, this function returns all of the n computed
  * eigenvectors, where n is the number of training images.
  *
- * @param A  mean-subtracted image matrix
+ * @param X  mean-subtracted image matrix
  * @return projection matrix W_pca'
  */
-matrix_t * PCA(matrix_t *A)
+matrix_t * PCA(matrix_t *X)
 {
-	// compute the surrogate matrix L = A' * A
-	matrix_t *A_tr = m_transpose(A);
-	matrix_t *L = m_product(A_tr, A);
+	// compute the surrogate matrix L = X' * X
+	matrix_t *A_tr = m_transpose(X);
+	matrix_t *L = m_product(A_tr, X);
 
 	m_free(A_tr);
 
@@ -29,8 +29,8 @@ matrix_t * PCA(matrix_t *A)
 
 	m_eigenvalues_eigenvectors(L, L_eval, L_evec);
 
-	// compute eigenfaces W_pca = A * L_evec
-	matrix_t *W_pca = m_product(A, L_evec);
+	// compute eigenfaces W_pca = X * L_evec
+	matrix_t *W_pca = m_product(X, L_evec);
 	matrix_t *W_pca_tr = m_transpose(W_pca);
 
 	m_free(L);

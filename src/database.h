@@ -38,8 +38,8 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata);
 void db_load(database_t *db, const char *path_tset, const char *path_tdata);
 void db_recognize(database_t *db, const char *path);
 
-matrix_t * PCA(matrix_t *A);
-matrix_t * LDA(database_t *db);
+matrix_t * PCA(matrix_t *X);
+matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *P_pca, int c, database_entry_t *entries);
 matrix_t * ICA2(matrix_t *W_pca_tr, matrix_t *P_pca);
 
 #endif

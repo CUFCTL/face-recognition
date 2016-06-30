@@ -238,7 +238,7 @@ void db_train(database_t *db, const char *path)
 	// compute LDA representation
 	printf("Computing LDA representation...\n");
 
-	db->W_lda_tr = LDA(db);
+	db->W_lda_tr = LDA(db->W_pca_tr, db->P_pca, db->num_classes, db->entries);
 	db->P_lda = m_product(db->W_lda_tr, X);
 
 	// compute ICA2 representation
