@@ -220,7 +220,7 @@ void m_ppm_write (matrix_t *M, int col, ppm_t *image)
  * @param M  pointer to matrix
  * @param pointer to covariance matrix of M
  */
-matrix_t * m_covariance(matrix_t *M)
+matrix_t * m_covariance (matrix_t *M)
 {
 	// compute the mean-subtracted matrix A
 	matrix_t *A = m_copy(M);
@@ -282,10 +282,7 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
 		abs_y += elem(B, k, j) * elem(B, k, j);
 	}
 
-	abs_x = sqrt(abs_x);
-	abs_y = sqrt(abs_y);
-
-	return -x_dot_y / (abs_x * abs_y);
+	return -x_dot_y / sqrt(abs_x * abs_y);
 }
 
 /**

@@ -16,6 +16,7 @@ recognize
 # data, log files
 *.dat
 *.log
+*.mat
 
 # miscellaneous
 *.swp

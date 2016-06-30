@@ -314,7 +314,7 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
  * @param dist_func  pointer to distance function
  * @return index of matching column in P
  */
-int find_match(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
+int nearest_neighbor(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
 {
 	int min_index = -1;
 	precision_t min_dist = -1;
@@ -362,8 +362,8 @@ void db_recognize(database_t *db, const char *path)
 		matrix_t *P_test_lda = m_product(db->W_lda_tr, T_i);
 
 		// find the matches for each algorithm
-		int index_pca = find_match(db->P_pca, P_test_pca, m_dist_L2);
-		int index_lda = find_match(db->P_lda, P_test_lda, m_dist_L2);
+		int index_pca = nearest_neighbor(db->P_pca, P_test_pca, m_dist_L2);
+		int index_lda = nearest_neighbor(db->P_lda, P_test_lda, m_dist_L2);
 
 		// print results
 		printf("test image: \'%s\'\n", image_names[i]);
