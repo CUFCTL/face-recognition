@@ -23,9 +23,10 @@ typedef struct {
 	matrix_t *mean_face;
 	matrix_t *W_pca_tr;
 	matrix_t *W_lda_tr;
-//	matrix_t *W_ica_tr;
+	matrix_t *W_ica_tr;
 	matrix_t *P_pca;
 	matrix_t *P_lda;
+	matrix_t *P_ica;
 } database_t;
 
 database_t * db_construct();
@@ -39,6 +40,6 @@ void db_recognize(database_t *db, const char *path);
 
 matrix_t * PCA(matrix_t *A);
 matrix_t * LDA(database_t *db);
-matrix_t * ICA(matrix_t *A);
+matrix_t * ICA2(matrix_t *W_pca_tr, matrix_t *P_pca);
 
 #endif

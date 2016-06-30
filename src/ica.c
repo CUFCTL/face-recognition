@@ -99,8 +99,8 @@ precision_t m_angle(matrix_t *A, matrix_t *B)
  * 300, at least for 2->2 separation.  When annealing to the right
  * solution for 10->10, however, L < 0.0001 and B = 10 were most successful.
  *
- * @param X  pointer to input matrix
- * @param W  pointer to weight matrix
+ * @param X  "sphered" input matrix
+ * @param W  weight matrix
  * @param B  block size
  * @param L  learning rate
  * @param F  interval to print training stats
@@ -158,21 +158,22 @@ void sep96(matrix_t *X, matrix_t *W, int B, double L, int F)
 
 typedef struct sep96_params {
     int B;
-    int L;
+    double L;
     int F;
     int N;
 } sep96_params_t;
 
 /**
- * Compute the projection matrix of a training set with ICA.
+ * Compute the ICA weight matrix W_I for an input matrix X.
  *
  * @param X  mean-subtracted input matrix
- * @return projection matrix W_ica
+ * @return weight matrix W_I
  */
 matrix_t * run_ica(matrix_t *X)
 {
     // compute whitening matrix W_z
     matrix_t *W_z = sphere(X);
+    matrix_t *X_sph = m_product(W_z, X);
 
     // train the weight matrix W
     matrix_t *W = m_identity(X->rows);
@@ -181,34 +182,48 @@ matrix_t * run_ica(matrix_t *X)
         { 50, 0.0005, 5000, 1000 },
         { 50, 0.0003, 5000, 200 },
         { 50, 0.0002, 5000, 200 },
-        { 50, 0.0001, 5000, 200 },
+        { 50, 0.0001, 5000, 200 }
     };
-    int num_trials = sizeof(params) / sizeof(sep96_params_t);
+    int num_sweeps = sizeof(params) / sizeof(sep96_params_t);
 
     int i, j;
-    for ( i = 0; i < num_trials; i++ ) {
+    for ( i = 0; i < num_sweeps; i++ ) {
+        printf("sweep %d: B = %d, L = %lf\n", i + 1, params[i].B, params[i].L);
+
         for ( j = 0; j < params[i].N; j++ ) {
-            sep96(X, W, params[i].B, params[i].L, params[i].F);
+            sep96(X_sph, W, params[i].B, params[i].L, params[i].F);
         }
     }
 
-    // compute W_ica = W * W_z
-    matrix_t *W_ica = m_product(W, W_z);
+    // compute W_I = W * W_z
+    matrix_t *W_I = m_product(W, W_z);
 
     // cleanup
     m_free(W_z);
+    m_free(X_sph);
     m_free(W);
 
-    return W_ica;
+    return W_I;
 }
 
 /**
- * Compute the projection matrix of a training set with ICA.
+ * Compute the projection matrix of a training set with ICA
+ * using Architecture II.
  *
- * @param A  mean-subtracted image matrix
- * @return projection matrix W_ica
+ * @param W_pca_tr  PCA projection matrix
+ * @param P_pca     PCA projected images
+ * @return projection matrix W_ica'
  */
-matrix_t * ICA(matrix_t *A)
+matrix_t * ICA2(matrix_t *W_pca_tr, matrix_t *P_pca)
 {
-    return NULL;
+    // compute weight matrix W_I
+    matrix_t *W_I = run_ica(P_pca);
+
+    // compute W_ica' = W_I * W_pca'
+    matrix_t *W_ica_tr = m_product(W_I, W_pca_tr);
+
+    // cleanup
+    m_free(W_I);
+
+    return W_ica_tr;
 }
