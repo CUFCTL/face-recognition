@@ -23,6 +23,9 @@ pca.o: matrix.o src/database.h src/pca.c
 lda.o: matrix.o src/database.h src/lda.c
 	$(CC) -c $(CFLAGS) src/lda.c -o $@
 
+ica.o: matrix.o src/database.h src/ica.c
+	$(CC) -c $(CFLAGS) src/ica.c -o $@
+
 test-matrix: matrix.o src/test_matrix.c
 	$(CC) $(CFLAGS) matrix.o $(LFLAGS) src/test_matrix.c -o $@
 
