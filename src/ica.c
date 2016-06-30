@@ -5,8 +5,8 @@
  */
 #include "database.h"
 #include "matrix.h"
+#include <assert.h>
 #include <math.h>
-#include <stdlib.h>
 
 /**
  * Compute the whitening matrix W_z for a matrix X.
@@ -28,58 +28,135 @@ matrix_t * sphere(matrix_t *X)
     matrix_t *W_z = m_inverse(W_z_temp2);
     m_elem_mult(W_z, 2);
 
-    free(A);
-    free(m);
-    free(W_z_temp1);
-    free(W_z_temp2);
+    // cleanup
+    m_free(A);
+    m_free(m);
+    m_free(W_z_temp1);
+    m_free(W_z_temp2);
 
     return W_z;
 }
 
 /**
- * Print stats for the change in weight matrix.
+ * Compute the 2-norm of a matrix.
  *
- * @param W0  previous weight matrix
- * @param W   current weight matrix
+ * @param M  pointer to matrix
+ * @return 2-norm of M
  */
-void sepout(matrix_t *W0, matrix_t *W)
+precision_t m_norm(matrix_t *M)
 {
-    // compute the magnitude of W - W0
     precision_t norm = 0;
 
     int i, j;
-    for ( i = 0; i < W->rows; i++ ) {
-        for ( j = 0; j < W->cols; j++ ) {
-            precision_t diff = elem(W, i, j) - elem(W0, i, j);
-            norm += diff * diff;
+    for ( i = 0; i < M->rows; i++ ) {
+        for ( j = 0; j < M->cols; j++ ) {
+            norm += elem(M, i, j) * elem(M, i, j);
         }
     }
 
-    // compute the angle between W and W0
-    // TODO: merge with m_dist_COS
-    // compute W * W0
-    precision_t x_dot_y = 0;
+    return sqrt(norm);
+}
 
-    for ( i = 0; i < W->rows; i++ ) {
-        for ( j = 0; j < W->cols; j++ ) {
-            x_dot_y += elem(W, i, j) * elem(W0, i, j);
+/**
+ * Compute the "angle" between two matrices.
+ *
+ * A and B are treated as column vectors, so that
+ * the angle between them is:
+ *
+ * acos(-A * B / (||A|| * ||B||))
+ *
+ * @param A  pointer to matrix
+ * @param B  pointer to matrix
+ * @return angle between A and B
+ */
+precision_t m_angle(matrix_t *A, matrix_t *B)
+{
+    assert(A->rows == B->rows && A->cols == B->cols);
+
+    // compute A * B
+    precision_t a_dot_b = 0;
+
+    int i, j;
+    for ( i = 0; i < A->rows; i++ ) {
+        for ( j = 0; j < A->cols; j++ ) {
+            a_dot_b += elem(A, i, j) * elem(B, i, j);
         }
     }
 
-    // compute ||W|| and ||W0||
-    precision_t abs_x = 0;
-    precision_t abs_y = 0;
+    return acos(-a_dot_b / (m_norm(A) * m_norm(B)));
+}
 
-    for ( i = 0; i < W->rows; i++ ) {
-        for ( j = 0; j < W->cols; j++ ) {
-            abs_x += elem(W, i, j) * elem(W, i, j);
-            abs_y += elem(W0, i, j) * elem(W0, i, j);
+/**
+ * Implementation of the learning rule described in Bell & Sejnowski,
+ * Vision Research, in press for 1997, that contained the natural
+ * gradient (W' * W).
+ *
+ * Bell & Sejnowski hold the patent for this learning rule.
+ *
+ * SEP goes once through the mixed signals X in batch blocks of size B,
+ * adjusting weights W at the end of each block.
+ *
+ * sepout is called every F counts.
+ *
+ * I suggest a learning rate (L) of 0.006, and a block size (B) of
+ * 300, at least for 2->2 separation.  When annealing to the right
+ * solution for 10->10, however, L < 0.0001 and B = 10 were most successful.
+ *
+ * @param X  pointer to input matrix
+ * @param W  pointer to weight matrix
+ * @param B  block size
+ * @param L  learning rate
+ * @param F  interval to print training stats
+ */
+void sep96(matrix_t *X, matrix_t *W, int B, double L, int F)
+{
+    matrix_t *BI = m_identity(X->rows);
+    m_elem_mult(BI, B);
+
+    int t;
+    for ( t = 0; t < X->cols; t += B ) {
+        matrix_t *W0 = m_copy(W);
+        matrix_t *X_batch = m_copy_columns(X, t, t + B);
+        matrix_t *U = m_product(W0, X_batch);
+
+        // compute Y' = 1 - 2 * f(U), f(u) = 1 / (1 + e^(-u))
+        matrix_t *Y_tr = m_initialize(U->rows, U->cols);
+
+        int i, j;
+        for ( i = 0; i < Y_tr->rows; i++ ) {
+            for ( j = 0; j < Y_tr->cols; j++ ) {
+                elem(Y_tr, i, j) = 1 - 2 * (1 / (1 + exp(-elem(U, i, j))));
+            }
         }
+
+        // compute dW = L * (BI + Y'U') * W0
+        matrix_t *U_tr = m_transpose(U);
+        matrix_t *dW_temp1 = m_product(Y_tr, U_tr);
+        m_add(dW_temp1, BI);
+
+        matrix_t *dW = m_product(dW_temp1, W0);
+        m_elem_mult(dW, L);
+
+        // compute W = W0 + dW
+        m_add(W, dW);
+
+        // print training stats
+        if ( t % F == 0 ) {
+            precision_t norm = m_norm(dW);
+            precision_t angle = m_angle(W0, W);
+
+            printf("*** norm(dW) = %.4lf, angle(W0, W) = %.1lf deg\n", norm, 180 * angle / M_PI);
+        }
+
+        // cleanup
+        m_free(W0);
+        m_free(X_batch);
+        m_free(U);
+        m_free(Y_tr);
+        m_free(U_tr);
+        m_free(dW_temp1);
+        m_free(dW);
     }
-
-    precision_t angle = acos(-x_dot_y / sqrt(abs_x * abs_y));
-
-    printf("*** change: %.4lf angle: %.1lf deg\n", norm, 180 * angle / M_PI);
 }
 
 /**
