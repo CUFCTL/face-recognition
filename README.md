@@ -105,15 +105,16 @@ Here is the working flow graph for the combined algorithm:
         P_pca = W_pca' * A (PCA projected images) (n-by-n)
         W_lda = lda(W_pca, P_pca) (LDA projection matrix) (m-by-n)
         P_lda = W_lda' * A (LDA projected images) (n-by-n)
-        W_ica = ica(...)
+        W_ica = ica(P_pca) (ICA projection matrix) (m-by-n)
+        P_ica = W_ica' * A (ICA projected images) (n-by-n)
 
     recognize: (a, W', P, T_i) -> P_match
         a = mean face (m-by-1)
         W = projection matrix (m-by-n)
         P = [P_1 ... P_n] (projected images) (n-by-n)
         T_i = test image (m-by-1)
-        T_i_proj = W' * (T_i - a) (n-by-1)
-        P_match = P_j that minimizes abs(P_j - T_i), 1:j:n (n-by-1)
+        P_test = W' * (T_i - a) (n-by-1)
+        P_match = nearest neighbor of P_test (n-by-1)
 
     pca: A -> W_pca
         T = [T_1 ... T_n] (image matrix) (m-by-n)
@@ -121,14 +122,16 @@ Here is the working flow graph for the combined algorithm:
         L_ev = eigenvectors of L (n-by-n)
         W_pca = A * L_ev (eigenfaces) (m-by-n)
 
-    lda: (W_pca, P_pca) -> W_opt
+    lda: (W_pca, P_pca) -> W_opt'
         S_b = (scatter around overall mean) (n-by-n)
         S_w = (scatter around mean of each class) (n-by-n)
         W_lda = eigenvectors of S_w^-1 * S_b (n-by-n)
-        W_opt' = W_lda' W_pca'
+        W_opt' = W_lda' W_pca' (n-by-m)
 
-    ica: A -> W_ica
-        ...
+    ica: X -> W_ica
+        W_z = 2 * Cov(X)^(-1/2) (n-by-n)
+        W = (train with sep96) (n-by-n)
+        W_ica = W * W_z (n-by-n)
 
 To run PCA on a training set of images:
 

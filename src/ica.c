@@ -11,26 +11,23 @@
 /**
  * Compute the whitening matrix W_z for a matrix X.
  *
- * @param X  pointer to input matrix
- * @return pointer to whitening matrix W_z
+ * The whitening matrix, when applied to X, removes
+ * the first- and second-order statistics; that is,
+ * the mean and covariances are set to zero and the
+ * variances are equalized.
+ *
+ * @param X  mean-subtracted input matrix
+ * @return whitening matrix W_z
  */
 matrix_t * sphere(matrix_t *X)
 {
-    // compute mean-subtracted matrix A
-    matrix_t *A = m_copy(X);
-    matrix_t *m = m_mean_column(X);
-
-    m_subtract_columns(A, m);
-
-    // compute W_z = 2 * Cov(A)^(-1/2)
-    matrix_t *W_z_temp1 = m_covariance(A);
+    // compute W_z = 2 * Cov(X)^(-1/2)
+    matrix_t *W_z_temp1 = m_covariance(X);
     matrix_t *W_z_temp2 = m_sqrtm(W_z_temp1);
     matrix_t *W_z = m_inverse(W_z_temp2);
     m_elem_mult(W_z, 2);
 
     // cleanup
-    m_free(A);
-    m_free(m);
     m_free(W_z_temp1);
     m_free(W_z_temp2);
 
@@ -157,6 +154,52 @@ void sep96(matrix_t *X, matrix_t *W, int B, double L, int F)
         m_free(dW_temp1);
         m_free(dW);
     }
+}
+
+typedef struct sep96_params {
+    int B;
+    int L;
+    int F;
+    int N;
+} sep96_params_t;
+
+/**
+ * Compute the projection matrix of a training set with ICA.
+ *
+ * @param X  mean-subtracted input matrix
+ * @return projection matrix W_ica
+ */
+matrix_t * run_ica(matrix_t *X)
+{
+    // compute whitening matrix W_z
+    matrix_t *W_z = sphere(X);
+
+    // train the weight matrix W
+    matrix_t *W = m_identity(X->rows);
+
+    sep96_params_t params[] = {
+        { 50, 0.0005, 5000, 1000 },
+        { 50, 0.0003, 5000, 200 },
+        { 50, 0.0002, 5000, 200 },
+        { 50, 0.0001, 5000, 200 },
+    };
+    int num_trials = sizeof(params) / sizeof(sep96_params_t);
+
+    int i, j;
+    for ( i = 0; i < num_trials; i++ ) {
+        for ( j = 0; j < params[i].N; j++ ) {
+            sep96(X, W, params[i].B, params[i].L, params[i].F);
+        }
+    }
+
+    // compute W_ica = W * W_z
+    matrix_t *W_ica = m_product(W, W_z);
+
+    // cleanup
+    m_free(W_z);
+    m_free(W);
+
+    return W_ica;
 }
 
 /**
