@@ -18,36 +18,35 @@ done
 
 ## The Matrix Library
 
-Function Name              | PCA | LDA | ICA | Verification Status | Verify Date | Member
----                        |:---:|:---:|:---:|---                  |---          |---
-_Constructors, Destructor_ |     |     |     |                     |             |
-m_initialize               |  x  |  x  |  x  | Verified            |             |
-m_identity                 |     |     |  x  | Verified            |             |
-m_zeros                    |     |     |  x  | Verified            |             |
-m_copy                     |     |     |  x  | Verified            |             |
-m_free                     |  x  |  x  |  x  | Verified            |             |
-_Input/Output_             |     |     |     |                     |             |
-m_fprint                   |     |  x  |     | Verified            |             |
-m_fwrite                   |  x  |     |     | Verified            |             |
-m_fscan                    |     |     |     | Verified            |             |
-m_fread                    |  x  |     |     | Verified            |             |
-m_ppm_read                 |  x  |     |     | Verified            |             |
-m_ppm_write                |  x  |     |     | Verified            |             |
-_Getters_                  |     |     |     |                     |             |
-m_covariance               |     |     |  x  | Verified            |             |
-m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ LAPACK  |             |
-m_inverse                  |     |  x  |  x  | Verified w/ LAPACK  |             |
-m_mean_column              |  x  |  x  |     | Verified            |             |
-m_product                  |  x  |  x  |  x  | Verified w/ BLAS    |             |
-m_sqrtm                    |     |     |  x  | Verified            |             |
-m_transpose                |  x  |  x  |  x  | Verified            |             |
-_Mutators_                 |     |     |     |                     |             |
-m_add                      |     |  x  |  x  | Verified            |             |
-m_elem_mult                |     |  x  |  x  | Verified            |             |
-m_subtract                 |     |  x  |  x  | Verified            |             |
-m_subtract_columns         |  x  |     |     | Verified            |             |
-_To review_                |     |     |     |                     |             |
-m_reorder_columns          |     |     |  x  | Not Verified        | 10/21/15    | Taylor
+Function Name              | PCA | LDA | ICA | Verification Status
+---                        |:---:|:---:|:---:|---
+_Constructors, Destructor_ |     |     |     |
+m_initialize               |  x  |  x  |  x  | Verified
+m_identity                 |     |     |  x  | Verified
+m_zeros                    |     |     |  x  | Verified
+m_copy                     |     |     |  x  | Verified
+m_free                     |  x  |  x  |  x  | Verified
+_Input/Output_             |     |     |     |
+m_fprint                   |     |  x  |     | Verified
+m_fwrite                   |  x  |     |     | Verified
+m_fscan                    |     |     |     | Verified
+m_fread                    |  x  |     |     | Verified
+m_ppm_read                 |  x  |     |     | Verified
+m_ppm_write                |  x  |     |     | Verified
+_Getters_                  |     |     |     |
+m_covariance               |     |     |  x  | Verified
+m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ LAPACK
+m_inverse                  |     |  x  |  x  | Verified w/ LAPACK
+m_mean_column              |  x  |  x  |     | Verified
+m_product                  |  x  |  x  |  x  | Verified w/ BLAS
+m_sqrtm                    |     |     |  x  | Verified
+m_transpose                |  x  |  x  |  x  | Verified
+_Mutators_                 |     |     |     |
+m_add                      |     |  x  |  x  | Verified
+m_elem_mult                |     |  x  |  x  | Verified
+m_shuffle_columns          |     |     |  x  | Verified
+m_subtract                 |     |  x  |  x  | Verified
+m_subtract_columns         |  x  |     |     | Verified
 
 #### BLAS and LAPACK
 

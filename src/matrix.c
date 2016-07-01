@@ -547,6 +547,25 @@ void m_elem_mult (matrix_t *M, precision_t c)
 }
 
 /**
+ * Shuffle the columns of a matrix.
+ *
+ * @param M  pointer to matrix
+ */
+void m_shuffle_columns (matrix_t *M)
+{
+	precision_t *temp = (precision_t *)malloc(M->rows * sizeof(precision_t));
+
+	int i, j;
+	for ( i = 0; i < M->cols - 1; i++ ) {
+		j = rand() % (M->cols - i) + i;
+
+		memcpy(temp, &elem(M, 0, i), M->rows * sizeof(precision_t));
+		memcpy(&elem(M, 0, i), &elem(M, 0, j), M->rows * sizeof(precision_t));
+		memcpy(&elem(M, 0, j), temp, M->rows * sizeof(precision_t));
+	}
+}
+
+/**
  * Subtract a "mean" column vector from each column in a matrix.
  *
  * @param M  pointer to matrix
@@ -560,29 +579,4 @@ void m_subtract_columns (matrix_t *M, matrix_t *a)
 			elem(M, j, i) -= elem(a, j, 0);
 		}
 	}
-}
-
-/*******************************************************************************
- * m_reorderCols
- *
- * This reorders the columns of input matrix M to the order specified by V into output matrix R
- *
- * Note:
- * 		V must have 1 row and the number of columns as M
- *
- * ICA:
- * 		void reorder_matrix(data_t *outmatrix, data_t *matrix, int rows, int cols, data_t *rowVect);
-*******************************************************************************/
-matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V) {
-	assert (M->cols == V->cols && V->rows == 1);
-
-	int i, j, row;
-	matrix_t *R = m_initialize(M->rows, M->cols);
-	for (j = 0; j < R->cols; j++) {
-		row = elem(V, 1, j);
-		for (i = 0; i < R->rows; i++) {
-			elem(R, i, j) = elem(M, row, j);
-		}
-	}
-	return R;
 }

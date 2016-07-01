@@ -52,11 +52,9 @@ matrix_t * m_transpose (matrix_t *M);
 
 // mutator functions
 void m_add (matrix_t *A, matrix_t *B);
-void m_subtract (matrix_t *A, matrix_t *B);
+void m_shuffle_columns (matrix_t *M);
 void m_elem_mult (matrix_t *M, precision_t c);
+void m_subtract (matrix_t *A, matrix_t *B);
 void m_subtract_columns (matrix_t *M, matrix_t *a);
-
-// TODO: functions to review
-matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);
 
 #endif

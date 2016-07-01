@@ -480,7 +480,31 @@ void test_m_elem_mult()
 }
 
 /**
- * Test matrix column normalization.
+ * Test matrix column shuffling.
+ */
+void test_m_shuffle_columns()
+{
+	precision_t data[][4] = {
+		{ 1, 2, 3, 4 },
+		{ 5, 6, 7, 8 }
+	};
+
+	matrix_t *A = m_initialize(2, 4);
+	fill_matrix_data(A, data);
+
+	printf("A = \n");
+	m_fprint(stdout, A);
+
+	m_shuffle_columns(A);
+
+	printf("m_shuffle_columns (A) = \n");
+	m_fprint(stdout, A);
+
+	m_free(A);
+}
+
+/**
+ * Test matrix column subtraction.
  */
 void test_m_subtract_columns()
 {
@@ -524,6 +548,7 @@ int main (int argc, char **argv)
 		test_m_add,
 		test_m_subtract,
 		test_m_elem_mult,
+		test_m_shuffle_columns,
 		test_m_subtract_columns
 	};
 	int num_tests = sizeof(tests) / sizeof(test_func_t);
@@ -532,22 +557,11 @@ int main (int argc, char **argv)
 	for ( i = 0; i < num_tests; i++ ) {
 		test_func_t test = tests[i];
 
+		printf("TEST %d\n\n", i + 1);
+
 		test();
 		putchar('\n');
 	}
-
-/*
-	matrix_t *V = m_initialize (UNDEFINED, 1, 6);
-	V->data[0] = 4; V->data[1] = 5; V->data[2] = 2; V->data[3] = 1;
-	V->data[4] = 0; V->data[5] = 3;
-	fprintf (output, "V = \n");
-	m_fprint (output, V);
-
-	R = m_reorder_columns (M, V);
-	fprintf (output, "m_reorderCols (M, V) = \n");
-	m_fprint (output, R);
-	m_free (R);
-*/
 
 	return 0;
 }

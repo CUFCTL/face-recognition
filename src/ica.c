@@ -175,6 +175,9 @@ matrix_t * run_ica(matrix_t *X)
     matrix_t *W_z = sphere(X);
     matrix_t *X_sph = m_product(W_z, X);
 
+    // shuffle the columns of X_sph
+    m_shuffle_columns(X_sph);
+
     // train the weight matrix W
     matrix_t *W = m_identity(X->rows);
 
