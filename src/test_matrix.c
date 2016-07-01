@@ -12,19 +12,6 @@
 typedef void (*test_func_t)(void);
 
 /**
- * Helper function to fill a matrix with a constant value.
- */
-void fill_matrix_constant(matrix_t *M, precision_t c)
-{
-	int i, j;
-	for ( i = 0; i < M->rows; i++ ) {
-		for ( j = 0; j < M->cols; j++ ) {
-			elem(M, i, j) = c;
-		}
-	}
-}
-
-/**
  * Helper function to fill a matrix with arbitrary data.
  */
 void fill_matrix_data(matrix_t *M, precision_t data[][M->cols])
@@ -33,19 +20,6 @@ void fill_matrix_data(matrix_t *M, precision_t data[][M->cols])
 	for ( i = 0; i < M->rows; i++ ) {
 		for ( j = 0; j < M->cols; j++ ) {
 			elem(M, i, j) = data[i][j];
-		}
-	}
-}
-
-/**
- * Helper function to fill a matrix with an increasing value.
- */
-void fill_matrix_linear(matrix_t *M)
-{
-	int i, j;
-	for ( i = 0; i < M->rows; i++ ) {
-		for ( j = 0; j < M->cols; j++ ) {
-			elem(M, i, j) = j * M->rows + i;
 		}
 	}
 }

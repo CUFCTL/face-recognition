@@ -243,8 +243,8 @@ matrix_t * m_covariance (matrix_t *M)
 		: 1;
 	m_elem_mult(C, 1 / c);
 
-	free(A);
-	free(mean);
+	m_free(A);
+	m_free(mean);
 
 	return C;
 }
@@ -461,15 +461,15 @@ matrix_t * m_sqrtm (matrix_t *M)
 		}
 	}
 
-	free(M_eval);
+	m_free(M_eval);
 
 	// compute X = B * M_evec^-1
 	matrix_t *M_evec_inv = m_inverse(M_evec);
 	matrix_t *X = m_product(B, M_evec_inv);
 
-	free(B);
-	free(M_evec);
-	free(M_evec_inv);
+	m_free(B);
+	m_free(M_evec);
+	m_free(M_evec_inv);
 
 	return X;
 }
@@ -563,6 +563,8 @@ void m_shuffle_columns (matrix_t *M)
 		memcpy(&elem(M, 0, i), &elem(M, 0, j), M->rows * sizeof(precision_t));
 		memcpy(&elem(M, 0, j), temp, M->rows * sizeof(precision_t));
 	}
+
+	free(temp);
 }
 
 /**
