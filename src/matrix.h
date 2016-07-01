@@ -57,9 +57,6 @@ void m_elem_mult (matrix_t *M, precision_t c);
 void m_subtract_columns (matrix_t *M, matrix_t *a);
 
 // TODO: functions to review
-void m_flipCols (matrix_t *M);
-void m_normalize (matrix_t *M);
-matrix_t * m_reshape (matrix_t *M, int newNumRows, int newNumCols);
 matrix_t * m_reorder_columns (matrix_t *M, matrix_t *V);
 
 #endif

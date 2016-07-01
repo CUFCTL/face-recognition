@@ -121,7 +121,7 @@ void m_fprint (FILE *stream, matrix_t *M)
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
 		for ( j = 0; j < M->cols; j++ ) {
-			fprintf(stream, "%lg ", elem(M, i, j));
+			fprintf(stream, "% 8.4lf ", elem(M, i, j));
 		}
 		fprintf(stream, "\n");
 	}
@@ -385,28 +385,6 @@ matrix_t * m_inverse (matrix_t *M)
 }
 
 /**
- * Get the product of two matrices.
- *
- * @param A  pointer to left matrix
- * @param B  pointer to right matrix
- * @return pointer to new matrix equal to A * B
- */
-matrix_t * m_product (matrix_t *A, matrix_t *B)
-{
-	assert(A->cols == B->rows);
-
-	matrix_t *C = m_zeros(A->rows, B->cols);
-
-	// C := alpha * op(A) * op(B) + beta * C, alpha = 1, beta = 0
-	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-		A->rows, B->cols, A->cols,
-		1, A->data, A->rows, B->data, B->rows,
-		0, C->data, C->rows);
-
-	return C;
-}
-
-/**
  * Get the mean column of a matrix.
  *
  * @param M  pointer to matrix
@@ -428,6 +406,28 @@ matrix_t * m_mean_column (matrix_t *M)
 	}
 
 	return a;
+}
+
+/**
+ * Get the product of two matrices.
+ *
+ * @param A  pointer to left matrix
+ * @param B  pointer to right matrix
+ * @return pointer to new matrix equal to A * B
+ */
+matrix_t * m_product (matrix_t *A, matrix_t *B)
+{
+	assert(A->cols == B->rows);
+
+	matrix_t *C = m_zeros(A->rows, B->cols);
+
+	// C := alpha * op(A) * op(B) + beta * C, alpha = 1, beta = 0
+	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+		A->rows, B->cols, A->cols,
+		1, A->data, A->rows, B->data, B->rows,
+		0, C->data, C->rows);
+
+	return C;
 }
 
 /**
@@ -560,76 +560,6 @@ void m_subtract_columns (matrix_t *M, matrix_t *a)
 			elem(M, j, i) -= elem(a, j, 0);
 		}
 	}
-}
-
-/*******************************************************************************
- * m_flipCols
- *
- * Swaps columns in M from left to right
- *
- * ICA:
- * 		void fliplr(data_t *outmatrix, data_t *matrix, int rows, int cols)
-*******************************************************************************/
-void m_flipCols (matrix_t *M) {
-	int i, j;
-	precision_t temp;
-	for (i = 0; i < M->rows; i++) {
-		for (j = 0; j < M->cols / 2; j++) {
-			temp = elem(M, i, j);
-			elem(M, i, j) = elem(M, i, M->cols - j - 1);
-			elem(M, i, M->cols - j - 1) = temp;
-		}
-	}
-}
-
-/*******************************************************************************
- * void normalize(data_t *outmatrix, data_t *matrix, int rows, int cols);
- *
- * normalizes the matrix
-*******************************************************************************/
-void m_normalize (matrix_t *M) {
-	int i, j;
-	precision_t max, min, val;
-	min = elem(M, 0, 0);
-	max = min;
-
-	for (i = 0; i < M->rows; i++) {
-		for (j = 0; j < M->cols; j++) {
-			val = elem(M, i, j);
-			if (min > val) {
-				min = val;
-			}
-			if (max < val) {
-				max = val;
-			}
-		}
-	}
-	for (i = 0; i < M->rows; i++) {
-		for (j = 0; j < M->cols; j++) {
-			elem(M, i, j) = (elem (M, i, j) - min) / (max - min);
-		}
-	}
-}
-
-/*******************************************************************************
- * void reshape(data_t **outmatrix, int outRows, int outCols, data_t **matrix, int rows, int cols)
- *
- * reshapes matrix by changing dimensions, keeping data
-*******************************************************************************/
-matrix_t *m_reshape (matrix_t *M, int newNumRows, int newNumCols) {
-	assert (M->rows * M->cols == newNumRows * newNumCols);
-	int i;
-	int r1, c1, r2, c2;
-	matrix_t *R = m_initialize(newNumRows, newNumCols);
-	for (i = 0; i < newNumRows * newNumCols; i++) {
-		r1 = i / newNumCols;
-		c1 = i % newNumCols;
-		r2 = i / M->cols;
-		c2 = i % M->cols;
-		elem(R, r1, c1) = elem(M, r2, c2);
-	}
-
-	return R;
 }
 
 /*******************************************************************************
