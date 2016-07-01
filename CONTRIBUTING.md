@@ -41,9 +41,9 @@ Try to make your commits clean and modular, e.g. make changes to add one feature
 
 When you join the project, you will be given push rights to this repository. That means you have to be careful about pushing your changes, because everyone else can push their changes too, and if we don't push responsibly then there will be conflicts. With that in mind, try to stick to the following work-flow:
 
-1. Before you develop, pull any new commits from the main repo:
+1. Before you develop, pull any new commits from Github:
 ```
-git pull origin master
+git pull
 ```
 
 2. Make sure no one else is working on the same code as you, but if you are working with someone else on the same code, you should probably coordinate in person.
@@ -52,9 +52,9 @@ git pull origin master
 
 4. Before you commit your changes, you might want to `pull` again just in case someone pushed more commits while you were working.
 
-4. Push your commits to the main repo:
+4. Push your commits to Github:
 ```
-git push -u origin master
+git push
 ```
 
 If you try to pull after committing new changes, git won't let you pull! And if you try to push but the main repo has new commits that you didn't pull, git won't let you push! At least not with the commands in this guide, so don't try to force git in these situations because you'll make a mess! Instead, you need to undo your commits with `git reset HEAD^` until you're on the same page as the main repo, then pull, then commit your changes and so on.

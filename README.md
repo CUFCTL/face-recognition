@@ -2,11 +2,30 @@
 
 This repository contains the code for facial recognition software that combines three popular algorithms PCA, LDA, and ICA.
 
+## Testing
+
+To run PCA, LDA, and ICA2 on a training set of images:
+
+    make
+    ./train [training-images-folder]
+
+To test a set of images against the training set:
+
+    ./recognize [test-images-folder]
+
+To run an automated test (k-fold cross-validation) with the ORL face database:
+
+    # test once with 1.pgm removed from each class
+    ./test.sh 1
+
+    # repeat with each index removed (takes much longer)
+    ./test.sh 1 10
+
 ## The Image Library
 
 This software currently supports a subset of the [Netpbm](https://en.wikipedia.org/wiki/Netpbm_format) format, particularly with PGM and PPM images.
 
-Images should __not__ be stored in this repository! Instead, images should be downloaded separately. Face databases are widely available on the Internet, such as [here](http://web.mit.edu/emeyers/www/face_databases.html) and [here](http://face-rec.org/databases/). I am currently using [this database](http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html).
+Images should __not__ be stored in this repository! Instead, images should be downloaded separately. Face databases are widely available on the Internet, such as [here](http://web.mit.edu/emeyers/www/face_databases.html) and [here](http://face-rec.org/databases/). I am currently using the [ORL database](http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html).
 
 To convert JPEG images to PPM with ImageMagick:
 
@@ -133,12 +152,3 @@ Here is the working flow graph for the combined algorithm:
         W = (train with sep96) (n-by-n)
         W_I = W * W_z (n-by-n)
         W_ica' = W_I * W_pca' (n-by-m)
-
-To run PCA, LDA, and ICA2 on a training set of images:
-
-    make
-    ./train [training-images-folder]
-
-To test a set of images against the training set:
-
-    ./recognize [test-images-folder]
