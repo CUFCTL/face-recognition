@@ -112,8 +112,12 @@ void sep96(matrix_t *X, matrix_t *W, int B, double L, int F)
 
     int t;
     for ( t = 0; t < X->cols; t += B ) {
+        int end = (t + B < X->cols)
+            ? t + B
+            : X->cols;
+
         matrix_t *W0 = m_copy(W);
-        matrix_t *X_batch = m_copy_columns(X, t, t + B);
+        matrix_t *X_batch = m_copy_columns(X, t, end);
         matrix_t *U = m_product(W0, X_batch);
 
         // compute Y' = 1 - 2 * f(U), f(u) = 1 / (1 + e^(-u))
