@@ -431,11 +431,11 @@ matrix_t * m_product (matrix_t *A, matrix_t *B)
 }
 
 /**
- * Compute the principal square root of a square matrix. That is,
- * compute X such that X * X = M and X is the unique square root for
- * which every eigenvalue has non-negative real part.
+ * Compute the principal square root of a symmetric matrix. That
+ * is, compute X such that X * X = M and X is the unique square root
+ * for which every eigenvalue has non-negative real part.
  *
- * @param M  pointer to matrix
+ * @param M  pointer to symmetric matrix
  * @return pointer to square root matrix
  */
 matrix_t * m_sqrtm (matrix_t *M)
@@ -446,7 +446,17 @@ matrix_t * m_sqrtm (matrix_t *M)
 	matrix_t *M_eval = m_initialize(M->rows, 1);
 	matrix_t *M_evec = m_initialize(M->rows, M->cols);
 
-	m_eigenvalues_eigenvectors(M, M_eval, M_evec);
+	int num_eval;
+	int *ISUPPZ = (int *)malloc(2 * M->rows * sizeof(int));
+
+	LAPACKE_dsyevr(LAPACK_COL_MAJOR, 'V', 'A', 'L',
+		M->cols, M->data, M->rows,
+		0, 0, 0, 0, LAPACKE_dlamch('S'),
+		&num_eval, M_eval->data, M_evec->data, M_evec->rows,
+		ISUPPZ);
+	free(ISUPPZ);
+
+	assert(num_eval == M->rows);
 
 	// compute B = M_evec * sqrt(D),
 	//   D = eigenvalues of M in the diagonal
@@ -463,13 +473,17 @@ matrix_t * m_sqrtm (matrix_t *M)
 
 	m_free(M_eval);
 
-	// compute X = B * M_evec^-1
-	matrix_t *M_evec_inv = m_inverse(M_evec);
-	matrix_t *X = m_product(B, M_evec_inv);
+	// compute X = B * M_evec'
+	// X := alpha * B * M_evec' + beta * X, alpha = 1, beta = 0
+	matrix_t *X = m_initialize(B->rows, M_evec->rows);
+
+	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
+		B->rows, M_evec->rows, B->cols,
+		1, B->data, B->rows, M_evec->data, M_evec->rows,
+		0, X->data, X->rows);
 
 	m_free(B);
 	m_free(M_evec);
-	m_free(M_evec_inv);
 
 	return X;
 }
@@ -557,11 +571,15 @@ void m_shuffle_columns (matrix_t *M)
 
 	int i, j;
 	for ( i = 0; i < M->cols - 1; i++ ) {
+		// generate j such that i <= j < M->cols
 		j = rand() % (M->cols - i) + i;
 
-		memcpy(temp, &elem(M, 0, i), M->rows * sizeof(precision_t));
-		memcpy(&elem(M, 0, i), &elem(M, 0, j), M->rows * sizeof(precision_t));
-		memcpy(&elem(M, 0, j), temp, M->rows * sizeof(precision_t));
+		// swap columns i and j
+		if ( i != j ) {
+			memcpy(temp, &elem(M, 0, i), M->rows * sizeof(precision_t));
+			memcpy(&elem(M, 0, i), &elem(M, 0, j), M->rows * sizeof(precision_t));
+			memcpy(&elem(M, 0, j), temp, M->rows * sizeof(precision_t));
+		}
 	}
 
 	free(temp);
