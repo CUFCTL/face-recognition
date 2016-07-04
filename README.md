@@ -53,12 +53,12 @@ m_fread                    |  x  |     |     | Verified
 m_ppm_read                 |  x  |     |     | Verified
 m_ppm_write                |  x  |     |     | Verified
 _Getters_                  |     |     |     |
-m_covariance               |     |     |  x  | Verified
-m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ LAPACK
-m_inverse                  |     |  x  |  x  | Verified w/ LAPACK
+m_covariance               |     |     |  x  | Verified w/ BLAS
+m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ BLAS
+m_inverse                  |     |  x  |  x  | Verified w/ BLAS
 m_mean_column              |  x  |  x  |     | Verified
 m_product                  |  x  |  x  |  x  | Verified w/ BLAS
-m_sqrtm                    |     |     |  x  | Verified
+m_sqrtm                    |     |     |  x  | Verified w/ BLAS
 m_transpose                |  x  |  x  |  x  | Verified
 _Mutators_                 |     |     |     |
 m_add                      |     |  x  |  x  | Verified
