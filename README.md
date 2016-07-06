@@ -25,6 +25,13 @@ To run an automated test (k-fold cross-validation) with the ORL face database:
     # repeat with each index removed (takes much longer)
     ./cross-validate.sh 1 10
 
+To test MATLAB code with ORL database:
+
+    ./create-sets.sh 1 10
+    ./convert-images.sh test_images orl_faces_ppm pgm ppm
+    # run archive/LDA/example.m
+    # run archive/PCAA/example.m
+
 ## The Image Library
 
 This software currently supports a subset of the [Netpbm](https://en.wikipedia.org/wiki/Netpbm_format) format, particularly with PGM and PPM images.

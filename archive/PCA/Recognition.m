@@ -143,7 +143,6 @@ end
 
 Euc_dist
 
-[Euc_dist_min , Recognized_index] = min(Euc_dist);
+[Euc_dist_min , OutputName] = min(Euc_dist);
 Euc_dist_min
-Recognized_index
-OutputName = Recognized_index + 2; % output is the file's location in directory with "+ 2" to skip . and .. (see CreateDatabase.m)
+OutputName
