@@ -1,7 +1,6 @@
-function OutputName = Recognition(TestImage, m, A, Eigenfaces)
 % Recognizing step....
 %
-% Description: This function compares two faces by projecting the images into facespace and 
+% Description: This function compares two faces by projecting the images into facespace and
 % measuring the Euclidean distance between them.
 %
 % Argument:      TestImage              - Path of the input test image
@@ -15,13 +14,15 @@ function OutputName = Recognition(TestImage, m, A, Eigenfaces)
 %
 %                A                      - (M*NxP) Matrix of centered image
 %                                         vectors, which is output of 'EigenfaceCore' function.
-% 
+%
 % Returns:       OutputName             - Name of the recognized image in the training database.
 %
 % See also: RESHAPE, STRCAT
-
+%
 % Original version by Amir Hossein Omidvarnia, October 2007
-%                     Email: aomidvar@ece.ut.ac.ir                  
+%                     Email: aomidvar@ece.ut.ac.ir
+%
+function OutputName = Recognition(TestImage, m, A, Eigenfaces)
 
 %%%%%%%%%%%%%%%%%%%%%%%% Projecting centered image vectors into facespace
 % All centered images are projected into facespace by multiplying in
@@ -29,24 +30,21 @@ function OutputName = Recognition(TestImage, m, A, Eigenfaces)
 % feature vector.
 
 ProjectedImages = [];
-Train_Number = size(Eigenfaces,2); 
+Train_Number = size(Eigenfaces,2);
 Test_Number = size(A,2);
 % - 1
 for i = 1 : Test_Number
     temp = Eigenfaces'*A(:,i); % Projection of centered images into facespace
-    ProjectedImages = [ProjectedImages temp]; 
+    ProjectedImages = [ProjectedImages temp];
 end
 %%%%%%%%%%%%%%%%%%%%%%%% Extracting the PCA features from test image
 InputImage = imread(TestImage);
 temp = InputImage(:,:,1);
-[irow icol] = size(temp);
+[irow, icol] = size(temp);
 InImage = reshape(temp',irow*icol,1);
-blah = double(InImage);
-%save reshaped.txt blah /Ascii 
 Difference = double(InImage)-m; % Centered test image
-%save diff.txt Difference /Ascii
 
-%%%%%%%%%%%%%%%%%%%%%%%% Calculating Euclidean distances 
+%%%%%%%%%%%%%%%%%%%%%%%% Calculating Euclidean distances
 % Euclidean distances between the projected test image and the projection
 % of all centered training images are calculated. Test image is
 % supposed to have minimum distance with its corresponding image in the
@@ -57,7 +55,7 @@ Euc_dist = [];
 %%% FPGA
 
 ProjectedTestImage = Eigenfaces'*Difference; % Test image feature vector
-save projectedtest.txt ProjectedTestImage /Ascii
+save projectedtest.txt ProjectedTestImage -ascii
 verbose = 0;
 
 truncate = 0;	% perform truncation if 1
@@ -72,9 +70,9 @@ if(truncate)
     E7 = 0;	% magnitude of 1e7 - 9.999e7
     E8 = 0;	% magnitude of 1e8 - 9.999e8
     E9B = 0;	% magnitude of 1e9 or greater
-    
+
     Absolute = abs(ProjectedImages); % use magnitude of eigenvalues
-    
+
     for x = 1 : Train_Number
         for y = 1 : Test_Number
             entry = abs(ProjectedImages(x,y));
@@ -91,9 +89,9 @@ if(truncate)
                      end
                 end
             end
-                      
-            truncatepoint = 1e6; % cutoff point 
-            
+
+            truncatepoint = 1e6; % cutoff point
+
             if(entry > truncatepoint) % > or < determines whether you truncate above or below the cutoff point
                 truncated = truncated + 1;
                 if(ProjectedImages(x,y) < 0) ProjectedImages(x,y) = -truncatepoint; % keep negative sign if original eigenvalue is negative
@@ -104,14 +102,14 @@ if(truncate)
     end
 end
 
-if(truncate & truncateverbose) % output min and max eigenvalues as well as truncation statistics from above
+if(truncate && truncateverbose) % output min and max eigenvalues as well as truncation statistics from above
     max(max(Absolute))
     min(min(Absolute))
-    
+
     truncated
     Train_Number^2
     percent = truncated/Train_Number^2 % percent of eigenvalues truncated
-    
+
     E3B
     E4
     E5
@@ -133,11 +131,12 @@ if(verbose)
     size(Eigenfaces')
 end
 
+ProjectedTestImage
+
 for i = 1 : Test_Number
     q = ProjectedImages(:,i);
-    ProjectedTestImage
     temp = ( norm (ProjectedTestImage - q)  )^2;
-    Euc_dist = [Euc_dist temp];
+    Euc_dist = [Euc_dist; temp];
 end
 
 %%% FPGA
@@ -145,6 +144,6 @@ end
 Euc_dist
 
 [Euc_dist_min , Recognized_index] = min(Euc_dist);
-Euc_dist_min;
-Recognized_index;
+Euc_dist_min
+Recognized_index
 OutputName = Recognized_index + 2; % output is the file's location in directory with "+ 2" to skip . and .. (see CreateDatabase.m)

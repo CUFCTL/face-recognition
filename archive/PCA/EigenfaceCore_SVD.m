@@ -1,11 +1,11 @@
-function [m, A, Eigenfaces] = EigenfaceCore(T)
+function [m, A, Eigenfaces] = EigenfaceCore_SVD(T)
 
-%%%%%%%%%%%%%%%%%%%%%%%% Calculating the mean image 
+%%%%%%%%%%%%%%%%%%%%%%%% Calculating the mean image
 m = mean(T,2); % Computing the average face image m = (1/P)*sum(Tj's)    (j = 1 : P)
 Train_Number = size(T,2);
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the deviation of each image from mean image
 fprintf('calculating deviation of each image from mean image\n');
-A = [];  
+A = [];
 A = zeros(size(T,1),size(T,2));
 for i = 1 : Train_Number
     temp = double(T(:,i)) - m; % Computing the difference image for each image in the training set Ai = Ti - m
