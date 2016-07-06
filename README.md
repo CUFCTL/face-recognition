@@ -2,6 +2,10 @@
 
 This repository contains the code for facial recognition software that combines three popular algorithms PCA, LDA, and ICA.
 
+## Getting Started
+
+New team members should look at CONTRIBUTING.md to learn about our work-flow, especially those who are unfamiliar with Github.
+
 ## Testing
 
 To run PCA, LDA, and ICA2 on a training set of images:
@@ -79,6 +83,13 @@ Much of the code in this project depends on BLAS and LAPACK. In order to run it 
     liblapacke (3.4.2+dfsg-2)
     liblapacke-dev (3.4.2+dfsg-2)
 
+Documentation for BLAS and LAPACK consists mostly of the documentation for each function. For any given BLAS/LAPACK function, you will want to reference two documents:
+
+1. The Fortran source file http://www.netlib.org/lapack/double/
+2. The cblas/lapacke header http://www.netlib.org/blas/cblas.h http://www.netlib.org/lapack/lapacke.h
+
+The Fortran source provides documentation for function parameters, and the C headers show how to order those arguments with the C interface.
+
 ##### Ubuntu
 
     sudo apt-get install libblas-dev liblapacke-dev
@@ -112,43 +123,50 @@ Here is the working flow graph for the combined algorithm:
     m = number of dimensions per image
     n = number of images
 
-    train: T -> (a, W', P)
-        T = [T_1 ... T_n] (image matrix) (m-by-n)
-        a = sum(T_i, 1:i:n) / n (mean face) (m-by-1)
-        X = [(T_1 - a) ... (T_n - a)] (norm. image matrix) (m-by-n)
-        W_pca' = PCA(X) (PCA projection matrix) (m-by-n)
-        P_pca = W_pca' * X (PCA projected images) (n-by-n)
-        W_lda' = LDA(W_pca, P_pca) (LDA projection matrix) (m-by-n)
-        P_lda = W_lda' * X (LDA projected images) (n-by-n)
-        W_ica' = ICA2(W_pca, P_pca) (ICA2 projection matrix) (n-by-n)
-        P_ica = W_ica' * X (ICA2 projected images) (n-by-n)
+    train: X -> (a, W', P)
+        X = [X_1 ... X_n] (image matrix) (m-by-n)
+        a = sum(X_i, 1:i:n) / n (mean face) (m-by-1)
+        X = [(X_1 - a) ... (X_n - a)] (mean-subtracted image matrix) (m-by-n)
+        W_pca' = PCA(X) (PCA projection matrix) (n-by-m)
+        P_pca = W_pca' * X (PCA projected image matrix) (n-by-n)
+        W_lda' = LDA(W_pca, P_pca) (LDA projection matrix) (n-by-m)
+        P_lda = W_lda' * X (LDA projected image matrix) (n-by-n)
+        W_ica' = ICA2(W_pca, P_pca) (ICA2 projection matrix) (n-by-m)
+        P_ica = W_ica' * X (ICA2 projected image matrix) (n-by-n)
 
-    recognize: T_i -> P_match
+    recognize: X_test -> P_match
         a = mean face (m-by-1)
         (W_pca, W_lda, W_ica) = projection matrices (m-by-n)
-        (P_pca, P_lda, P_ica) = projected images (n-by-n)
-        T_i = test image (m-by-1)
-        P_test_pca = W_pca' * (T_i - a) (n-by-1)
-        P_test_lda = W_lda' * (T_i - a) (n-by-1)
-        P_test_ica = W_ica' * (T_i - a) (n-by-1)
+        (P_pca, P_lda, P_ica) = projected image matrices (n-by-n)
+        X_test = test image (m-by-1)
+        P_test_pca = W_pca' * (X_test - a) (n-by-1)
+        P_test_lda = W_lda' * (X_test - a) (n-by-1)
+        P_test_ica = W_ica' * (X_test - a) (n-by-1)
         P_match_pca = nearest neighbor of P_test_pca (n-by-1)
         P_match_lda = nearest neighbor of P_test_lda (n-by-1)
         P_match_ica = nearest neighbor of P_test_ica (n-by-1)
 
     PCA: X -> W_pca'
-        T = [T_1 ... T_n] (image matrix) (m-by-n)
+        X = [X_1 ... X_n] (image matrix) (m-by-n)
         L = X' * X (surrogate matrix) (n-by-n)
         L_ev = eigenvectors of L (n-by-n)
         W_pca = X * L_ev (eigenfaces) (m-by-n)
 
     LDA: (W_pca, P_pca) -> W_lda'
-        S_b = (scatter around overall mean) (n-by-n)
-        S_w = (scatter around mean of each class) (n-by-n)
-        W_fld = eigenvectors of S_w^-1 * S_b (n-by-n)
+        X = P_pca (n-by-n)
+        c = number of classes
+        n_i = size of class i
+        U_i = sum(X_j, j in class i) / n_i (n-by-1)
+        u = sum(U_i, 1:i:c) / c (n-by-1)
+        S_b = sum((U_i - u) * (U_i - u)', 1:i:c) (n-by-n)
+        S_w = sum(sum((X_j - U_i) * (X_j - U_i)', j in class i), 1:i:c) (n-by-n)
+        W_fld = eigenvectors of (S_b, S_w) (n-by-n)
         W_lda' = W_fld' * W_pca' (n-by-m)
 
     ICA2: (W_pca, P_pca) -> W_ica'
+        X = P_pca (n-by-n)
         W_z = 2 * Cov(X)^(-1/2) (n-by-n)
+        X_sph = W_z * X (n-by-n)
         W = (train with sep96) (n-by-n)
         W_I = W * W_z (n-by-n)
         W_ica' = W_I * W_pca' (n-by-m)
