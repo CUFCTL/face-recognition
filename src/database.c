@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "database.h"
-#include "ppm.h"
+#include "image.h"
 
 /**
  * Get whether an entry is a PGM or PPM image based
@@ -155,22 +155,22 @@ int get_image_entries(const char *path, database_entry_t **image_entries, int *n
 matrix_t * get_image_matrix(database_entry_t *entries, int num_images)
 {
 	// get the image size from the first image
-	ppm_t *image = ppm_construct();
+	image_t *image = image_construct();
 
-	ppm_read(image, entries[0].name);
+	image_read(image, entries[0].name);
 
 	matrix_t *T = m_initialize(image->channels * image->height * image->width, num_images);
 
 	// map each image to a column vector
-	m_ppm_read(T, 0, image);
+	m_image_read(T, 0, image);
 
 	int i;
 	for ( i = 1; i < num_images; i++ ) {
-		ppm_read(image, entries[i].name);
-		m_ppm_read(T, i, image);
+		image_read(image, entries[i].name);
+		m_image_read(T, i, image);
 	}
 
-	ppm_destruct(image);
+	image_destruct(image);
 
 	return T;
 }
@@ -362,14 +362,14 @@ void db_recognize(database_t *db, const char *path)
 	int num_test_images = get_image_names(path, &image_names);
 
 	// test each image against the database
-	ppm_t *image = ppm_construct();
+	image_t *image = image_construct();
 	matrix_t *T_i = m_initialize(db->num_dimensions, 1);
 
 	int i;
 	for ( i = 0; i < num_test_images; i++ ) {
 		// read the test image T_i
-		ppm_read(image, image_names[i]);
-		m_ppm_read(T_i, 0, image);
+		image_read(image, image_names[i]);
+		m_image_read(T_i, 0, image);
 		m_subtract(T_i, db->mean_face);
 
 		// compute the projected test image P_test = W' * (T_i - a)
@@ -396,7 +396,7 @@ void db_recognize(database_t *db, const char *path)
 	}
 
 	// cleanup
-	ppm_destruct(image);
+	image_destruct(image);
 	m_free(T_i);
 
 	for ( i = 0; i < num_test_images; i++ ) {

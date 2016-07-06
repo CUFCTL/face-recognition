@@ -10,7 +10,7 @@
 #define MATRIX_H
 
 #include <stdio.h>
-#include "ppm.h"
+#include "image.h"
 
 typedef double precision_t;
 
@@ -35,8 +35,8 @@ void m_fprint (FILE *stream, matrix_t *M);
 void m_fwrite (FILE *stream, matrix_t *M);
 matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
-void m_ppm_read (matrix_t *M, int col, ppm_t *image);
-void m_ppm_write (matrix_t *M, int col, ppm_t *image);
+void m_image_read (matrix_t *M, int col, image_t *image);
+void m_image_write (matrix_t *M, int col, image_t *image);
 
 // getter functions
 matrix_t * m_covariance (matrix_t *M);

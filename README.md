@@ -54,8 +54,8 @@ m_fprint                   |     |  x  |     | Verified
 m_fwrite                   |  x  |     |     | Verified
 m_fscan                    |     |     |     | Verified
 m_fread                    |  x  |     |     | Verified
-m_ppm_read                 |  x  |     |     | Verified
-m_ppm_write                |  x  |     |     | Verified
+m_image_read               |  x  |     |     | Verified
+m_image_write              |  x  |     |     | Verified
 _Getters_                  |     |     |     |
 m_covariance               |     |     |  x  | Verified w/ BLAS
 m_eigen                    |  x  |  x  |     | Verified w/ BLAS

@@ -1,5 +1,5 @@
 /**
- * @file ppm.c
+ * @file image.c
  *
  * Implementation of the image type.
  *
@@ -11,16 +11,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ppm.h"
+#include "image.h"
 
 /**
  * Construct a PPM image.
  *
  * @return pointer to empty PPM image
  */
-ppm_t * ppm_construct()
+image_t * image_construct()
 {
-	ppm_t *image = (ppm_t *)malloc(sizeof(ppm_t));
+	image_t *image = (image_t *)malloc(sizeof(image_t));
 	image->channels = 0;
 	image->height = 0;
 	image->width = 0;
@@ -31,18 +31,18 @@ ppm_t * ppm_construct()
 }
 
 /**
- * Destruct a PPM image.
+ * Destruct an image.
  *
- * @param image  pointer to PPM image
+ * @param image  pointer to image
  */
-void ppm_destruct(ppm_t *image)
+void image_destruct(image_t *image)
 {
 	free(image->pixels);
 	free(image);
 }
 
 /**
- * Helper function to skip comments in a PPM image.
+ * Helper function to skip comments in a PGM/PPM image.
  */
 void skip_to_next_value(FILE* in)
 {
@@ -64,12 +64,12 @@ void skip_to_next_value(FILE* in)
 }
 
 /**
- * Read a PPM image from a file.
+ * Read an image from a PGM/PPM file.
  *
- * @param image  pointer to PPM image
+ * @param image  pointer to image
  * @param path   image filename
  */
-void ppm_read(ppm_t *image, const char *path)
+void image_read(image_t *image, const char *path)
 {
 	FILE *in = fopen(path, "r");
 
@@ -108,12 +108,12 @@ void ppm_read(ppm_t *image, const char *path)
 }
 
 /**
- * Write a PPM image to a file.
+ * Write an image to a PGM/PPM file.
  *
- * @param image  pointer to PPM image
+ * @param image  pointer to image
  * @param path   image filename
  */
-void ppm_write(ppm_t *image, const char *path)
+void image_write(image_t *image, const char *path)
 {
 	FILE *out = fopen(path, "w");
 

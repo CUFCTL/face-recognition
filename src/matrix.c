@@ -187,7 +187,7 @@ matrix_t * m_fread (FILE *stream)
  * @param col    column index
  * @param image  pointer to image
  */
-void m_ppm_read (matrix_t *M, int col, ppm_t *image)
+void m_image_read (matrix_t *M, int col, image_t *image)
 {
 	assert(M->rows == image->channels * image->height * image->width);
 
@@ -204,7 +204,7 @@ void m_ppm_read (matrix_t *M, int col, ppm_t *image)
  * @param col    column index
  * @param image  pointer to image
  */
-void m_ppm_write (matrix_t *M, int col, ppm_t *image)
+void m_image_write (matrix_t *M, int col, image_t *image)
 {
 	assert(M->rows == image->channels * image->height * image->width);
 

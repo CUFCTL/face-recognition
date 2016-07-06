@@ -2,8 +2,8 @@
 *.o
 
 # executables
+test-image
 test-matrix
-test-ppm
 train
 recognize
 
