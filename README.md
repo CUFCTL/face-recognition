@@ -58,9 +58,10 @@ m_ppm_read                 |  x  |     |     | Verified
 m_ppm_write                |  x  |     |     | Verified
 _Getters_                  |     |     |     |
 m_covariance               |     |     |  x  | Verified w/ BLAS
-m_eigenvalues_eigenvectors |  x  |  x  |  x  | Verified w/ BLAS
+m_eigen                    |  x  |  x  |     | Verified w/ BLAS
+m_eigen2                   |     | (x) |     | Not Verified
 m_inverse                  |     |  x  |  x  | Verified w/ BLAS
-m_mean_column              |  x  |  x  |     | Verified
+m_mean_column              |  x  |  x  |  x  | Verified
 m_product                  |  x  |  x  |  x  | Verified w/ BLAS
 m_sqrtm                    |     |     |  x  | Verified w/ BLAS
 m_transpose                |  x  |  x  |  x  | Verified

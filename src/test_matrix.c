@@ -138,7 +138,7 @@ void test_m_distance()
 /**
  * Test eigenvalues, eigenvectors.
  */
-void test_m_eigenvalues_eigenvectors()
+void test_m_eigen()
 {
 	precision_t data[][4] = {
 		{ 1.0000, 0.5000, 0.3333, 0.2500 },
@@ -148,12 +148,12 @@ void test_m_eigenvalues_eigenvectors()
 	};
 
 	matrix_t *M = m_initialize(4, 4);
-	matrix_t *M_eval = m_initialize(4, 1);
-	matrix_t *M_evec = m_initialize(4, 4);
+	matrix_t *M_eval = m_initialize(M->rows, 1);
+	matrix_t *M_evec = m_initialize(M->rows, M->cols);
 
 	fill_matrix_data(M, data);
 
-	m_eigenvalues_eigenvectors(M, M_eval, M_evec);
+	m_eigen(M, M_eval, M_evec);
 
 	printf("M = \n");
 	m_fprint(stdout, M);
@@ -167,6 +167,52 @@ void test_m_eigenvalues_eigenvectors()
 	m_free(M);
 	m_free(M_eval);
 	m_free(M_evec);
+}
+
+// TODO: find more examples, check this example against MATLAB
+/**
+ * Test generalized eigenvalues, eigenvectors for two matrices.
+ */
+void test_m_eigen2()
+{
+	precision_t data_A[][3] = {
+		{ 0, 0, 0 },
+		{ 0, 0, 0 },
+		{ 0, 0, 0 }
+	};
+
+	precision_t data_B[][3] = {
+		{ 1.0, 0.1, 0.1 },
+		{ 0.1, 2.0, 0.1 },
+		{ 1.0, 0.1, 3.0 }
+	};
+
+	matrix_t *A = m_initialize(3, 3);
+	matrix_t *B = m_initialize(3, 3);
+	matrix_t *J_eval = m_initialize(A->rows, 1);
+	matrix_t *J_evec = m_initialize(A->rows, A->cols);
+
+	fill_matrix_data(A, data_A);
+	fill_matrix_data(B, data_B);
+
+	m_eigen2(A, B, J_eval, J_evec);
+
+	printf("A = \n");
+	m_fprint(stdout, A);
+
+	printf("B = \n");
+	m_fprint(stdout, B);
+
+	printf("eigenvalues of J = \n");
+	m_fprint(stdout, J_eval);
+
+	printf("eigenvectors of J = \n");
+	m_fprint(stdout, J_evec);
+
+	m_free(A);
+	m_free(B);
+	m_free(J_eval);
+	m_free(J_evec);
 }
 
 /**
@@ -513,7 +559,8 @@ int main (int argc, char **argv)
 		test_m_copy,
 		test_m_covariance,
 		test_m_distance,
-		test_m_eigenvalues_eigenvectors,
+		test_m_eigen,
+		test_m_eigen2,
 		test_m_inverse,
 		test_m_mean_column,
 		test_m_product,

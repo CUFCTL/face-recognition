@@ -117,7 +117,7 @@ matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *P_pca, int c, database_entry_t *ent
     matrix_t *J_eval = m_initialize(J->rows, 1);
     matrix_t *J_evec = m_initialize(J->rows, J->cols);
 
-    m_eigenvalues_eigenvectors(J, J_eval, J_evec);
+    m_eigen(J, J_eval, J_evec);
 
     // TODO: take only the first c - 1 columns of J_evec
     matrix_t *W_fld = J_evec;

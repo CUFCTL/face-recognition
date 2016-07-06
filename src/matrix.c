@@ -340,7 +340,7 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
  * @param M_eval  pointer to eigenvalues matrix, m-by-1
  * @param M_evec  pointer to eigenvectors matrix, m-by-n
  */
-void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec)
+void m_eigen (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec)
 {
 	assert(M_eval->rows == M->rows && M_eval->cols == 1);
 	assert(M_evec->rows == M->rows && M_evec->cols == M->cols);
@@ -356,6 +356,48 @@ void m_eigenvalues_eigenvectors (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec
 
 	m_free(M_work);
 	free(wi);
+}
+
+/**
+ * Compute the generalized eigenvalues and right eigenvectors of two
+ * square matrices.
+ *
+ * The eigenvalues are returned as a column vector, and the
+ * eigenvectors are returned as column vectors. The i-th
+ * eigenvalue corresponds to the i-th column vector.
+ *
+ * @param A	      pointer to matrix, n-by-n
+ * @param B	      pointer to matrix, n-by-n
+ * @param J_eval  pointer to eigenvalues matrix, n-by-1
+ * @param J_evec  pointer to eigenvectors matrix, n-by-n
+ */
+void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t *J_eval, matrix_t *J_evec)
+{
+	assert(A->rows == A->cols && B->rows == B->cols);
+	assert(A->rows == B->rows);
+	assert(J_eval->rows == A->rows && J_eval->cols == 1);
+	assert(J_evec->rows == A->rows && J_evec->cols == A->cols);
+
+	matrix_t *A_work = m_copy(A);
+	matrix_t *B_work = m_copy(B);
+	precision_t *alphai = (precision_t *)malloc(A->rows * sizeof(precision_t));
+	precision_t *beta = (precision_t *)malloc(A->rows * sizeof(precision_t));
+
+	LAPACKE_dggev(LAPACK_COL_MAJOR, 'N', 'V',
+		A->cols, A_work->data, A->rows, B_work->data, B->rows,
+		J_eval->data, alphai, beta,      // eigenvalues (lambda = (alphar + i * alphai) / beta)
+		NULL, A->rows,                   // left eigenvectors
+		J_evec->data, A->rows);          // right eigenvectors
+
+	int i;
+	for ( i = 0; i < A->rows; i++ ) {
+		elem(J_eval, i, 0) /= beta[i];
+	}
+
+	m_free(A_work);
+	m_free(B_work);
+	free(alphai);
+	free(beta);
 }
 
 /**
@@ -443,6 +485,7 @@ matrix_t * m_sqrtm (matrix_t *M)
 	assert(M->rows == M->cols);
 
 	// compute eigenvalues, eigenvectors
+	matrix_t *M_work = m_copy(M);
 	matrix_t *M_eval = m_initialize(M->rows, 1);
 	matrix_t *M_evec = m_initialize(M->rows, M->cols);
 
@@ -450,10 +493,12 @@ matrix_t * m_sqrtm (matrix_t *M)
 	int *ISUPPZ = (int *)malloc(2 * M->rows * sizeof(int));
 
 	LAPACKE_dsyevr(LAPACK_COL_MAJOR, 'V', 'A', 'L',
-		M->cols, M->data, M->rows,
+		M->cols, M_work->data, M->rows,
 		0, 0, 0, 0, LAPACKE_dlamch('S'),
 		&num_eval, M_eval->data, M_evec->data, M_evec->rows,
 		ISUPPZ);
+
+	m_free(M_work);
 	free(ISUPPZ);
 
 	assert(num_eval == M->rows);

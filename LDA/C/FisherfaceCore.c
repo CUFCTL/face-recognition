@@ -124,7 +124,7 @@ matrix_t **FisherfaceCore(const matrix_t *Database)
 
     // D is the (D)iagonal matrix of eigenvalues
     // V is the matrix of eigen(V)ectors
-    m_eigenvalues_eigenvectors(M, D, V);
+    m_eigen(M, D, V);
 
     if (verbose) {
         printf("D, eigenvalues:\n");
