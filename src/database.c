@@ -238,12 +238,14 @@ void db_train(database_t *db, const char *path)
 	// compute LDA representation
 	printf("Computing LDA representation...\n");
 
+	// db->W_lda_tr = m_copy(db->W_pca_tr);
 	db->W_lda_tr = LDA(db->W_pca_tr, db->P_pca, db->num_classes, db->entries);
 	db->P_lda = m_product(db->W_lda_tr, X);
 
 	// compute ICA2 representation
 	printf("Computing ICA2 representation...\n");
 
+	// db->W_ica_tr = m_copy(db->W_pca_tr);
 	db->W_ica_tr = ICA2(db->W_pca_tr, db->P_pca);
 	db->P_ica = m_product(db->W_ica_tr, X);
 

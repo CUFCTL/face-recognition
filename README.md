@@ -20,10 +20,10 @@ To test a set of images against the training set:
 To run an automated test (k-fold cross-validation) with the ORL face database:
 
     # test once with 1.pgm removed from each class
-    ./test.sh 1
+    ./cross-validate.sh 1
 
     # repeat with each index removed (takes much longer)
-    ./test.sh 1 10
+    ./cross-validate.sh 1 10
 
 ## The Image Library
 
@@ -31,13 +31,9 @@ This software currently supports a subset of the [Netpbm](https://en.wikipedia.o
 
 Images should __not__ be stored in this repository! Instead, images should be downloaded separately. Face databases are widely available on the Internet, such as [here](http://web.mit.edu/emeyers/www/face_databases.html) and [here](http://face-rec.org/databases/). I am currently using the [ORL database](http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html).
 
-To convert JPEG images to PPM with ImageMagick:
+To convert JPEG images to PGM with ImageMagick:
 
-```
-for f in [images-folder]/**/*.jpg
-do convert $f -size 300x200 "$(basename $f .jpg)".ppm
-done
-```
+    convert-images.sh [src-folder] [dst-folder] jpeg pgm
 
 ## The Matrix Library
 

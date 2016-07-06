@@ -5,13 +5,13 @@
 # EXAMPLES
 #
 # Perform k-fold on a single observation (2.pgm):
-# ./test.sh 2
+# ./cross-validate.sh 2
 #
 # Perform k-fold on a range of observations (4.pgm - 7.pgm):
-# ./test.sh 4 7
+# ./cross-validate.sh 4 7
 #
 # Perform k-fold for all observations:
-# ./test.sh 1 10
+# ./cross-validate.sh 1 10
 
 # determine the range
 if [ "$#" = 2 ]; then
@@ -21,7 +21,7 @@ elif [ "$#" = 1 ]; then
     START=$1
     END=$1
 else
-    >&2 echo "usage: ./test.sh [begin-index] [end-index]"
+    >&2 echo "usage: ./cross-validate.sh [begin-index] [end-index]"
     exit 1
 fi
 
@@ -35,15 +35,8 @@ for (( i = $START; i <= $END; i++ )); do
     echo "BEGIN: remove $i.pgm from each class"
     echo
 
-    # initialize training set and test set
-    rm -rf train_images test_images
-    cp -r orl_faces train_images
-    mkdir test_images
-
-    # move the i-th image of each class to the test set
-    for f in train_images/*
-        do mv $f/$i.pgm test_images/$(basename $f)_$i.pgm
-    done
+    # create the training set and test set
+    ./create-sets.sh $i
 
     # run the algorithms
     ./train train_images
