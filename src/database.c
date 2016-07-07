@@ -203,10 +203,10 @@ void db_destruct(database_t *db)
 	m_free(db->mean_face);
 	m_free(db->W_pca_tr);
 	m_free(db->W_lda_tr);
-	//m_free(db->W_ica_tr);
+	m_free(db->W_ica_tr);
 	m_free(db->P_pca);
 	m_free(db->P_lda);
-	//m_free(db->P_ica);
+	m_free(db->P_ica);
 
 	free(db);
 }
