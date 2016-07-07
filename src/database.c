@@ -203,10 +203,10 @@ void db_destruct(database_t *db)
 	m_free(db->mean_face);
 	m_free(db->W_pca_tr);
 	m_free(db->W_lda_tr);
-	m_free(db->W_ica_tr);
+	//m_free(db->W_ica_tr);
 	m_free(db->P_pca);
 	m_free(db->P_lda);
-	m_free(db->P_ica);
+	//m_free(db->P_ica);
 
 	free(db);
 }
@@ -243,11 +243,11 @@ void db_train(database_t *db, const char *path)
 	db->P_lda = m_product(db->W_lda_tr, X);
 
 	// compute ICA2 representation
-	printf("Computing ICA2 representation...\n");
+	//printf("Computing ICA2 representation...\n");
 
 	// db->W_ica_tr = m_copy(db->W_pca_tr);
-	db->W_ica_tr = ICA2(db->W_pca_tr, db->P_pca);
-	db->P_ica = m_product(db->W_ica_tr, X);
+	//db->W_ica_tr = ICA2(db->W_pca_tr, db->P_pca);
+	//db->P_ica = m_product(db->W_ica_tr, X);
 
 	m_free(X);
 }
@@ -276,10 +276,10 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 	m_fwrite(tdata, db->mean_face);
 	m_fwrite(tdata, db->W_pca_tr);
 	m_fwrite(tdata, db->W_lda_tr);
-	m_fwrite(tdata, db->W_ica_tr);
+	//m_fwrite(tdata, db->W_ica_tr);
 	m_fwrite(tdata, db->P_pca);
 	m_fwrite(tdata, db->P_lda);
-	m_fwrite(tdata, db->P_ica);
+	//m_fwrite(tdata, db->P_ica);
 	fclose(tdata);
 }
 
@@ -298,10 +298,10 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 	db->mean_face = m_fread(db_training_data);
 	db->W_pca_tr = m_fread(db_training_data);
 	db->W_lda_tr = m_fread(db_training_data);
-	db->W_ica_tr = m_fread(db_training_data);
+	//db->W_ica_tr = m_fread(db_training_data);
 	db->P_pca = m_fread(db_training_data);
 	db->P_lda = m_fread(db_training_data);
-	db->P_ica = m_fread(db_training_data);
+	//db->P_ica = m_fread(db_training_data);
 
 	db->num_images = db->P_pca->cols;
 	db->num_dimensions = db->mean_face->rows;
@@ -377,24 +377,24 @@ void db_recognize(database_t *db, const char *path)
 		// compute the projected test image P_test = W' * (T_i - a)
 		matrix_t *P_test_pca = m_product(db->W_pca_tr, T_i);
 		matrix_t *P_test_lda = m_product(db->W_lda_tr, T_i);
-		matrix_t *P_test_ica = m_product(db->W_ica_tr, T_i);
+		//matrix_t *P_test_ica = m_product(db->W_ica_tr, T_i);
 
 		// find the matches for each algorithm
 		int index_pca = nearest_neighbor(db->P_pca, P_test_pca, m_dist_L2);
 		int index_lda = nearest_neighbor(db->P_lda, P_test_lda, m_dist_L2);
-		int index_ica = nearest_neighbor(db->P_ica, P_test_ica, m_dist_COS);
+		//int index_ica = nearest_neighbor(db->P_ica, P_test_ica, m_dist_COS);
 
 		// print results
 		printf("test image: \'%s\'\n", image_names[i]);
 		printf("\tPCA:  (class %d) \'%s\'\n", db->entries[index_pca].class, db->entries[index_pca].name);
 		printf("\tLDA:  (class %d) \'%s\'\n", db->entries[index_lda].class, db->entries[index_lda].name);
-		printf("\tICA2: (class %d) \'%s\'\n", db->entries[index_ica].class, db->entries[index_ica].name);
+		//printf("\tICA2: (class %d) \'%s\'\n", db->entries[index_ica].class, db->entries[index_ica].name);
 		putchar('\n');
 
 		// cleanup
 		m_free(P_test_pca);
 		m_free(P_test_lda);
-		m_free(P_test_ica);
+		//m_free(P_test_ica);
 	}
 
 	// cleanup
