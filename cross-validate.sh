@@ -14,14 +14,27 @@
 # ./cross-validate.sh 1 10
 
 # determine the range
-if [ "$#" = 2 ]; then
+
+if [ "$#" = 5 ]; then
+    START=$1
+    END=$2
+    ARGS="$3 $4 $5"
+elif [ "$#" = 4 ]; then
+    START=$1
+    END=$2
+    ARGS="$3 $4"
+elif [ "$#" = 3 ]; then
+    START=$1
+    END=$2
+    ARGS="$3"
+elif [ "$#" = 2 ]; then
     START=$1
     END=$2
 elif [ "$#" = 1 ]; then
     START=$1
     END=$1
 else
-    >&2 echo "usage: ./cross-validate.sh [begin-index] [end-index]"
+    >&2 echo "usage: ./cross-validate.sh [begin-index] [end-index] -flags"
     exit 1
 fi
 
@@ -39,6 +52,6 @@ for (( i = $START; i <= $END; i++ )); do
     ./create-sets.sh $i
 
     # run the algorithms
-    ./train train_images
-    ./recognize test_images
+    ./train train_images ARGS
+    ./recognize test_images ARGS
 done
