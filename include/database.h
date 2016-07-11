@@ -3,7 +3,6 @@
  *
  * Interface definitions for a face database.
  */
-
 #ifndef DATABASE_H
 #define DATABASE_H
 
@@ -30,20 +29,14 @@ typedef struct {
 	matrix_t *P_ica;
 } database_t;
 
-typedef struct {
-	int pca;
-	int lda;
-	int ica;
-} args_t;
-
 database_t * db_construct();
-void db_destruct(database_t *db, args_t * args);
+void db_destruct(database_t *db);
 
-void db_train(database_t *db, const char *path, args_t * args);
-void db_save(database_t *db, const char *path_tset, const char *path_tdata, args_t * args);
+void db_train(database_t *db, const char *path);
+void db_save(database_t *db, const char *path_tset, const char *path_tdata);
 
-void db_load(database_t *db, const char *path_tset, const char *path_tdata, args_t * args);
-void db_recognize(database_t *db, const char *path, args_t * args);
+void db_load(database_t *db, const char *path_tset, const char *path_tdata);
+void db_recognize(database_t *db, const char *path);
 
 matrix_t * PCA(matrix_t *X);
 matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *P_pca, int c, database_entry_t *entries);

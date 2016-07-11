@@ -11,11 +11,20 @@ New team members should look at CONTRIBUTING.md to learn about our work-flow, es
 To run PCA, LDA, and ICA2 on a training set of images:
 
     make
-    ./train [training-images-folder]
+    ./train [training-images-folder] -flags
+    
+    -flags specify which algorithms to run as follows:
+        -pca
+        -lda
+        -ica
+        -all
+        NOTE: default with no flags sets to -all
 
 To test a set of images against the training set:
 
-    ./recognize [test-images-folder]
+    ./recognize [test-images-folder] -flags
+    
+    NOTE: flags must be the same as the flags set during training
 
 To run an automated test (k-fold cross-validation) with the ORL face database:
 
