@@ -1,6 +1,6 @@
 # Clemson FCT Facial Recognition
 
-This repository contains the code for facial recognition software that combines three popular algorithms PCA, LDA, and ICA.
+This repository contains the code for facial recognition software that combines three popular algorithms: PCA, LDA, and ICA.
 
 ## Getting Started
 
