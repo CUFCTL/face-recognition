@@ -7,7 +7,7 @@ This foler contains useful tools for performing face detection, facial recogniti
 FaceCrop is a tool that takes an input image (.jpg, .png, .bmp, etc) and detects all faces within the image. Once detected, the tool crops the image to minimum dimensions that contain the face. FaceCrop will allow for much more freedom when it comes to creating test sets. Now it is not necessary to require a picture to be taken at a precise distance and with one subject. 
 
 ## OpenCV
-To run FaceCrop, you must first download openCV on your machine. To download openCV, go to [this](http://opencv.org/downloads.html) site and select the appropriate file to download. Then, run the following commands in the directory openCV that gets created when you unzip the download:
+To run FaceCrop, you must first download openCV on your machine. To download openCV, go to [this site](http://opencv.org/downloads.html) and select the appropriate file to download. Then, run the following commands in the directory openCV that gets created when you unzip the download:
 
     sudo apt-get install cmake
     sudo apt-get install libgtk2.0-dev
