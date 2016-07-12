@@ -9,21 +9,21 @@ FaceCrop is a tool that takes an input image (.jpg, .png, .bmp, etc) and detects
 ## OpenCV
 To run FaceCrop, you must first download openCV on your machine. To download openCV, go to [this](http://opencv.org/downloads.html) site and select the appropriate file to download. Then, run the following commands in the directory openCV that gets created when you unzip the download:
 
-sudo apt-get install cmake (if you dont have cmake)
-sudo apt-get install libgtk2.0-dev
-sudo apt-get install python-numpy (this will be good to have if we utilize python scripts in the future)
+    sudo apt-get install cmake
+    sudo apt-get install libgtk2.0-dev
+    sudo apt-get install python-numpy 
 
 Make sure you are in the directory created by unzipping the downlaoded openCV package and then:
 
-cmake -D CMAKE_BUILD_TYPE=RELEASE -D BUILD_NEW_PYTHON_SUPPORT=ON -D CMAKE_INSTALL_PREFIX=/usr/local ./
+    cmake -D CMAKE_BUILD_TYPE=RELEASE -D BUILD_NEW_PYTHON_SUPPORT=ON -D CMAKE_INSTALL_PREFIX=/usr/local ./
 
 You should see "Configuring done." and "Generating done." at the end of the make. Then:
 
-make
+    make
 
 And finally:
 
-sudo make install
+    sudo make install
 
 If you have any issues with the install, check out [this link](https://www.youtube.com/watch?v=MqQB5KKJCh0) for additional help.
 
