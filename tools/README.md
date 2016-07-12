@@ -6,7 +6,7 @@ This foler contains useful tools for performing face detection, facial recogniti
 
 FaceCrop is a tool that takes an input image (.jpg, .png, .bmp, etc) and detects all faces within the image. Once detected, the tool crops the image to minimum dimensions that contain the face. FaceCrop will allow for much more freedom when it comes to creating test sets. Now it is not necessary to require a picture to be taken at a precise distance and with one subject. 
 
-### OpenCV
+## OpenCV
 To run FaceCrop, you must first download openCV on your machine. To download openCV, go to [this](http://opencv.org/downloads.html) site and select the appropriate file to download. Then, run the following commands in the directory openCV that gets created when you unzip the download:
 
 sudo apt-get install cmake (if you dont have cmake)
@@ -27,10 +27,10 @@ sudo make install
 
 If you have any issues with the install, check out [this link](https://www.youtube.com/watch?v=MqQB5KKJCh0) for additional help.
 
-#### How To Run
+## How To Run
 
 Once you have openCV installed, running FaceCrop should not be a problem. Run "make" and then ./facedetect to crop photos. Currently the path to the photo is hard coded within facedetect.cpp, but future versions will create command line arguments and possible scripts to run this program on an entire directory. 
 
-### Issues
+## Issues
 
 This is the 'first cut' at the FaceCrop tool, so do not be too critical! FaceCrop is being tested, but there are definitely some bugs at the moment to be worked out. Updates to come.
