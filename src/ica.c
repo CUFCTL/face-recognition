@@ -121,18 +121,18 @@ void sep96(matrix_t *X, matrix_t *W, int B, double L, int F)
         matrix_t *U = m_product(W0, X_batch);
 
         // compute Y' = 1 - 2 * f(U), f(u) = 1 / (1 + e^(-u))
-        matrix_t *Y_tr = m_initialize(U->rows, U->cols);
+        matrix_t *Y_p = m_initialize(U->rows, U->cols);
 
         int i, j;
-        for ( i = 0; i < Y_tr->rows; i++ ) {
-            for ( j = 0; j < Y_tr->cols; j++ ) {
-                elem(Y_tr, i, j) = 1 - 2 * (1 / (1 + exp(-elem(U, i, j))));
+        for ( i = 0; i < Y_p->rows; i++ ) {
+            for ( j = 0; j < Y_p->cols; j++ ) {
+                elem(Y_p, i, j) = 1 - 2 * (1 / (1 + exp(-elem(U, i, j))));
             }
         }
 
         // compute dW = L * (BI + Y'U') * W0
         matrix_t *U_tr = m_transpose(U);
-        matrix_t *dW_temp1 = m_product(Y_tr, U_tr);
+        matrix_t *dW_temp1 = m_product(Y_p, U_tr);
         m_add(dW_temp1, BI);
 
         matrix_t *dW = m_product(dW_temp1, W0);
@@ -153,7 +153,7 @@ void sep96(matrix_t *X, matrix_t *W, int B, double L, int F)
         m_free(W0);
         m_free(X_batch);
         m_free(U);
-        m_free(Y_tr);
+        m_free(Y_p);
         m_free(U_tr);
         m_free(dW_temp1);
         m_free(dW);

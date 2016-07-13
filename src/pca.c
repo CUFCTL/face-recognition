@@ -18,10 +18,10 @@
 matrix_t * PCA(matrix_t *X)
 {
 	// compute the surrogate matrix L = X' * X
-	matrix_t *A_tr = m_transpose(X);
-	matrix_t *L = m_product(A_tr, X);
+	matrix_t *X_tr = m_transpose(X);
+	matrix_t *L = m_product(X_tr, X);
 
-	m_free(A_tr);
+	m_free(X_tr);
 
 	// compute eigenvectors for L
 	matrix_t *L_eval = m_initialize(L->rows, 1);

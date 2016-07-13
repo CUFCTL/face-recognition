@@ -2,10 +2,9 @@
 *.o
 
 # executables
+face-rec
 test-image
 test-matrix
-train
-recognize
 
 # image files
 *.jpg
