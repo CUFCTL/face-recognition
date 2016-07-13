@@ -40,4 +40,4 @@ recognize: image.o matrix.o database.o pca.o lda.o ica.o src/recognize.c
 
 clean:
 	rm -f *.o *.dat $(BINS)
-        rm -rf test_images train_images orl_faces
+	rm -rf test_images train_images
