@@ -28,9 +28,9 @@
 %
 function [m_database, V_PCA, V_Fisher, ProjectedImages_Fisher] = FisherfaceCore(T)
 
-P = size(T, 2);
-Class_number = 40;
-Class_population = P / Class_number;
+P = size(T, 2);                        % Number of columns in T, num images
+Class_number = 40;                     % Number of images per individual
+Class_population = P / Class_number;   % Number of individuals
 
 %%%%%%%%%%%%%%%%%%%%%%%% calculating the mean image
 m_database = mean(T,2);
