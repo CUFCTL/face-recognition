@@ -1,6 +1,6 @@
 # Clemson FCT Facial Recognition
 
-This repository contains the code for facial recognition software that combines three popular algorithms: PCA, LDA, and ICA.
+This repository contains the code for a face recognition system that combines three popular algorithms: PCA, LDA, and ICA.
 
 ## Getting Started
 
@@ -8,28 +8,20 @@ New team members should look at CONTRIBUTING.md to learn about our work-flow, es
 
 ## Testing
 
-To run PCA, LDA, and ICA2 on a training set of images:
+Usage for the face recognition system:
 
-    make
-    ./train [training-images-folder] -flags
-    
-    -flags specify which algorithms to run as follows:
-        -pca
-        -lda
-        -ica
-        -all
-        NOTE: default with no flags sets to -all
-
-To test a set of images against the training set:
-
-    ./recognize [test-images-folder] -flags
-    
-    NOTE: flags must be the same as the flags set during training
+    Usage: ./face-rec [options]
+    Options:
+      --train DIRECTORY  create a database from a training set
+      --rec DIRECTORY    test a set of images against a database
+      --lda              run PCA, LDA
+      --ica              run PCA, ICA2
+      --all              run PCA, LDA, ICA2
 
 To run an automated test (k-fold cross-validation) with the ORL face database:
 
     # test once with 1.pgm removed from each class
-    ./cross-validate.sh 1
+    ./cross-validate.sh 1 1
 
     # repeat with each index removed (takes much longer)
     ./cross-validate.sh 1 10
@@ -38,8 +30,8 @@ To test MATLAB code with ORL database:
 
     ./create-sets.sh 1 10
     ./convert-images.sh test_images orl_faces_ppm pgm ppm
-    # run archive/LDA/example.m
-    # run archive/PCAA/example.m
+    # run MATLAB/LDA/example.m
+    # run MATLAB/PCA/example.m
 
 ## The Image Library
 
