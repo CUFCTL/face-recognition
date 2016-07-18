@@ -4,12 +4,18 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <string>
+#include <vector>
 
 using namespace std;
 using namespace cv;
 
 // Function Headers
 void detectAndDisplay(Mat frame);
+std::vector<std::string> open(std::string path);
 
 // Global variables
 // Copy this file from opencv/data/haarscascades to target folder
@@ -20,30 +26,47 @@ int filenumber; // Number of file to be saved
 string filename;
 
 // Function main
-int main(void)
+int main(int argc, char **argv)
 {
+    std::string dir;
+    std::vector<std::string> files;
+    uint32_t i;
+
     // Load the cascade
     if (!face_cascade.load(face_cascade_name)){
         printf("--(!)Error loading\n");
         return (-1);
     }
 
-    // Read the image file
-    Mat frame = imread("./media/people.jpg");
-
-    // Apply the classifier to the frame
-    if (!frame.empty()){
-        detectAndDisplay(frame);
+    if (argc != 2)
+    {
+      fprintf(stderr, "\nUsage: ./detect ./path/to/images/directory\n\n");
+      return -1;
     }
-    else{
-        printf(" --(!) No captured frame -- Break!");
-        return 1;
+    else
+    {
+      dir = argv[1];
     }
 
-    int c = waitKey(0);
+    files = open(dir);
 
-    if (27 == char(c)){
-        return 0;
+    chdir(argv[1]);
+
+    for (i = 0; i < files.size(); i++)
+    {
+      if (files[i] == "." || files[i] == "..") continue;
+
+      // Read the image file
+      Mat frame = imread(files[i]);
+
+      // Apply the classifier to the frame
+      if (!frame.empty()){
+          detectAndDisplay(frame);
+      }
+      else{
+          printf(" --(!) No captured frame -- Break!\n\n");
+          return 1;
+      }
     }
 
     return 0;
@@ -60,11 +83,13 @@ void detectAndDisplay(Mat frame)
     string text;
     stringstream sstm;
 
+    mkdir("./../cropped_faces", 0700);
+
     cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
     equalizeHist(frame_gray, frame_gray);
 
     // Detect faces
-    face_cascade.detectMultiScale(frame_gray, faces, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(120, 120));
+    face_cascade.detectMultiScale(frame_gray, faces, 1.05, 3, 0, Size(15, 15));
 
     // Set Region of Interest
     cv::Rect roi_b;
@@ -101,15 +126,14 @@ void detectAndDisplay(Mat frame)
             roi_b.width = (faces[ib].width);
             roi_b.height = (faces[ib].height);
         }
-
         crop = frame(roi_c);
-        resize(crop, res, Size(256, 256), 0, 0, INTER_LINEAR); // This will be needed later while saving images
+        resize(crop, res, Size(256, 256)); // This will be needed later while saving images
         cvtColor(crop, gray, CV_BGR2GRAY); // Convert cropped image to Grayscale
 
         // Form a filename
         filename = "";
         stringstream ssfn;
-        ssfn << filenumber << ".png";
+        ssfn << "./../cropped_faces/" << filenumber << "_cropped.png";
         filename = ssfn.str();
         filenumber++;
 
@@ -119,11 +143,6 @@ void detectAndDisplay(Mat frame)
         Point pt2((faces[ic].x + faces[ic].height), (faces[ic].y + faces[ic].width));
         rectangle(frame, pt1, pt2, Scalar(0, 255, 0), 2, 8, 0);
 
-        // Show image
-        sstm << "Crop area size: " << roi_b.width << "x" << roi_b.height << " Filename: " << filename;
-        text = sstm.str();
-
-        putText(frame, text, cvPoint(30, 30), FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0, 0, 255), 1, CV_AA);
         imshow("original", frame);
 
         if (!crop.empty())
@@ -135,17 +154,22 @@ void detectAndDisplay(Mat frame)
             destroyWindow("detected");
     }
 
-    // Show image
-    sstm << "Crop area size: " << roi_b.width << "x" << roi_b.height << " Filename: " << filename;
-    text = sstm.str();
+}
 
-    putText(frame, text, cvPoint(30, 30), FONT_HERSHEY_COMPLEX_SMALL, 0.8, cvScalar(0, 0, 255), 1, CV_AA);
-    imshow("original", frame);
 
-    if (!crop.empty())
-    {
-        imshow("detected", crop);
-    }
-    else
-        destroyWindow("detected");
+// save each file within a path to a vector for proecessing
+std::vector<std::string> open(std::string path)
+{
+  DIR * dir;
+  dirent * pDir;
+  std::vector<std::string> files;
+
+  dir = opendir(path.c_str());
+
+  while ((pDir = readdir(dir)) != NULL)
+  {
+    files.push_back(pDir->d_name);
+  }
+
+  return files;
 }

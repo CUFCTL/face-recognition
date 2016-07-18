@@ -5,8 +5,8 @@ LDFLAGS += $(shell pkg-config --libs --static opencv)
 
 all: detect
 
-facedetect: detect.o; $(CXX) $< -o $@ $(LDFLAGS)
+detect: detect.o; $(CXX) $< -o $@ $(LDFLAGS) -g
 
-%.o: %.cpp; $(CXX) $< -o $@ $(CXXFLAGS)
+%.o: %.cpp; $(CXX) $< -o $@ $(CXXFLAGS) -g
 
 clean: ; rm -f detect.o detect
