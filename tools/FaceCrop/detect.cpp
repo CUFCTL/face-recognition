@@ -14,7 +14,7 @@ using namespace std;
 using namespace cv;
 
 // Function Headers
-void detectAndDisplay(Mat frame);
+void detectAndDisplay(Mat frame, std::string outPath);
 std::vector<std::string> open(std::string path);
 
 // Global variables
@@ -31,6 +31,10 @@ int main(int argc, char **argv)
     std::string dir;
     std::vector<std::string> files;
     uint32_t i;
+    char cwd[1024];
+
+
+    getcwd(cwd, sizeof(cwd));
 
     // Load the cascade
     if (!face_cascade.load(face_cascade_name)){
@@ -38,9 +42,9 @@ int main(int argc, char **argv)
         return (-1);
     }
 
-    if (argc != 2)
+    if (argc != 3)
     {
-      fprintf(stderr, "\nUsage: ./detect ./path/to/images/directory\n\n");
+      fprintf(stderr, "\nUsage: ./detect ./path/to/images/directory ./destination/path\n\n");
       return -1;
     }
     else
@@ -50,7 +54,9 @@ int main(int argc, char **argv)
 
     files = open(dir);
 
-    chdir(argv[1]);
+    chdir(dir.c_str());
+
+    //mkdir(argv[2], 0700);
 
     for (i = 0; i < files.size(); i++)
     {
@@ -61,19 +67,21 @@ int main(int argc, char **argv)
 
       // Apply the classifier to the frame
       if (!frame.empty()){
-          detectAndDisplay(frame);
+          detectAndDisplay(frame, argv[2]);
       }
       else{
           printf(" --(!) No captured frame -- Break!\n\n");
-          return 1;
+          //return 1;
       }
     }
+
+    chdir(cwd);
 
     return 0;
 }
 
 // Function detectAndDisplay
-void detectAndDisplay(Mat frame)
+void detectAndDisplay(Mat frame, std::string outPath)
 {
     std::vector<Rect> faces;
     Mat frame_gray;
@@ -83,13 +91,11 @@ void detectAndDisplay(Mat frame)
     string text;
     stringstream sstm;
 
-    mkdir("./../cropped_faces", 0700);
-
     cvtColor(frame, frame_gray, COLOR_BGR2GRAY);
     equalizeHist(frame_gray, frame_gray);
 
     // Detect faces
-    face_cascade.detectMultiScale(frame_gray, faces, 1.05, 3, 0, Size(15, 15));
+    face_cascade.detectMultiScale(frame_gray, faces, 1.01, 4, 0, Size(30, 30));
 
     // Set Region of Interest
     cv::Rect roi_b;
@@ -133,7 +139,7 @@ void detectAndDisplay(Mat frame)
         // Form a filename
         filename = "";
         stringstream ssfn;
-        ssfn << "./../cropped_faces/" << filenumber << "_cropped.png";
+        ssfn << outPath << "/" << filenumber << "_cropped.png";
         filename = ssfn.str();
         filenumber++;
 
@@ -148,7 +154,7 @@ void detectAndDisplay(Mat frame)
         if (!crop.empty())
         {
             imshow("detected", crop);
-            waitKey(1000);
+            waitKey(200);
         }
         else
             destroyWindow("detected");
