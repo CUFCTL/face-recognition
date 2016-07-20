@@ -23,6 +23,7 @@ function [m, A, Eigenfaces] = EigenfaceCore(T)
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the mean image
 m = mean(T,2); % Computing the average face image m = (1/P)*sum(Tj's)    (j = 1 : P)
 Train_Number = size(T,2);
+
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the deviation of each image from mean image
 fprintf('calculating deviation of each image from mean image\n');
 A = [];
@@ -31,6 +32,7 @@ for i = 1 : Train_Number
     temp = double(T(:,i)) - m; % Computing the difference image for each image in the training set Ai = Ti - m
     A(:,i) = temp; % Merging all centered images
 end
+
 %%%%%%%%%%%%%%%%%%%%%%%% Snapshot method of Eigenface methos
 % We know from linear algebra theory that for a PxQ matrix, the maximum
 % number of non-zero eigenvalues that the matrix can have is min(P-1,Q-1).
@@ -42,7 +44,7 @@ end
 
 fprintf('calculating surrogate matrix\n');
 L = A'*A; % L is the surrogate of covariance matrix C=A*A'.
-save L_matrix.txt L -ascii
+
 fprintf('getting eigenvalues from surrogate\n');
 [V, D] = eig(L); % Diagonal elements of D are the eigenvalues for both L=A'*A and C=A*A'.
 
@@ -58,6 +60,7 @@ L_eig_vec = V;% [];
   %      L_eig_vec = [L_eig_vec V(:,i)];
    % end
 %end
+
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the eigenvectors of covariance matrix 'C'
 % Eigenvectors of covariance matrix C (or so-called "Eigenfaces")
 % can be recovered from L's eiegnvectors.

@@ -37,6 +37,7 @@ for i = 1 : Test_Number
     temp = Eigenfaces'*A(:,i); % Projection of centered images into facespace
     ProjectedImages = [ProjectedImages temp];
 end
+
 %%%%%%%%%%%%%%%%%%%%%%%% Extracting the PCA features from test image
 InputImage = imread(TestImage);
 temp = InputImage(:,:,1);
@@ -55,7 +56,7 @@ Euc_dist = [];
 %%% FPGA
 
 ProjectedTestImage = Eigenfaces'*Difference; % Test image feature vector
-save projectedtest.txt ProjectedTestImage -ascii
+
 verbose = 0;
 
 truncate = 0;	% perform truncation if 1
@@ -131,8 +132,6 @@ if(verbose)
     size(Eigenfaces')
 end
 
-ProjectedTestImage
-
 for i = 1 : Test_Number
     q = ProjectedImages(:,i);
     temp = ( norm (ProjectedTestImage - q)  )^2;
@@ -141,8 +140,4 @@ end
 
 %%% FPGA
 
-Euc_dist
-
 [Euc_dist_min , OutputName] = min(Euc_dist);
-Euc_dist_min
-OutputName

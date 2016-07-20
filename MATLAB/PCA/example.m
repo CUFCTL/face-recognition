@@ -13,12 +13,11 @@ close all
 format long e
 
 % TODO: set train and test path with arguments
-TrainDatabasePath = '../../orl_faces_ppm/';
-TestDatabasePath = '../../orl_faces_ppm/';
+TrainDatabasePath = '../../train_images_ppm/';
+TestDatabasePath = '../../test_images_ppm/';
 
 TrainFiles = dir(strcat(TrainDatabasePath, '/*.ppm'));
-
-TestImage = strcat(TestDatabasePath, '/s1_1.ppm');
+TestFiles = dir(strcat(TestDatabasePath, '/*.ppm'));
 
 % create training database
 T = CreateDatabase(TrainDatabasePath);
@@ -27,21 +26,13 @@ T = CreateDatabase(TrainDatabasePath);
 [numPixels, numImages] = size(T);
 [~, numFaces] = size(Eigenfaces);
 
-save eigenfaces_200.txt numImages numFaces numPixels Eigenfaces A m -ascii
+% test each image in the test set
+for i = 1 : size(TestFiles, 1)
+    % perform recognition algorithm
+    OutputName = Recognition(strcat(TestDatabasePath, '/', TestFiles(i).name), m, A, Eigenfaces);
 
-% perform recognition algorithm
-OutputName = Recognition(TestImage, m, A, Eigenfaces);
-
-SelectedImage = strcat(TrainDatabasePath,'/',TrainFiles(OutputName).name);
-
-% display test image and matched image
-im1 = imread(TestImage);
-im2 = imread(SelectedImage);
-
-image(im1)
-title('Test Image');
-figure, image(im2);
-title('Equivalent Image');
-
-fprintf('Test image is : %s\n', TestImage);
-fprintf('Matched image is : %s\n', TrainFiles(OutputName).name);
+    % print results
+    fprintf('test image: \"%s\"\n', TestFiles(i).name);
+    fprintf('\tPCA: \"%s\"\n', TrainFiles(OutputName).name);
+    fprintf('\n');
+end

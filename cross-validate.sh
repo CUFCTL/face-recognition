@@ -14,22 +14,17 @@
 # ./cross-validate.sh 1 10
 
 # parse arguments
-if [ "$#" = 4 ]; then
-    START=$1
-    END=$2
-    ARGS="$3 $4"
-elif [ "$#" = 3 ]; then
-    START=$1
-    END=$2
-    ARGS="$3"
-elif [ "$#" = 2 ]; then
-    START=$1
-    END=$2
-    ARGS=""
-else
+if [ "$#" -lt 2 ]; then
     >&2 echo "usage: ./cross-validate.sh [begin-index] [end-index] [--lda --ica --all]"
     exit 1
 fi
+
+DB_PATH=orl_faces
+START=$1
+END=$2
+
+shift 2
+ARGS="$@"
 
 # build executables
 make
@@ -42,7 +37,7 @@ for (( i = $START; i <= $END; i++ )); do
     echo
 
     # create the training set and test set
-    ./create-sets.sh $i
+    ./create-sets.sh $DB_PATH $i $i
 
     # run the algorithms
     ./face-rec --train train_images --rec test_images $ARGS
