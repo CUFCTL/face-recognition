@@ -20,6 +20,7 @@ To get started, clone this repository in your local workspace:
     git clone https://github.com/CUFCTFACE/face-recognition.git
     cd face-recognition
     git remote add origin https://github.com/CUFCTFACE/face-recognition.git
+    git push -u origin master
 
 The last command creates an alias called "origin" which will help you pull from and push to the main repo.
 

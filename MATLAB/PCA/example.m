@@ -12,7 +12,6 @@ close all
 
 format long e
 
-% TODO: set train and test path with arguments
 TrainDatabasePath = '../../train_images_ppm/';
 TestDatabasePath = '../../test_images_ppm/';
 
@@ -26,13 +25,16 @@ T = CreateDatabase(TrainDatabasePath);
 [numPixels, numImages] = size(T);
 [~, numFaces] = size(Eigenfaces);
 
+ProjectedImages = Eigenfaces' * A;
+
 % test each image in the test set
 for i = 1 : size(TestFiles, 1)
     % perform recognition algorithm
-    OutputName = Recognition(strcat(TestDatabasePath, '/', TestFiles(i).name), m, A, Eigenfaces);
+    strtest = strcat(TestDatabasePath, '/', TestFiles(i).name);
+    j = Recognition(strtest, m, Eigenfaces, ProjectedImages);
 
     % print results
     fprintf('test image: \"%s\"\n', TestFiles(i).name);
-    fprintf('\tPCA: \"%s\"\n', TrainFiles(OutputName).name);
+    fprintf('       PCA: \"%s\"\n', TrainFiles(j).name);
     fprintf('\n');
 end

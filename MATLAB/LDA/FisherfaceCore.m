@@ -14,6 +14,7 @@
 % Argument:      T                      - (M*NxP) A 2D matrix, containing all 1D image vectors.
 %                                         All of 1D column vectors have the same length of M*N
 %                                         and 'T' will be a MNxP 2D matrix.
+%                Class_number           - number of classes
 %
 % Returns:       m_database             - (M*Nx1) Mean of the training database
 %                V_PCA                  - (M*Nx(P-C)) Eigen vectors of the covariance matrix of the
@@ -26,11 +27,10 @@
 % Original version by Amir Hossein Omidvarnia, October 2007
 %                     Email: aomidvar@ece.ut.ac.ir
 %
-function [m_database, V_PCA, V_Fisher, ProjectedImages_Fisher] = FisherfaceCore(T)
+function [m_database, V_PCA, V_Fisher, ProjectedImages_Fisher] = FisherfaceCore(T, Class_number)
 
 P = size(T, 2);                        % Number of columns in T, num images
-Class_number = 40;                     % Number of images per individual
-Class_population = P / Class_number;   % Number of individuals
+Class_population = P / Class_number;   % Number of images per individual
 
 %%%%%%%%%%%%%%%%%%%%%%%% calculating the mean image
 m_database = mean(T,2);
