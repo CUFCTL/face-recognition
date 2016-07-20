@@ -10,118 +10,111 @@
 #include "image_entry.h"
 
 /**
- * Get whether an entry is a PGM or PPM image based
- * on the file extension.
+ * Get a pathname with the first directory prefix removed.
  *
- * @param entry
- * @return 1 if entry is PGM or PPM image, 0 otherwise
+ * @param path
+ * @return pointer to index in path
  */
-int is_valid_image(const struct dirent *entry)
+char * basename(char *path)
 {
-	return strstr(entry->d_name, ".pgm") != NULL
-		|| strstr(entry->d_name, ".ppm") != NULL;
+	char *s = strchr(path, '/');
+
+	return s != NULL
+		? s + 1
+		: NULL;
 }
 
 /**
- * Get whether an entry is a directory, excluding "." and "..".
+ * Get whether an entry is a file, excluding "." and "..".
  *
  * @param entry
- * @return 1 if entry is a directory, 0 otherwise
+ * @return 1 if entry is a file, 0 otherwise
  */
-int is_directory(const struct dirent *entry)
+int is_file(const struct dirent *entry)
 {
-	return entry->d_type == DT_DIR
-		&& strcmp(entry->d_name, ".") != 0
+	return strcmp(entry->d_name, ".") != 0
 		&& strcmp(entry->d_name, "..") != 0;
 }
 
 /**
- * Get a list of images in a directory.
+ * Get a list of files in a directory.
  *
  * @param path
- * @param image_names
- * @return number of images that were found
+ * @param p_names
+ * @return number of files that were found
  */
-int get_image_names(const char *path, char ***image_names)
+int get_directory(const char *path, char ***p_names)
 {
-	// get list of image entries
+	// get list of entries
 	struct dirent **entries;
-	int num_images = scandir(path, &entries, is_valid_image, alphasort);
+	int num_entries = scandir(path, &entries, is_file, alphasort);
 
-	if ( num_images <= 0 ) {
+	if ( num_entries <= 0 ) {
 		perror("scandir");
 		exit(1);
 	}
 
-	// construct list of image paths
-	*image_names = (char **)malloc(num_images * sizeof(char *));
+	// construct list of file names
+	char **names = (char **)malloc(num_entries * sizeof(char *));
 
 	int i;
-	for ( i = 0; i < num_images; i++ ) {
-		(*image_names)[i] = (char *)malloc(strlen(path) + 1 + strlen(entries[i]->d_name) + 1);
+	for ( i = 0; i < num_entries; i++ ) {
+		names[i] = (char *)malloc(strlen(path) + 1 + strlen(entries[i]->d_name) + 1);
 
-		sprintf((*image_names)[i], "%s/%s", path, entries[i]->d_name);
+		sprintf(names[i], "%s/%s", path, entries[i]->d_name);
 	}
 
 	// clean up
-	for ( i = 0; i < num_images; i++ ) {
+	for ( i = 0; i < num_entries; i++ ) {
 		free(entries[i]);
 	}
 	free(entries);
 
-	return num_images;
+	*p_names = names;
+
+	return num_entries;
 }
 
 /**
- * Get a list of image entries in a directory.
- *
- * The directory should contain a subdirectory for each
- * class, and each subdirectory should contain the images
- * of its class.
+ * Get a list of files in a two-level directory tree.
  *
  * @param path
- * @param image_entries
- * @param num_classes
- * @return number of images that were found
+ * @param p_entries
+ * @param p_num_dirs
+ * @return number of files that were found
  */
-int get_image_entries(const char *path, image_entry_t **image_entries, int *num_classes)
+int get_directory_rec(const char *path, dir_entry_t **p_entries, int *p_num_dirs)
 {
-	// get list of classes
-	struct dirent **entries;
-	*num_classes = scandir(path, &entries, is_directory, alphasort);
+	// get list of directories
+	char **paths;
+	int num_dirs = get_directory(path, &paths);
 
-	if ( (*num_classes) <= 0 ) {
-		perror("scandir");
-		exit(1);
-	}
-
-	// get list of image names for each class
-	char ***classes = (char ***)malloc((*num_classes) * sizeof(char **));
-	int *class_sizes = (int *)malloc((*num_classes) * sizeof(int *));
-
-	int num_images = 0;
+	// get list of names in each directory
+	dir_t *dirs = (dir_t *)malloc(num_dirs * sizeof(dir_t));
 
 	int i;
-	for ( i = 0; i < (*num_classes); i++ ) {
-		char *class_path = (char *)malloc(strlen(path) + 1 + strlen(entries[i]->d_name) + 1);
-
-		sprintf(class_path, "%s/%s", path, entries[i]->d_name);
-
-		class_sizes[i] = get_image_names(class_path, &classes[i]);
-		num_images += class_sizes[i];
-
-		free(class_path);
+	for ( i = 0; i < num_dirs; i++ ) {
+		dirs[i].path = paths[i];
+		dirs[i].size = get_directory(dirs[i].path, &dirs[i].names);
 	}
 
-	// flatten image name lists into a list of entries
-	*image_entries = (image_entry_t *)malloc(num_images * sizeof(image_entry_t));
+	// count the total number of entries
+	int num_entries = 0;
 
-	int num, j;
-	for ( num = 0, i = 0; i < (*num_classes); i++ ) {
-		for ( j = 0; j < class_sizes[i]; j++ ) {
-			(*image_entries)[num] = (image_entry_t) {
+	for ( i = 0; i < num_dirs; i++ ) {
+		num_entries += dirs[i].size;
+	}
+
+	// flatten directory lists into one list of entries
+	dir_entry_t *entries = (dir_entry_t *)malloc(num_entries * sizeof(dir_entry_t));
+
+	int num = 0;
+	int j;
+	for ( i = 0; i < num_dirs; i++ ) {
+		for ( j = 0; j < dirs[i].size; j++ ) {
+			entries[num] = (dir_entry_t) {
 				.class = i,
-				.name = classes[i][j]
+				.name = dirs[i].names[j]
 			};
 
 			num++;
@@ -129,13 +122,14 @@ int get_image_entries(const char *path, image_entry_t **image_entries, int *num_
 	}
 
 	// clean up
-	for ( i = 0; i < (*num_classes); i++ ) {
-		free(entries[i]);
-		free(classes[i]);
+	for ( i = 0; i < num_dirs; i++ ) {
+		free(paths[i]);
 	}
-	free(entries);
-	free(classes);
-	free(class_sizes);
+	free(paths);
+	free(dirs);
 
-	return num_images;
+	*p_entries = entries;
+	*p_num_dirs = num_dirs;
+
+	return num_entries;
 }

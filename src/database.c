@@ -96,7 +96,7 @@ void db_destruct(database_t *db)
  */
 void db_train(database_t *db, const char *path)
 {
-	db->num_images = get_image_entries(path, &db->entries, &db->num_classes);
+	db->num_images = get_directory_rec(path, &db->entries, &db->num_classes);
 
 	// compute mean-subtracted image matrix X
 	matrix_t *X = get_image_matrix(db->entries, db->num_images);
@@ -253,9 +253,13 @@ void db_recognize(database_t *db, const char *path)
 {
 	// get test images
 	char **image_names;
-	int num_test_images = get_image_names(path, &image_names);
-	int index_pca, index_lda, index_ica;
-	matrix_t *P_test_pca, *P_test_lda, *P_test_ica;
+	int num_test_images = get_directory(path, &image_names);
+	matrix_t *P_test_pca;
+	matrix_t *P_test_lda;
+	matrix_t *P_test_ica;
+	int index_pca;
+	int index_lda;
+	int index_ica;
 
 	// test each image against the database
 	image_t *image = image_construct();
@@ -291,10 +295,10 @@ void db_recognize(database_t *db, const char *path)
 		}
 
 		// print results
-		printf("test image: \'%s\'\n", image_names[i]);
-		printf("       PCA: \'%s\'\n", db->entries[index_pca].name);
-		if ( db->lda ) printf("       LDA: \'%s\'\n", db->entries[index_lda].name);
-		if ( db->ica ) printf("      ICA2: \'%s\'\n", db->entries[index_ica].name);
+		printf("test image: \'%s\'\n", basename(image_names[i]));
+		printf("       PCA: \'%s\'\n", basename(db->entries[index_pca].name));
+		if ( db->lda ) printf("       LDA: \'%s\'\n", basename(db->entries[index_lda].name));
+		if ( db->ica ) printf("      ICA2: \'%s\'\n", basename(db->entries[index_ica].name));
 		putchar('\n');
 	}
 

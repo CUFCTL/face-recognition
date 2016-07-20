@@ -6,12 +6,21 @@
 #ifndef IMAGE_ENTRY_H
 #define IMAGE_ENTRY_H
 
-typedef struct {
+typedef struct dir {
+	char *path;
+	int size;
+	char **names;
+} dir_t;
+
+typedef struct dir_entry {
 	int class;
 	char *name;
-} image_entry_t;
+} dir_entry_t;
 
-int get_image_names(const char *path, char ***image_names);
-int get_image_entries(const char *path, image_entry_t **image_entries, int *num_classes);
+typedef dir_entry_t image_entry_t;
+
+char * basename(char *path);
+int get_directory(const char *path, char ***p_names);
+int get_directory_rec(const char *path, dir_entry_t **p_entries, int *p_num_dirs);
 
 #endif
