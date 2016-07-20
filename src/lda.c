@@ -16,7 +16,7 @@
  * @param S_b      pointer to store between-scatter matrix
  * @param S_w      pointer to store within-scatter matrix
  */
-void m_scatter(matrix_t *X, int c, database_entry_t *entries, matrix_t *S_b, matrix_t *S_w)
+void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix_t *S_w)
 {
     matrix_t **X_classes = (matrix_t **)malloc(c * sizeof(matrix_t *));
     matrix_t **U = (matrix_t **)malloc(c * sizeof(matrix_t *));
@@ -100,7 +100,7 @@ void m_scatter(matrix_t *X, int c, database_entry_t *entries, matrix_t *S_b, mat
  * @param entries   list of entries for each image
  * @return projection matrix W_lda'
  */
-matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *P_pca, int c, database_entry_t *entries)
+matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *P_pca, int c, image_entry_t *entries)
 {
     // TODO: take only the first n - c columns of P_pca
 
