@@ -12,8 +12,8 @@ close all
 
 format long e
 
-TrainDatabasePath = '../../train_images_ppm/';
-TestDatabasePath = '../../test_images_ppm/';
+TrainDatabasePath = '../../train_images/';
+TestDatabasePath = '../../test_images/';
 
 TrainFiles = dir(strcat(TrainDatabasePath, '/*.ppm'));
 TestFiles = dir(strcat(TestDatabasePath, '/*.ppm'));

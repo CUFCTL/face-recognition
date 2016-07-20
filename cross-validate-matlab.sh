@@ -1,27 +1,36 @@
 #!/bin/bash
-# Cross validation for PCA, LDA, ICA, based on the ORL face
-# database, which should be located at ./orl_faces.
+# Perform a k-fold cross-validation on the MATLAB code
+# with a face database. The database should have the
+# following structure:
+#
+# database/
+#  class1_image1.ppm
+#  class1_image2.ppm
+#  class1_imageN.ppm
+#  ...
+#  class2_image1.ppm
+#  class2_image2.ppm
+#  class2_imageN.ppm
+#  ...
 #
 # EXAMPLES
 #
-# Perform k-fold on a single observation (2.pgm):
+# Perform k-fold on a single observation (2):
 # ./cross-validate.sh 2 2
 #
-# Perform k-fold on a range of observations (4.pgm - 7.pgm):
+# Perform k-fold on a range of observations (4 - 7):
 # ./cross-validate.sh 4 7
-#
-# Perform k-fold for all observations:
-# ./cross-validate.sh 1 10
 
 # parse arguments
-if [ "$#" -lt 2 ]; then
-    >&2 echo "usage: ./cross-validate-matlab.sh [begin-index] [end-index] [--pca --lda --ica]"
+if [ "$#" -lt 3 ]; then
+    >&2 echo "usage: ./cross-validate-matlab.sh [db-path] [begin-index] [end-index] [--pca --lda --ica]"
     exit 1
 fi
 
-DB_PATH=orl_faces
-START=$1
-END=$2
+DB_PATH=$1
+EXT=ppm
+START=$2
+END=$3
 PCA=0
 LDA=0
 ICA=0
@@ -40,17 +49,14 @@ echo "Performing k-fold cross-validation on the range [$START, $END]"
 echo
 
 for (( i = $START; i <= $END; i++ )); do
-    echo "BEGIN: remove $i.pgm from each class"
+    echo "BEGIN: remove observation $i from each class"
     echo
 
     # create the training set and test set
-    rm -rf train_images_ppm test_images_ppm
-    mkdir train_images_ppm test_images_ppm
-
-    ./create-sets.sh $DB_PATH 1 10
-    ./convert-images.sh test_images train_images_ppm pgm ppm > /dev/null
-
-    mv train_images_ppm/*$i.ppm test_images_ppm
+    rm -rf train_images test_images
+    cp -r $DB_PATH train_images
+    mkdir test_images
+    mv train_images/*$i.ppm test_images
 
     # run the algorithms
     if [ $PCA = 1 ]; then

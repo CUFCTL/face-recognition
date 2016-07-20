@@ -15,8 +15,8 @@ clear
 clc
 close all
 
-TrainDatabasePath = '../../train_images_ppm/';
-TestDatabasePath = '../../test_images_ppm/';
+TrainDatabasePath = '../../train_images/';
+TestDatabasePath = '../../test_images/';
 Class_number = 40;
 
 T = CreateDatabase(TrainDatabasePath);
