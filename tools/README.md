@@ -4,10 +4,12 @@ This foler contains useful tools for performing face detection, facial recogniti
 
 ## FaceCrop
 
-FaceCrop is a tool that takes an input image (.jpg, .png, .bmp, etc) and detects all faces within the image. Once detected, the tool crops the image to the minimum dimensions that contain the face. FaceCrop will allow for much more freedom when it comes to creating test sets. It is now not necessary to require a picture to be taken at a precise distance and with one subject.
+FaceCrop is a tool that takes an input directory containing subdirectories of different subjects. FaceCrop will iterate through each subdirectory and crop all the faces in the image, then save the cropped faces in a subdirectory of a specified output directory. The subdirectories in the output directory will have the same names. This tool can be used to significantly expedite the process of creating images that are acceptable to run through the face detection system. Additionally, faces cropped to these dimensions could increase the accuracy of the system by having less 'noise' near the borders of the images.
 
 FaceCrop usage:
-    ./crop-faces.sh [path-to-source-images]
+'''python
+    python crop.py [path/to/source/directory] [path/to/output/directory]
+'''
 
 FaceCrop will create a directory in the pwd called cropped_test_set that contains the subdirectories of all the cropped
 faces from the source directory.
