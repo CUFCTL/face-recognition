@@ -31,10 +31,6 @@ int main(int argc, char **argv)
     std::string dir;
     std::vector<std::string> files;
     uint32_t i;
-    char cwd[1024];
-
-
-    getcwd(cwd, sizeof(cwd));
 
     // Load the cascade
     if (!face_cascade.load(face_cascade_name)){
@@ -54,16 +50,14 @@ int main(int argc, char **argv)
 
     files = open(dir);
 
-    chdir(dir.c_str());
-
-    //mkdir(argv[2], 0700);
+    mkdir(argv[2], 0700);
 
     for (i = 0; i < files.size(); i++)
     {
       if (files[i] == "." || files[i] == "..") continue;
 
       // Read the image file
-      Mat frame = imread(files[i]);
+      Mat frame = imread(dir + "/" + files[i]);
 
       // Apply the classifier to the frame
       if (!frame.empty()){
@@ -73,9 +67,8 @@ int main(int argc, char **argv)
           printf(" --(!) No captured frame -- Break!\n\n");
           //return 1;
       }
-    }
 
-    chdir(cwd);
+    }
 
     return 0;
 }
@@ -149,12 +142,12 @@ void detectAndDisplay(Mat frame, std::string outPath)
         Point pt2((faces[ic].x + faces[ic].height), (faces[ic].y + faces[ic].width));
         rectangle(frame, pt1, pt2, Scalar(0, 255, 0), 2, 8, 0);
 
-        imshow("original", frame);
+        //imshow("original", frame);
 
         if (!crop.empty())
         {
-            imshow("detected", crop);
-            waitKey(200);
+            //imshow("detected", crop);
+            //waitKey(50);
         }
         else
             destroyWindow("detected");
