@@ -2,6 +2,12 @@
  * @file image_entry.h
  *
  * Interface definitions for the image entry type.
+ *
+ * The image entry module is the interface between the database
+ * type and the "face database" in the filesystem. As such, this
+ * module provides functions to map a directory of images to a
+ * collection of image entries as well as various operations on
+ * the pathnames of image entries.
  */
 #ifndef IMAGE_ENTRY_H
 #define IMAGE_ENTRY_H
