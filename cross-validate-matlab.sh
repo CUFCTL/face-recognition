@@ -16,10 +16,10 @@
 # EXAMPLES
 #
 # Perform k-fold on a single observation (2):
-# ./cross-validate.sh 2 2
+# ./cross-validate-matlab.sh orl_faces_ppm 2 2 [--pca --lda --ica]
 #
 # Perform k-fold on a range of observations (4 - 7):
-# ./cross-validate.sh 4 7
+# ./cross-validate-matlab.sh orl_faces_ppm 4 7 [--pca --lda --ica]
 
 # parse arguments
 if [ "$#" -lt 3 ]; then
@@ -68,6 +68,6 @@ for (( i = $START; i <= $END; i++ )); do
     fi
 
     if [ $ICA = 1 ]; then
-        echo "MATLAB ICA is not yet supported"
+        matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/ICA; Arch2; quit"
     fi
 done

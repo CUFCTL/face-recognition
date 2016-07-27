@@ -3,7 +3,7 @@
 %Loads a directory of images into the rows of C.
 %imgdir is a string with the path to the directory containing the images.
 
-imgdir = '../../orl_faces_ppm/';
+imgdir = '../../test_images/';
 TestFiles = dir(strcat(imgdir, '/*.ppm'));
 
 Ctest = [];

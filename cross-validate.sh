@@ -6,10 +6,10 @@
 # EXAMPLES
 #
 # Perform k-fold on a single observation (2):
-# ./cross-validate.sh 2 2
+# ./cross-validate.sh orl_faces pgm 2 2
 #
 # Perform k-fold on a range of observations (4 - 7):
-# ./cross-validate.sh 4 7
+# ./cross-validate.sh orl_faces pgm 4 7
 
 # parse arguments
 if [ "$#" -lt 4 ]; then
