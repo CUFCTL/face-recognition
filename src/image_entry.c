@@ -19,9 +19,33 @@ char * basename(char *path)
 {
 	char *s = strchr(path, '/');
 
-	return s != NULL
+	return (s != NULL)
 		? s + 1
 		: NULL;
+}
+
+/**
+ * Determine whether an entry and a test entry are in the
+ * same class based on their pathnames.
+ *
+ * The first pathname is assumed to have the following form:
+ *   [train-folder]/[class-name]/[image-name]
+ *
+ * The second pathname is assumed to have the following form:
+ *   [train-folder]/[class-name]_[image-name]
+ *
+ * @param path1
+ * @param path2
+ * @return 1 if path1 and path2 have the same class name, 0 otherwise
+ */
+int is_same_class(char *path1, char *path2)
+{
+	path1 = basename(path1);
+	path2 = basename(path2);
+
+	int len = strchr(path1, '/') - path1;
+
+	return (strncmp(path1, path2, len) == 0);
 }
 
 /**
@@ -32,8 +56,7 @@ char * basename(char *path)
  */
 int is_file(const struct dirent *entry)
 {
-	return strcmp(entry->d_name, ".") != 0
-		&& strcmp(entry->d_name, "..") != 0;
+	return (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0);
 }
 
 /**

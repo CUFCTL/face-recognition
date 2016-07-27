@@ -20,6 +20,8 @@ typedef struct dir_entry {
 typedef dir_entry_t image_entry_t;
 
 char * basename(char *path);
+int is_same_class(char *path1, char *path2);
+
 int get_directory(const char *path, char ***p_names);
 int get_directory_rec(const char *path, dir_entry_t **p_entries, int *p_num_dirs);
 

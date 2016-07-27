@@ -254,6 +254,10 @@ void db_recognize(database_t *db, const char *path)
 	// get test images
 	char **image_names;
 	int num_test_images = get_directory(path, &image_names);
+
+	// test each image against the database
+	image_t *image = image_construct();
+	matrix_t *T_i = m_initialize(db->num_dimensions, 1);
 	matrix_t *P_test_pca;
 	matrix_t *P_test_lda;
 	matrix_t *P_test_ica;
@@ -261,9 +265,9 @@ void db_recognize(database_t *db, const char *path)
 	int index_lda;
 	int index_ica;
 
-	// test each image against the database
-	image_t *image = image_construct();
-	matrix_t *T_i = m_initialize(db->num_dimensions, 1);
+	int num_correct_pca = 0;
+	int num_correct_lda = 0;
+	int num_correct_ica = 0;
 
 	int i;
 	for ( i = 0; i < num_test_images; i++ ) {
@@ -297,9 +301,45 @@ void db_recognize(database_t *db, const char *path)
 		// print results
 		printf("test image: \'%s\'\n", basename(image_names[i]));
 		printf("       PCA: \'%s\'\n", basename(db->entries[index_pca].name));
-		if ( db->lda ) printf("       LDA: \'%s\'\n", basename(db->entries[index_lda].name));
-		if ( db->ica ) printf("      ICA2: \'%s\'\n", basename(db->entries[index_ica].name));
+
+		if ( is_same_class(db->entries[index_pca].name, image_names[i]) ) {
+			num_correct_pca++;
+		}
+
+		if ( db->lda ) {
+			printf("       LDA: \'%s\'\n", basename(db->entries[index_lda].name));
+
+			if ( is_same_class(db->entries[index_lda].name, image_names[i]) ) {
+				num_correct_lda++;
+			}
+		}
+
+		if ( db->ica ) {
+			printf("      ICA2: \'%s\'\n", basename(db->entries[index_ica].name));
+
+			if ( is_same_class(db->entries[index_ica].name, image_names[i]) ) {
+				num_correct_ica++;
+			}
+		}
+
 		putchar('\n');
+	}
+
+	// print performance metrics
+	double success_rate_pca = 100.0 * num_correct_pca / num_test_images;
+
+	printf("PCA: %d / %d matched, %.2f%%\n", num_correct_pca, num_test_images, success_rate_pca);
+
+	if ( db->lda ) {
+		double success_rate_lda = 100.0 * num_correct_lda / num_test_images;
+
+		printf("LDA: %d / %d matched, %.2f%%\n", num_correct_lda, num_test_images, success_rate_lda);
+	}
+
+	if ( db->ica ) {
+		double success_rate_ica = 100.0 * num_correct_ica / num_test_images;
+
+		printf("ICA: %d / %d matched, %.2f%%\n", num_correct_ica, num_test_images, success_rate_ica);
 	}
 
 	// cleanup
