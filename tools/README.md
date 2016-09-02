@@ -41,3 +41,4 @@ Once you have openCV installed, running FaceCrop should not be a problem. Run "m
 ## Issues
 
 This is the 'first cut' at the FaceCrop tool, so do not be too critical! FaceCrop is being tested, but there are definitely some bugs at the moment to be worked out. Updates to come.
+This is a test for will.
