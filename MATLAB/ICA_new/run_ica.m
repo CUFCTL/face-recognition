@@ -21,11 +21,16 @@ TestFiles = dir(strcat(TestDatabasePath, '/*.ppm'));
 % create training database
 T = CreateDatabase(TrainDatabasePath);
 
-[m, A, Eigenfaces] = EigenfaceCore(T);
+% compute the ICA... icasig should be the eigenfaces... i think
+[icasig] = fastica(T);
 [numPixels, numImages] = size(T);
 [~, numFaces] = size(Eigenfaces);
 
-ProjectedImages = Eigenfaces' * A;
+ProjectedImages = icasig' * A;
+
+% compute the mean... this is not optimal and redundant, find way to
+% pass mean to this function via the fastica
+[newMatrix, m] = remmean(T);
 
 % test each image in the test set
 num_correct = 0;
@@ -33,7 +38,7 @@ num_correct = 0;
 for i = 1 : size(TestFiles, 1)
     % perform recognition algorithm
     strtest = strcat(TestDatabasePath, '/', TestFiles(i).name);
-    j = Recognition(strtest, m, Eigenfaces, ProjectedImages);
+    j = Recognition(strtest, m, icasig, ProjectedImages);
 
     % print results
     fprintf('test image: \"%s\"\n', TestFiles(i).name);
