@@ -68,6 +68,6 @@ for (( i = $START; i <= $END; i++ )); do
     fi
 
     if [ $ICA = 1 ]; then
-        matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/ICA_new; run_ica; quit"
+        matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/ICA; run_ica; quit"
     fi
 done

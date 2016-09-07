@@ -30,3 +30,5 @@ The LDA Algorithm performs the following steps:
  - Recognition.m
 
 ## ICA
+
+ICA is now being implemented by FastICA from http://research.ics.aalto.fi/ica/fastica/
