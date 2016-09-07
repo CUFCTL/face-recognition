@@ -22,15 +22,15 @@ TestFiles = dir(strcat(TestDatabasePath, '/*.ppm'));
 T = CreateDatabase(TrainDatabasePath);
 
 % compute the ICA... icasig should be the eigenfaces... i think
-[icasig] = fastica(T);
-[numPixels, numImages] = size(T);
-[~, numFaces] = size(Eigenfaces);
+[icasig] = fastica(T')';
+[numPixels, numImages] = size(T');
+[~, numFaces] = size(icasig)
+[A, m] = remmean(T);
 
 ProjectedImages = icasig' * A;
 
 % compute the mean... this is not optimal and redundant, find way to
 % pass mean to this function via the fastica
-[newMatrix, m] = remmean(T);
 
 % test each image in the test set
 num_correct = 0;
