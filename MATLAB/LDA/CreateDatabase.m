@@ -26,16 +26,23 @@ Train_Number = size(TrainFiles, 1);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Construction of 2D matrix from 1D image vectors
 T = [];
+% For each image
 for i = 1 : Train_Number
     str = strcat(TrainDatabasePath, '/', TrainFiles(i).name);
 
+    % Load image
     img = imread(str);
+    % Convert to grayscale
     img = rgb2gray(img);
 
+    % Get number of pixels
     [irow, icol] = size(img);
 
+    % Make image into column vector
     temp = reshape(img',irow*icol,1);   % Reshaping 2D images into 1D image vectors
+    % Concatinate T with the column vector of current image
     T = [T temp]; % 'T' grows after each turn
 end
 
+% T is a matrix of doubles, each column is an image
 T = double(T);
