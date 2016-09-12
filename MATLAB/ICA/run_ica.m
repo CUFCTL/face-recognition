@@ -21,16 +21,17 @@ TestFiles = dir(strcat(TestDatabasePath, '/*.ppm'));
 % create training database
 T = CreateDatabase(TrainDatabasePath);
 
-% compute the ICA... icasig should be the eigenfaces... i think
-[icasig] = fastica(T')';
-[numPixels, numImages] = size(T');
-[~, numFaces] = size(icasig)
+% compute the ICA...
+
+% A is the centered matrix that has the mean vector subtracted from each column
 [A, m] = remmean(T);
 
-ProjectedImages = icasig' * A;
+% now use the centered matrix to compute icasig
+[icasig] = fastica(A')';
+[numPixels, numImages] = size(T');
+[~, numFaces] = size(icasig)
 
-% compute the mean... this is not optimal and redundant, find way to
-% pass mean to this function via the fastica
+ProjectedImages = icasig' * A;
 
 % test each image in the test set
 num_correct = 0;
@@ -42,7 +43,7 @@ for i = 1 : size(TestFiles, 1)
 
     % print results
     fprintf('test image: \"%s\"\n', TestFiles(i).name);
-    fprintf('       PCA: \"%s\"\n', TrainFiles(j).name);
+    fprintf('       ICA: \"%s\"\n', TrainFiles(j).name);
     fprintf('\n');
 
     % determine whether the algorithm was correct
