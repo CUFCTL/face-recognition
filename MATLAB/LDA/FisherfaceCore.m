@@ -36,12 +36,17 @@ Class_population = P / Class_number;   % Number of images per individual
 m_database = mean(T,2);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the deviation of each image from mean image
-A = T - repmat(m_database,1,P);
+CenteredImageDatabase = T - repmat(m_database,1,P);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Snapshot method of Eigenface algorithm
-L = A'*A; % L is the surrogate of covariance matrix C=A*A'.
-[V, D] = eig(L); % Diagonal elements of D are the eigenvalues for both L=A'*A and C=A*A'.
+L = CenteredImageDatabase' * CenteredImageDatabase; % L is the surrogate of
+ % covariance matrix C = CenteredImageDatabase * CenteredImageDatabase'
+[V, D] = eig(L); % Diagonal elements of D are the eigenvalues for both
+ % L = CenteredImageDatabase' * CenteredImageDatabase and
+ % C = CenteredImageDatabase * CenteredImageDatabase'.
+% Flip left-right to place largest eigenvalues in the leftmost column
 V = fliplr(V);
+D = fliplr(D);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Sorting and eliminating small eigenvalues
 L_eig_vec = [];
@@ -50,13 +55,13 @@ for i = 1 : P-Class_number
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the eigenvectors of covariance matrix 'C'
-V_PCA = A * L_eig_vec; % A: centered image vectors
+V_PCA = CenteredImageDatabase * L_eig_vec; % CenteredImageDatabase: centered image vectors
 
 %%%%%%%%%%%%%%%%%%%%%%%% Projecting centered image vectors onto eigenspace
 % Zi = V_PCA' * (Ti-m_database)
 ProjectedImages_PCA = [];
 for i = 1 : P
-    temp = V_PCA'*A(:,i);
+    temp = V_PCA' * CenteredImageDatabase(:,i);
     ProjectedImages_PCA = [ProjectedImages_PCA temp];
 end
 
