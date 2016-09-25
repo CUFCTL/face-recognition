@@ -4,7 +4,7 @@
 # EXAMPLES
 #
 # Convert JPG images in './images' to PGM images in './images2':
-# ./convert-images.sh ./images ./images2 jpg pgm
+# ./scripts/convert-images.sh ./images ./images2 jpg pgm
 
 # parse arguments
 if [ "$#" = 4 ]; then
@@ -13,7 +13,7 @@ if [ "$#" = 4 ]; then
     SRC_FMT=$3
     DST_FMT=$4
 else
-    >&2 echo "usage: ./convert-images.sh [src-path] [dst-path] [src-format] [dst-format]"
+    >&2 echo "usage: ./scripts/convert-images.sh [src-path] [dst-path] [src-format] [dst-format]"
     exit 1
 fi
 

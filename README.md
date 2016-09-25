@@ -21,19 +21,19 @@ Usage for the face recognition system:
 To run an automated test (k-fold cross-validation) with the ORL face database:
 
     # test once with 1.pgm removed from each class
-    ./cross-validate.sh orl_faces pgm 1 1 [--lda --ica --all]
+    ./scripts/cross-validate.sh orl_faces pgm 1 1 [--lda --ica --all]
 
     # repeat with each index removed (takes much longer)
-    ./cross-validate.sh orl_faces pgm 1 10 [--lda --ica --all]
+    ./scripts/cross-validate.sh orl_faces pgm 1 10 [--lda --ica --all]
 
 To test MATLAB code with ORL database:
 
     # (first time) flatten and convert orl_faces to PPM
-    ./create-sets.sh orl_faces pgm 1 10
-    ./convert-images.sh test_images orl_faces_ppm pgm ppm
+    ./scripts/create-sets.sh orl_faces pgm 1 10
+    ./scripts/convert-images.sh test_images orl_faces_ppm pgm ppm
 
     # test once with 1.pgm removed from each class
-    ./cross-validate-matlab.sh orl_faces_ppm 1 1 [--pca --lda --ica]
+    ./scripts/cross-validate-matlab.sh orl_faces_ppm 1 1 [--pca --lda --ica]
 
 ## The Image Library
 
@@ -47,7 +47,7 @@ Images should __not__ be stored in this repository! Instead, images should be do
 
 To convert JPEG images to PGM with ImageMagick:
 
-    ./convert-images.sh [src-folder] [dst-folder] jpeg pgm
+    ./scripts/convert-images.sh [src-folder] [dst-folder] jpeg pgm
 
 ## Results
 
