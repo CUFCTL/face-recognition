@@ -16,14 +16,14 @@
 # EXAMPLES
 #
 # Perform k-fold on a single observation (2):
-# ./cross-validate-matlab.sh orl_faces_ppm 2 2 [--pca --lda --ica]
+# ./scripts/cross-validate-matlab.sh orl_faces_ppm 2 2 [--pca --lda --ica]
 #
 # Perform k-fold on a range of observations (4 - 7):
-# ./cross-validate-matlab.sh orl_faces_ppm 4 7 [--pca --lda --ica]
+# ./scripts/cross-validate-matlab.sh orl_faces_ppm 4 7 [--pca --lda --ica]
 
 # parse arguments
 if [ "$#" -lt 3 ]; then
-    >&2 echo "usage: ./cross-validate-matlab.sh [db-path] [begin-index] [end-index] [--pca --lda --ica]"
+    >&2 echo "usage: ./scripts/cross-validate-matlab.sh [db-path] [begin-index] [end-index] [--pca --lda --ica]"
     exit 1
 fi
 

@@ -16,14 +16,14 @@
 # EXAMPLES
 #
 # Remove 2.pgm from each class:
-# ./create-sets.sh [db-path] pgm 2 2
+# ./scripts/create-sets.sh [db-path] pgm 2 2
 #
 # Remove 4.pgm - 7.pgm from each class:
-# ./create-sets.sh [db-path] pgm 4 7
+# ./scripts/create-sets.sh [db-path] pgm 4 7
 
 # parse arguments
 if [ "$#" -lt 4 ]; then
-    >&2 echo "usage: ./create-sets.sh [db-path] [ext] [begin-index] [end-index]"
+    >&2 echo "usage: ./scripts/create-sets.sh [db-path] [ext] [begin-index] [end-index]"
     exit 1
 fi
 
