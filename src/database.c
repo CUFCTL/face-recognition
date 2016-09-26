@@ -122,10 +122,10 @@ void db_train(database_t *db, const char *path)
 
 	// compute ICA2 representation
 	if ( db->ica ) {
-		printf("Computing ICA2 representation...\n");
+		printf("Computing ICA representation...\n");
 
-		db->W_ica_tr = ICA2(db->W_pca_tr, db->P_pca);
-		db->P_ica = m_product(db->W_ica_tr, X);
+		// under construction
+		//ICA(db_P_pca);
 	}
 
 	m_free(X);

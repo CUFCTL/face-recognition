@@ -3,7 +3,7 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
 %
 % FastICA for Matlab 7.x and 6.x
 % Version 2.5, October 19 2005
-% Copyright (c) Hugo Gävert, Jarmo Hurri, Jaakko Särelä, and Aapo Hyvärinen.
+% Copyright (c) Hugo Gï¿½vert, Jarmo Hurri, Jaakko Sï¿½relï¿½, and Aapo Hyvï¿½rinen.
 %
 % FASTICA(mixedsig) estimates the independent components from given
 % multidimensional signals. Each row of matrix mixedsig is one
@@ -50,7 +50,7 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
 %======================================================================
 % --Choosing the nonlinearity:
 %
-% 'g'                   (string) Chooses the nonlinearity g used in 
+% 'g'                   (string) Chooses the nonlinearity g used in
 %                       the fixed-point algorithm. Possible values:
 %
 %                       Value of 'g':      Nonlinearity used:
@@ -58,8 +58,8 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
 %                       'tanh'             g(u)=tanh(a1*u)
 %                       'gauss             g(u)=u*exp(-a2*u^2/2)
 %                       'skew'             g(u)=u^2
-% 
-% 'finetune'		(string) Chooses the nonlinearity g used when 
+%
+% 'finetune'		(string) Chooses the nonlinearity g used when
 %                       fine-tuning. In addition to same values
 %                       as for 'g', the possible value 'finetune' is:
 %                       'off'              fine-tuning is disabled.
@@ -75,7 +75,7 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
 %                       algorithm (see also parameter 'stabilization').
 %
 %
-% 'stabilization'       (string) Values 'on' or 'off'. Default 'off'. 
+% 'stabilization'       (string) Values 'on' or 'off'. Default 'off'.
 %                       This parameter controls wether the program uses
 %                       the stabilized version of the algorithm or
 %                       not. If the stabilization is on, then the value
@@ -85,7 +85,7 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
 %                       is no convergence before half of the maximum
 %                       number of iterations has been reached then mu
 %                       will be halved for the rest of the rounds.
-% 
+%
 %======================================================================
 % --Controlling convergence:
 %
@@ -94,7 +94,7 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
 % 'maxNumIterations'    (integer) Maximum number of iterations.
 %                       Default is 1000.
 %
-% 'maxFinetune'         (integer) Maximum number of iterations in 
+% 'maxFinetune'         (integer) Maximum number of iterations in
 %                       fine-tuning. Default 100.
 %
 % 'sampleSize'          (number) [0 - 1] Percentage of samples used in
@@ -102,7 +102,7 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
 %                       Default is 1 (all samples).
 %
 % 'initGuess'           (matrix) Initial guess for A. Default is random.
-%                       You can now do a "one more" like this: 
+%                       You can now do a "one more" like this:
 %                       [ica, A, W] = fastica(mix, 'numOfIC',3);
 %                       [ica2, A2, W2] = fastica(mix, 'initGuess', A, 'numOfIC', 4);
 %
@@ -123,7 +123,7 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
 % --Controlling reduction of dimension and whitening:
 %
 % Reduction of dimension is controlled by 'firstEig' and 'lastEig', or
-% alternatively by 'interactivePCA'. 
+% alternatively by 'interactivePCA'.
 %
 % 'firstEig'            (integer) This and 'lastEig' specify the range for
 %                       eigenvalues that are retained, 'firstEig' is
@@ -166,20 +166,20 @@ function [Out1, Out2, Out3] = fastica(mixedsig, varargin)
 %                       dimension ('pca') or only PCA plus whitening
 %                       ('white'). Default is 'all': do ICA estimation
 %                       as well.  This option changes the output
-%                       format accordingly. For example: 
+%                       format accordingly. For example:
 %
-%                       [whitesig, WM, DWM] = FASTICA(mixedsig, 
-%                       'only', 'white') 
+%                       [whitesig, WM, DWM] = FASTICA(mixedsig,
+%                       'only', 'white')
 %                       returns the whitened signals, the whitening matrix
 %                       (WM) and the dewhitening matrix (DWM). (See also
 %                       WHITENV.) In FastICA the whitening matrix performs
 %                       whitening and the reduction of dimension. Dewhitening
 %                       matrix is the pseudoinverse of whitening matrix.
-%                        
-%                       [E, D] = FASTICA(mixedsig, 'only', 'pca') 
-%                       returns the eigenvector (E) and diagonal 
-%                       eigenvalue (D) matrices  containing the 
-%                       selected subspaces. 
+%
+%                       [E, D] = FASTICA(mixedsig, 'only', 'pca')
+%                       returns the eigenvector (E) and diagonal
+%                       eigenvalue (D) matrices  containing the
+%                       selected subspaces.
 %
 %======================================================================
 % EXAMPLES
@@ -234,7 +234,7 @@ end
 % Default values for optional parameters
 
 % All
-verbose           = 'on';
+verbose           = 'off';
 
 % Default values for 'pcamat' parameters
 firstEig          = 1;
@@ -242,7 +242,7 @@ lastEig           = Dim;
 interactivePCA    = 'off';
 
 % Default values for 'fpica' parameters
-approach          = 'defl';
+approach          = 'symm';
 numOfIC           = Dim;
 g                 = 'pow3';
 finetune          = 'off';
@@ -300,7 +300,7 @@ if jumpWhitening == 3
     fprintf ('PCA calculations not needed.\n');
   end;
 else
-  
+
   % OK, so first we need to calculate PCA
   % Check to see if we already have the PCA data
   if jumpPCA == 2,
@@ -314,7 +314,7 @@ else
       fprintf ('You must suply all of these in order to jump PCA:\n');
       fprintf ('''pcaE'', ''pcaD''.\n');
     end;
-    
+
     % Calculate PCA
     [E, D]=pcamat(mixedsig, firstEig, lastEig, interactivePCA, verbose);
   end
@@ -322,44 +322,44 @@ end
 
 % skip the rest if user only wanted PCA
 if only > 1
-  
+
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Whitening the data
-  
+
   % Check to see if the whitening is needed...
   if jumpWhitening == 3,
     if b_verbose,
       fprintf ('Whitening not needed.\n');
     end;
   else
-    
+
     % Whitening is needed
     % display notice if the user entered some of the whitening info, but not all.
     if (jumpWhitening > 0) & (b_verbose),
       fprintf ('You must suply all of these in order to jump whitening:\n');
       fprintf ('''whiteSig'', ''whiteMat'', ''dewhiteMat''.\n');
     end;
-    
+
     % Calculate the whitening
     [whitesig, whiteningMatrix, dewhiteningMatrix] = whitenv ...
 						     (mixedsig, E, D, verbose);
   end
-  
+
 end % if only > 1
 
 % skip the rest if user only wanted PCA and whitening
 if only > 2
-  
+
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Calculating the ICA
-  
+
   % Check some parameters
   % The dimension of the data may have been reduced during PCA calculations.
   % The original dimension is calculated from the data by default, and the
   % number of IC is by default set to equal that dimension.
-  
+
   Dim = size(whitesig, 1);
-  
+
   % The number of IC's must be less or equal to the dimension of data
   if numOfIC > Dim
     numOfIC = Dim;
@@ -369,13 +369,13 @@ if only > 2
       fprintf('(Can''t estimate more independent components than dimension of data)\n');
     end
   end
-  
+
   % Calculate the ICA with fixed point algorithm.
   [A, W] = fpica (whitesig,  whiteningMatrix, dewhiteningMatrix, approach, ...
 		  numOfIC, g, finetune, a1, a2, myy, stabilization, epsilon, ...
 		  maxNumIterations, maxFinetune, initState, guess, sampleSize, ...
 		  displayMode, displayInterval, verbose);
-  
+
   % Check for valid return
   if ~isempty(W)
     % Add the mean back in.
