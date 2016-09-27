@@ -21,19 +21,19 @@ Usage for the face recognition system:
 To run an automated test (k-fold cross-validation) with the ORL face database:
 
     # test once with 1.pgm removed from each class
-    ./scripts/cross-validate.sh orl_faces pgm 1 1 [--lda --ica --all]
+    ./scripts/cross-validate.sh -p orl_faces -e pgm -r 1 1 [--lda --ica --all]
 
     # repeat with each index removed (takes much longer)
-    ./scripts/cross-validate.sh orl_faces pgm 1 10 [--lda --ica --all]
+    ./scripts/cross-validate.sh -p orl_faces -e pgm -r 1 10 [--lda --ica --all]
 
 To test MATLAB code with ORL database:
 
     # (first time) flatten and convert orl_faces to PPM
-    ./scripts/create-sets.sh orl_faces pgm 1 10
+    ./scripts/create-sets.sh -p orl_faces -e pgm -r 1 10
     ./scripts/convert-images.sh test_images orl_faces_ppm pgm ppm
 
     # test once with 1.pgm removed from each class
-    ./scripts/cross-validate-matlab.sh orl_faces_ppm 1 1 [--pca --lda --ica]
+    ./scripts/cross-validate-matlab.sh -p orl_faces_ppm -r 1 1 [--pca --lda --ica]
 
 ## The Image Library
 

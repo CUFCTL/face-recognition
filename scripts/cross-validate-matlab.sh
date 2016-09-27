@@ -16,34 +16,64 @@
 # EXAMPLES
 #
 # Perform k-fold on a single observation (2):
-# ./scripts/cross-validate-matlab.sh orl_faces_ppm 2 2 [--pca --lda --ica]
+# ./scripts/cross-validate-matlab.sh -p orl_faces_ppm -r 2 2 [--pca --lda --ica]
 #
 # Perform k-fold on a range of observations (4 - 7):
-# ./scripts/cross-validate-matlab.sh orl_faces_ppm 4 7 [--pca --lda --ica]
+# ./scripts/cross-validate-matlab.sh -p orl_faces_ppm -r 4 7 [--pca --lda --ica]
 
 # parse arguments
-if [ "$#" -lt 3 ]; then
-    >&2 echo "usage: ./scripts/cross-validate-matlab.sh [db-path] [begin-index] [end-index] [--pca --lda --ica]"
-    exit 1
-fi
-
-DB_PATH=$1
-EXT=ppm
-START=$2
-END=$3
+EXT="ppm"
 PCA=0
 LDA=0
 ICA=0
 
-for i in "$@"; do
-    if [ $i = "--pca" ]; then
+while [[ $# -gt 0 ]]; do
+    key="$1"
+
+    case $key in
+    -p|--path)
+        DB_PATH="$2"
+        shift
+        ;;
+    -e|--ext)
+        EXT="$2"
+        shift
+        ;;
+    -r|--range)
+        START="$2"
+        shift
+        END="$2"
+        shift
+        ;;
+    --pca)
         PCA=1
-    elif [ $i = "--lda" ]; then
+        ;;
+    --lda)
         LDA=1
-    elif [ $i = "--ica" ]; then
+        ;;
+    --ica)
         ICA=1
-    fi
+        ;;
+    *)
+        # unknown option
+        ;;
+    esac
+
+    shift
 done
+
+if [[ -z $DB_PATH || -z $EXT || -z $START || -z $END ]]; then
+    >&2 echo "usage: ./scripts/cross-validate-matlab.sh [options]"
+    >&2 echo
+    >&2 echo "options:"
+    >&2 echo "  -p, --path             path to image database"
+    >&2 echo "  -e, --ext              image file extension"
+    >&2 echo "  -r, --range BEGIN END  range of samples to remove from training set"
+    >&2 echo "  --pca                  run PCA"
+    >&2 echo "  --lda                  run LDA"
+    >&2 echo "  --ica                  run ICA"
+    exit 1
+fi
 
 echo "Performing k-fold cross-validation on the range [$START, $END]"
 echo
