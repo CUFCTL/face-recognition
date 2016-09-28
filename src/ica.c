@@ -44,4 +44,6 @@ matrix_t * ICA(matrix_t *X, matrix_t *L_eval, matrix_t *L_evec)
 {
     // call spherex
     // call fpica(whitened_matrix)
+
+    return NULL;
 }

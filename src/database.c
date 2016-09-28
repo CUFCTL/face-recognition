@@ -127,7 +127,7 @@ void db_train(database_t *db, const char *path)
 		printf("Computing ICA representation...\n");
 
 		// under construction
-		ICA(X, *L_eval, *L_evec);
+		ICA(X, L_eval, L_evec);
 	}
 
 	m_free(X);
