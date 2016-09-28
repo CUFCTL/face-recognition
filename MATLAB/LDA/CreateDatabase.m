@@ -9,7 +9,8 @@
 %
 % Argument:     TrainDatabasePath      - Path of the training database
 %
-% Returns:      T                      - A 2D matrix, containing all 1D image vectors.
+% Returns:      TrainFiles             - Column vector of image entries
+%               T                      - A 2D matrix, containing all 1D image vectors.
 %                                        The length of 1D column vectors is MN and 'T' will be a MNxP 2D matrix.
 %
 % See also: STRCMP, STRCAT, RESHAPE
@@ -17,32 +18,41 @@
 % Original version by Amir Hossein Omidvarnia, October 2007
 %                     Email: aomidvar@ece.ut.ac.ir
 %
-function T = CreateDatabase(TrainDatabasePath)
+function [TrainFiles, T, Class_number] = CreateDatabase(TrainDatabasePath)
 
 %%%%%%%%%%%%%%%%%%%%%%%% File management
+ClassDirs = dir(TrainDatabasePath);
+ClassDirs = ClassDirs(3 : size(ClassDirs,1));
 
-TrainFiles = dir(strcat(TrainDatabasePath, '/*.ppm'));
-Train_Number = size(TrainFiles, 1);
+Class_number = size(ClassDirs, 1);
 
-%%%%%%%%%%%%%%%%%%%%%%%% Construction of 2D matrix from 1D image vectors
-T = [];
-% For each image
-for i = 1 : Train_Number
-    str = strcat(TrainDatabasePath, '/', TrainFiles(i).name);
+TrainFiles = [];
 
-    % Load image
-    img = imread(str);
-    % Convert to grayscale
-    img = rgb2gray(img);
+for i = 1 : size(ClassDirs,1)
+    str = strcat(TrainDatabasePath, ClassDirs(i).name, '/*.pgm');
+    entries = dir(str);
+    for j = 1 : size(entries,1)
+        entries(j).class = ClassDirs(i).name;
+    end
 
-    % Get number of pixels
-    [irow, icol] = size(img);
-
-    % Make image into column vector
-    temp = reshape(img',irow*icol,1);   % Reshaping 2D images into 1D image vectors
-    % Concatinate T with the column vector of current image
-    T = [T temp]; % 'T' grows after each turn
+    TrainFiles = [TrainFiles; entries];
 end
 
-% T is a matrix of doubles, each column is an image
-T = double(T);
+%%%%%%%%%%%%%%%%%%%%%%%% Construction of 2D matrix from 1D image vectors
+% grab the first image to get the height and width info for all images
+str = strcat(TrainDatabasePath, '/', TrainFiles(1).class, '/', TrainFiles(1).name);
+img = imread(str);
+[irow, icol] = size(img);
+
+% allocate width*height rows and number of images columns
+T = zeros(irow*icol, size(TrainFiles,1));
+
+for i = 1 : size(TrainFiles,1)
+    str = strcat(TrainDatabasePath, '/', TrainFiles(i).class, '/', TrainFiles(i).name);
+    img = imread(str);
+
+    [irow, icol] = size(img);
+
+    % Reshaping 2D images into 1D image vectors
+    T(:, i) = reshape(img',irow*icol,1);
+end

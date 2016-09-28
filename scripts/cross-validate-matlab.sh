@@ -14,7 +14,6 @@
 #  ...
 
 # parse arguments
-EXT="ppm"
 PCA=0
 LDA=0
 ICA=0
@@ -71,7 +70,7 @@ if [[ -z $DB_PATH || -z $EXT || -z $NUM_TEST || -z $NUM_ITER ]]; then
 fi
 
 # determine the number of observations in each class
-NUM_TRAIN=10
+NUM_TRAIN=$(ls $DB_PATH/$(ls $DB_PATH | head -n 1) | wc -l)
 
 # begin iterations
 echo "Performing Monte Carlo cross-validation with p=$NUM_TEST and n=$NUM_ITER"
@@ -86,23 +85,15 @@ for (( i = 1; i <= $NUM_ITER; i++ )); do
     echo
 
     # create the training set and test set
-    rm -rf train_images test_images
-    cp -r $DB_PATH train_images
-    mkdir test_images
-
-    SAMPLES=$(echo $SAMPLES | tr ',' ' ')
-
-    for j in $SAMPLES; do
-        mv train_images/*$j.$EXT test_images
-    done
+    ./scripts/create-sets.sh -p $DB_PATH -e $EXT -s $SAMPLES
 
     # run the algorithms
     if [ $PCA = 1 ]; then
-        matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/PCA; example; quit"
+        matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/PCA; run_pca; quit"
     fi
 
     if [ $LDA = 1 ]; then
-        matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/LDA; example; quit"
+        matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/LDA; run_lda; quit"
     fi
 
     if [ $ICA = 1 ]; then

@@ -10,24 +10,16 @@ clear
 clc
 close all
 
-format long e
-
 TrainDatabasePath = '../../train_images/';
 TestDatabasePath = '../../test_images/';
 
-TrainFiles = dir(strcat(TrainDatabasePath, '/*.ppm'));
-TestFiles = dir(strcat(TestDatabasePath, '/*.ppm'));
-
 % create training database
-T = CreateDatabase(TrainDatabasePath);
-
+[TrainFiles, T] = CreateDatabase(TrainDatabasePath);
 [m, A, Eigenfaces] = EigenfaceCore(T);
-[numPixels, numImages] = size(T);
-[~, numFaces] = size(Eigenfaces);
-
 ProjectedImages = Eigenfaces' * A;
 
 % test each image in the test set
+TestFiles = dir(strcat(TestDatabasePath, '/*.pgm'));
 num_correct = 0;
 
 for i = 1 : size(TestFiles, 1)
@@ -37,15 +29,14 @@ for i = 1 : size(TestFiles, 1)
 
     % print results
     fprintf('test image: \"%s\"\n', TestFiles(i).name);
-    fprintf('       PCA: \"%s\"\n', TrainFiles(j).name);
+    fprintf('       PCA: \"%s/%s\"\n', TrainFiles(j).class, TrainFiles(j).name);
     fprintf('\n');
 
     % determine whether the algorithm was correct
     % assumes that filename is formatted as '{class}_{index}.ppm'
-    tokens_train = strsplit(TrainFiles(j).name, '_');
     tokens_test = strsplit(TestFiles(i).name, '_');
 
-    if strcmp(tokens_train{1}, tokens_test{1})
+    if strcmp(TrainFiles(j).class, tokens_test{1})
         num_correct = num_correct + 1;
     end
 end

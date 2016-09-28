@@ -6,8 +6,6 @@
 % Original version by Amir Hossein Omidvarnia, October 2007
 %                     Email: aomidvar@ece.ut.ac.ir
 %
-% load_stuff: flag
-%
 %
 % Good Reference? : http://www.eecs.umich.edu/~silvio/teaching/lectures/lecture22.pdf
 %
@@ -17,14 +15,13 @@ close all
 
 TrainDatabasePath = '../../train_images/';
 TestDatabasePath = '../../test_images/';
-Class_number = 40;
 
-T = CreateDatabase(TrainDatabasePath);
+% create training database
+[TrainFiles, T, Class_number] = CreateDatabase(TrainDatabasePath);
 [m, V_PCA, V_Fisher, ProjectedImages_Fisher] = FisherfaceCore(T, Class_number);
 
-TrainFiles = dir(strcat(TrainDatabasePath, '/*.ppm'));
-TestFiles = dir(strcat(TestDatabasePath, '/*.ppm'));
-
+% test each image in the test set
+TestFiles = dir(strcat(TestDatabasePath, '/*.pgm'));
 num_correct = 0;
 
 for i = 1 : size(TestFiles, 1)
@@ -34,15 +31,14 @@ for i = 1 : size(TestFiles, 1)
 
     % print results
     fprintf('test image: \"%s\"\n', TestFiles(i).name);
-    fprintf('       LDA: \"%s\"\n', TrainFiles(j).name);
+    fprintf('       LDA: \"%s/%s\"\n', TrainFiles(j).class, TrainFiles(j).name);
     fprintf('\n');
 
     % determine whether the algorithm was correct
     % assumes that filename is formatted as '{class}_{index}.ppm'
-    tokens_train = strsplit(TrainFiles(j).name, '_');
     tokens_test = strsplit(TestFiles(i).name, '_');
 
-    if strcmp(tokens_train{1}, tokens_test{1})
+    if strcmp(TrainFiles(j).class, tokens_test{1})
         num_correct = num_correct + 1;
     end
 end
