@@ -53,51 +53,6 @@ To convert JPEG images to PGM with ImageMagick:
 
 Not quite ready
 
-#### BLAS and LAPACK
-
-Much of the code in this project depends on BLAS and LAPACK. In order to run it properly, it is necessary to install the following libraries:
-
-    libblas-dev (1.2.20110419-5)
-    libblas3 (1.2.20110419-5)
-    libgfortran3 (4.8.1-10ubuntu9)
-    liblapack-dev (3.4.2+dfsg-2)
-    liblapack3 (3.4.2+dfsg-2)
-    liblapacke (3.4.2+dfsg-2)
-    liblapacke-dev (3.4.2+dfsg-2)
-
-Documentation for BLAS and LAPACK consists mostly of the documentation for each function. For any given BLAS/LAPACK function, you will want to reference two documents:
-
-1. The Fortran source file http://www.netlib.org/lapack/double/
-2. The cblas/lapacke header http://www.netlib.org/blas/cblas.h http://www.netlib.org/lapack/lapacke.h
-
-The Fortran source provides documentation for function parameters, and the C headers show how to order those arguments with the C interface.
-
-##### Ubuntu
-
-    sudo apt-get install libblas-dev liblapacke-dev
-
-##### Mac
-
-Confirmed to run on Mac OS 10.11.1
-
-Download LAPACK 3.5.0 http://www.netlib.org/lapack/
-
-Download BLAS 3.5.0 http://www.netlib.org/blas/
-
-(10.10 - 10.11) Download gfortran 5.2 http://coudert.name/software/gfortran-5.2-Yosemite.dmg
-
-(10.7 - 10.9) Download gfortran 4.8.2 http://coudert.name/software/gfortran-4.8.2-MountainLion.dmg
-
-    # in BLAS directory
-    make
-    sudo cp blas-LINUX.a /usr/local/lib/libblas.a
-
-    # in LAPACK directory
-    mv make.inc.example make.inc
-    # set BLASLIB in make.inc line 68 equal to ‘/usr/local/lib/libblas.a’
-    make
-    sudo cp liblapack.a /usr/local/lib
-
 ## The Algorithms
 
 Here is the working flow graph for the combined algorithm:
