@@ -242,7 +242,7 @@ lastEig           = Dim;
 interactivePCA    = 'off';
 
 % Default values for 'fpica' parameters
-approach          = 'symm';
+approach          = 'defl';
 numOfIC           = Dim;
 g                 = 'pow3';
 finetune          = 'off';

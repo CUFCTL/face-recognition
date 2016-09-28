@@ -38,8 +38,12 @@ matrix_t * sphere(matrix_t *X)
     return W_z;
 }
 
-matrix_t * ICA(matrix_t *X)
+// L_eval.... eigenvalue vector... must translate this to diagonal matrix
+// L_evec.... eigenvector matrix
+matrix_t * ICA(matrix_t *X, matrix_t *L_eval, matrix_t *L_evec)
 {
     // call spherex
     // call fpica(whitened_matrix)
+
+    return NULL;
 }

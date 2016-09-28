@@ -15,7 +15,7 @@
  * @param X  mean-subtracted image matrix
  * @return projection matrix W_pca'
  */
-matrix_t * PCA(matrix_t *X)
+matrix_t * PCA(matrix_t *X, matrix_t **L_eval, matrix_t **L_evec)
 {
 	// compute the surrogate matrix L = X' * X
 	matrix_t *X_tr = m_transpose(X);
@@ -24,18 +24,16 @@ matrix_t * PCA(matrix_t *X)
 	m_free(X_tr);
 
 	// compute eigenvectors for L
-	matrix_t *L_eval = m_initialize(L->rows, 1);
-	matrix_t *L_evec = m_initialize(L->rows, L->cols);
+	*L_eval = m_initialize(L->rows, 1);
+	*L_evec = m_initialize(L->rows, L->cols);
 
-	m_eigen(L, L_eval, L_evec);
+	m_eigen(L, *L_eval, *L_evec);
 
 	// compute eigenfaces W_pca = X * L_evec
-	matrix_t *W_pca = m_product(X, L_evec);
+	matrix_t *W_pca = m_product(X, *L_evec);
 	matrix_t *W_pca_tr = m_transpose(W_pca);
 
 	m_free(L);
-	m_free(L_eval);
-	m_free(L_evec);
 	m_free(W_pca);
 
 	return W_pca_tr;

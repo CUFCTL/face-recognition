@@ -109,7 +109,9 @@ void db_train(database_t *db, const char *path)
 	// compute PCA representation
 	printf("Computing PCA representation...\n");
 
-	db->W_pca_tr = PCA(X);
+	matrix_t *L_eval, *L_evec;
+
+	db->W_pca_tr = PCA(X, &L_eval, &L_evec);
 	db->P_pca = m_product(db->W_pca_tr, X);
 
 	// compute LDA representation
@@ -125,7 +127,7 @@ void db_train(database_t *db, const char *path)
 		printf("Computing ICA representation...\n");
 
 		// under construction
-		//ICA(db_P_pca);
+		ICA(X, L_eval, L_evec);
 	}
 
 	m_free(X);
