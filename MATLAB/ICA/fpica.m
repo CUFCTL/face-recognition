@@ -6,10 +6,10 @@ function [A, W] = fpica(X, whiteningMatrix, dewhiteningMatrix, approach, ...
 %FPICA - Fixed point ICA. Main algorithm of FASTICA.
 %
 % [A, W] = fpica(whitesig, whiteningMatrix, dewhiteningMatrix, approach,
-%        numOfIC, g, finetune, a1, a2, mu, stabilization, epsilon, 
+%        numOfIC, g, finetune, a1, a2, mu, stabilization, epsilon,
 %        maxNumIterations, maxFinetune, initState, guess, sampleSize,
 %        displayMode, displayInterval, verbose);
-% 
+%
 % Perform independent component analysis using Hyvarinen's fixed point
 % algorithm. Outputs an estimate of the mixing matrix A and its inverse W.
 %
@@ -19,14 +19,14 @@ function [A, W] = fpica(X, whiteningMatrix, dewhiteningMatrix, approach, ...
 % approach      [ 'symm' | 'defl' ]     :the approach used (deflation or symmetric)
 % numOfIC       [ 0 - Dim of whitesig ] :number of independent components estimated
 % g             [ 'pow3' | 'tanh' |     :the nonlinearity used
-%                 'gaus' | 'skew' ]     
+%                 'gaus' | 'skew' ]
 % finetune      [same as g + 'off']     :the nonlinearity used in finetuning.
 % a1                                    :parameter for tuning 'tanh'
 % a2                                    :parameter for tuning 'gaus'
 % mu                                    :step size in stabilized algorithm
 % stabilization [ 'on' | 'off' ]        :if mu < 1 then automatically on
 % epsilon                               :stopping criterion
-% maxNumIterations                      :maximum number of iterations 
+% maxNumIterations                      :maximum number of iterations
 % maxFinetune                           :maximum number of iteretions for finetuning
 % initState     [ 'rand' | 'guess' ]    :initial guess or random initial state. See below
 % guess                                 :initial guess for A. Ignored if initState = 'rand'
@@ -126,14 +126,14 @@ if sampleSize > 1
   sampleSize = 1;
   if b_verbose
     fprintf('Warning: Setting ''sampleSize'' to 1.\n');
-  end  
+  end
 elseif sampleSize < 1
   if (sampleSize * numSamples) < 1000
     sampleSize = min(1000/numSamples, 1);
     if b_verbose
       fprintf('Warning: Setting ''sampleSize'' to %0.3f (%d samples).\n', ...
 	      sampleSize, floor(sampleSize * numSamples));
-    end  
+    end
   end
 end
 if b_verbose
@@ -181,7 +181,7 @@ switch lower(finetune)
  case 'off'
   if myy ~= 1
     gFine = gOrig;
-  else 
+  else
     gFine = gOrig + 1;
   end
   finetuningEnabled = 0;
@@ -205,7 +205,7 @@ switch lower(stabilization)
   end
  otherwise
   error(sprintf('Illegal value [ %s ] for parameter: ''stabilization''\n', ...
-		stabilization)); 
+		stabilization));
 end
 
 if b_verbose & stabilizationEnabled
@@ -243,7 +243,7 @@ switch lower(initState)
     initialStateMode = 1;
     if size(guess,2) < numOfIC
       if b_verbose
-	fprintf('Warning: initial guess only for first %d components. Using random initial guess for others.\n', size(guess,2)); 
+	fprintf('Warning: initial guess only for first %d components. Using random initial guess for others.\n', size(guess,2));
       end
       guess(:, size(guess, 2) + 1:numOfIC) = ...
 					     rand(vectorSize,numOfIC-size(guess,2))-.5;
@@ -303,7 +303,7 @@ if approachMode == 1,
   stroke = 0;
   notFine = 1;
   long = 0;
-  
+
   A = zeros(vectorSize, numOfIC);  % Dewhitened basis vectors.
   if initialStateMode == 0
     % Take random orthonormal initial vectors.
@@ -312,10 +312,10 @@ if approachMode == 1,
     % Use the given initial vector as the initial state
     B = whiteningMatrix * guess;
   end
-  
+
   BOld = zeros(size(B));
   BOld2 = zeros(size(B));
-  
+
   % This is the actual fixed-point iteration loop.
   for round = 1:maxNumIterations + 1,
     if round == maxNumIterations + 1,
@@ -333,9 +333,9 @@ if approachMode == 1,
       end
       return;
     end
-    
+
     if (interruptible & g_FastICA_interrupt)
-      if b_verbose 
+      if b_verbose
         fprintf('\n\nCalculation interrupted by the user\n');
       end
       if ~isempty(B)
@@ -347,16 +347,16 @@ if approachMode == 1,
       end
       return;
     end
-    
-    
+
+
     % Symmetric orthogonalization.
     B = B * real(inv(B' * B)^(1/2));
-    
+
     % Test for termination condition. Note that we consider opposite
     % directions here as well.
     minAbsCos = min(abs(diag(B' * BOld)));
     minAbsCos2 = min(abs(diag(B' * BOld2)));
-    
+
     if (1 - minAbsCos < epsilon)
       if finetuningEnabled & notFine
         if b_verbose, fprintf('Initial convergence, fine-tuning: \n'); end;
@@ -365,10 +365,10 @@ if approachMode == 1,
         myy = myyK * myyOrig;
         BOld = zeros(size(B));
         BOld2 = zeros(size(B));
-	
+
       else
         if b_verbose, fprintf('Convergence after %d steps\n', round); end
-	
+
         % Calculate the de-whitened vectors.
         A = dewhiteningMatrix * B;
         break;
@@ -396,10 +396,10 @@ if approachMode == 1,
 	end
       end
     end
-    
+
     BOld2 = BOld;
     BOld = B;
-    
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Show the progress...
     if b_verbose
@@ -409,7 +409,7 @@ if approachMode == 1,
         fprintf('Step no. %d, change in value of estimate: %.3g \n', round, 1 - minAbsCos);
       end
     end
-    
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Also plot the current state...
     switch usedDisplay
@@ -438,14 +438,14 @@ if approachMode == 1,
       end
      otherwise
     end
-    
+
     switch usedNlinearity
       % pow3
      case 10
       B = (X * (( X' * B) .^ 3)) / numSamples - 3 * B;
      case 11
       % optimoitu - epsilonin kokoisia eroja
-      % tämä on optimoitu koodi, katso vanha koodi esim.
+      % tï¿½mï¿½ on optimoitu koodi, katso vanha koodi esim.
       % aikaisemmista versioista kuten 2.0 beta3
       Y = X' * B;
       Gpow3 = Y .^ 3;
@@ -462,7 +462,7 @@ if approachMode == 1,
       Beta = sum(Ysub .* Gpow3);
       D = diag(1 ./ (Beta - 3 * size(Ysub', 2)));
       B = B + myy * B * (Ysub' * Gpow3 - diag(Beta)) * D;
-      
+
       % tanh
      case 20
       hypTan = tanh(a1 * X' * B);
@@ -470,7 +470,7 @@ if approachMode == 1,
 	  ones(size(B,1),1) * sum(1 - hypTan .^ 2) .* B / numSamples * ...
 	  a1;
      case 21
-      % optimoitu - epsilonin kokoisia 
+      % optimoitu - epsilonin kokoisia
       Y = X' * B;
       hypTan = tanh(a1 * Y);
       Beta = sum(Y .* hypTan);
@@ -488,7 +488,7 @@ if approachMode == 1,
       Beta = sum(Y .* hypTan);
       D = diag(1 ./ (Beta - a1 * sum(1 - hypTan .^ 2)));
       B = B + myy * B * (Y' * hypTan - diag(Beta)) * D;
-      
+
       % gauss
      case 30
       U = X' * B;
@@ -525,7 +525,7 @@ if approachMode == 1,
       Beta = sum(Y .* gauss);
       D = diag(1 ./ (Beta - sum((1 - a2 * (Y .^ 2)) .* ex)));
       B = B + myy * B * (Y' * gauss - diag(Beta)) * D;
-      
+
       % skew
      case 40
       B = (X * ((X' * B) .^ 2)) / numSamples;
@@ -552,14 +552,14 @@ if approachMode == 1,
     end
   end
 
-  
+
   % Calculate ICA filters.
   W = B' * whiteningMatrix;
-  
+
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Also plot the last one...
   switch usedDisplay
-   case 1 
+   case 1
     % There was and may still be other displaymodes...
     % 1D signals
     icaplot('dispsig',(X'*B)');
@@ -581,14 +581,14 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DEFLATION APPROACH
 if approachMode == 2
-  
+
   B = zeros(vectorSize);
-  
+
   % The search for a basis vector is repeated numOfIC times.
   round = 1;
-  
+
   numFailures = 0;
-  
+
   while round <= numOfIC,
     myy = myyOrig;
     usedNlinearity = gOrig;
@@ -596,80 +596,84 @@ if approachMode == 2
     notFine = 1;
     long = 0;
     endFinetuning = 0;
-    
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Show the progress...
     if b_verbose, fprintf('IC %d ', round); end
-    
+
     % Take a random initial vector of lenght 1 and orthogonalize it
     % with respect to the other vectors.
     if initialStateMode == 0
       w = randn (vectorSize, 1);
+
+
     elseif initialStateMode == 1
       w=whiteningMatrix*guess(:,round);
     end
     w = w - B * B' * w;
     w = w / norm(w);
-    
+
     wOld = zeros(size(w));
     wOld2 = zeros(size(w));
-    
+
     % This is the actual fixed-point iteration loop.
     %    for i = 1 : maxNumIterations + 1
     i = 1;
     gabba = 1;
     while i <= maxNumIterations + gabba
       if (usedDisplay > 0)
-	drawnow;
+		drawnow;
       end
       if (interruptible & g_FastICA_interrupt)
-        if b_verbose 
+        if b_verbose
           fprintf('\n\nCalculation interrupted by the user\n');
         end
         return;
       end
-      
+
       % Project the vector into the space orthogonal to the space
       % spanned by the earlier found basis vectors. Note that we can do
       % the projection with matrix B, since the zero entries do not
       % contribute to the projection.
       w = w - B * B' * w;
       w = w / norm(w);
-      
+
+
       if notFine
-	if i == maxNumIterations + 1
-	  if b_verbose
-	    fprintf('\nComponent number %d did not converge in %d iterations.\n', round, maxNumIterations);
-	  end
-	  round = round - 1;
-	  numFailures = numFailures + 1;
-	  if numFailures > failureLimit
-	    if b_verbose
-	      fprintf('Too many failures to converge (%d). Giving up.\n', numFailures);
-	    end
-	    if round == 0
-	      A=[];
-	      W=[];
-	    end
-	    return;
-	  end
-	  % numFailures > failurelimit
-	  break;
-	end
-	% i == maxNumIterations + 1
+	  	if i == maxNumIterations + 1
+	  		if b_verbose
+	    		fprintf('\nComponent number %d did not converge in %d iterations.\n', round, maxNumIterations);
+	  		end
+
+	  		round = round - 1;
+	  		numFailures = numFailures + 1;
+	  		if numFailures > failureLimit
+	    		if b_verbose
+	      			fprintf('Too many failures to converge (%d). Giving up.\n', numFailures);
+	    		end
+	    		if round == 0
+	      			A=[];
+	      			W=[];
+	    		end
+	    		return;
+	  		end
+		  % numFailures > failurelimit
+		  break;
+		end
+		% i == maxNumIterations + 1
       else
-	% if notFine
-	if i >= endFinetuning
-	  wOld = w; % So the algorithm will stop on the next test...
-	end
+		  % if notFine
+		  if i >= endFinetuning
+	  		wOld = w; % So the algorithm will stop on the next test...
+		  end
       end
       % if notFine
-      
+
       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       % Show the progress...
       if b_verbose, fprintf('.'); end;
-      
-      
+
+
       % Test for termination condition. Note that the algorithm has
       % converged if the direction of w and wOld is the same, this
       % is why we test the two cases.
@@ -677,34 +681,34 @@ if approachMode == 2
         if finetuningEnabled & notFine
           if b_verbose, fprintf('Initial convergence, fine-tuning: '); end;
           notFine = 0;
-	  gabba = maxFinetune;
+	  	  gabba = maxFinetune;
           wOld = zeros(size(w));
           wOld2 = zeros(size(w));
           usedNlinearity = gFine;
           myy = myyK * myyOrig;
-	  
-	  endFinetuning = maxFinetune + i;
-	  
+
+	  	  endFinetuning = maxFinetune + i;
+
         else
           numFailures = 0;
           % Save the vector
           B(:, round) = w;
-	  
+
           % Calculate the de-whitened vector.
           A(:,round) = dewhiteningMatrix * w;
           % Calculate ICA filter.
           W(round,:) = w' * whiteningMatrix;
-	  
+
           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           % Show the progress...
           if b_verbose, fprintf('computed ( %d steps ) \n', i); end
-	  
+
           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
           % Also plot the current state...
           switch usedDisplay
 	   case 1
 	    if rem(round, displayInterval) == 0,
-	      % There was and may still be other displaymodes...   
+	      % There was and may still be other displaymodes...
 	      % 1D signals
 	      temp = X'*B;
 	      icaplot('dispsig',temp(:,1:numOfIC)');
@@ -712,14 +716,14 @@ if approachMode == 2
 	    end
 	   case 2
 	    if rem(round, displayInterval) == 0,
-	      % ... and now there are :-) 
+	      % ... and now there are :-)
 	      % 1D basis
 	      icaplot('dispsig',A');
 	      drawnow;
 	    end
 	   case 3
 	    if rem(round, displayInterval) == 0,
-	      % ... and now there are :-) 
+	      % ... and now there are :-)
 	      % 1D filters
 	      icaplot('dispsig',W);
 	      drawnow;
@@ -753,10 +757,10 @@ if approachMode == 2
 	  end
 	end
       end
-      
+
       wOld2 = wOld;
       wOld = w;
-      
+
       switch usedNlinearity
 	% pow3
        case 10
@@ -843,11 +847,11 @@ if approachMode == 2
 	EXGskew = (Xsub * ((Xsub' * w) .^ 2)) / size(Xsub, 2);
 	Beta = w' * EXGskew;
 	w = w - myy * (EXGskew - Beta*w)/(-Beta);
-	
+
        otherwise
 	error('Code for desired nonlinearity not found!');
       end
-      
+
       % Normalize the new w.
       w = w / norm(w);
       i = i + 1;
@@ -855,7 +859,7 @@ if approachMode == 2
     round = round + 1;
   end
   if b_verbose, fprintf('Done.\n'); end
-  
+
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   % Also plot the ones that may not have been plotted.
   if (usedDisplay > 0) & (rem(round-1, displayInterval) ~= 0)
