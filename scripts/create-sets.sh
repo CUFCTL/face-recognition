@@ -16,10 +16,12 @@
 # EXAMPLES
 #
 # Remove 2.pgm from each class:
-# ./scripts/create-sets.sh -p [db-path] -e pgm -r 2 2
+# ./scripts/create-sets.sh -p [db-path] -e pgm -s 2
 #
 # Remove 4.pgm - 7.pgm from each class:
-# ./scripts/create-sets.sh -p [db-path] -e pgm -r 4 7
+# ./scripts/create-sets.sh -p [db-path] -e pgm -s 4,5,6,7
+#
+# TODO: maybe implement ranges with a dash (i.e. '4-7')
 
 # parse arguments
 while [[ $# -gt 0 ]]; do
@@ -34,10 +36,8 @@ while [[ $# -gt 0 ]]; do
         EXT="$2"
         shift
         ;;
-    -r|--range)
-        START="$2"
-        shift
-        END="$2"
+    -s|--samples)
+        SAMPLES="$2"
         shift
         ;;
     *)
@@ -48,13 +48,13 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [[ -z $DB_PATH || -z $EXT || -z $START || -z $END ]]; then
+if [[ -z $DB_PATH || -z $EXT || -z $SAMPLES ]]; then
     >&2 echo "usage: ./scripts/create-sets.sh [options]"
     >&2 echo
     >&2 echo "options:"
     >&2 echo "  -p, --path             path to image database"
     >&2 echo "  -e, --ext              image file extension"
-    >&2 echo "  -r, --range BEGIN END  range of samples to remove from training set"
+    >&2 echo "  -s, --samples SAMPLES  comma-separated list of samples to remove from training set"
     exit 1
 fi
 
@@ -63,9 +63,12 @@ rm -rf train_images test_images
 cp -r $DB_PATH train_images
 mkdir test_images
 
-# move range of observations from each class to the test set
+# transform samples argument into space-separated list
+SAMPLES=$(echo $SAMPLES | tr ',' ' ')
+
+# move specified observations from each class to the test set
 for f in train_images/*; do
-    for (( i = $START; i <= $END; i++ )); do
+    for i in $SAMPLES; do
         mv $f/$i.$EXT test_images/$(basename $f)_$i.$EXT
     done
 done

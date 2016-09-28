@@ -1,6 +1,6 @@
 #!/bin/bash
-# Perform a k-fold cross-validation on the MATLAB code
-# with a face database. The database should have the
+# Perform Monte Carlo cross-validation (repeated random sub-sampling)
+# on the MATLAB code with a face database. The database should have the
 # following structure:
 #
 # database/
@@ -12,14 +12,6 @@
 #  class2_image2.ppm
 #  class2_imageN.ppm
 #  ...
-#
-# EXAMPLES
-#
-# Perform k-fold on a single observation (2):
-# ./scripts/cross-validate-matlab.sh -p orl_faces_ppm -r 2 2 [--pca --lda --ica]
-#
-# Perform k-fold on a range of observations (4 - 7):
-# ./scripts/cross-validate-matlab.sh -p orl_faces_ppm -r 4 7 [--pca --lda --ica]
 
 # parse arguments
 EXT="ppm"
@@ -39,10 +31,12 @@ while [[ $# -gt 0 ]]; do
         EXT="$2"
         shift
         ;;
-    -r|--range)
-        START="$2"
+    -t|--num-test)
+        NUM_TEST="$2"
         shift
-        END="$2"
+        ;;
+    -i|--num-iter)
+        NUM_ITER="$2"
         shift
         ;;
     --pca)
@@ -62,31 +56,45 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [[ -z $DB_PATH || -z $EXT || -z $START || -z $END ]]; then
+if [[ -z $DB_PATH || -z $EXT || -z $NUM_TEST || -z $NUM_ITER ]]; then
     >&2 echo "usage: ./scripts/cross-validate-matlab.sh [options]"
     >&2 echo
     >&2 echo "options:"
-    >&2 echo "  -p, --path             path to image database"
-    >&2 echo "  -e, --ext              image file extension"
-    >&2 echo "  -r, --range BEGIN END  range of samples to remove from training set"
-    >&2 echo "  --pca                  run PCA"
-    >&2 echo "  --lda                  run LDA"
-    >&2 echo "  --ica                  run ICA"
+    >&2 echo "  -p, --path      path to image database"
+    >&2 echo "  -e, --ext       image file extension"
+    >&2 echo "  -t, --num-test  number of samples to remove from training set"
+    >&2 echo "  -i, --num-iter  number of random iterations"
+    >&2 echo "  --pca           run PCA"
+    >&2 echo "  --lda           run LDA"
+    >&2 echo "  --ica           run ICA"
     exit 1
 fi
 
-echo "Performing k-fold cross-validation on the range [$START, $END]"
+# determine the number of observations in each class
+NUM_TRAIN=10
+
+# begin iterations
+echo "Performing Monte Carlo cross-validation with p=$NUM_TEST and n=$NUM_ITER"
 echo
 
-for (( i = $START; i <= $END; i++ )); do
-    echo "BEGIN: remove observation $i from each class"
+for (( i = 1; i <= $NUM_ITER; i++ )); do
+    # select p random observations
+    SAMPLES=$(shuf -i 1-$NUM_TRAIN -n $NUM_TEST)
+    SAMPLES=$(echo $SAMPLES | tr ' ' ',')
+
+    echo "BEGIN: removing observations $SAMPLES from each class"
     echo
 
     # create the training set and test set
     rm -rf train_images test_images
     cp -r $DB_PATH train_images
     mkdir test_images
-    mv train_images/*$i.ppm test_images
+
+    SAMPLES=$(echo $SAMPLES | tr ',' ' ')
+
+    for j in $SAMPLES; do
+        mv train_images/*$j.$EXT test_images
+    done
 
     # run the algorithms
     if [ $PCA = 1 ]; then

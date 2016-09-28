@@ -18,22 +18,19 @@ Usage for the face recognition system:
       --ica              run PCA, ICA2
       --all              run PCA, LDA, ICA2
 
-To run an automated test (k-fold cross-validation) with the ORL face database:
+To run an automated test (Monte Carlo cross-validation) with the ORL face database:
 
-    # test once with 1.pgm removed from each class
-    ./scripts/cross-validate.sh -p orl_faces -e pgm -r 1 1 [--lda --ica --all]
-
-    # repeat with each index removed (takes much longer)
-    ./scripts/cross-validate.sh -p orl_faces -e pgm -r 1 10 [--lda --ica --all]
+    # test with 3 random samples removed, 10 iterations
+    ./scripts/cross-validate.sh -p orl_faces -e pgm -t 3 -i 10 [--lda --ica --all]
 
 To test MATLAB code with ORL database:
 
     # (first time) flatten and convert orl_faces to PPM
-    ./scripts/create-sets.sh -p orl_faces -e pgm -r 1 10
+    ./scripts/create-sets.sh -p orl_faces -e pgm -s 1,2,3,4,5,6,7,8,9,10
     ./scripts/convert-images.sh test_images orl_faces_ppm pgm ppm
 
-    # test once with 1.pgm removed from each class
-    ./scripts/cross-validate-matlab.sh -p orl_faces_ppm -r 1 1 [--pca --lda --ica]
+    # test with 3 random samples removed, 10 iterations
+    ./scripts/cross-validate-matlab.sh -p orl_faces_ppm -t 3 -n 10 [--pca --lda --ica]
 
 ## The Image Library
 
