@@ -14,7 +14,7 @@
 % Argument:      T                      - (M*NxP) A 2D matrix, containing all 1D image vectors.
 %                                         All of 1D column vectors have the same length of M*N
 %                                         and 'T' will be a MNxP 2D matrix.
-%                Class_number           - number of classes
+%                NumberClasses           - number of classes
 %
 % Returns:       m_database             - (M*Nx1) Mean of the training database
 %                V_PCA                  - (M*Nx(P-C)) Eigen vectors of the covariance matrix of the
@@ -27,16 +27,19 @@
 % Original version by Amir Hossein Omidvarnia, October 2007
 %                     Email: aomidvar@ece.ut.ac.ir
 %
-function [m_database, V_PCA, V_Fisher, ProjectedImages_Fisher] = FisherfaceCore(T, Class_number)
+function [m_database, V_PCA, V_Fisher, ProjectedImages_Fisher] = FisherfaceCore(T, NumberClasses)
 
-P = size(T, 2);                        % Number of columns in T, num images
-Class_population = P / Class_number;   % Number of images per individual
+n = 1;
+TotalImages = size(T, 2);                        % Number of columns in T, num images
+ClassSize = TotalImages / NumberClasses;   % Number of images per individual
+NumEigenvaluesUsed = TotalImages - n * NumberClasses;
+NumEigenvaluesFisher = NumberClasses - n;
 
 %%%%%%%%%%%%%%%%%%%%%%%% calculating the mean image
 m_database = mean(T,2);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the deviation of each image from mean image
-CenteredImageDatabase = T - repmat(m_database,1,P);
+CenteredImageDatabase = T - repmat(m_database,1,TotalImages);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Snapshot method of Eigenface algorithm
 L = CenteredImageDatabase' * CenteredImageDatabase; % L is the surrogate of
@@ -50,7 +53,7 @@ D = fliplr(D);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Sorting and eliminating small eigenvalues
 L_eig_vec = [];
-for i = 1 : P-Class_number
+for i = 1 : NumEigenvaluesUsed
     L_eig_vec = [V(:,i) L_eig_vec];
 end
 
@@ -60,22 +63,22 @@ V_PCA = CenteredImageDatabase * L_eig_vec; % CenteredImageDatabase: centered ima
 %%%%%%%%%%%%%%%%%%%%%%%% Projecting centered image vectors onto eigenspace
 % Zi = V_PCA' * (Ti-m_database)
 ProjectedImages_PCA = [];
-for i = 1 : P
+for i = 1 : TotalImages
     temp = V_PCA' * CenteredImageDatabase(:,i);
     ProjectedImages_PCA = [ProjectedImages_PCA temp];
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the mean of each class in eigenspace
 m_PCA = mean(ProjectedImages_PCA,2); % Total mean in eigenspace
-m = zeros(P-Class_number,Class_number);
-Sw = zeros(P-Class_number,P-Class_number); % ;Initialization of Within Scatter Matrix
-Sb = zeros(P-Class_number,P-Class_number); % Initialization of Between Scatter Matrix
+m = zeros(NumEigenvaluesUsed,NumberClasses);
+Sw = zeros(NumEigenvaluesUsed,NumEigenvaluesUsed); % ;Initialization of Within Scatter Matrix
+Sb = zeros(NumEigenvaluesUsed,NumEigenvaluesUsed); % Initialization of Between Scatter Matrix
 
-for i = 1 : Class_number
-    m(:,i) = mean( ( ProjectedImages_PCA(:,((i-1)*Class_population+1):i*Class_population) ), 2 )';
+for i = 1 : NumberClasses
+    m(:,i) = mean( ( ProjectedImages_PCA(:,((i-1)*ClassSize+1):i*ClassSize) ), 2 )';
 
-    S  = zeros(P-Class_number,P-Class_number);
-    for j = ( (i-1)*Class_population+1 ) : ( i*Class_population )
+    S  = zeros(NumEigenvaluesUsed,NumEigenvaluesUsed);
+    for j = ( (i-1)*ClassSize+1 ) : ( i*ClassSize )
         S = S + (ProjectedImages_PCA(:,j)-m(:,i))*(ProjectedImages_PCA(:,j)-m(:,i))';
     end
 
@@ -92,12 +95,12 @@ J_eig_vec = fliplr(J_eig_vec);
 %%%%%%%%%%%%%%%%%%%%%%%% Eliminating zero eigens and sorting in descend order
 V_Fisher = [];
 
-for i = 1 : Class_number-1
+for i = 1 : NumEigenvaluesFisher
     V_Fisher(:,i) = J_eig_vec(:,i); % Largest (C-1) eigen vectors of matrix J
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%% Projecting images onto Fisher linear space
 % Yi = V_Fisher' * V_PCA' * (Ti - m_database)
-for i = 1 : Class_number*Class_population
+for i = 1 : NumberClasses*ClassSize
     ProjectedImages_Fisher(:,i) = V_Fisher' * ProjectedImages_PCA(:,i);
 end

@@ -111,7 +111,6 @@ matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *P_pca, int c, image_entry_t *entrie
     m_scatter(P_pca, c, entries, S_b, S_w);
 
     // compute W_fld = eigenvectors of S_w^-1 * S_b
-    // TODO: implement with LAPACKE_dggev
     matrix_t *S_w_inv = m_inverse(S_w);
     matrix_t *J = m_product(S_w_inv, S_b);
     matrix_t *J_eval = m_initialize(J->rows, 1);
