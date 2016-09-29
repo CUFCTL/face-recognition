@@ -24,7 +24,7 @@ while [[ $# -gt 0 ]]; do
         NUM_ITER="$2"
         shift
         ;;
-    --lda|--ica|--all)
+    --pca|--lda|--ica|--all)
         ARGS="$ARGS $1"
         ;;
     *)
@@ -43,6 +43,7 @@ if [[ -z $DB_PATH || -z $EXT || -z $NUM_TEST || -z $NUM_ITER ]]; then
     >&2 echo "  -e, --ext       image file extension"
     >&2 echo "  -t, --num-test  number of samples to remove from training set"
     >&2 echo "  -i, --num-iter  number of random iterations"
+    >&2 echo "  --pca           run PCA"
     >&2 echo "  --lda           run LDA"
     >&2 echo "  --ica           run ICA"
     >&2 echo "  --all           run all algorithms (PCA, LDA, ICA)"

@@ -14,23 +14,20 @@ Usage for the face recognition system:
     Options:
       --train DIRECTORY  create a database from a training set
       --rec DIRECTORY    test a set of images against a database
-      --lda              run PCA, LDA
-      --ica              run PCA, ICA2
-      --all              run PCA, LDA, ICA2
+      --pca              run PCA
+      --lda              run LDA
+      --ica              run ICA
+      --all              run all algorithms (PCA, LDA, ICA)
 
 To run an automated test (Monte Carlo cross-validation) with the ORL face database:
 
     # test with 3 random samples removed, 10 iterations
-    ./scripts/cross-validate.sh -p orl_faces -e pgm -t 3 -i 10 [--lda --ica --all]
+    ./scripts/cross-validate.sh -p orl_faces -e pgm -t 3 -i 10 [--pca --lda --ica --all]
 
 To test MATLAB code with ORL database:
 
-    # (first time) flatten and convert orl_faces to PPM
-    ./scripts/create-sets.sh -p orl_faces -e pgm -s 1,2,3,4,5,6,7,8,9,10
-    ./scripts/convert-images.sh test_images orl_faces_ppm pgm ppm
-
     # test with 3 random samples removed, 10 iterations
-    ./scripts/cross-validate-matlab.sh -p orl_faces_ppm -t 3 -n 10 [--pca --lda --ica]
+    ./scripts/cross-validate-matlab.sh -p orl_faces -e pgm -t 3 -n 10 [--pca --lda --ica]
 
 ## The Image Library
 
@@ -65,8 +62,8 @@ Here is the working flow graph for the combined algorithm:
         P_pca = W_pca' * X (PCA projected image matrix) (n-by-n)
         W_lda' = LDA(W_pca, P_pca) (LDA projection matrix) (n-by-m)
         P_lda = W_lda' * X (LDA projected image matrix) (n-by-n)
-        W_ica' = ICA2(W_pca, P_pca) (ICA2 projection matrix) (n-by-m)
-        P_ica = W_ica' * X (ICA2 projected image matrix) (n-by-n)
+        W_ica' = ICA(W_pca, P_pca) (ICA projection matrix) (n-by-m)
+        P_ica = W_ica' * X (ICA projected image matrix) (n-by-n)
 
     recognize: X_test -> P_match
         a = mean face (m-by-1)
@@ -97,7 +94,7 @@ Here is the working flow graph for the combined algorithm:
         W_fld = eigenvectors of (S_b, S_w) (n-by-n)
         W_lda' = W_fld' * W_pca' (n-by-m)
 
-    ICA2: (W_pca, P_pca) -> W_ica'
+    ICA: (W_pca, P_pca) -> W_ica'
         X = P_pca (n-by-n)
         W_z = 2 * Cov(X)^(-1/2) (n-by-n)
         X_sph = W_z * X (n-by-n)

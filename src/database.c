@@ -45,13 +45,15 @@ matrix_t * get_image_matrix(image_entry_t *entries, int num_images)
 /**
  * Construct a database.
  *
+ * @param pca
  * @param lda
  * @param ica
  * @return pointer to new database
  */
-database_t * db_construct(int lda, int ica)
+database_t * db_construct(int pca, int lda, int ica)
 {
 	database_t *db = (database_t *)calloc(1, sizeof(database_t));
+	db->pca = pca;
 	db->lda = lda;
 	db->ica = ica;
 
@@ -72,8 +74,11 @@ void db_destruct(database_t *db)
 	free(db->entries);
 
 	m_free(db->mean_face);
-	m_free(db->W_pca_tr);
-	m_free(db->P_pca);
+
+	if ( db->pca || db->lda || db->ica ) {
+		m_free(db->W_pca_tr);
+		m_free(db->P_pca);
+	}
 
 	if ( db->lda ) {
 		m_free(db->W_lda_tr);
@@ -107,12 +112,14 @@ void db_train(database_t *db, const char *path)
 	m_subtract_columns(X, db->mean_face);
 
 	// compute PCA representation
-	printf("Computing PCA representation...\n");
-
 	matrix_t *L_eval, *L_evec;
 
-	db->W_pca_tr = PCA(X, &L_eval, &L_evec);
-	db->P_pca = m_product(db->W_pca_tr, X);
+	if ( db->pca || db->lda || db->ica ) {
+		printf("Computing PCA representation...\n");
+
+		db->W_pca_tr = PCA(X, &L_eval, &L_evec);
+		db->P_pca = m_product(db->W_pca_tr, X);
+	}
 
 	// compute LDA representation
 	if ( db->lda ) {
@@ -122,7 +129,7 @@ void db_train(database_t *db, const char *path)
 		db->P_lda = m_product(db->W_lda_tr, X);
 	}
 
-	// compute ICA2 representation
+	// compute ICA representation
 	if ( db->ica ) {
 		printf("Computing ICA representation...\n");
 
@@ -155,8 +162,11 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 	FILE *tdata = fopen(path_tdata, "w");
 
 	m_fwrite(tdata, db->mean_face);
-	m_fwrite(tdata, db->W_pca_tr);
-	m_fwrite(tdata, db->P_pca);
+
+	if ( db->pca || db->lda || db->ica ) {
+		m_fwrite(tdata, db->W_pca_tr);
+		m_fwrite(tdata, db->P_pca);
+	}
 
 	if ( db->lda ) {
 		m_fwrite(tdata, db->W_lda_tr);
@@ -180,12 +190,15 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
  */
 void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 {
-	// get mean face, PDA output, and LDA output
+	// read the mean face and PCA/LDA/ICA representations
 	FILE *tdata = fopen(path_tdata, "r");
 
 	db->mean_face = m_fread(tdata);
-	db->W_pca_tr = m_fread(tdata);
-	db->P_pca = m_fread(tdata);
+
+	if ( db->pca || db->lda || db->ica ) {
+		db->W_pca_tr = m_fread(tdata);
+		db->P_pca = m_fread(tdata);
+	}
 
 	if ( db->lda ) {
 		db->W_lda_tr = m_fread(tdata);
@@ -279,10 +292,12 @@ void db_recognize(database_t *db, const char *path)
 		m_subtract(T_i, db->mean_face);
 
 		// find the nearest neighbor of P_test for PCA
-		P_test_pca = m_product(db->W_pca_tr, T_i);
-		index_pca = nearest_neighbor(db->P_pca, P_test_pca, m_dist_L2);
+		if ( db->pca ) {
+			P_test_pca = m_product(db->W_pca_tr, T_i);
+			index_pca = nearest_neighbor(db->P_pca, P_test_pca, m_dist_L2);
 
-		m_free(P_test_pca);
+			m_free(P_test_pca);
+		}
 
 		// find the nearest neighbor of P_test for LCA
 		if ( db->lda ) {
@@ -292,7 +307,7 @@ void db_recognize(database_t *db, const char *path)
 			m_free(P_test_lda);
 		}
 
-		// find the nearest neighbor of P_test for ICA2
+		// find the nearest neighbor of P_test for ICA
 		if ( db->ica ) {
 			P_test_ica = m_product(db->W_ica_tr, T_i);
 			index_ica = nearest_neighbor(db->P_ica, P_test_ica, m_dist_COS);
@@ -302,10 +317,13 @@ void db_recognize(database_t *db, const char *path)
 
 		// print results
 		printf("test image: \'%s\'\n", basename(image_names[i]));
-		printf("       PCA: \'%s\'\n", basename(db->entries[index_pca].name));
 
-		if ( is_same_class(db->entries[index_pca].name, image_names[i]) ) {
-			num_correct_pca++;
+		if ( db->pca ) {
+			printf("       PCA: \'%s\'\n", basename(db->entries[index_pca].name));
+
+			if ( is_same_class(db->entries[index_pca].name, image_names[i]) ) {
+				num_correct_pca++;
+			}
 		}
 
 		if ( db->lda ) {
@@ -317,7 +335,7 @@ void db_recognize(database_t *db, const char *path)
 		}
 
 		if ( db->ica ) {
-			printf("      ICA2: \'%s\'\n", basename(db->entries[index_ica].name));
+			printf("       ICA: \'%s\'\n", basename(db->entries[index_ica].name));
 
 			if ( is_same_class(db->entries[index_ica].name, image_names[i]) ) {
 				num_correct_ica++;
@@ -327,10 +345,12 @@ void db_recognize(database_t *db, const char *path)
 		putchar('\n');
 	}
 
-	// print performance metrics
-	double success_rate_pca = 100.0 * num_correct_pca / num_test_images;
+	// print accuracy results
+	if ( db->pca ) {
+		double success_rate_pca = 100.0 * num_correct_pca / num_test_images;
 
-	printf("PCA: %d / %d matched, %.2f%%\n", num_correct_pca, num_test_images, success_rate_pca);
+		printf("PCA: %d / %d matched, %.2f%%\n", num_correct_pca, num_test_images, success_rate_pca);
+	}
 
 	if ( db->lda ) {
 		double success_rate_lda = 100.0 * num_correct_lda / num_test_images;

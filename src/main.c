@@ -13,12 +13,14 @@ void print_usage()
 {
 	fprintf(stderr,
 		"Usage: ./face-rec [options]\n"
+		"\n"
 		"Options:\n"
 		"  --train DIRECTORY  create a database from a training set\n"
 		"  --rec DIRECTORY    test a set of images against a database\n"
-		"  --lda              run PCA, LDA\n"
-		"  --ica              run PCA, ICA2\n"
-		"  --all              run PCA, LDA, ICA2\n"
+		"  --pca              run PCA\n"
+		"  --lda              run LDA\n"
+		"  --ica              run ICA\n"
+		"  --all              run all algorithms (PCA, LDA, ICA)\n"
 	);
 }
 
@@ -29,6 +31,7 @@ int main(int argc, char **argv)
 
 	int arg_train = 0;
 	int arg_recognize = 0;
+	int arg_pca = 0;
 	int arg_lda = 0;
 	int arg_ica = 0;
 
@@ -38,6 +41,7 @@ int main(int argc, char **argv)
 	struct option long_options[] = {
 		{ "train", required_argument, 0, 't' },
 		{ "rec", required_argument, 0, 'r' },
+		{ "pca", no_argument, 0, 'p' },
 		{ "lda", no_argument, 0, 'l' },
 		{ "ica", no_argument, 0, 'i' },
 		{ "all", no_argument, 0, 'a' },
@@ -56,6 +60,9 @@ int main(int argc, char **argv)
 			arg_recognize = 1;
 			path_test_set = optarg;
 			break;
+		case 'p':
+			arg_pca = 1;
+			break;
 		case 'l':
 			arg_lda = 1;
 			break;
@@ -63,6 +70,7 @@ int main(int argc, char **argv)
 			arg_ica = 1;
 			break;
 		case 'a':
+			arg_pca = 1;
 			arg_lda = 1;
 			arg_ica = 1;
 			break;
@@ -79,7 +87,7 @@ int main(int argc, char **argv)
 	}
 
 	// run the face recognition system
-	database_t *db = db_construct(arg_lda, arg_ica);
+	database_t *db = db_construct(arg_pca, arg_lda, arg_ica);
 
 	if ( arg_train && arg_recognize ) {
 		db_train(db, path_train_set);

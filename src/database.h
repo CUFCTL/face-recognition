@@ -17,6 +17,8 @@ typedef struct {
 	int num_dimensions;
 	image_entry_t *entries;
 	matrix_t *mean_face;
+
+	int pca;
 	matrix_t *W_pca_tr;
 	matrix_t *P_pca;
 
@@ -29,7 +31,7 @@ typedef struct {
 	matrix_t *P_ica;
 } database_t;
 
-database_t * db_construct();
+database_t * db_construct(int pca, int lda, int ica);
 void db_destruct(database_t *db);
 
 void db_train(database_t *db, const char *path);
