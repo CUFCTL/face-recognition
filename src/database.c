@@ -112,12 +112,12 @@ void db_train(database_t *db, const char *path)
 	m_subtract_columns(X, db->mean_face);
 
 	// compute PCA representation
-	matrix_t *L_eval, *L_evec;
+	matrix_t *L_eval, *W_pca;
 
 	if ( db->pca || db->lda || db->ica ) {
 		printf("Computing PCA representation...\n");
 
-		db->W_pca_tr = PCA(X, &L_eval, &L_evec);
+		db->W_pca_tr = PCA(X, &L_eval, &W_pca);
 		db->P_pca = m_product(db->W_pca_tr, X);
 	}
 
@@ -134,7 +134,7 @@ void db_train(database_t *db, const char *path)
 		printf("Computing ICA representation...\n");
 
 		// under construction
-		ICA(X, L_eval, L_evec);
+		ICA(X, L_eval, W_pca);
 	}
 
 	m_free(X);
