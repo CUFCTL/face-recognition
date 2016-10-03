@@ -27,14 +27,13 @@ matrix_t * PCA(matrix_t *X, matrix_t **L_eval, matrix_t **W_pca)
 	*L_eval = m_initialize(L->rows, 1);
 	matrix_t *L_evec = m_initialize(L->rows, L->cols);
 
-	m_eigen(L, *L_eval, *L_evec);
+	m_eigen(L, *L_eval, L_evec);
 
 	// compute eigenfaces W_pca = X * L_evec
-	*W_pca = m_product(X, *L_evec);
-	matrix_t *W_pca_tr = m_transpose(W_pca);
+	*W_pca = m_product(X, L_evec);
+	matrix_t *W_pca_tr = m_transpose(*W_pca);
 
 	m_free(L);
-	m_free(W_pca);
 
 	return W_pca_tr;
 }

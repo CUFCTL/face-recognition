@@ -35,7 +35,7 @@ matrix_t * sphere (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **whiteningMa
     *whiteningMatrix = m_product(inv_sqrt_D, E_tr);
     *dewhiteningMatrix = m_product(E, D);
 
-    matrix_t * newVectors = m_product(whiteningMatrix, X);
+    matrix_t * newVectors = m_product(*whiteningMatrix, X);
 
     // cleanup
     m_free(inv_sqrt_D);
@@ -67,9 +67,9 @@ matrix_t * ICA (matrix_t *X, matrix_t *L_eval, matrix_t *L_evec)
 
 matrix_t * diagonalize (matrix_t *M)
 {
-    int i, j;
+    int i;
 
-    matrix_t * D = m_zeroes(M->rows, M->rows);
+    matrix_t * D = m_zeros(M->rows, M->rows);
 
     for (i = 0; i < M->rows; i++)
     {
