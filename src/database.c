@@ -134,6 +134,7 @@ void db_train(database_t *db, const char *path)
 		printf("Computing ICA representation...\n");
 
 		// under construction
+		// DEBUG: W_pca is 10304x360 for orl_faces testing 
 		ICA(X, L_eval, W_pca);
 	}
 

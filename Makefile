@@ -26,7 +26,7 @@ pca.o: matrix.o src/database.h src/pca.c
 lda.o: matrix.o src/database.h src/lda.c
 	$(CC) -c $(CFLAGS) src/lda.c -o $@
 
-ica.o: matrix.o src/database.h src/ica.c src/fpica.c 
+ica.o: fpica.o src/ica.c
 	$(CC) -c $(CFLAGS) src/ica.c -o $@
 
 face-rec: image.o image_entry.o matrix.o database.o pca.o lda.o ica.o src/main.c
