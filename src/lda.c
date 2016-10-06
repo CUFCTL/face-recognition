@@ -95,14 +95,19 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
  * Compute the projection matrix of a training set with LDA.
  *
  * @param W_pca_tr  PCA projection matrix
- * @param P_pca     PCA projected images
+ * @param X         image matrix
  * @param c         number of classes
  * @param entries   list of entries for each image
+ * @param n_opt1    number of columns in W_pca to use
  * @return projection matrix W_lda'
  */
-matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *P_pca, int c, image_entry_t *entries)
+matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *X, int c, image_entry_t *entries, int n_opt1)
 {
-    // TODO: take only the first n - c columns of P_pca
+    // use only the first n_opt1 columns in W_pca
+    matrix_t *W_pca = m_transpose(W_pca_tr);
+    matrix_t *W_pca2 = m_copy_columns(W_pca, 0, n_opt1);
+    matrix_t *W_pca2_tr = m_transpose(W_pca2);
+    matrix_t *P_pca = m_product(W_pca2_tr, X);
 
     // compute scatter matrices S_b and S_w
     matrix_t *S_b = m_zeros(P_pca->rows, P_pca->rows);
@@ -124,8 +129,12 @@ matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *P_pca, int c, image_entry_t *entrie
     matrix_t *W_fld_tr = m_transpose(W_fld);
 
     // compute W_lda' = W_fld' * W_pca'
-    matrix_t *W_lda_tr = m_product(W_fld_tr, W_pca_tr);
+    matrix_t *W_lda_tr = m_product(W_fld_tr, W_pca2_tr);
 
+    m_free(W_pca);
+    m_free(W_pca2);
+    m_free(W_pca2_tr);
+    m_free(P_pca);
     m_free(S_b);
     m_free(S_w);
     m_free(S_w_inv);

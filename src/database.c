@@ -125,7 +125,9 @@ void db_train(database_t *db, const char *path)
 	if ( db->lda ) {
 		printf("Computing LDA representation...\n");
 
-		db->W_lda_tr = LDA(db->W_pca_tr, db->P_pca, db->num_classes, db->entries);
+		int n_opt1 = X->cols - db->num_classes;
+
+		db->W_lda_tr = LDA(db->W_pca_tr, X, db->num_classes, db->entries, n_opt1);
 		db->P_lda = m_product(db->W_lda_tr, X);
 	}
 
@@ -134,7 +136,7 @@ void db_train(database_t *db, const char *path)
 		printf("Computing ICA representation...\n");
 
 		// under construction
-		// DEBUG: W_pca is 10304x360 for orl_faces testing 
+		// DEBUG: W_pca is 10304x360 for orl_faces testing
 		ICA(X, L_eval, W_pca);
 	}
 

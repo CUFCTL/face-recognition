@@ -83,16 +83,18 @@ Here is the working flow graph for the combined algorithm:
         L_ev = eigenvectors of L (n-by-n)
         W_pca = X * L_ev (eigenfaces) (m-by-n)
 
-    LDA: (W_pca, P_pca) -> W_lda'
-        X = P_pca (n-by-n)
+    LDA: (X, W_pca, c, n_opt1) -> W_lda'
         c = number of classes
+        n_opt1 = number of columns to take from W_pca
+        W_pca2 = W_pca(1 : n_opt1) (m by n_opt1)
+        P_pca = W_pca2' * X (n_opt1 by n)
         n_i = size of class i
-        U_i = sum(X_j, j in class i) / n_i (n-by-1)
-        u = sum(U_i, 1:i:c) / c (n-by-1)
-        S_b = sum((U_i - u) * (U_i - u)', 1:i:c) (n-by-n)
-        S_w = sum(sum((X_j - U_i) * (X_j - U_i)', j in class i), 1:i:c) (n-by-n)
-        W_fld = eigenvectors of (S_b, S_w) (n-by-n)
-        W_lda' = W_fld' * W_pca' (n-by-m)
+        U_i = sum(P_pca_j, j in class i) / n_i (n_opt1 by 1)
+        u = sum(U_i, 1:i:c) / c (n_opt1 by 1)
+        S_b = sum((U_i - u) * (U_i - u)', 1:i:c) (n_opt1 by n_opt1)
+        S_w = sum(sum((P_pca_j - U_i) * (P_pca_j - U_i)', j in class i), 1:i:c) (n_opt1 by n_opt1)
+        W_fld = eigenvectors of (S_b, S_w) (n_opt1 by n_opt1)
+        W_lda' = W_fld' * W_pca2' (n by m)
 
     ICA: (W_pca, P_pca) -> W_ica'
         X = P_pca (n-by-n)
