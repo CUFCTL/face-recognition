@@ -123,8 +123,10 @@ matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *X, int c, image_entry_t *entries, i
 
     m_eigen(J, J_eval, J_evec);
 
-    // TODO: take only the first c - 1 columns of J_evec
-    matrix_t *W_fld = J_evec;
+    // take only the first n_opt2 columns in J_evec
+    // TODO pass as parameter
+    int n_opt2 = c - 1;
+    matrix_t *W_fld = m_copy_columns(J_evec, 0, n_opt2);
 
     matrix_t *W_fld_tr = m_transpose(W_fld);
 
@@ -140,7 +142,8 @@ matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *X, int c, image_entry_t *entries, i
     m_free(S_w_inv);
     m_free(J);
     m_free(J_eval);
-    m_free(J_evec); // W_fld
+    m_free(J_evec);
+    m_free(W_fld);
     m_free(W_fld_tr);
 
     return W_lda_tr;
