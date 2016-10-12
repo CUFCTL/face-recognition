@@ -411,7 +411,7 @@ matrix_t * m_inverse (matrix_t *M)
 	assert(M->rows == M->cols);
 
 	matrix_t *M_inv = m_copy(M);
-	int *ipiv = malloc(M->rows * sizeof(int));
+	int *ipiv = (int *)malloc(M->rows * sizeof(int));
 
 	LAPACKE_dgetrf(LAPACK_COL_MAJOR,
 		M->rows, M->cols, M_inv->data, M->rows,
