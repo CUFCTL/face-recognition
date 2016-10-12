@@ -85,7 +85,7 @@ for (( i = 1; i <= $NUM_ITER; i++ )); do
     SAMPLES=$(shuf -i 1-$NUM_TRAIN -n $NUM_TEST)
     SAMPLES=$(echo $SAMPLES | tr ' ' ',')
 
-    echo "BEGIN: removing observations $SAMPLES from each class"
+    echo "TEST $i: removing observations $SAMPLES from each class"
     echo
 
     # create the training set and test set
@@ -93,24 +93,30 @@ for (( i = 1; i <= $NUM_ITER; i++ )); do
 
     # run the algorithms
     if [ $RUN_MATLAB = 1 ]; then
-        echo "MATLAB:"
+        if [[ $RUN_MATLAB = 1 && $RUN_C = 1 ]]; then
+            echo "MATLAB:"
+        fi
 
         if [ $PCA = 1 ]; then
-            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/PCA; run_pca; quit"
+            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/PCA; run_pca(false); quit" | tail -n 2
         fi
 
         if [ $LDA = 1 ]; then
-            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/LDA; run_lda; quit"
+            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/LDA; run_lda(false); quit" | tail -n 2
         fi
 
         if [ $ICA = 1 ]; then
-            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/ICA; run_ica; quit"
+            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/ICA; run_ica(false); quit" | tail -n 2
         fi
     fi
 
     if [ $RUN_C = 1 ]; then
-        echo "C:"
+        if [[ $RUN_MATLAB = 1 && $RUN_C = 1 ]]; then
+            echo "C:"
+        fi
 
         ./face-rec --train train_images --rec test_images $ARGS
     fi
+
+    echo
 done

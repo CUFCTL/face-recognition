@@ -115,7 +115,9 @@ void db_train(database_t *db, const char *path)
 	matrix_t *L_eval, *W_pca;
 
 	if ( db->pca || db->lda || db->ica ) {
-		printf("Computing PCA representation...\n");
+		if ( VERBOSE ) {
+			printf("Computing PCA representation...\n");
+		}
 
 		db->W_pca_tr = PCA(X, &L_eval, &W_pca);
 		db->P_pca = m_product(db->W_pca_tr, X);
@@ -123,7 +125,9 @@ void db_train(database_t *db, const char *path)
 
 	// compute LDA representation
 	if ( db->lda ) {
-		printf("Computing LDA representation...\n");
+		if ( VERBOSE ) {
+			printf("Computing LDA representation...\n");
+		}
 
 		int n_opt1 = X->cols - db->num_classes;
 
@@ -133,7 +137,9 @@ void db_train(database_t *db, const char *path)
 
 	// compute ICA representation
 	if ( db->ica ) {
-		printf("Computing ICA representation...\n");
+		if ( VERBOSE ) {
+			printf("Computing ICA representation...\n");
+		}
 
 		// under construction
 		// DEBUG: W_pca is 10304x360 for orl_faces testing
@@ -187,7 +193,7 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 /**
  * Load a database from the file system.
  *
- * @param db  pointer to database
+ * @param db          pointer to database
  * @param path_tset   path to read image filenames
  * @param path_tdata  path to read matrix data
  */
@@ -319,10 +325,14 @@ void db_recognize(database_t *db, const char *path)
 		}
 
 		// print results
-		printf("test image: \'%s\'\n", basename(image_names[i]));
+		if ( VERBOSE ) {
+			printf("test image: \'%s\'\n", basename(image_names[i]));
+		}
 
 		if ( db->pca ) {
-			printf("       PCA: \'%s\'\n", basename(db->entries[index_pca].name));
+			if ( VERBOSE ) {
+				printf("       PCA: \'%s\'\n", basename(db->entries[index_pca].name));
+			}
 
 			if ( is_same_class(db->entries[index_pca].name, image_names[i]) ) {
 				num_correct_pca++;
@@ -330,7 +340,9 @@ void db_recognize(database_t *db, const char *path)
 		}
 
 		if ( db->lda ) {
-			printf("       LDA: \'%s\'\n", basename(db->entries[index_lda].name));
+			if ( VERBOSE ) {
+				printf("       LDA: \'%s\'\n", basename(db->entries[index_lda].name));
+			}
 
 			if ( is_same_class(db->entries[index_lda].name, image_names[i]) ) {
 				num_correct_lda++;
@@ -338,33 +350,52 @@ void db_recognize(database_t *db, const char *path)
 		}
 
 		if ( db->ica ) {
-			printf("       ICA: \'%s\'\n", basename(db->entries[index_ica].name));
+			if ( VERBOSE ) {
+				printf("       ICA: \'%s\'\n", basename(db->entries[index_ica].name));
+			}
 
 			if ( is_same_class(db->entries[index_ica].name, image_names[i]) ) {
 				num_correct_ica++;
 			}
 		}
 
-		putchar('\n');
+		if ( VERBOSE ) {
+			putchar('\n');
+		}
 	}
 
 	// print accuracy results
 	if ( db->pca ) {
 		double success_rate_pca = 100.0 * num_correct_pca / num_test_images;
 
-		printf("PCA: %d / %d matched, %.2f%%\n", num_correct_pca, num_test_images, success_rate_pca);
+		if ( VERBOSE ) {
+			printf("PCA: %d / %d matched, %.2f%%\n", num_correct_pca, num_test_images, success_rate_pca);
+		}
+		else {
+			printf("%.2f\n", success_rate_pca);
+		}
 	}
 
 	if ( db->lda ) {
 		double success_rate_lda = 100.0 * num_correct_lda / num_test_images;
 
-		printf("LDA: %d / %d matched, %.2f%%\n", num_correct_lda, num_test_images, success_rate_lda);
+		if ( VERBOSE ) {
+			printf("LDA: %d / %d matched, %.2f%%\n", num_correct_lda, num_test_images, success_rate_lda);
+		}
+		else {
+			printf("%.2f\n", success_rate_lda);
+		}
 	}
 
 	if ( db->ica ) {
 		double success_rate_ica = 100.0 * num_correct_ica / num_test_images;
 
-		printf("ICA: %d / %d matched, %.2f%%\n", num_correct_ica, num_test_images, success_rate_ica);
+		if ( VERBOSE ) {
+			printf("ICA: %d / %d matched, %.2f%%\n", num_correct_ica, num_test_images, success_rate_ica);
+		}
+		else {
+			printf("%.2f\n", success_rate_ica);
+		}
 	}
 
 	// cleanup

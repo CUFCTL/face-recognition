@@ -9,12 +9,15 @@
 #include <unistd.h>
 #include "database.h"
 
+int VERBOSE = 0;
+
 void print_usage()
 {
 	fprintf(stderr,
 		"Usage: ./face-rec [options]\n"
 		"\n"
 		"Options:\n"
+		"  --verbose          enable verbose output\n"
 		"  --train DIRECTORY  create a database from a training set\n"
 		"  --rec DIRECTORY    test a set of images against a database\n"
 		"  --pca              run PCA\n"
@@ -39,6 +42,7 @@ int main(int argc, char **argv)
 	char *path_test_set = NULL;
 
 	struct option long_options[] = {
+		{ "verbose", no_argument, 0, 'v' },
 		{ "train", required_argument, 0, 't' },
 		{ "rec", required_argument, 0, 'r' },
 		{ "pca", no_argument, 0, 'p' },
@@ -52,6 +56,9 @@ int main(int argc, char **argv)
 	int opt;
 	while ( (opt = getopt_long_only(argc, argv, "", long_options, NULL)) != -1 ) {
 		switch ( opt ) {
+		case 'v':
+			VERBOSE = 1;
+			break;
 		case 't':
 			arg_train = 1;
 			path_train_set = optarg;

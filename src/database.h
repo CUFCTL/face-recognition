@@ -9,6 +9,8 @@
 #include "image_entry.h"
 #include "matrix.h"
 
+extern int VERBOSE;
+
 typedef precision_t (*dist_func_t)(matrix_t *, int, matrix_t *, int);
 
 typedef struct {

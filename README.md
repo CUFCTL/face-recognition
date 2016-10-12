@@ -12,6 +12,7 @@ Usage for the face recognition system:
 
     Usage: ./face-rec [options]
     Options:
+      --verbose          enable verbose output
       --train DIRECTORY  create a database from a training set
       --rec DIRECTORY    test a set of images against a database
       --pca              run PCA
