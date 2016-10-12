@@ -4,16 +4,21 @@
 # should have the structure that is defined in ./scripts/create-sets.sh.
 
 # parse arguments
+EXT="pgm"
+
+RUN_MATLAB=1
+RUN_C=1
+
+PCA=0
+LDA=0
+ICA=0
+
 while [[ $# -gt 0 ]]; do
     key="$1"
 
     case $key in
     -p|--path)
         DB_PATH="$2"
-        shift
-        ;;
-    -e|--ext)
-        EXT="$2"
         shift
         ;;
     -t|--num-test)
@@ -24,8 +29,23 @@ while [[ $# -gt 0 ]]; do
         NUM_ITER="$2"
         shift
         ;;
-    --pca|--lda|--ica|--all)
+    --matlab-only)
+        RUN_C=0
+        ;;
+    --c-only)
+        RUN_MATLAB=0
+        ;;
+    --pca)
         ARGS="$ARGS $1"
+        PCA=1
+        ;;
+    --lda)
+        ARGS="$ARGS $1"
+        LDA=1
+        ;;
+    --ica)
+        ARGS="$ARGS $1"
+        ICA=1
         ;;
     *)
         # unknown option
@@ -35,18 +55,18 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-if [[ -z $DB_PATH || -z $EXT || -z $NUM_TEST || -z $NUM_ITER ]]; then
+if [[ -z $DB_PATH || -z $NUM_TEST || -z $NUM_ITER || ($PCA = 0 && $LDA = 0 && $ICA = 0) ]]; then
     >&2 echo "usage: ./scripts/cross-validate.sh [options]"
     >&2 echo
     >&2 echo "options:"
     >&2 echo "  -p, --path      path to image database"
-    >&2 echo "  -e, --ext       image file extension"
     >&2 echo "  -t, --num-test  number of samples to remove from training set"
     >&2 echo "  -i, --num-iter  number of random iterations"
+    >&2 echo "  --matlab-only   run MATLAB code only"
+    >&2 echo "  --c-only        run C code only"
     >&2 echo "  --pca           run PCA"
     >&2 echo "  --lda           run LDA"
     >&2 echo "  --ica           run ICA"
-    >&2 echo "  --all           run all algorithms (PCA, LDA, ICA)"
     exit 1
 fi
 
@@ -72,5 +92,25 @@ for (( i = 1; i <= $NUM_ITER; i++ )); do
     ./scripts/create-sets.sh -p $DB_PATH -e $EXT -s $SAMPLES
 
     # run the algorithms
-    ./face-rec --train train_images --rec test_images $ARGS
+    if [ $RUN_MATLAB = 1 ]; then
+        echo "MATLAB:"
+
+        if [ $PCA = 1 ]; then
+            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/PCA; run_pca; quit"
+        fi
+
+        if [ $LDA = 1 ]; then
+            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/LDA; run_lda; quit"
+        fi
+
+        if [ $ICA = 1 ]; then
+            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/ICA; run_ica; quit"
+        fi
+    fi
+
+    if [ $RUN_C = 1 ]; then
+        echo "C:"
+
+        ./face-rec --train train_images --rec test_images $ARGS
+    fi
 done

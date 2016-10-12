@@ -22,12 +22,12 @@ Usage for the face recognition system:
 To run an automated test (Monte Carlo cross-validation) with the ORL face database:
 
     # test with 3 random samples removed, 10 iterations
-    ./scripts/cross-validate.sh -p orl_faces -e pgm -t 3 -i 10 [--pca --lda --ica --all]
+    ./scripts/cross-validate.sh -p orl_faces --c-only -t 3 -i 10 [--pca --lda --ica]
 
 To test MATLAB code with ORL database:
 
     # test with 3 random samples removed, 10 iterations
-    ./scripts/cross-validate-matlab.sh -p orl_faces -e pgm -t 3 -n 10 [--pca --lda --ica]
+    ./scripts/cross-validate.sh -p orl_faces --matlab-only -t 3 -i 10 [--pca --lda --ica]
 
 ## The Image Library
 
