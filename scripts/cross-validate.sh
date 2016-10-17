@@ -71,7 +71,9 @@ if [[ -z $DB_PATH || -z $NUM_TEST || -z $NUM_ITER || ($PCA = 0 && $LDA = 0 && $I
 fi
 
 # build executables
-make
+if [ $RUN_C = 1]; then
+    make
+fi
 
 # determine the number of observations in each class
 NUM_TRAIN=$(ls $DB_PATH/$(ls $DB_PATH | head -n 1) | wc -l)
