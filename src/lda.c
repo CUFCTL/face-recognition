@@ -99,9 +99,10 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
  * @param c         number of classes
  * @param entries   list of entries for each image
  * @param n_opt1    number of columns in W_pca to use
+ * @param n_opt2    number of columns in W_fld to use
  * @return projection matrix W_lda'
  */
-matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *X, int c, image_entry_t *entries, int n_opt1)
+matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2)
 {
     // use only the first n_opt1 columns in W_pca
     matrix_t *W_pca = m_transpose(W_pca_tr);
@@ -124,8 +125,6 @@ matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *X, int c, image_entry_t *entries, i
     m_eigen(J, J_eval, J_evec);
 
     // take only the first n_opt2 columns in J_evec
-    // TODO pass as parameter
-    int n_opt2 = c - 1;
     matrix_t *W_fld = m_copy_columns(J_evec, 0, n_opt2);
 
     matrix_t *W_fld_tr = m_transpose(W_fld);

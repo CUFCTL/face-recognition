@@ -130,8 +130,9 @@ void db_train(database_t *db, const char *path)
 		}
 
 		int n_opt1 = X->cols - db->num_classes;
+		int n_opt2 = db->num_classes - 1;
 
-		db->W_lda_tr = LDA(db->W_pca_tr, X, db->num_classes, db->entries, n_opt1);
+		db->W_lda_tr = LDA(db->W_pca_tr, X, db->num_classes, db->entries, n_opt1, n_opt2);
 		db->P_lda = m_product(db->W_lda_tr, X);
 	}
 
