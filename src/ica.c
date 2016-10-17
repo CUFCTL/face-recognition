@@ -95,11 +95,13 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
 {
     int round = 1, i = 0;
 
-    int vectorSize = X->cols;
+    int numSamples = X->cols; // make sure this and vectorSize are correct
+    int vectorSize = X->rows; 
     int numOfIC = vectorSize;
 
     matrix_t * B = m_zeros(vectorSize, vectorSize);
-
+    matrix_t * A = m_zeros(vectorSize, vectorSize);
+    matrix_t * W = m_zeros(vectorSize, vectorSize);
 
     while (round <= numOfIC)
     {
@@ -116,7 +118,6 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
 
         matrix_t * wOld = m_zeros(vectorSize, 1);
         matrix_t * wOld2 = m_zeros(vectorSize, 1);
-
 
 
         while (i <= maxNumIterations + 1)
@@ -138,13 +139,61 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
             m_subtract(copy_w, wOld);
             m_add(copy_w2, wOld);
 
+            // line 680 of fpica.m
             if (norm(copy_w) < epsilon || norm(copy_w2) < epsilon)
             {
+                int c;
+
+                // save the vector w to the matrix B
+                for (c = 0; c < vectorSize; c++)
+                {
+                    elem(B, c, round) = elem(w, c, 0);
+                }
+
+                // calculate the de-whitened vector
+                matrix_t * temp_A_vec = m_product(dewhiteningMatrix, w);
+
+                // save the de-whitened vector to matrix A
+                for (c = 0; c < vectorSize; c++)
+                {
+                    elem(A, c, round) = elem(temp_A_vec, c, 0);
+                }
+
+                m_free(temp_A_vec);
+
+                // calculate ICA filter
+                matrix_t * temp_W_vec = m_product(m_transpose(w), whiteningMatrix);
+
+                // save the ICA filter vector
+                for (c = 0; c < vectorSize; c++)
+                {
+                    elem(W, round, c) = elem(temp_W_vec, 0, c);
+                }
+
+                m_free(temp_W_vec);
+
+                wOld2 = wOld;
+                wOld = w;
+
+                // pow3 function on w on line 767 of fpica.m
+                matrix_t * X_tran_w = m_product(m_transpose(X), w);
+
+                // raise each element to the third power
+                for (c = 0; c < vectorSize; c++)
+                {
+                    elem(X_tran_w, c, 0) = pow(elem(X_tran_w), 3);
+                }
+
+                matrix_t * w_cpy = m_copy(w);
+                m_elem_mult(w_cpy, 3);
+                w = m_product(X, X_tran_w);
+                m_elem_mult(w, (1/numSamples));
+                m_subtract(w, w_cpy);
+
+                m_free(w_cpy);
+                m_free(X_tran_w);
 
             }
-
-
-
 
             m_free(copy_w);
             m_free(copy_w2);
