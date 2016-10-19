@@ -96,7 +96,7 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
     int round = 1, i = 0;
 
     int numSamples = X->cols; // make sure this and vectorSize are correct
-    int vectorSize = X->rows; 
+    int vectorSize = X->rows;
     int numOfIC = vectorSize;
 
     matrix_t * B = m_zeros(vectorSize, vectorSize);
@@ -170,30 +170,30 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
                     elem(W, round, c) = elem(temp_W_vec, 0, c);
                 }
 
-                m_free(temp_W_vec);
-
-                wOld2 = wOld;
-                wOld = w;
-
-                // pow3 function on w on line 767 of fpica.m
-                matrix_t * X_tran_w = m_product(m_transpose(X), w);
-
-                // raise each element to the third power
-                for (c = 0; c < vectorSize; c++)
-                {
-                    elem(X_tran_w, c, 0) = pow(elem(X_tran_w), 3);
-                }
-
-                matrix_t * w_cpy = m_copy(w);
-                m_elem_mult(w_cpy, 3);
-                w = m_product(X, X_tran_w);
-                m_elem_mult(w, (1/numSamples));
-                m_subtract(w, w_cpy);
-
-                m_free(w_cpy);
-                m_free(X_tran_w);
-
             }
+
+            m_free(temp_W_vec);
+
+            wOld2 = wOld;
+            wOld = w;
+
+            // pow3 function on w on line 767 of fpica.m
+            matrix_t * X_tran_w = m_product(m_transpose(X), w);
+
+            // raise each element to the third power
+            for (c = 0; c < vectorSize; c++)
+            {
+                elem(X_tran_w, c, 0) = pow(elem(X_tran_w), 3);
+            }
+
+            matrix_t * w_cpy = m_copy(w);
+            m_elem_mult(w_cpy, 3);
+            w = m_product(X, X_tran_w);
+            m_elem_mult(w, (1/numSamples));
+            m_subtract(w, w_cpy);
+
+            m_free(w_cpy);
+            m_free(X_tran_w);
 
             m_free(copy_w);
             m_free(copy_w2);

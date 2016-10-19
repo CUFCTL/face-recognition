@@ -144,7 +144,7 @@ void db_train(database_t *db, const char *path)
 
 		// under construction
 		// DEBUG: W_pca is 10304x360 for orl_faces testing
-		ICA(X, L_eval, W_pca);
+		ICA(X, L_eval, db->P_pca);
 	}
 
 	m_free(X);
