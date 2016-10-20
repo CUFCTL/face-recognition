@@ -18,6 +18,10 @@ test-matrix
 *.mat
 *.txt
 
+# archives
+*.tar
+*.tgz
+
 # miscellaneous
 *~
 *.asv

@@ -71,7 +71,7 @@ if [[ -z $DB_PATH || -z $NUM_TEST || -z $NUM_ITER || ($PCA = 0 && $LDA = 0 && $I
 fi
 
 # build executables
-if [ $RUN_C = 1]; then
+if [ $RUN_C = 1 ]; then
     make
 fi
 

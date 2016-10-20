@@ -12,7 +12,7 @@
  #include <string.h>
 
 
-#define maxNumIterations 1000
+#define maxNumIterations 100
 #define epsilon 0.0001
 
 matrix_t * diagonalize(matrix_t *M);
@@ -23,6 +23,8 @@ void m_copy_vector_into_column(matrix_t * M, matrix_t * V, int col);
 matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteningMatrix);
 double norm(double mean, double std_dev);
 double rand_val(int seed);
+void temp_PCA(matrix_t * X, matrix_t ** L_eval, matrix_t **L_evec);
+
 
 // THIS FILE SHOULD PREPROCESS THE DATA THAT WILL BE CALLED USING THE FPICA ALGORITHM
 //  * WHITEN THE DATA
@@ -59,16 +61,22 @@ matrix_t * sphere (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **whiteningMa
 
 // L_eval.... eigenvalue vector... must translate this to diagonal matrix
 // L_evec.... eigenvector matrix
-matrix_t * ICA (matrix_t *X, matrix_t *L_eval, matrix_t *L_evec)
+matrix_t * ICA (matrix_t *X, matrix_t *mean_face, matrix_t *L_eval, matrix_t *L_evec)
 {
     // call spherex after diagonalizing the eigenvalues
     matrix_t * whiteningMatrix, * dewhiteningMatrix;
-    matrix_t * D = diagonalize(L_eval); // DEBUG: L_eval is 360x1 for orl_faces
-    matrix_t * whitesig = sphere(X, L_evec, D, &whiteningMatrix, &dewhiteningMatrix);
+
+    matrix_t * e_vals = m_zeros(X->cols, 1);
+    matrix_t * e_vecs = m_zeros(X->cols, X->cols);
+
+    temp_PCA(m_transpose(X), &e_vals, &e_vecs);
+
+    matrix_t * D = diagonalize(e_vals); // DEBUG: L_eval is 360x1 for orl_faces
+    matrix_t * whitesig = sphere(X, e_vecs, D, &whiteningMatrix, &dewhiteningMatrix);
 
     // call fpica(whitened_matrix)
     // A is the mixing matrix
-    matrix_t *A = fpica(whitesig, dewhiteningMatrix, whiteningMatrix);
+    matrix_t *W = fpica(whitesig, dewhiteningMatrix, whiteningMatrix);
 
     // cleanup
     m_free(D);
@@ -76,8 +84,16 @@ matrix_t * ICA (matrix_t *X, matrix_t *L_eval, matrix_t *L_evec)
     m_free(dewhiteningMatrix);
     m_free(whitesig);
 
-    return A;
+    return m_product(W,m_transpose(X));
 }
+
+
+void temp_PCA(matrix_t * X, matrix_t ** L_eval, matrix_t **L_evec)
+{
+    matrix_t * cov_m = m_covariance(X);
+    m_eigen(cov_m, *L_eval, *L_evec);
+}
+
 
 /**
  * Function    : fpica
@@ -96,25 +112,23 @@ matrix_t * ICA (matrix_t *X, matrix_t *L_eval, matrix_t *L_evec)
 // this translation starts at line 582 of fpica.m
 matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteningMatrix)
 {
-    int round = 1, i = 0, c = 0;
+    int round = 1, c = 0;
 
     int numSamples = X->cols; // make sure this and vectorSize are correct
     int vectorSize = X->rows;
-    int numOfIC = vectorSize;
 
     // initialize output matrices
     matrix_t * B = m_zeros(vectorSize, vectorSize);
-    matrix_t * A = m_zeros(vectorSize, vectorSize);
+    //matrix_t * A = m_zeros(vectorSize, vectorSize);
     matrix_t * W = m_zeros(vectorSize, vectorSize);
 
     // initialize random variable generator
     rand_val(1);
 
     // initialize matrices
-    matrix_t * wOld = m_zeros(vectorSize, 1);
-    matrix_t * wOld2 = m_zeros(vectorSize, 1);  
+    matrix_t * wOld = m_zeros(vectorSize, 1);  
 
-    while (round <= numOfIC)
+    while (round <= vectorSize)
     {
 
         // BEGIN line 613 fpica.m
@@ -131,8 +145,13 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
         m_elem_mult(w, (1/m_norm(w)));
         // END line 613 fpica.m
 
+        printf("round %d\n", round);
+
+        int i = 0;
+
         while (i <= maxNumIterations + 1)
         {
+            printf(".");
             // Project the vector into the space orthogonal to the space
             // spanned by the earlier found basis vectors. Note that we can do
             // the projection with matrix B, since the zero entries do not
@@ -160,15 +179,15 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
                 }
 
                 // calculate the de-whitened vector
-                matrix_t * temp_A_vec = m_product(dewhiteningMatrix, w);
+                //matrix_t * temp_A_vec = m_product(dewhiteningMatrix, w);
 
                 // save the de-whitened vector to matrix A
-                for (c = 0; c < vectorSize; c++)
-                {
-                    elem(A, c, round) = elem(temp_A_vec, c, 0);
-                }
+                //for (c = 0; c < vectorSize; c++)
+                //{
+                //    elem(A, c, round) = elem(temp_A_vec, c, 0);
+                //}
 
-                m_free(temp_A_vec);
+                //m_free(temp_A_vec);
 
                 // calculate ICA filter
                 matrix_t * temp_W_vec = m_product(m_transpose(w), whiteningMatrix);
@@ -182,7 +201,6 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
                 m_free(temp_W_vec);
             }
 
-            wOld2 = wOld;
             wOld = w;
 
             // pow3 function on w on line 767 of fpica.m
@@ -216,13 +234,11 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
         m_free(transposeB);
         m_free(tempB);
         m_free(tempB_prod_w);
-        m_free(wOld);
-        m_free(wOld2);
         round++;
     }
 
 
-    return NULL;
+    return W;
 }
 
 // randomize the vector with values from 0 to 1
