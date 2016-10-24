@@ -13,6 +13,9 @@ PCA=0
 LDA=0
 ICA=0
 
+N_OPT1=360
+N_OPT2=9
+
 while [[ $# -gt 0 ]]; do
     key="$1"
 
@@ -50,6 +53,12 @@ while [[ $# -gt 0 ]]; do
         ARGS="$ARGS $1"
         ICA=1
         ;;
+    --lda1)
+        N_OPT1="$2"
+	;;
+    --lda2)
+        N_OPT2="$2"
+	;;
     *)
         # unknown option
         ;;
@@ -71,6 +80,8 @@ if [[ -z $DB_PATH || -z $NUM_TEST || -z $NUM_ITER || ($PCA = 0 && $LDA = 0 && $I
     >&2 echo "  --pca           run PCA"
     >&2 echo "  --lda           run LDA"
     >&2 echo "  --ica           run ICA"
+    >&2 echo "  --lda1          values for first optional lda parameter"
+    >&2 echo "  --lda2          values for second optional lda parameter"
     exit 1
 fi
 

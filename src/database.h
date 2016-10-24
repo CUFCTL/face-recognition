@@ -36,7 +36,7 @@ typedef struct {
 database_t * db_construct(int pca, int lda, int ica);
 void db_destruct(database_t *db);
 
-void db_train(database_t *db, const char *path);
+void db_train(database_t *db, const char *path, int n_opt1, int n_opt2);
 void db_save(database_t *db, const char *path_tset, const char *path_tdata);
 
 void db_load(database_t *db, const char *path_tset, const char *path_tdata);

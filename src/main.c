@@ -24,6 +24,8 @@ void print_usage()
 		"  --lda              run LDA\n"
 		"  --ica              run ICA\n"
 		"  --all              run all algorithms (PCA, LDA, ICA)\n"
+		"  --lda1             first optional lda argument\n"
+		"  --lda2             second optional lda argument\n"
 	);
 }
 
@@ -38,6 +40,9 @@ int main(int argc, char **argv)
 	int arg_lda = 0;
 	int arg_ica = 0;
 
+	int n_opt1 = 240;
+	int n_opt2 = 39;
+
 	char *path_train_set = NULL;
 	char *path_test_set = NULL;
 
@@ -49,6 +54,8 @@ int main(int argc, char **argv)
 		{ "lda", no_argument, 0, 'l' },
 		{ "ica", no_argument, 0, 'i' },
 		{ "all", no_argument, 0, 'a' },
+		{ "lda1", required_argument, 0, 'f' },
+		{ "lda2", required_argument, 0, 's' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -81,6 +88,12 @@ int main(int argc, char **argv)
 			arg_lda = 1;
 			arg_ica = 1;
 			break;
+		case 'f':
+			n_opt1 = atoi(optarg);
+			break;
+		case 's':
+			n_opt2 = atoi(optarg);
+			break;
 		case '?':
 			print_usage();
 			exit(1);
@@ -97,11 +110,11 @@ int main(int argc, char **argv)
 	database_t *db = db_construct(arg_pca, arg_lda, arg_ica);
 
 	if ( arg_train && arg_recognize ) {
-		db_train(db, path_train_set);
+		db_train(db, path_train_set, n_opt1, n_opt2);
 		db_recognize(db, path_test_set);
 	}
 	else if ( arg_train ) {
-		db_train(db, path_train_set);
+		db_train(db, path_train_set, n_opt1, n_opt2);
 		db_save(db, DB_ENTRIES, DB_DATA);
 	}
 	else if ( arg_recognize ) {

@@ -99,7 +99,7 @@ void db_destruct(database_t *db)
  * @param db	pointer to database
  * @param path  directory of training images
  */
-void db_train(database_t *db, const char *path)
+void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 {
 	db->num_images = get_directory_rec(path, &db->entries, &db->num_classes);
 
@@ -128,9 +128,6 @@ void db_train(database_t *db, const char *path)
 		if ( VERBOSE ) {
 			printf("Computing LDA representation...\n");
 		}
-
-		int n_opt1 = X->cols - db->num_classes;
-		int n_opt2 = db->num_classes - 1;
 
 		if ( VERBOSE ) {
 			printf("LDA Parameter #1: %d\n", n_opt1);
