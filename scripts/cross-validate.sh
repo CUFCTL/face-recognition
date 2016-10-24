@@ -17,6 +17,9 @@ while [[ $# -gt 0 ]]; do
     key="$1"
 
     case $key in
+    -v|--verbose)
+        ARGS="$ARGS --verbose"
+	;;
     -p|--path)
         DB_PATH="$2"
         shift
@@ -59,6 +62,7 @@ if [[ -z $DB_PATH || -z $NUM_TEST || -z $NUM_ITER || ($PCA = 0 && $LDA = 0 && $I
     >&2 echo "usage: ./scripts/cross-validate.sh [options]"
     >&2 echo
     >&2 echo "options:"
+    >&2 echo "  -v, --verbose   print all warnings and logs"
     >&2 echo "  -p, --path      path to image database"
     >&2 echo "  -t, --num-test  number of samples to remove from training set"
     >&2 echo "  -i, --num-iter  number of random iterations"
