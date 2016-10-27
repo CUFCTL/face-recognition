@@ -21,8 +21,6 @@ The Fortran source provides documentation for function parameters, and the C hea
 
 #### Mac
 
-Confirmed to run on Mac OS 10.11.1:
-
 - Download LAPACK 3.5.0 http://www.netlib.org/lapack/
 - Download BLAS 3.5.0 http://www.netlib.org/blas/
 - (10.10 - 10.11) Download gfortran 5.2 http://coudert.name/software/gfortran-5.2-Yosemite.dmg
@@ -34,7 +32,7 @@ Confirmed to run on Mac OS 10.11.1:
     sudo cp blas-LINUX.a /usr/local/lib/libblas.a
 
     # in LAPACK directory
-    mv make.inc.example make.inc
+    cp make.inc.example make.inc
     # set BLASLIB in make.inc line 68 equal to ‘/usr/local/lib/libblas.a’
     make
     sudo cp liblapack.a /usr/local/lib
@@ -83,16 +81,30 @@ When you join the project, you will be given push rights to this repository. Tha
 ```
 git pull
 ```
-
 2. Make sure no one else is working on the same code as you, but if you are working with someone else on the same code, you should probably coordinate in person.
-
 3. Develop!
-
 4. Before you commit your changes, you might want to `pull` again just in case someone pushed more commits while you were working.
-
-4. Push your commits to Github:
+5. Push your commits to Github:
 ```
 git push
 ```
 
-If you try to pull after committing new changes, git won't let you pull! And if you try to push but the main repo has new commits that you didn't pull, git won't let you push! At least not with the commands in this guide, so don't try to force git in these situations because you'll make a mess! Instead, you need to undo your commits with `git reset HEAD^` until you're on the same page as the main repo, then pull, then commit your changes and so on.
+### In Case of Emergency
+
+If you commit new changes and then try to pull, git won't let you pull! And if you try to push but the main repo has new commits that you didn't pull, git won't let you push! At least not with the commands in this guide, so don't try to force git in these situations because you'll make a mess! Follow these steps instead:
+
+1. Undo your commits with `git reset HEAD^` until you're on the same page as the main repo.
+2. Pull
+3. Commit your changes
+4. Push
+
+### Branching
+
+Sometimes you might want to experiment with a new feature, but you don't want to add it to the project yet. Maybe other people are working on the same feature so you need to collaborate. In this case, you can create a separate branch to version control your experimental feature. The main repo that you commit to is itself a branch called `master`; to make a new branch and use it, follow these steps:
+
+1. Create the branch and switch to it:
+```
+git checkout -b [branch-name]
+```
+2. Develop, commit changes to your branch with `git commit`.
+3. Push your branch to Github with `git push`.

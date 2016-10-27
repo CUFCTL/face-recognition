@@ -87,7 +87,7 @@ Here is the working flow graph for the combined algorithm:
     LDA: (X, W_pca, c, n_opt1, n_opt2) -> W_lda'
         c = number of classes
         n_opt1 = number of columns to take from W_pca
-	n_opt2 = number of columns to take from W_fld
+        n_opt2 = number of columns to take from W_fld
         W_pca2 = W_pca(1 : n_opt1) (m by n_opt1)
         P_pca = W_pca2' * X (n_opt1 by n)
         n_i = size of class i
