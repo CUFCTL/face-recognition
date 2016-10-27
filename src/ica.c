@@ -24,6 +24,7 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
 double norm(double mean, double std_dev);
 double rand_val(int seed);
 void temp_PCA(matrix_t * X, matrix_t ** L_eval, matrix_t **L_evec);
+matrix_t * m_ones(int rows, int cols);
 
 
 // THIS FILE SHOULD PREPROCESS THE DATA THAT WILL BE CALLED USING THE FPICA ALGORITHM
@@ -63,20 +64,33 @@ matrix_t * sphere (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **whiteningMa
 // L_evec.... eigenvector matrix
 matrix_t * ICA (matrix_t *X, matrix_t *mean_face, matrix_t *L_eval, matrix_t *L_evec)
 {
-    // call spherex after diagonalizing the eigenvalues
-    matrix_t * whiteningMatrix, * dewhiteningMatrix;
+	// subtract mean "row" from X
+	matrix_t * X_tr = m_transpose(X);
+	matrix_t * mixedmean = m_mean_column(X_tr);
 
+	m_subtract_columns(X_tr, mixedmean);
+
+	// compute principal components
     matrix_t * e_vals = m_zeros(X->cols, 1);
     matrix_t * e_vecs = m_zeros(X->cols, X->cols);
 
-    temp_PCA(m_transpose(X), &e_vals, &e_vecs);
-
+    temp_PCA(X_tr, &e_vals, &e_vecs);
     matrix_t * D = diagonalize(e_vals); // DEBUG: L_eval is 360x1 for orl_faces
+
+    // call spherex after diagonalizing the eigenvalues
+    matrix_t * whiteningMatrix, * dewhiteningMatrix;
+
     matrix_t * whitesig = sphere(X, e_vecs, D, &whiteningMatrix, &dewhiteningMatrix);
 
     // call fpica(whitened_matrix)
     // A is the mixing matrix
     matrix_t *W = fpica(whitesig, dewhiteningMatrix, whiteningMatrix);
+    matrix_t *icasig = m_product(W, X_tr);
+    matrix_t *icasig_temp1 = m_product(W, mixedmean);
+    matrix_t *icasig_temp2 = m_ones(1, X_tr->cols);
+    matrix_t *icasig_temp3 = m_product(icasig_temp1, icasig_temp2);
+
+	m_add(icasig, icasig_temp3);
 
     // cleanup
     m_free(D);
@@ -84,7 +98,7 @@ matrix_t * ICA (matrix_t *X, matrix_t *mean_face, matrix_t *L_eval, matrix_t *L_
     m_free(dewhiteningMatrix);
     m_free(whitesig);
 
-    return m_product(W,m_transpose(X));
+    return icasig;
 }
 
 
@@ -126,7 +140,7 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
     rand_val(1);
 
     // initialize matrices
-    matrix_t * wOld = m_zeros(vectorSize, 1);  
+    matrix_t * wOld = m_zeros(vectorSize, 1);
 
     while (round <= vectorSize)
     {
@@ -138,11 +152,15 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
         // helper matrices for line 613 of fpica.m
         matrix_t * transposeB = m_transpose(B);
         matrix_t * tempB = m_product(B, transposeB);
-        matrix_t * tempB_prod_w = m_product(tempB, w);  
+        matrix_t * tempB_prod_w = m_product(tempB, w);
 
         m_subtract(w, tempB_prod_w);
 
         m_elem_mult(w, (1/m_norm(w)));
+
+        m_free(transposeB);
+        m_free(tempB);
+        m_free(tempB_prod_w);
         // END line 613 fpica.m
 
         printf("round %d\n", round);
@@ -151,7 +169,6 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
 
         while (i <= maxNumIterations + 1)
         {
-            printf(".");
             // Project the vector into the space orthogonal to the space
             // spanned by the earlier found basis vectors. Note that we can do
             // the projection with matrix B, since the zero entries do not
@@ -225,15 +242,15 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
 
             m_free(copy_w);
             m_free(copy_w2);
+            m_free(transposeB);
+            m_free(tempB);
+            m_free(tempB_prod_w);
 
             m_elem_mult(w, (1/m_norm(w)));
             i++;
         }
 
         m_free(w);
-        m_free(transposeB);
-        m_free(tempB);
-        m_free(tempB_prod_w);
         round++;
     }
 
@@ -299,6 +316,20 @@ void m_elem_sqrt (matrix_t * M)
             elem(M, i , j) = sqrt(elem(M, i, j));
         }
     }
+}
+
+matrix_t * m_ones(int rows, int cols)
+{
+    matrix_t *M = m_initialize(rows, cols);
+
+    int i, j;
+    for ( i = 0; i < rows; i++ ) {
+        for ( j = 0; j < cols; j++ ) {
+            elem(M, i, j) = 1;
+        }
+    }
+
+    return M;
 }
 
 
@@ -375,6 +406,3 @@ double rand_val(int seed)
   // Return a random value between 0.0 and 1.0
   return((double) x / m);
 }
-
-
-
