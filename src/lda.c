@@ -119,10 +119,10 @@ matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *X, int c, image_entry_t *entries, i
     // compute W_fld = eigenvectors of S_w^-1 * S_b
     matrix_t *S_w_inv = m_inverse(S_w);
     matrix_t *J = m_product(S_w_inv, S_b);
-    matrix_t *J_eval = m_initialize(J->rows, 1);
-    matrix_t *J_evec = m_initialize(J->rows, J->cols);
+    matrix_t *J_eval;
+    matrix_t *J_evec;
 
-    m_eigen(J, J_eval, J_evec);
+    m_eigen(J, &J_eval, &J_evec);
 
     // take only the first n_opt2 columns in J_evec
     matrix_t *W_fld = m_copy_columns(J_evec, 0, n_opt2);

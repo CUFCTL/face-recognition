@@ -448,14 +448,14 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
  * eigenvectors are returned as column vectors. The i-th
  * eigenvalue corresponds to the i-th column vector.
  *
- * @param M	      pointer to matrix, m-by-n
- * @param M_eval  pointer to eigenvalues matrix, m-by-1
- * @param M_evec  pointer to eigenvectors matrix, m-by-n
+ * @param M	        pointer to matrix, m-by-n
+ * @param p_M_eval  pointer to store eigenvalues matrix, m-by-1
+ * @param p_M_evec  pointer to store eigenvectors matrix, m-by-n
  */
-void m_eigen (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec)
+void m_eigen (matrix_t *M, matrix_t **p_M_eval, matrix_t **p_M_evec)
 {
-	assert(M_eval->rows == M->rows && M_eval->cols == 1);
-	assert(M_evec->rows == M->rows && M_evec->cols == M->cols);
+	matrix_t *M_eval = m_initialize(M->rows, 1);
+	matrix_t *M_evec = m_initialize(M->rows, M->cols);
 
 	matrix_t *M_work = m_copy(M);
 	precision_t *wi = (precision_t *)malloc(M->rows * sizeof(precision_t));
@@ -468,6 +468,9 @@ void m_eigen (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec)
 
 	m_free(M_work);
 	free(wi);
+
+	*p_M_eval = M_eval;
+	*p_M_evec = M_evec;
 }
 
 /**
@@ -478,17 +481,18 @@ void m_eigen (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec)
  * eigenvectors are returned as column vectors. The i-th
  * eigenvalue corresponds to the i-th column vector.
  *
- * @param A	      pointer to matrix, n-by-n
- * @param B	      pointer to matrix, n-by-n
- * @param J_eval  pointer to eigenvalues matrix, n-by-1
- * @param J_evec  pointer to eigenvectors matrix, n-by-n
+ * @param A	        pointer to matrix, n-by-n
+ * @param B	        pointer to matrix, n-by-n
+ * @param p_J_eval  pointer to store eigenvalues matrix, n-by-1
+ * @param p_J_evec  pointer to store eigenvectors matrix, n-by-n
  */
-void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t *J_eval, matrix_t *J_evec)
+void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_J_eval, matrix_t **p_J_evec)
 {
 	assert(A->rows == A->cols && B->rows == B->cols);
 	assert(A->rows == B->rows);
-	assert(J_eval->rows == A->rows && J_eval->cols == 1);
-	assert(J_evec->rows == A->rows && J_evec->cols == A->cols);
+
+	matrix_t *J_eval = m_initialize(A->rows, 1);
+	matrix_t *J_evec = m_initialize(A->rows, A->cols);
 
 	matrix_t *A_work = m_copy(A);
 	matrix_t *B_work = m_copy(B);
@@ -510,6 +514,9 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t *J_eval, matrix_t *J_evec)
 	m_free(B_work);
 	free(alphai);
 	free(beta);
+
+	*p_J_eval = J_eval;
+	*p_J_evec = J_evec;
 }
 
 /**

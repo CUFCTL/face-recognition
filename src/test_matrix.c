@@ -197,12 +197,12 @@ void test_m_eigen()
 	};
 
 	matrix_t *M = m_initialize(4, 4);
-	matrix_t *M_eval = m_initialize(M->rows, 1);
-	matrix_t *M_evec = m_initialize(M->rows, M->cols);
+	matrix_t *M_eval;
+	matrix_t *M_evec;
 
 	fill_matrix_data(M, data);
 
-	m_eigen(M, M_eval, M_evec);
+	m_eigen(M, &M_eval, &M_evec);
 
 	printf("M = \n");
 	m_fprint(stdout, M);
@@ -238,13 +238,13 @@ void test_m_eigen2()
 
 	matrix_t *A = m_initialize(3, 3);
 	matrix_t *B = m_initialize(3, 3);
-	matrix_t *J_eval = m_initialize(A->rows, 1);
-	matrix_t *J_evec = m_initialize(A->rows, A->cols);
+	matrix_t *J_eval;
+	matrix_t *J_evec;
 
 	fill_matrix_data(A, data_A);
 	fill_matrix_data(B, data_B);
 
-	m_eigen2(A, B, J_eval, J_evec);
+	m_eigen2(A, B, &J_eval, &J_evec);
 
 	printf("A = \n");
 	m_fprint(stdout, A);
@@ -311,7 +311,7 @@ void test_m_mean_column()
 	printf("A = \n");
 	m_fprint(stdout, A);
 
-	printf("mean(A, 1) = \n");
+	printf("mean(A, 2) = \n");
 	m_fprint(stdout, m);
 
 	m_free(A);
@@ -338,7 +338,7 @@ void test_m_mean_row()
 	printf("A = \n");
 	m_fprint(stdout, A);
 
-	printf("mean(A, 2) = \n");
+	printf("mean(A, 1) = \n");
 	m_fprint(stdout, m);
 
 	m_free(A);

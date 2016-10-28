@@ -34,11 +34,9 @@ matrix_t * PCA_alt(matrix_t *X, matrix_t **L_eval)
     // TODO: add normalization weight param to m_covariance
     matrix_t *X_tr = m_transpose(X);
     matrix_t *C = m_covariance(X_tr);
-    matrix_t *W_pca = m_initialize(C->cols, C->cols);
+    matrix_t *W_pca;
 
-    *L_eval = m_initialize(C->cols, 1);
-
-    m_eigen(C, *L_eval, W_pca);
+    m_eigen(C, L_eval, &W_pca);
 
     m_free(X_tr);
     m_free(C);
