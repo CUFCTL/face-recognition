@@ -15,10 +15,7 @@
 #define maxNumIterations 100
 #define epsilon 0.0001
 
-void randomize_vector(matrix_t * m);
 matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteningMatrix);
-double norm(double mean, double std_dev);
-double rand_val(int seed);
 void temp_PCA(matrix_t * X, matrix_t ** L_eval, matrix_t **L_evec);
 
 // THIS FILE SHOULD PREPROCESS THE DATA THAT WILL BE CALLED USING THE FPICA ALGORITHM
@@ -130,18 +127,13 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
     //matrix_t * A = m_zeros(vectorSize, vectorSize);
     matrix_t * W = m_zeros(vectorSize, vectorSize);
 
-    // initialize random variable generator
-    rand_val(1);
-
     // initialize matrices
     matrix_t * wOld = m_zeros(vectorSize, 1);
 
     while (round <= vectorSize)
     {
-
         // BEGIN line 613 fpica.m
-        matrix_t * w = m_zeros(vectorSize, 1);
-        randomize_vector(w);
+        matrix_t * w = m_random(vectorSize, 1);
 
         // helper matrices for line 613 of fpica.m
         matrix_t * transposeB = m_transpose(B);
@@ -250,89 +242,4 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
 
 
     return W;
-}
-
-// randomize the vector with values from 0 to 1
-void randomize_vector(matrix_t * M)
-{
-    int i;
-
-    for (i = 0; i < M->rows; i++)
-    {
-        M->data[i] = norm(0, 1);
-    }
-}
-
-//===========================================================================
-//=  Function to generate normally distributed random variable using the    =
-//=  Box-Muller method                                                      =
-//=    - Input: mean and standard deviation                                 =
-//=    - Output: Returns with normally distributed random variable          =
-//===========================================================================
-double norm(double mean, double std_dev)
-{
-  double   u, r, theta;           // Variables for Box-Muller method
-  double   x;                     // Normal(0, 1) rv
-  double   norm_rv;               // The adjusted normal rv
-
-  // Generate u
-  u = 0.0;
-  while (u == 0.0)
-    u = rand_val(0);
-
-  // Compute r
-  r = sqrt(-2.0 * log(u));
-
-  // Generate theta
-  theta = 0.0;
-  while (theta == 0.0)
-    theta = 2.0 * M_PI * rand_val(0);
-
-  // Generate x value
-  x = r * cos(theta);
-
-  // Adjust x value for specified mean and variance
-  norm_rv = (x * std_dev) + mean;
-
-  // Return the normally distributed RV value
-  return(norm_rv);
-}
-
-
-//=========================================================================
-//= Multiplicative LCG for generating uniform(0.0, 1.0) random numbers    =
-//=   - x_n = 7^5*x_(n-1)mod(2^31 - 1)                                    =
-//=   - With x seeded to 1 the 10000th x value should be 1043618065       =
-//=   - From R. Jain, "The Art of Computer Systems Performance Analysis," =
-//=     John Wiley & Sons, 1991. (Page 443, Figure 26.2)                  =
-//=========================================================================
-double rand_val(int seed)
-{
-  const long  a =      16807;  // Multiplier
-  const long  m = 2147483647;  // Modulus
-  const long  q =     127773;  // m div a
-  const long  r =       2836;  // m mod a
-  static long x;               // Random int value
-  long        x_div_q;         // x divided by q
-  long        x_mod_q;         // x modulo q
-  long        x_new;           // New x value
-
-  // Set the seed if argument is non-zero and then return zero
-  if (seed > 0)
-  {
-    x = seed;
-    return(0.0);
-  }
-
-  // RNG using integer arithmetic
-  x_div_q = x / q;
-  x_mod_q = x % q;
-  x_new = (a * x_mod_q) - (r * x_div_q);
-  if (x_new > 0)
-    x = x_new;
-  else
-    x = x_new + m;
-
-  // Return a random value between 0.0 and 1.0
-  return((double) x / m);
 }

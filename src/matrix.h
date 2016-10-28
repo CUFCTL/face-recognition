@@ -28,6 +28,7 @@ typedef precision_t (*elem_func_t)(precision_t);
 matrix_t * m_initialize (int rows, int cols);
 matrix_t * m_identity (int rows);
 matrix_t * m_ones (int rows, int cols);
+matrix_t * m_random (int rows, int cols);
 matrix_t * m_zeros (int rows, int cols);
 matrix_t * m_copy (matrix_t *M);
 matrix_t * m_copy_columns (matrix_t *M, int begin, int end);

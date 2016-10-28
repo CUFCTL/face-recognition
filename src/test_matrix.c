@@ -52,6 +52,19 @@ void test_m_ones()
 }
 
 /**
+ * Test random matrix.
+ */
+void test_m_random()
+{
+	matrix_t *X = m_random(5, 5);
+
+	printf("X = randn(%d, %d) = \n", X->rows, X->cols);
+	m_fprint(stdout, X);
+
+	m_free(X);
+}
+
+/**
  * Test zero matrix.
  */
 void test_m_zeros()
@@ -165,9 +178,9 @@ void test_m_distance()
 	printf("M = \n");
 	m_fprint(stdout, M);
 
-	printf("d_COS(M[0], M[1]) = % 8.4lf\n", m_dist_COS(M, 0, M, 1));
-	printf("d_L1(M[0], M[1])  = % 8.4lf\n", m_dist_L1(M, 0, M, 1));
-	printf("d_L2(M[0], B[1])  = % 8.4lf\n", m_dist_L2(M, 0, M, 1));
+	printf("d_COS(M(:, 0), M(:, 1)) = % 8.4lf\n", m_dist_COS(M, 0, M, 1));
+	printf("d_L1(M(:, 0), M(:, 1))  = % 8.4lf\n", m_dist_L1(M, 0, M, 1));
+	printf("d_L2(M(:, 0), M(:, 1))  = % 8.4lf\n", m_dist_L2(M, 0, M, 1));
 
 	m_free(M);
 }
@@ -683,6 +696,7 @@ int main (int argc, char **argv)
 	test_func_t tests[] = {
 		test_m_identity,
 		test_m_ones,
+		test_m_random,
 		test_m_zeros,
 		test_m_copy,
 		test_m_covariance,

@@ -72,6 +72,63 @@ matrix_t * m_ones(int rows, int cols)
 }
 
 /**
+ * Generate a normally-distributed (mu, sigma) random number
+ * using the Box-Muller transform.
+ *
+ * @param mu      mean
+ * @param signma  standard deviation
+ * @return normally-distributed random number
+ */
+precision_t rand_normal(precision_t mu, precision_t sigma)
+{
+	static int init = 1;
+	static int generate = 0;
+	static precision_t z0, z1;
+
+	// provide a seed on the first call
+	if ( init ) {
+		srand48(1);
+		init = 0;
+	}
+
+	// return z1 if z0 was returned in the previous call
+	generate = !generate;
+	if ( !generate ) {
+		return z1 * sigma + mu;
+	}
+
+	// generate number pair (z0, z1), return z0
+	precision_t u1 = drand48();
+	precision_t u2 = drand48();
+
+	z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
+	z1 = sqrt(-2.0 * log(u1)) * sin(2.0 * M_PI * u2);
+
+	return z0 * sigma + mu;
+}
+
+/**
+ * Construct a matrix of normally-distributed random numbers.
+ *
+ * @param rows
+ * @param cols
+ * @return pointer to a new random matrix
+ */
+matrix_t * m_random (int rows, int cols)
+{
+    matrix_t *M = m_initialize(rows, cols);
+
+    int i, j;
+    for ( i = 0; i < rows; i++ ) {
+        for ( j = 0; j < cols; j++ ) {
+            elem(M, i, j) = rand_normal(0, 1);
+        }
+    }
+
+    return M;
+}
+
+/**
  * Construct a zero matrix.
  *
  * @param rows
