@@ -293,36 +293,47 @@ void m_image_write (matrix_t *M, int col, image_t *image)
 }
 
 /**
- * Compute the covariance matrix of a matrix.
+ * Compute the covariance matrix of a matrix M, whose
+ * columns are random variables and whose rows are
+ * observations.
+ *
+ * If the columns of M are observations and the rows
+ * of M are random variables, the covariance is:
+ *
+ *   C = 1/(N - 1) (M - mu * 1_N') (M - mu * 1_N')', N = M->cols
+ *
+ * If the columns of M are random variables and the
+ * rows of M are observations, the covariance is:
+ *
+ *   C = 1/(N - 1) (M - 1_N * mu)' (M - 1_N * mu), N = M->rows
  *
  * @param M  pointer to matrix
  * @return pointer to covariance matrix of M
  */
 matrix_t * m_covariance (matrix_t *M)
 {
-	// compute the mean-subtracted matrix A
+	// compute A = M - 1_N * mu
 	matrix_t *A = m_copy(M);
-	matrix_t *mean = m_mean_column(A);
+	matrix_t *mu = m_mean_row(A);
 
-	m_subtract_columns(A, mean);
+	m_subtract_rows(A, mu);
 
-	// compute C = A * A'
-	matrix_t *C = m_zeros(A->rows, A->rows);
+	// compute C = 1/(N - 1) * A' * A
+	matrix_t *C = m_zeros(A->cols, A->cols);
 
-	// C := alpha * A * A_tr + beta * C, alpha = 1, beta = 0
-	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
-		A->rows, A->rows, A->cols,
+	// C := alpha * A' * A + beta * C, alpha = 1, beta = 0
+	cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+		A->cols, A->cols, A->rows,
 		1, A->data, A->rows, A->data, A->rows,
 		0, C->data, C->rows);
 
-	// normalize C
-	precision_t c = (M->cols > 1)
-		? M->cols - 1
+	precision_t c = (M->rows > 1)
+		? M->rows - 1
 		: 1;
 	m_elem_mult(C, 1 / c);
 
 	m_free(A);
-	m_free(mean);
+	m_free(mu);
 
 	return C;
 }
@@ -546,6 +557,30 @@ matrix_t * m_mean_column (matrix_t *M)
 
 	for ( i = 0; i < M->rows; i++ ) {
 		elem(a, i, 0) /= M->cols;
+	}
+
+	return a;
+}
+
+/**
+ * Get the mean row of a matrix.
+ *
+ * @param M  pointer to matrix
+ * @return pointer to mean row vector
+ */
+matrix_t * m_mean_row (matrix_t *M)
+{
+	matrix_t *a = m_zeros(1, M->cols);
+
+	int i, j;
+	for ( i = 0; i < M->rows; i++ ) {
+		for ( j = 0; j < M->cols; j++ ) {
+			elem(a, 0, j) += elem(M, i, j);
+		}
+	}
+
+	for ( i = 0; i < M->cols; i++ ) {
+		elem(a, 0, i) /= M->rows;
 	}
 
 	return a;
@@ -787,17 +822,45 @@ void m_shuffle_columns (matrix_t *M)
 }
 
 /**
- * Subtract a "mean" column vector from each column in a matrix.
+ * Subtract a column vector from each column in a matrix.
+ *
+ * This function is equivalent to:
+ *
+ *   M = M - a * 1_N'
  *
  * @param M  pointer to matrix
  * @param a  pointer to column vector
  */
 void m_subtract_columns (matrix_t *M, matrix_t *a)
 {
+	assert(M->rows == a->rows && a->cols == 1);
+
 	int i, j;
 	for ( i = 0; i < M->cols; i++ ) {
 		for ( j = 0; j < M->rows; j++ ) {
 			elem(M, j, i) -= elem(a, j, 0);
+		}
+	}
+}
+
+/**
+ * Subtract a row vector from each row in a matrix.
+ *
+ * This function is equivalent to:
+ *
+ *   M = M - 1_N * a
+ *
+ * @param M  pointer to matrix
+ * @param a  pointer to row vector
+ */
+void m_subtract_rows (matrix_t *M, matrix_t *a)
+{
+	assert(M->cols == a->cols && a->rows == 1);
+
+	int i, j;
+	for ( i = 0; i < M->rows; i++ ) {
+		for ( j = 0; j < M->cols; j++ ) {
+			elem(M, i, j) -= elem(a, 0, j);
 		}
 	}
 }

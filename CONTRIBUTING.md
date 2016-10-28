@@ -8,7 +8,7 @@ Much of the code in this project depends on BLAS and LAPACK.
 
 Documentation for BLAS and LAPACK consists mostly of the documentation for each function. For any given BLAS/LAPACK function, you will want to reference two documents:
 
-1. The Fortran source file http://www.netlib.org/lapack/double/
+1. The Fortran source file http://www.netlib.org/blas/ http://www.netlib.org/lapack/double/
 2. The cblas/lapacke header http://www.netlib.org/blas/cblas.h http://www.netlib.org/lapack/lapacke.h
 
 The Fortran source provides documentation for function parameters, and the C headers show how to order those arguments with the C interface.

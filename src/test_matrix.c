@@ -116,14 +116,13 @@ void test_m_copy()
  */
 void test_m_covariance()
 {
-	precision_t data[][3] = {
-		{ 5, 1, 4 },
-		{ 0, -5, 9 },
-		{ 3, 7, 8 },
-		{ 7, 3, 10 }
+	precision_t data[][4] = {
+		{ 5, 0, 3, 7 },
+		{ 1, -5, 7, 3 },
+		{ 4, 9, 8, 10 }
 	};
 
-	matrix_t *A = m_initialize(4, 3);
+	matrix_t *A = m_initialize(3, 4);
 	fill_matrix_data(A, data);
 
 	matrix_t *C = m_covariance(A);
@@ -299,13 +298,12 @@ void test_m_inverse()
  */
 void test_m_mean_column()
 {
-	precision_t data[][4] = {
-		{ 0, 2, 1, 4 },
-		{ 1, 3, 3, 2 },
-		{ 1, 2, 2, 2 }
+	precision_t data[][3] = {
+		{ 0, 1, 1 },
+		{ 2, 3, 2 }
 	};
 
-	matrix_t *A = m_initialize(3, 4);
+	matrix_t *A = m_initialize(2, 3);
 	fill_matrix_data(A, data);
 
 	matrix_t *m = m_mean_column(A);
@@ -313,7 +311,34 @@ void test_m_mean_column()
 	printf("A = \n");
 	m_fprint(stdout, A);
 
-	printf("mean(A) = \n");
+	printf("mean(A, 1) = \n");
+	m_fprint(stdout, m);
+
+	m_free(A);
+	m_free(m);
+}
+
+/**
+ * Test matrix mean row.
+ */
+void test_m_mean_row()
+{
+	precision_t data[][3] = {
+		{ 0, 1, 1 },
+		{ 2, 3, 2 },
+		{ 1, 3, 2 },
+		{ 4, 2, 2 }
+	};
+
+	matrix_t *A = m_initialize(4, 3);
+	fill_matrix_data(A, data);
+
+	matrix_t *m = m_mean_row(A);
+
+	printf("A = \n");
+	m_fprint(stdout, A);
+
+	printf("mean(A, 2) = \n");
 	m_fprint(stdout, m);
 
 	m_free(A);
@@ -668,27 +693,71 @@ void test_m_shuffle_columns()
  */
 void test_m_subtract_columns()
 {
-	precision_t data[][4] = {
+	precision_t data_M[][4] = {
 		{ 0, 2, 1, 4 },
 		{ 1, 3, 3, 2 },
 		{ 1, 2, 2, 2 }
 	};
+	precision_t data_a[][1] = {
+		{ 0 },
+		{ 1 },
+		{ 1 }
+	};
 
-	matrix_t *A = m_initialize(3, 4);
-	fill_matrix_data(A, data);
+	matrix_t *M = m_initialize(3, 4);
+	fill_matrix_data(M, data_M);
 
-	matrix_t *m = m_mean_column(A);
+	matrix_t *a = m_initialize(3, 1);;
+	fill_matrix_data(a, data_a);
 
-	printf("A = \n");
-	m_fprint(stdout, A);
+	printf("M = \n");
+	m_fprint(stdout, M);
 
-	m_subtract_columns(A, m);
+	printf("a = \n");
+	m_fprint(stdout, a);
 
-	printf("m_subtract_columns (A, mean(A)) = \n");
-	m_fprint(stdout, A);
+	m_subtract_columns(M, a);
 
-	m_free(A);
-	m_free(m);
+	printf("M - a * 1_N' = \n");
+	m_fprint(stdout, M);
+
+	m_free(M);
+	m_free(a);
+}
+
+/**
+ * Test matrix row subtraction.
+ */
+void test_m_subtract_rows()
+{
+	precision_t data_M[][4] = {
+		{ 0, 2, 1, 4 },
+		{ 1, 3, 3, 2 },
+		{ 1, 2, 2, 2 }
+	};
+	precision_t data_a[][4] = {
+		{ 0, 2, 1, 4 }
+	};
+
+	matrix_t *M = m_initialize(3, 4);
+	fill_matrix_data(M, data_M);
+
+	matrix_t *a = m_initialize(1, 4);;
+	fill_matrix_data(a, data_a);
+
+	printf("M = \n");
+	m_fprint(stdout, M);
+
+	printf("a = \n");
+	m_fprint(stdout, a);
+
+	m_subtract_rows(M, a);
+
+	printf("M - 1_N * a = \n");
+	m_fprint(stdout, M);
+
+	m_free(M);
+	m_free(a);
 }
 
 int main (int argc, char **argv)
@@ -706,6 +775,7 @@ int main (int argc, char **argv)
 		test_m_eigen2,
 		test_m_inverse,
 		test_m_mean_column,
+		test_m_mean_row,
 		test_m_norm,
 		test_m_product,
 		test_m_sqrtm,
@@ -716,7 +786,8 @@ int main (int argc, char **argv)
 		test_m_elem_apply,
 		test_m_elem_mult,
 		test_m_shuffle_columns,
-		test_m_subtract_columns
+		test_m_subtract_columns,
+		test_m_subtract_rows
 	};
 	int num_tests = sizeof(tests) / sizeof(test_func_t);
 

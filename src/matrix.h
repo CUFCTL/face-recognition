@@ -52,6 +52,7 @@ void m_eigen (matrix_t *M, matrix_t *M_eval, matrix_t *M_evec);
 void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t *J_eval, matrix_t *J_evec);
 matrix_t * m_inverse (matrix_t *M);
 matrix_t * m_mean_column (matrix_t *M);
+matrix_t * m_mean_row (matrix_t *M);
 precision_t m_norm(matrix_t *v);
 matrix_t * m_product (matrix_t *A, matrix_t *B);
 matrix_t * m_sqrtm (matrix_t *M);
@@ -65,5 +66,6 @@ void m_elem_mult (matrix_t *M, precision_t c);
 void m_shuffle_columns (matrix_t *M);
 void m_subtract (matrix_t *A, matrix_t *B);
 void m_subtract_columns (matrix_t *M, matrix_t *a);
+void m_subtract_rows (matrix_t *M, matrix_t *a);
 
 #endif
