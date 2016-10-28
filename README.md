@@ -8,18 +8,6 @@ New team members should look at CONTRIBUTING.md to learn about our work-flow, es
 
 ## Testing
 
-Usage for the face recognition system:
-
-    Usage: ./face-rec [options]
-    Options:
-      --verbose          enable verbose output
-      --train DIRECTORY  create a database from a training set
-      --rec DIRECTORY    test a set of images against a database
-      --pca              run PCA
-      --lda              run LDA
-      --ica              run ICA
-      --all              run all algorithms (PCA, LDA, ICA)
-
 To run an automated test (Monte Carlo cross-validation) with the ORL face database:
 
     # test with 3 random samples removed, 10 iterations
