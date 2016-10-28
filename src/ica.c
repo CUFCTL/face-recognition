@@ -16,11 +16,35 @@
 #define epsilon 0.0001
 
 matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteningMatrix);
-void temp_PCA(matrix_t * X, matrix_t ** L_eval, matrix_t **L_evec);
 
-// THIS FILE SHOULD PREPROCESS THE DATA THAT WILL BE CALLED USING THE FPICA ALGORITHM
-//  * WHITEN THE DATA
-//  * CALCULATE PCA
+/**
+ * An alternate implementation of PCA.
+ *
+ * This implementation conforms to pcamat.m in the MATLAB ICA code;
+ * however, it produces eigenvectors with different dimensions from
+ * our C implementation of PCA. Until these two functions can be resolved,
+ * ICA will have to use this function.
+ *
+ * @param X
+ * @param L_eval
+ * @return principal components of X in columns
+ */
+matrix_t * PCA_alt(matrix_t *X, matrix_t **L_eval)
+{
+    // TODO: add normalization weight param to m_covariance
+    matrix_t *X_tr = m_transpose(X);
+    matrix_t *C = m_covariance(X_tr);
+    matrix_t *W_pca = m_initialize(C->cols, C->cols);
+
+    *L_eval = m_initialize(C->cols, 1);
+
+    m_eigen(C, *L_eval, W_pca);
+
+    m_free(X_tr);
+    m_free(C);
+
+    return W_pca;
+}
 
 /**
  * Compute the whitening matrix W_z for a matrix X.
@@ -51,54 +75,59 @@ matrix_t * sphere (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **whiteningMa
     return newVectors;
 }
 
-// L_eval.... eigenvalue vector... must translate this to diagonal matrix
-// L_evec.... eigenvector matrix
-matrix_t * ICA (matrix_t *X, matrix_t *mean_face, matrix_t *L_eval, matrix_t *L_evec)
+/**
+ * Compute the independent components of a matrix of image vectors.
+ *
+ * TODO: should we not subtract the mean column from X beforehand?
+ *
+ * @param X  matrix of mean-subtracted images in columns
+ * @return independent components of X in columns
+ */
+matrix_t * ICA (matrix_t *X)
 {
-	// subtract mean "row" from X
-	matrix_t * X_tr = m_transpose(X);
-	matrix_t * mixedmean = m_mean_column(X_tr);
+    // compute mixedsig = X', subtract mean column
+    matrix_t *mixedsig = m_transpose(X);
+    matrix_t *mixedmean = m_mean_column(mixedsig);
 
-	m_subtract_columns(X_tr, mixedmean);
+    m_subtract_columns(mixedsig, mixedmean);
 
-	// compute principal components
-    matrix_t * e_vals = m_zeros(X->cols, 1);
-    matrix_t * e_vecs = m_zeros(X->cols, X->cols);
+    // compute principal components
+    matrix_t *L_eval;
+    matrix_t *W_pca = PCA_alt(mixedsig, &L_eval);
+    matrix_t *D = m_diagonalize(L_eval);
 
-    temp_PCA(X_tr, &e_vals, &e_vecs);
-    matrix_t * D = m_diagonalize(e_vals);
+    // compute whitened input
+    matrix_t *whiteningMatrix;
+    matrix_t *dewhiteningMatrix;
+    matrix_t *whitesig = sphere(X, W_pca, D, &whiteningMatrix, &dewhiteningMatrix);
 
-    // call spherex after diagonalizing the eigenvalues
-    matrix_t * whiteningMatrix, * dewhiteningMatrix;
-
-    matrix_t * whitesig = sphere(X, e_vecs, D, &whiteningMatrix, &dewhiteningMatrix);
-
-    // call fpica(whitened_matrix)
-    // A is the mixing matrix
+    // compute mixing matrix
     matrix_t *W = fpica(whitesig, dewhiteningMatrix, whiteningMatrix);
-    matrix_t *icasig = m_product(W, X_tr);
+
+    // compute independent components
+    matrix_t *icasig = m_product(W, mixedsig);
     matrix_t *icasig_temp1 = m_product(W, mixedmean);
-    matrix_t *icasig_temp2 = m_ones(1, X_tr->cols);
+    matrix_t *icasig_temp2 = m_ones(1, mixedsig->cols);
     matrix_t *icasig_temp3 = m_product(icasig_temp1, icasig_temp2);
 
-	m_add(icasig, icasig_temp3);
+    m_add(icasig, icasig_temp3);
 
     // cleanup
+    m_free(mixedsig);
+    m_free(mixedmean);
+    m_free(L_eval);
+    m_free(W_pca);
     m_free(D);
     m_free(whiteningMatrix);
     m_free(dewhiteningMatrix);
     m_free(whitesig);
+    m_free(W);
+    m_free(icasig_temp1);
+    m_free(icasig_temp2);
+    m_free(icasig_temp3);
 
     return icasig;
 }
-
-
-void temp_PCA(matrix_t * X, matrix_t ** L_eval, matrix_t **L_evec)
-{
-    matrix_t * cov_m = m_covariance(X);
-    m_eigen(cov_m, *L_eval, *L_evec);
-}
-
 
 /**
  * Function    : fpica

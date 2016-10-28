@@ -66,11 +66,12 @@ Here is the working flow graph for the combined algorithm:
         P_match_lda = nearest neighbor of P_test_lda (n-by-1)
         P_match_ica = nearest neighbor of P_test_ica (n-by-1)
 
-    PCA: X -> W_pca'
+    PCA: X -> (L_eval, W_pca)
         X = [X_1 ... X_n] (image matrix) (m-by-n)
         L = X' * X (surrogate matrix) (n-by-n)
-        L_ev = eigenvectors of L (n-by-n)
-        W_pca = X * L_ev (eigenfaces) (m-by-n)
+        L_eval = eigenvalues of L (n-by-n)
+        L_evec = eigenvectors of L (n-by-n)
+        W_pca = X * L_evec (eigenfaces) (m-by-n)
 
     LDA: (X, W_pca, c, n_opt1, n_opt2) -> W_lda'
         c = number of classes

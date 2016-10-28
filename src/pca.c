@@ -7,15 +7,17 @@
 #include "matrix.h"
 
 /**
- * Compute the principal components of a training set.
+ * Compute the principal components of a matrix of image vectors.
  *
- * Currently, this function returns all of the n computed
- * eigenvectors, where n is the number of training images.
+ * The principal components of a matrix are the eigenvectors of
+ * the covariance matrix. This function returns all of the n
+ * computed eigenvectors, where n is the number of columns.
  *
- * @param X  mean-subtracted image matrix
- * @return projection matrix W_pca'
+ * @param X       matrix of mean-subtracted images in columns
+ * @param L_eval  pointer to save eigenvalues
+ * @return principal components of X in columns
  */
-matrix_t * PCA(matrix_t *X, matrix_t **L_eval, matrix_t **W_pca)
+matrix_t * PCA(matrix_t *X, matrix_t **L_eval)
 {
 	// compute the surrogate matrix L = X' * X
 	matrix_t *X_tr = m_transpose(X);
@@ -23,17 +25,17 @@ matrix_t * PCA(matrix_t *X, matrix_t **L_eval, matrix_t **W_pca)
 
 	m_free(X_tr);
 
-	// compute eigenvectors for L
+	// compute eigenvalues, eigenvectors of L
 	*L_eval = m_initialize(L->rows, 1);
 	matrix_t *L_evec = m_initialize(L->rows, L->cols);
 
 	m_eigen(L, *L_eval, L_evec);
 
-	// compute eigenfaces W_pca = X * L_evec
-	*W_pca = m_product(X, L_evec);
-	matrix_t *W_pca_tr = m_transpose(*W_pca);
+	// compute principal components W_pca = X * L_evec
+	matrix_t *W_pca = m_product(X, L_evec);
 
 	m_free(L);
+	m_free(L_evec);
 
-	return W_pca_tr;
+	return W_pca;
 }

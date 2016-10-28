@@ -42,8 +42,8 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata);
 void db_load(database_t *db, const char *path_tset, const char *path_tdata);
 void db_recognize(database_t *db, const char *path);
 
-matrix_t * PCA(matrix_t *X, matrix_t **L_eval, matrix_t **W_pca);
+matrix_t * PCA(matrix_t *X, matrix_t **L_eval);
 matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2);
-matrix_t * ICA(matrix_t *X, matrix_t *mean_face, matrix_t *L_eval, matrix_t *L_evec);
+matrix_t * ICA(matrix_t *X);
 
 #endif
