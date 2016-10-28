@@ -13,15 +13,19 @@
  * Get a pathname with the first directory prefix removed.
  *
  * @param path
- * @return pointer to index in path
+ * @return pointer to index in path, or NULL if the path had no prefix
  */
 char * basename(char *path)
 {
+	// skip to next directory slash
 	char *s = strchr(path, '/');
 
-	return (s != NULL)
-		? s + 1
-		: NULL;
+	// skip duplicate slashes
+	while ( s != NULL && s[0] == '/' ) {
+		s++;
+	}
+
+	return s;
 }
 
 /**
