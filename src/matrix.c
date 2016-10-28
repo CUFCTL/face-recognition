@@ -51,6 +51,27 @@ matrix_t * m_identity (int rows)
 }
 
 /**
+ * Construct a matrix of all ones.
+ *
+ * @param rows
+ * @param cols
+ * @return pointer to a new ones matrix
+ */
+matrix_t * m_ones(int rows, int cols)
+{
+    matrix_t *M = m_initialize(rows, cols);
+
+    int i, j;
+    for ( i = 0; i < rows; i++ ) {
+        for ( j = 0; j < cols; j++ ) {
+            elem(M, i, j) = 1;
+        }
+    }
+
+    return M;
+}
+
+/**
  * Construct a zero matrix.
  *
  * @param rows
@@ -218,7 +239,7 @@ void m_image_write (matrix_t *M, int col, image_t *image)
  * Compute the covariance matrix of a matrix.
  *
  * @param M  pointer to matrix
- * @param pointer to covariance matrix of M
+ * @return pointer to covariance matrix of M
  */
 matrix_t * m_covariance (matrix_t *M)
 {
@@ -247,6 +268,29 @@ matrix_t * m_covariance (matrix_t *M)
 	m_free(mean);
 
 	return C;
+}
+
+/**
+ * Compute the diagonal matrix of a vector.
+ *
+ * @param v  pointer to vector
+ * @return pointer to diagonal matrix of v
+ */
+matrix_t * m_diagonalize (matrix_t *v)
+{
+	assert(v->rows == 1 || v->cols == 1);
+
+	int n = (v->rows == 1)
+		? v->cols
+		: v->rows;
+    matrix_t *D = m_zeros(n, n);
+
+    int i;
+    for ( i = 0; i < n; i++ ) {
+        elem(D, i, i) = v->data[i];
+    }
+
+    return D;
 }
 
 /**
@@ -451,6 +495,29 @@ matrix_t * m_mean_column (matrix_t *M)
 }
 
 /**
+ * Compute the 2-norm of a vector.
+ *
+ * @param v  pointer to vector
+ * @return 2-norm of v
+ */
+precision_t m_norm(matrix_t *v)
+{
+	assert(v->rows == 1 || v->cols == 1);
+
+    precision_t sum = 0;
+	int n = (v->rows == 1)
+		? v->cols
+		: v->rows;
+
+    int i;
+    for ( i = 0; i < n; i++ ) {
+        sum += v->data[i] * v->data[i];
+    }
+
+    return sqrt(sum);
+}
+
+/**
  * Get the product of two matrices.
  *
  * @param A  pointer to left matrix
@@ -572,6 +639,21 @@ void m_add (matrix_t *A, matrix_t *B)
 }
 
 /**
+ * Assign a column of a matrix.
+ *
+ * @param A  pointer to matrix
+ * @param i  lhs column index
+ * @param B  pointer to matrix
+ * @param j  rhs column index
+ */
+void m_assign_column (matrix_t * A, int i, matrix_t * B, int j)
+{
+    assert(A->rows == B->rows);
+
+    memcpy(&elem(A, 0, i), B->data, B->rows * sizeof(precision_t));
+}
+
+/**
  * Subtract a matrix from another matrix.
  *
  * @param A  pointer to matrix
@@ -587,6 +669,23 @@ void m_subtract (matrix_t *A, matrix_t *B)
 			elem(A, i, j) -= elem(B, i, j);
 		}
 	}
+}
+
+/**
+ * Apply a function to each element of a matrix.
+ *
+ * @param M  pointer to a matrix
+ * @param f  pointer to element-wise function
+ */
+void m_elem_apply (matrix_t * M, elem_func_t f)
+{
+    int i, j;
+
+    for ( i = 0; i < M->rows; i++ ) {
+        for ( j = 0; j < M->cols; j++ ) {
+            elem(M, i, j) = f(elem(M, i, j));
+        }
+    }
 }
 
 /**

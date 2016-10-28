@@ -6,6 +6,7 @@
  * Tests are based on examples in the MATLAB documentation
  * where appropriate.
  */
+#include <math.h>
 #include <stdio.h>
 #include "matrix.h"
 
@@ -35,6 +36,19 @@ void test_m_identity()
 	m_fprint(stdout, I);
 
 	m_free(I);
+}
+
+/**
+ * Test ones matrix.
+ */
+void test_m_ones()
+{
+	matrix_t *X = m_ones(4, 4);
+
+	printf("X = ones(%d, %d) = \n", X->rows, X->cols);
+	m_fprint(stdout, X);
+
+	m_free(X);
 }
 
 /**
@@ -108,6 +122,29 @@ void test_m_covariance()
 
 	m_free(A);
 	m_free(C);
+}
+
+/**
+ * Test the diagonal matrix.
+ */
+void test_m_diagonalize()
+{
+	precision_t data[][5] = {
+		{ 2, 1, -1, -2, -5 }
+	};
+
+	matrix_t *v = m_initialize(1, 5);
+	fill_matrix_data(v, data);
+
+	matrix_t *D = m_diagonalize(v);
+
+	printf("v = \n");
+	m_fprint(stdout, v);
+	printf("diag(v) = \n");
+	m_fprint(stdout, D);
+
+	m_free(v);
+	m_free(D);
 }
 
 /**
@@ -268,6 +305,28 @@ void test_m_mean_column()
 
 	m_free(A);
 	m_free(m);
+}
+
+/**
+ * Test vector norm.
+ */
+void test_m_norm()
+{
+	precision_t data[][3] = {
+		{ -2, 3, 1 }
+	};
+
+	matrix_t *v = m_initialize(1, 3);
+	fill_matrix_data(v, data);
+
+	precision_t n = m_norm(v);
+
+	printf("v = \n");
+	m_fprint(stdout, v);
+
+	printf("norm(v) = % 8.4lf\n", n);
+
+	m_free(v);
 }
 
 /**
@@ -439,6 +498,49 @@ void test_m_add()
 }
 
 /**
+ * Test matrix column assingment.
+ */
+void test_m_assign_column()
+{
+	precision_t data_A[][4] = {
+		{ 16,  2,  3, 13 },
+		{  5, 11, 10,  8 },
+		{  9,  7,  6, 12 },
+		{  4, 14, 15,  1 }
+	};
+	precision_t data_B[][1] = {
+		{ 0 },
+		{ 0 },
+		{ 0 },
+		{ 0 }
+	};
+
+	matrix_t *A = m_initialize(4, 4);
+	matrix_t *B = m_initialize(4, 1);
+	int i = 2;
+	int j = 0;
+
+	fill_matrix_data(A, data_A);
+	fill_matrix_data(B, data_B);
+
+	printf("A = \n");
+	m_fprint(stdout, A);
+
+	printf("B = \n");
+	m_fprint(stdout, B);
+
+	printf("A(:, %d) = B(:, %d)\n", i, j);
+
+	m_assign_column(A, i, B, j);
+
+	printf("A = \n");
+	m_fprint(stdout, A);
+
+	m_free(A);
+	m_free(B);
+}
+
+/**
  * Test matrix subtraction.
  */
 void test_m_subtract()
@@ -471,6 +573,31 @@ void test_m_subtract()
 
 	m_free(A);
 	m_free(B);
+}
+
+/**
+ * Test matrix element-wise function application.
+ */
+void test_m_elem_apply()
+{
+	precision_t data[][3] = {
+		{ 1, 0, 2 },
+		{ 3, 1, 4 }
+	};
+
+	matrix_t *A = m_initialize(2, 3);
+
+	fill_matrix_data(A, data);
+
+	printf("A = \n");
+	m_fprint(stdout, A);
+
+	m_elem_apply(A, sqrt);
+
+	printf("sqrt(A) = \n");
+	m_fprint(stdout, A);
+
+	m_free(A);
 }
 
 /**
@@ -555,19 +682,24 @@ int main (int argc, char **argv)
 {
 	test_func_t tests[] = {
 		test_m_identity,
+		test_m_ones,
 		test_m_zeros,
 		test_m_copy,
 		test_m_covariance,
+		test_m_diagonalize,
 		test_m_distance,
 		test_m_eigen,
 		test_m_eigen2,
 		test_m_inverse,
 		test_m_mean_column,
+		test_m_norm,
 		test_m_product,
 		test_m_sqrtm,
 		test_m_transpose,
 		test_m_add,
 		test_m_subtract,
+		test_m_assign_column,
+		test_m_elem_apply,
 		test_m_elem_mult,
 		test_m_shuffle_columns,
 		test_m_subtract_columns

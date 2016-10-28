@@ -1,31 +1,25 @@
 /**
  * @file ica.c
  *
- * Implementation of ICA (Bartlett et al., 2002; Draper et al., 2003).
+ * Implementation of ICA (Hyvarinen, 1999).
+ *
  * Random normal distribution code from http://www.csee.usf.edu/~kchriste/tools/gennorm.c
  */
- #include "database.h"
- #include "matrix.h"
- #include <assert.h>
- #include <math.h>
- #include <stdlib.h>
- #include <string.h>
-
+#include <assert.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+#include "database.h"
+#include "matrix.h"
 
 #define maxNumIterations 100
 #define epsilon 0.0001
 
-matrix_t * diagonalize(matrix_t *M);
-void m_elem_sqrt (matrix_t * M);
 void randomize_vector(matrix_t * m);
-precision_t m_norm(matrix_t * m);
-void m_copy_vector_into_column(matrix_t * M, matrix_t * V, int col);
 matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteningMatrix);
 double norm(double mean, double std_dev);
 double rand_val(int seed);
 void temp_PCA(matrix_t * X, matrix_t ** L_eval, matrix_t **L_evec);
-matrix_t * m_ones(int rows, int cols);
-
 
 // THIS FILE SHOULD PREPROCESS THE DATA THAT WILL BE CALLED USING THE FPICA ALGORITHM
 //  * WHITEN THE DATA
@@ -45,7 +39,7 @@ matrix_t * m_ones(int rows, int cols);
 matrix_t * sphere (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **whiteningMatrix, matrix_t **dewhiteningMatrix)
 {
     // compute whitened data based on whitenv.m
-    m_elem_sqrt(D);
+    m_elem_apply(D, sqrt);
     matrix_t *inv_sqrt_D = m_inverse(D);
     matrix_t *E_tr = m_transpose(E);
     *whiteningMatrix = m_product(inv_sqrt_D, E_tr);
@@ -75,7 +69,7 @@ matrix_t * ICA (matrix_t *X, matrix_t *mean_face, matrix_t *L_eval, matrix_t *L_
     matrix_t * e_vecs = m_zeros(X->cols, X->cols);
 
     temp_PCA(X_tr, &e_vals, &e_vecs);
-    matrix_t * D = diagonalize(e_vals); // DEBUG: L_eval is 360x1 for orl_faces
+    matrix_t * D = m_diagonalize(e_vals);
 
     // call spherex after diagonalizing the eigenvalues
     matrix_t * whiteningMatrix, * dewhiteningMatrix;
@@ -268,70 +262,6 @@ void randomize_vector(matrix_t * M)
         M->data[i] = norm(0, 1);
     }
 }
-
-
-// return the norm of a vector
-precision_t m_norm(matrix_t * M)
-{
-    int i;
-    precision_t sum = 0;
-
-    for (i = 0; i < M->rows; i++)
-    {
-        sum += pow(M->data[i], 2);
-    }
-
-    return sqrt(sum);
-}
-
-void m_copy_vector_into_column(matrix_t * M, matrix_t * V, int col)
-{
-    assert(V->cols == 1);
-
-    memcpy(&elem(M, 0, col), V->data, V->rows * sizeof(precision_t));
-}
-
-matrix_t * diagonalize (matrix_t *M)
-{
-    int i;
-
-    matrix_t * D = m_zeros(M->rows, M->rows);
-
-    for (i = 0; i < M->rows; i++)
-    {
-        elem(D, i, i) = elem(M, i, 0);
-    }
-
-    return D;
-}
-
-void m_elem_sqrt (matrix_t * M)
-{
-    int i, j;
-
-    for (i = 0; i < M->rows; i++)
-    {
-        for (j = 0; j < M->cols; j++)
-        {
-            elem(M, i , j) = sqrt(elem(M, i, j));
-        }
-    }
-}
-
-matrix_t * m_ones(int rows, int cols)
-{
-    matrix_t *M = m_initialize(rows, cols);
-
-    int i, j;
-    for ( i = 0; i < rows; i++ ) {
-        for ( j = 0; j < cols; j++ ) {
-            elem(M, i, j) = 1;
-        }
-    }
-
-    return M;
-}
-
 
 //===========================================================================
 //=  Function to generate normally distributed random variable using the    =
