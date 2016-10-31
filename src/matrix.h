@@ -10,6 +10,7 @@
 #define MATRIX_H
 
 #include <stdio.h>
+#include <time.h>
 #include "image.h"
 
 typedef double precision_t;
@@ -21,6 +22,7 @@ typedef struct {
 } matrix_t;
 
 #define elem(M, i, j) (M)->data[(j) * (M)->rows + (i)]
+#define FP "time.csv"
 
 // constructor, destructor functions
 matrix_t * m_initialize (int rows, int cols);

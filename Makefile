@@ -29,6 +29,7 @@ lda.o: matrix.o src/database.h src/lda.c
 ica.o: matrix.o src/database.h src/ica.c
 	$(CC) -c $(CFLAGS) src/ica.c -o $@
 
+#deleted ica.o out of each line
 face-rec: image.o image_entry.o matrix.o database.o pca.o lda.o ica.o src/main.c
 	$(CC) $(CFLAGS) image.o image_entry.o matrix.o database.o pca.o lda.o ica.o $(LFLAGS) src/main.c -o $@
 
@@ -39,5 +40,5 @@ test-matrix: matrix.o src/test_matrix.c
 	$(CC) $(CFLAGS) matrix.o $(LFLAGS) src/test_matrix.c -o $@
 
 clean:
-	rm -f *.o *.dat $(BINS)
+	rm -f *.o *.dat *.csv $(BINS)
 	rm -rf test_images train_images

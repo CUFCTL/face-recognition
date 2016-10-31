@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "database.h"
+#include <time.h>
 
 int VERBOSE = 0;
 
@@ -31,6 +32,11 @@ void print_usage()
 
 int main(int argc, char **argv)
 {
+	FILE *fp;
+	fp = fopen(FP, "a");
+
+	clock_t main_begin = clock();
+
 	const char *DB_ENTRIES = "./db_training_set.dat";
 	const char *DB_DATA = "./db_training_data.dat";
 
@@ -110,8 +116,16 @@ int main(int argc, char **argv)
 	database_t *db = db_construct(arg_pca, arg_lda, arg_ica);
 
 	if ( arg_train && arg_recognize ) {
+		clock_t trainTimeBegin = clock();
 		db_train(db, path_train_set, n_opt1, n_opt2);
+		clock_t trainTimeEnd = clock();
+		fprintf(fp, "\nTraining time, %.3lf\n", (double)(trainTimeEnd - trainTimeBegin) / CLOCKS_PER_SEC);
+
+		clock_t recTimeBegin = clock();
+
 		db_recognize(db, path_test_set);
+		clock_t recTimeEnd = clock();
+		fprintf(fp, "\nRecognization time, %.3lf\n", (double)(recTimeEnd - recTimeBegin) / CLOCKS_PER_SEC);
 	}
 	else if ( arg_train ) {
 		db_train(db, path_train_set, n_opt1, n_opt2);
@@ -124,5 +138,9 @@ int main(int argc, char **argv)
 
 	db_destruct(db);
 
+	clock_t main_end = clock();
+	fprintf(fp, "\nMain time, %.3lf\n", (double)(main_end - main_begin) / CLOCKS_PER_SEC);
+
+	fclose(fp);
 	return 0;
 }

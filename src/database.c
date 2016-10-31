@@ -146,6 +146,7 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 
 		// under construction
 		// DEBUG: W_pca is 10304x360 for orl_faces testing
+
 		db->W_ica_tr = ICA(X, db->mean_face, L_eval, db->P_pca);
 		db->P_ica = m_product(db->W_ica_tr, X);
 	}
