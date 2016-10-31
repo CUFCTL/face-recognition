@@ -8,8 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <cblas.h>
-#include <lapacke.h>
+#ifdef INTEL_MKL
+	#include <mkl.h>
+#else
+	#include <cblas.h>
+	#include <lapacke.h>
+#endif
+
 #include "matrix.h"
 
 /**

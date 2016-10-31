@@ -1,12 +1,35 @@
+ifndef BUILD
+BUILD = debug
+endif
+
+ifeq ($(CC), cc)
 CC = gcc
+endif
+
+ifeq ($(BUILD), release)
+CFLAGS = -O3
+else ifeq ($(BUILD), debug)
 CFLAGS = -g -Wall
+endif
+
+ifeq ($(CC), gcc)
 LFLAGS = -lm -lblas -llapacke
+else ifeq ($(CC), icc)
+CFLAGS += -D INTEL_MKL
+LFLAGS = -lm -mkl
+endif
 
 INCS = src/database.h src/image.h src/image_entry.h src/matrix.h
 OBJS = database.o image.o image_entry.o matrix.o pca.o lda.o ica.o
 BINS = face-rec test-matrix test-image
 
-all: $(BINS)
+all: config $(BINS)
+
+config:
+	$(info BUILD  = $(BUILD))
+	$(info CC     = $(CC))
+	$(info CFLAGS = $(CFLAGS))
+	$(info LFLAGS = $(LFLAGS))
 
 image.o: src/image.h src/image.c
 	$(CC) -c $(CFLAGS) src/image.c -o $@
