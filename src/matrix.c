@@ -35,6 +35,28 @@ matrix_t * m_initialize (int rows, int cols)
 }
 
 /**
+ * Construct a matrix with arbitrary data.
+ *
+ * @param rows
+ * @param cols
+ * @param data
+ * @return pointer to matrix
+ */
+matrix_t * m_initialize_data (int rows, int cols, precision_t data[][cols])
+{
+	matrix_t *M = m_initialize(rows, cols);
+
+	int i, j;
+	for ( i = 0; i < M->rows; i++ ) {
+		for ( j = 0; j < M->cols; j++ ) {
+			elem(M, i, j) = data[i][j];
+		}
+	}
+
+	return M;
+}
+
+/**
  * Construct an identity matrix.
  *
  * @param rows
