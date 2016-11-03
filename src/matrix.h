@@ -9,6 +9,10 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include "image.h"
 
@@ -18,11 +22,18 @@ typedef struct {
 	precision_t *data;
 	int rows;
 	int cols;
+#ifdef __NVCC__
+	precision_t *data_dev;
+#endif
 } matrix_t;
 
 typedef precision_t (*elem_func_t)(precision_t);
 
 #define elem(M, i, j) (M)->data[(j) * (M)->rows + (i)]
+
+// cuBLAS helper functions
+void cublas_set_matrix(matrix_t *M);
+void cublas_get_matrix(matrix_t *M);
 
 // constructor, destructor functions
 matrix_t * m_initialize (int rows, int cols);
@@ -67,5 +78,9 @@ void m_shuffle_columns (matrix_t *M);
 void m_subtract (matrix_t *A, matrix_t *B);
 void m_subtract_columns (matrix_t *M, matrix_t *a);
 void m_subtract_rows (matrix_t *M, matrix_t *a);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

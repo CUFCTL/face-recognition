@@ -19,6 +19,8 @@ CFLAGS += -D INTEL_MKL
 LFLAGS = -lm -mkl
 endif
 
+FLAGS_MATRIX = -x c
+
 INCS = src/database.h src/image.h src/image_entry.h src/matrix.h
 OBJS = database.o image.o image_entry.o matrix.o pca.o lda.o ica.o
 BINS = face-rec test-matrix test-image
@@ -37,8 +39,8 @@ image.o: src/image.h src/image.c
 image_entry.o: src/image_entry.h src/image_entry.c
 	$(CC) -c $(CFLAGS) src/image_entry.c -o $@
 
-matrix.o: image.o src/matrix.h src/matrix.c
-	$(CC) -c $(CFLAGS) src/matrix.c -o $@
+matrix.o: image.o src/matrix.h src/matrix.cu
+	$(CC) -c $(CFLAGS) $(FLAGS_MATRIX) src/matrix.cu -o $@
 
 database.o: image.o image_entry.o matrix.o src/database.h src/database.c
 	$(CC) -c $(CFLAGS) src/database.c -o $@
@@ -60,6 +62,11 @@ test-image: image.o matrix.o src/test_image.c
 
 test-matrix: matrix.o src/test_matrix.c
 	$(CC) $(CFLAGS) matrix.o $(LFLAGS) src/test_matrix.c -o $@
+
+test-cublas: src/matrix.h src/matrix.cu src/test_matrix.c
+	nvcc -c src/matrix.cu -o matrix.o
+	gcc -c src/test_matrix.c -o test_matrix.o
+	g++ matrix.o test_matrix.o -lm -lcudart -lcublas -o $@
 
 clean:
 	rm -f *.o *.dat $(BINS)

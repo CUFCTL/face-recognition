@@ -8,7 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef INTEL_MKL
+#if defined(__NVCC__)
+	#include <cuda_runtime.h>
+	#include "cublas_v2.h"
+#elif defined(INTEL_MKL)
 	#include <mkl.h>
 #else
 	#include <cblas.h>
@@ -16,6 +19,80 @@
 #endif
 
 #include "matrix.h"
+
+#ifdef __NVCC__
+
+/**
+ * Get a cuBLAS handle.
+ *
+ * @return cuBLAS handle
+ */
+cublasHandle_t cublas_handle()
+{
+	static int init = 1;
+	static cublasHandle_t handle;
+
+	if ( init == 1 ) {
+		cublasStatus_t stat = cublasCreate(&handle);
+
+		assert(stat == CUBLAS_STATUS_SUCCESS);
+		init = 0;
+	}
+
+	return handle;
+}
+
+#endif
+
+/**
+ * Allocate a cuBLAS matrix.
+ *
+ * @param M
+ */
+void cublas_alloc_matrix(matrix_t *M)
+{
+#ifdef __NVCC__
+	cudaError_t stat = cudaMalloc((void **)&M->data_dev, M->rows * M->cols * sizeof(precision_t));
+
+	assert(stat == cudaSuccess);
+#endif
+}
+
+/**
+ * Write a matrix to the GPU.
+ *
+ * @param M
+ */
+void cublas_set_matrix(matrix_t *M)
+{
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasSetMatrix(M->rows, M->cols, sizeof(precision_t),
+		M->data, M->rows,
+		M->data_dev, M->rows);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#endif
+}
+
+/**
+ * Read a matrix from the GPU.
+ *
+ * @param M
+ */
+void cublas_get_matrix(matrix_t *M)
+{
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasGetMatrix(M->rows, M->cols, sizeof(precision_t),
+		M->data_dev, M->rows,
+		M->data, M->rows);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#endif
+}
 
 /**
  * Construct a matrix.
@@ -30,6 +107,8 @@ matrix_t * m_initialize (int rows, int cols)
 	M->rows = rows;
 	M->cols = cols;
 	M->data = (precision_t *) malloc(rows * cols * sizeof(precision_t));
+
+	cublas_alloc_matrix(M);
 
 	return M;
 }
@@ -52,6 +131,9 @@ matrix_t * m_identity (int rows)
 		elem(M, i, i) = 1;
 	}
 
+	cublas_alloc_matrix(M);
+	cublas_set_matrix(M);
+
 	return M;
 }
 
@@ -72,6 +154,8 @@ matrix_t * m_ones(int rows, int cols)
             elem(M, i, j) = 1;
         }
     }
+
+	cublas_set_matrix(M);
 
     return M;
 }
@@ -130,6 +214,8 @@ matrix_t * m_random (int rows, int cols)
         }
     }
 
+	cublas_set_matrix(M);
+
     return M;
 }
 
@@ -146,6 +232,9 @@ matrix_t * m_zeros (int rows, int cols)
 	M->rows = rows;
 	M->cols = cols;
 	M->data = (precision_t *) calloc(rows * cols, sizeof(precision_t));
+
+	cublas_alloc_matrix(M);
+	cublas_set_matrix(M);
 
 	return M;
 }
@@ -187,6 +276,10 @@ matrix_t * m_copy_columns (matrix_t *M, int begin, int end)
  */
 void m_free (matrix_t *M)
 {
+#ifdef __NVCC__
+	cudaFree(M->data_dev);
+#endif
+
 	free(M->data);
 	free(M);
 }
@@ -296,6 +389,8 @@ void m_image_write (matrix_t *M, int col, image_t *image)
 		image->pixels[i] = (unsigned char) elem(M, i, col);
 	}
 }
+
+#ifdef UNDEFINED
 
 /**
  * Compute the covariance matrix of a matrix M, whose
@@ -621,6 +716,8 @@ precision_t m_norm(matrix_t *v)
     return sqrt(sum);
 }
 
+#endif
+
 /**
  * Get the product of two matrices.
  *
@@ -635,13 +732,35 @@ matrix_t * m_product (matrix_t *A, matrix_t *B)
 	matrix_t *C = m_zeros(A->rows, B->cols);
 
 	// C := alpha * op(A) * op(B) + beta * C, alpha = 1, beta = 0
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	double *alpha = (double *)malloc(sizeof(double));
+	double *beta = (double *)malloc(sizeof(double));
+
+	*alpha = 1;
+	*beta = 1;
+
+	cublasStatus_t stat = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+		A->rows, B->cols, A->cols,
+		alpha, A->data_dev, A->rows, B->data_dev, B->rows,
+		beta, C->data_dev, C->rows);
+
+	free(alpha);
+	free(beta);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#else
 	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
 		A->rows, B->cols, A->cols,
 		1, A->data, A->rows, B->data, B->rows,
 		0, C->data, C->rows);
+#endif
 
 	return C;
 }
+
+#ifdef UNDEFINED
 
 /**
  * Compute the principal square root of a symmetric matrix. That
@@ -876,3 +995,5 @@ void m_subtract_rows (matrix_t *M, matrix_t *a)
 		}
 	}
 }
+
+#endif
