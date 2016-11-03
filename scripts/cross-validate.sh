@@ -87,7 +87,12 @@ fi
 
 # build executables
 if [ $RUN_C = 1 ]; then
+    echo "Building..."
+    echo
+
     make
+
+    echo
 fi
 
 # determine the number of observations in each class
