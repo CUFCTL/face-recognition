@@ -126,8 +126,6 @@ void test_m_copy()
 	m_free(C2);
 }
 
-#ifdef UNDEFINED
-
 /**
  * Test the matrix convariance.
  */
@@ -141,6 +139,8 @@ void test_m_covariance()
 
 	matrix_t *A = m_initialize_data(3, 4, data);
 	matrix_t *C = m_covariance(A);
+
+	cublas_get_matrix(C);
 
 	printf("A = \n");
 	m_fprint(stdout, A);
@@ -365,8 +365,6 @@ void test_m_norm()
 	m_free(v);
 }
 
-#endif
-
 /**
  * Test matrix product.
  */
@@ -439,8 +437,6 @@ void test_m_product()
 	m_free(B);
 	m_free(C);
 }
-
-#ifdef UNDEFINED
 
 /**
  * Test matrix square root.
@@ -736,8 +732,6 @@ void test_m_subtract_rows()
 	m_free(a);
 }
 
-#endif
-
 int main (int argc, char **argv)
 {
 	test_func_t tests[] = {
@@ -746,26 +740,26 @@ int main (int argc, char **argv)
 		test_m_random,
 		test_m_zeros,
 		test_m_copy,
-//		test_m_covariance,
-//		test_m_diagonalize,
-//		test_m_distance,
+		test_m_covariance,
+		test_m_diagonalize,
+		test_m_distance,
 //		test_m_eigen,
 //		test_m_eigen2,
 //		test_m_inverse,
-//		test_m_mean_column,
-//		test_m_mean_row,
-//		test_m_norm,
+		test_m_mean_column,
+		test_m_mean_row,
+		test_m_norm,
 		test_m_product,
 //		test_m_sqrtm,
-//		test_m_transpose,
-//		test_m_add,
-//		test_m_subtract,
-//		test_m_assign_column,
-//		test_m_elem_apply,
-//		test_m_elem_mult,
-//		test_m_shuffle_columns,
-//		test_m_subtract_columns,
-//		test_m_subtract_rows
+		test_m_transpose,
+		test_m_add,
+		test_m_subtract,
+		test_m_assign_column,
+		test_m_elem_apply,
+		test_m_elem_mult,
+		test_m_shuffle_columns,
+		test_m_subtract_columns,
+		test_m_subtract_rows
 	};
 	int num_tests = sizeof(tests) / sizeof(test_func_t);
 

@@ -390,8 +390,6 @@ void m_image_write (matrix_t *M, int col, image_t *image)
 	}
 }
 
-#ifdef UNDEFINED
-
 /**
  * Compute the covariance matrix of a matrix M, whose
  * columns are random variables and whose rows are
@@ -421,11 +419,25 @@ matrix_t * m_covariance (matrix_t *M)
 	// compute C = 1/(N - 1) * A' * A
 	matrix_t *C = m_zeros(A->cols, A->cols);
 
-	// C := alpha * A' * A + beta * C, alpha = 1, beta = 0
+	double alpha = 1;
+	double beta = 0;
+
+	// C := alpha * A' * A + beta * C
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
+		A->cols, A->cols, A->rows,
+		&alpha, A->data_dev, A->rows, A->data_dev, A->rows,
+		&beta, C->data_dev, C->rows);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#else
 	cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
 		A->cols, A->cols, A->rows,
-		1, A->data, A->rows, A->data, A->rows,
-		0, C->data, C->rows);
+		alpha, A->data, A->rows, A->data, A->rows,
+		beta, C->data, C->rows);
+#endif
 
 	precision_t c = (M->rows > 1)
 		? M->rows - 1
@@ -557,6 +569,9 @@ void m_eigen (matrix_t *M, matrix_t **p_M_eval, matrix_t **p_M_evec)
 	matrix_t *M_eval = m_initialize(M->rows, 1);
 	matrix_t *M_evec = m_initialize(M->rows, M->cols);
 
+#ifdef __NVCC__
+	// TODO: stub
+#else
 	matrix_t *M_work = m_copy(M);
 	precision_t *wi = (precision_t *)malloc(M->rows * sizeof(precision_t));
 
@@ -568,6 +583,7 @@ void m_eigen (matrix_t *M, matrix_t **p_M_eval, matrix_t **p_M_evec)
 
 	m_free(M_work);
 	free(wi);
+#endif
 
 	*p_M_eval = M_eval;
 	*p_M_evec = M_evec;
@@ -594,6 +610,9 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_J_eval, matrix_t **p_J_eve
 	matrix_t *J_eval = m_initialize(A->rows, 1);
 	matrix_t *J_evec = m_initialize(A->rows, A->cols);
 
+#ifdef __NVCC__
+	// TODO: stub
+#else
 	matrix_t *A_work = m_copy(A);
 	matrix_t *B_work = m_copy(B);
 	precision_t *alphai = (precision_t *)malloc(A->rows * sizeof(precision_t));
@@ -614,6 +633,7 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_J_eval, matrix_t **p_J_eve
 	m_free(B_work);
 	free(alphai);
 	free(beta);
+#endif
 
 	*p_J_eval = J_eval;
 	*p_J_evec = J_evec;
@@ -630,6 +650,10 @@ matrix_t * m_inverse (matrix_t *M)
 	assert(M->rows == M->cols);
 
 	matrix_t *M_inv = m_copy(M);
+
+#ifdef __NVCC__
+	// TODO: stub
+#else
 	int *ipiv = (int *)malloc(M->rows * sizeof(int));
 
 	LAPACKE_dgetrf(LAPACK_COL_MAJOR,
@@ -641,6 +665,7 @@ matrix_t * m_inverse (matrix_t *M)
 		ipiv);
 
 	free(ipiv);
+#endif
 
 	return M_inv;
 }
@@ -703,20 +728,24 @@ precision_t m_norm(matrix_t *v)
 {
 	assert(v->rows == 1 || v->cols == 1);
 
-    precision_t sum = 0;
-	int n = (v->rows == 1)
+	int N = (v->rows == 1)
 		? v->cols
 		: v->rows;
+	int incX = 1;
 
-    int i;
-    for ( i = 0; i < n; i++ ) {
-        sum += v->data[i] * v->data[i];
-    }
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+	precision_t result;
 
-    return sqrt(sum);
-}
+	cublasStatus_t stat = cublasDnrm2(handle, N, v->data_dev, incX, &result);
 
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+
+	return result;
+#else
+	return cblas_dnrm2(N, v->data, incX);
 #endif
+}
 
 /**
  * Get the product of two matrices.
@@ -731,36 +760,28 @@ matrix_t * m_product (matrix_t *A, matrix_t *B)
 
 	matrix_t *C = m_zeros(A->rows, B->cols);
 
-	// C := alpha * op(A) * op(B) + beta * C, alpha = 1, beta = 0
+	double alpha = 1;
+	double beta = 0;
+
+	// C := alpha * A * B + beta * C
 #ifdef __NVCC__
 	cublasHandle_t handle = cublas_handle();
 
-	double *alpha = (double *)malloc(sizeof(double));
-	double *beta = (double *)malloc(sizeof(double));
-
-	*alpha = 1;
-	*beta = 1;
-
 	cublasStatus_t stat = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
 		A->rows, B->cols, A->cols,
-		alpha, A->data_dev, A->rows, B->data_dev, B->rows,
-		beta, C->data_dev, C->rows);
-
-	free(alpha);
-	free(beta);
+		&alpha, A->data_dev, A->rows, B->data_dev, B->rows,
+		&beta, C->data_dev, C->rows);
 
 	assert(stat == CUBLAS_STATUS_SUCCESS);
 #else
 	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
 		A->rows, B->cols, A->cols,
-		1, A->data, A->rows, B->data, B->rows,
-		0, C->data, C->rows);
+		alpha, A->data, A->rows, B->data, B->rows,
+		beta, C->data, C->rows);
 #endif
 
 	return C;
 }
-
-#ifdef UNDEFINED
 
 /**
  * Compute the principal square root of a symmetric matrix. That
@@ -774,6 +795,11 @@ matrix_t * m_sqrtm (matrix_t *M)
 {
 	assert(M->rows == M->cols);
 
+#ifdef __NVCC__
+	// TODO: stub
+
+	return NULL;
+#else
 	// compute eigenvalues, eigenvectors
 	matrix_t *M_work = m_copy(M);
 	matrix_t *M_eval = m_initialize(M->rows, 1);
@@ -821,6 +847,7 @@ matrix_t * m_sqrtm (matrix_t *M)
 	m_free(M_evec);
 
 	return X;
+#endif
 }
 
 /**
@@ -996,4 +1023,3 @@ void m_subtract_rows (matrix_t *M, matrix_t *a)
 	}
 }
 
-#endif
