@@ -170,7 +170,7 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 
 	int i;
 	for ( i = 0; i < db->num_images; i++ ) {
-		fprintf(tset, "%d %s\n", db->entries[i].class, db->entries[i].name);
+		fprintf(tset, "%d %s\n", db->entries[i].ent_class, db->entries[i].name);
 	}
 	fclose(tset);
 
@@ -239,7 +239,7 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 	int i;
 	for ( i = 0; i < db->num_images; i++ ) {
 		db->entries[i].name = (char *)malloc(64 * sizeof(char));
-		fscanf(tset, "%d %s", &db->entries[i].class, db->entries[i].name);
+		fscanf(tset, "%d %s", &db->entries[i].ent_class, db->entries[i].name);
 	}
 
 	fclose(tset);
@@ -333,12 +333,12 @@ void db_recognize(database_t *db, const char *path)
 
 		// print results
 		if ( VERBOSE ) {
-			printf("test image: \'%s\'\n", basename(image_names[i]));
+			printf("test image: \'%s\'\n", rem_base_dir(image_names[i]));
 		}
 
 		if ( db->pca ) {
 			if ( VERBOSE ) {
-				printf("       PCA: \'%s\'\n", basename(db->entries[index_pca].name));
+				printf("       PCA: \'%s\'\n", rem_base_dir(db->entries[index_pca].name));
 			}
 
 			if ( is_same_class(db->entries[index_pca].name, image_names[i]) ) {
@@ -348,7 +348,7 @@ void db_recognize(database_t *db, const char *path)
 
 		if ( db->lda ) {
 			if ( VERBOSE ) {
-				printf("       LDA: \'%s\'\n", basename(db->entries[index_lda].name));
+				printf("       LDA: \'%s\'\n", rem_base_dir(db->entries[index_lda].name));
 			}
 
 			if ( is_same_class(db->entries[index_lda].name, image_names[i]) ) {
@@ -358,7 +358,7 @@ void db_recognize(database_t *db, const char *path)
 
 		if ( db->ica ) {
 			if ( VERBOSE ) {
-				printf("       ICA: \'%s\'\n", basename(db->entries[index_ica].name));
+				printf("       ICA: \'%s\'\n", rem_base_dir(db->entries[index_ica].name));
 			}
 
 			if ( is_same_class(db->entries[index_ica].name, image_names[i]) ) {

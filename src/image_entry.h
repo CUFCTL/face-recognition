@@ -19,13 +19,13 @@ typedef struct dir {
 } dir_t;
 
 typedef struct dir_entry {
-	int class;
+	int ent_class;
 	char *name;
 } dir_entry_t;
 
 typedef dir_entry_t image_entry_t;
 
-char * basename(char *path);
+char * rem_base_dir(char *path);
 int is_same_class(char *path1, char *path2);
 
 int get_directory(const char *path, char ***p_names);
