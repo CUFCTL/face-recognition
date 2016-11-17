@@ -5,6 +5,11 @@
  *
  * Tests are based on examples in the MATLAB documentation
  * where appropriate.
+ *
+ * NOTE: This source file is not C++ compliant because the
+ * function m_initialize_data depends on a C99 language
+ * feature (2D array parameter). As a result, this file
+ * will not compile with g++ or icpc.
  */
 #include <math.h>
 #include <stdio.h>
@@ -30,6 +35,8 @@ matrix_t * m_initialize_data (int rows, int cols, precision_t data[][cols])
 			elem(M, i, j) = data[i][j];
 		}
 	}
+
+	cublas_set_matrix(M);
 
 	return M;
 }
@@ -132,6 +139,8 @@ void test_m_covariance()
 
 	matrix_t *A = m_initialize_data(3, 4, data);
 	matrix_t *C = m_covariance(A);
+
+	cublas_get_matrix(C);
 
 	printf("A = \n");
 	m_fprint(stdout, A);
@@ -376,6 +385,8 @@ void test_m_product()
 	matrix_t *B = m_initialize_data(4, 1, data_B1);
 	matrix_t *C = m_product(A, B);
 
+	cublas_get_matrix(C);
+
 	printf("A = \n");
 	m_fprint(stdout, A);
 	printf("B = \n");
@@ -387,6 +398,8 @@ void test_m_product()
 
 	// multiply two vectors, B * A
 	C = m_product(B, A);
+
+	cublas_get_matrix(C);
 
 	printf("B * A = \n");
 	m_fprint(stdout, C);
@@ -409,6 +422,8 @@ void test_m_product()
 	A = m_initialize_data(2, 3, data_A2);
 	B = m_initialize_data(3, 3, data_B2);
 	C = m_product(A, B);
+
+	cublas_get_matrix(C);
 
 	printf("A = \n");
 	m_fprint(stdout, A);
@@ -728,14 +743,14 @@ int main (int argc, char **argv)
 		test_m_covariance,
 		test_m_diagonalize,
 		test_m_distance,
-		test_m_eigen,
-		test_m_eigen2,
-		test_m_inverse,
+//		test_m_eigen,
+//		test_m_eigen2,
+//		test_m_inverse,
 		test_m_mean_column,
 		test_m_mean_row,
 		test_m_norm,
 		test_m_product,
-		test_m_sqrtm,
+//		test_m_sqrtm,
 		test_m_transpose,
 		test_m_add,
 		test_m_subtract,

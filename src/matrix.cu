@@ -8,7 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef INTEL_MKL
+#if defined(__NVCC__)
+	#include <cuda_runtime.h>
+	#include "cublas_v2.h"
+#elif defined(INTEL_MKL)
 	#include <mkl.h>
 #else
 	#include <cblas.h>
@@ -16,6 +19,80 @@
 #endif
 
 #include "matrix.h"
+
+#ifdef __NVCC__
+
+/**
+ * Get a cuBLAS handle.
+ *
+ * @return cuBLAS handle
+ */
+cublasHandle_t cublas_handle()
+{
+	static int init = 1;
+	static cublasHandle_t handle;
+
+	if ( init == 1 ) {
+		cublasStatus_t stat = cublasCreate(&handle);
+
+		assert(stat == CUBLAS_STATUS_SUCCESS);
+		init = 0;
+	}
+
+	return handle;
+}
+
+#endif
+
+/**
+ * Allocate a cuBLAS matrix.
+ *
+ * @param M
+ */
+void cublas_alloc_matrix(matrix_t *M)
+{
+#ifdef __NVCC__
+	cudaError_t stat = cudaMalloc((void **)&M->data_dev, M->rows * M->cols * sizeof(precision_t));
+
+	assert(stat == cudaSuccess);
+#endif
+}
+
+/**
+ * Write a matrix to the GPU.
+ *
+ * @param M
+ */
+void cublas_set_matrix(matrix_t *M)
+{
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasSetMatrix(M->rows, M->cols, sizeof(precision_t),
+		M->data, M->rows,
+		M->data_dev, M->rows);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#endif
+}
+
+/**
+ * Read a matrix from the GPU.
+ *
+ * @param M
+ */
+void cublas_get_matrix(matrix_t *M)
+{
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasGetMatrix(M->rows, M->cols, sizeof(precision_t),
+		M->data_dev, M->rows,
+		M->data, M->rows);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#endif
+}
 
 /**
  * Construct a matrix.
@@ -30,6 +107,8 @@ matrix_t * m_initialize (int rows, int cols)
 	M->rows = rows;
 	M->cols = cols;
 	M->data = (precision_t *) malloc(rows * cols * sizeof(precision_t));
+
+	cublas_alloc_matrix(M);
 
 	return M;
 }
@@ -52,6 +131,9 @@ matrix_t * m_identity (int rows)
 		elem(M, i, i) = 1;
 	}
 
+	cublas_alloc_matrix(M);
+	cublas_set_matrix(M);
+
 	return M;
 }
 
@@ -72,6 +154,8 @@ matrix_t * m_ones(int rows, int cols)
             elem(M, i, j) = 1;
         }
     }
+
+	cublas_set_matrix(M);
 
     return M;
 }
@@ -130,6 +214,8 @@ matrix_t * m_random (int rows, int cols)
         }
     }
 
+	cublas_set_matrix(M);
+
     return M;
 }
 
@@ -146,6 +232,9 @@ matrix_t * m_zeros (int rows, int cols)
 	M->rows = rows;
 	M->cols = cols;
 	M->data = (precision_t *) calloc(rows * cols, sizeof(precision_t));
+
+	cublas_alloc_matrix(M);
+	cublas_set_matrix(M);
 
 	return M;
 }
@@ -187,6 +276,10 @@ matrix_t * m_copy_columns (matrix_t *M, int begin, int end)
  */
 void m_free (matrix_t *M)
 {
+#ifdef __NVCC__
+	cudaFree(M->data_dev);
+#endif
+
 	free(M->data);
 	free(M);
 }
@@ -326,11 +419,25 @@ matrix_t * m_covariance (matrix_t *M)
 	// compute C = 1/(N - 1) * A' * A
 	matrix_t *C = m_zeros(A->cols, A->cols);
 
-	// C := alpha * A' * A + beta * C, alpha = 1, beta = 0
+	double alpha = 1;
+	double beta = 0;
+
+	// C := alpha * A' * A + beta * C
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
+		A->cols, A->cols, A->rows,
+		&alpha, A->data_dev, A->rows, A->data_dev, A->rows,
+		&beta, C->data_dev, C->rows);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#else
 	cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
 		A->cols, A->cols, A->rows,
-		1, A->data, A->rows, A->data, A->rows,
-		0, C->data, C->rows);
+		alpha, A->data, A->rows, A->data, A->rows,
+		beta, C->data, C->rows);
+#endif
 
 	precision_t c = (M->rows > 1)
 		? M->rows - 1
@@ -462,6 +569,9 @@ void m_eigen (matrix_t *M, matrix_t **p_M_eval, matrix_t **p_M_evec)
 	matrix_t *M_eval = m_initialize(M->rows, 1);
 	matrix_t *M_evec = m_initialize(M->rows, M->cols);
 
+#ifdef __NVCC__
+	// TODO: stub
+#else
 	matrix_t *M_work = m_copy(M);
 	precision_t *wi = (precision_t *)malloc(M->rows * sizeof(precision_t));
 
@@ -473,6 +583,7 @@ void m_eigen (matrix_t *M, matrix_t **p_M_eval, matrix_t **p_M_evec)
 
 	m_free(M_work);
 	free(wi);
+#endif
 
 	*p_M_eval = M_eval;
 	*p_M_evec = M_evec;
@@ -499,6 +610,9 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_J_eval, matrix_t **p_J_eve
 	matrix_t *J_eval = m_initialize(A->rows, 1);
 	matrix_t *J_evec = m_initialize(A->rows, A->cols);
 
+#ifdef __NVCC__
+	// TODO: stub
+#else
 	matrix_t *A_work = m_copy(A);
 	matrix_t *B_work = m_copy(B);
 	precision_t *alphai = (precision_t *)malloc(A->rows * sizeof(precision_t));
@@ -519,6 +633,7 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_J_eval, matrix_t **p_J_eve
 	m_free(B_work);
 	free(alphai);
 	free(beta);
+#endif
 
 	*p_J_eval = J_eval;
 	*p_J_evec = J_evec;
@@ -535,6 +650,10 @@ matrix_t * m_inverse (matrix_t *M)
 	assert(M->rows == M->cols);
 
 	matrix_t *M_inv = m_copy(M);
+
+#ifdef __NVCC__
+	// TODO: stub
+#else
 	int *ipiv = (int *)malloc(M->rows * sizeof(int));
 
 	LAPACKE_dgetrf(LAPACK_COL_MAJOR,
@@ -546,6 +665,7 @@ matrix_t * m_inverse (matrix_t *M)
 		ipiv);
 
 	free(ipiv);
+#endif
 
 	return M_inv;
 }
@@ -608,17 +728,23 @@ precision_t m_norm(matrix_t *v)
 {
 	assert(v->rows == 1 || v->cols == 1);
 
-    precision_t sum = 0;
-	int n = (v->rows == 1)
+	int N = (v->rows == 1)
 		? v->cols
 		: v->rows;
+	int incX = 1;
 
-    int i;
-    for ( i = 0; i < n; i++ ) {
-        sum += v->data[i] * v->data[i];
-    }
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+	precision_t result;
 
-    return sqrt(sum);
+	cublasStatus_t stat = cublasDnrm2(handle, N, v->data_dev, incX, &result);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+
+	return result;
+#else
+	return cblas_dnrm2(N, v->data, incX);
+#endif
 }
 
 /**
@@ -634,11 +760,25 @@ matrix_t * m_product (matrix_t *A, matrix_t *B)
 
 	matrix_t *C = m_zeros(A->rows, B->cols);
 
-	// C := alpha * op(A) * op(B) + beta * C, alpha = 1, beta = 0
+	double alpha = 1;
+	double beta = 0;
+
+	// C := alpha * A * B + beta * C
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+		A->rows, B->cols, A->cols,
+		&alpha, A->data_dev, A->rows, B->data_dev, B->rows,
+		&beta, C->data_dev, C->rows);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#else
 	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
 		A->rows, B->cols, A->cols,
-		1, A->data, A->rows, B->data, B->rows,
-		0, C->data, C->rows);
+		alpha, A->data, A->rows, B->data, B->rows,
+		beta, C->data, C->rows);
+#endif
 
 	return C;
 }
@@ -655,6 +795,11 @@ matrix_t * m_sqrtm (matrix_t *M)
 {
 	assert(M->rows == M->cols);
 
+#ifdef __NVCC__
+	// TODO: stub
+
+	return NULL;
+#else
 	// compute eigenvalues, eigenvectors
 	matrix_t *M_work = m_copy(M);
 	matrix_t *M_eval = m_initialize(M->rows, 1);
@@ -702,6 +847,7 @@ matrix_t * m_sqrtm (matrix_t *M)
 	m_free(M_evec);
 
 	return X;
+#endif
 }
 
 /**
@@ -876,3 +1022,4 @@ void m_subtract_rows (matrix_t *M, matrix_t *a)
 		}
 	}
 }
+
