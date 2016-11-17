@@ -13,7 +13,7 @@ CFLAGS = -g -Wall
 endif
 
 ifeq ($(CC), gcc)
-LFLAGS = -lm -lblas -llapacke
+LFLAGS = -lm -lblas -llapacke -lstdc++
 else ifeq ($(CC), icc)
 CFLAGS += -D INTEL_MKL
 LFLAGS = -lm -mkl
@@ -21,8 +21,8 @@ endif
 
 FLAGS_MATRIX = -x c
 
-INCS = src/database.h src/image.h src/image_entry.h src/matrix.h
-OBJS = database.o image.o image_entry.o matrix.o pca.o lda.o ica.o
+INCS = src/database.h src/image.h src/image_entry.h src/matrix.h src/timing.h
+OBJS = database.o image.o image_entry.o matrix.o pca.o lda.o ica.o timing.o
 BINS = face-rec test-matrix test-image
 
 all: config $(BINS)
@@ -45,17 +45,20 @@ matrix.o: image.o src/matrix.h src/matrix.cu
 database.o: image.o image_entry.o matrix.o src/database.h src/database.c
 	$(CC) -c $(CFLAGS) src/database.c -o $@
 
-pca.o: matrix.o src/database.h src/pca.c
+timing.o: src/timing.h src/timing.cpp
+	$(CXX) -c $(CFLAGS) src/timing.cpp -o $@
+
+pca.o: matrix.o timing.o src/database.h src/pca.c
 	$(CC) -c $(CFLAGS) src/pca.c -o $@
 
-lda.o: matrix.o src/database.h src/lda.c
+lda.o: matrix.o timing.o src/database.h src/lda.c
 	$(CC) -c $(CFLAGS) src/lda.c -o $@
 
 ica.o: matrix.o src/database.h src/ica.c
 	$(CC) -c $(CFLAGS) src/ica.c -o $@
 
-face-rec: image.o image_entry.o matrix.o database.o pca.o lda.o ica.o src/main.c
-	$(CC) $(CFLAGS) image.o image_entry.o matrix.o database.o pca.o lda.o ica.o $(LFLAGS) src/main.c -o $@
+face-rec: image.o image_entry.o matrix.o database.o pca.o lda.o ica.o timing.o src/main.c
+	$(CC) $(CFLAGS) image.o image_entry.o matrix.o timing.o database.o pca.o lda.o ica.o $(LFLAGS) src/main.c -o $@
 
 test-image: image.o matrix.o src/test_image.c
 	$(CC) $(CFLAGS) image.o matrix.o $(LFLAGS) src/test_image.c -o $@

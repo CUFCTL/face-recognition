@@ -23,6 +23,9 @@ while [[ $# -gt 0 ]]; do
     -v|--verbose)
         ARGS="$ARGS --verbose"
 	;;
+    -s|--timing)
+	ARGS="$ARGS --timing"
+        ;;
     -p|--path)
         DB_PATH="$2"
         shift

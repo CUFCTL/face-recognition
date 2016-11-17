@@ -15,7 +15,7 @@
  * @param path
  * @return pointer to index in path, or NULL if the path had no prefix
  */
-char * basename(char *path)
+char * rem_base_dir(char *path)
 {
 	// skip to next directory slash
 	char *s = strchr(path, '/');
@@ -44,8 +44,8 @@ char * basename(char *path)
  */
 int is_same_class(char *path1, char *path2)
 {
-	path1 = basename(path1);
-	path2 = basename(path2);
+	path1 = rem_base_dir(path1);
+	path2 = rem_base_dir(path2);
 
 	int len = strchr(path1, '/') - path1;
 
@@ -140,7 +140,7 @@ int get_directory_rec(const char *path, dir_entry_t **p_entries, int *p_num_dirs
 	for ( i = 0; i < num_dirs; i++ ) {
 		for ( j = 0; j < dirs[i].size; j++ ) {
 			entries[num] = (dir_entry_t) {
-				.class = i,
+				.ent_class = i,
 				.name = dirs[i].names[j]
 			};
 
