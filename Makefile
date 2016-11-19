@@ -4,7 +4,6 @@ BUILD = debug
 endif
 
 # determine matrix library (netlib, mkl, cuda)
-# TODO: implement flags for cuda option
 ifndef MATLIB
 MATLIB = netlib
 endif
@@ -13,13 +12,18 @@ endif
 ifeq ($(MATLIB), netlib)
 CC = gcc
 CXX = g++
-else ifeq ($(ENV), mkl)
+CCU = g++
+else ifeq ($(MATLIB), mkl)
 CC = icc
 CXX = icpc
+CCU = icpc
+else ifeq ($(MATLIB), cuda)
+CCU = nvcc
 endif
 
 # determine compiler and linker flags
 CFLAGS =
+CUFLAGS = -x c++
 LFLAGS = -lm
 
 ifeq ($(BUILD), release)
@@ -29,10 +33,14 @@ CFLAGS += -g -Wall
 endif
 
 ifeq ($(MATLIB), netlib)
+CUFLAGS += $(CFLAGS)
 LFLAGS += -lblas -llapacke
 else ifeq ($(MATLIB), mkl)
 CFLAGS += -D INTEL_MKL
+CUFLAGS += $(CFLAGS)
 LFLAGS += -mkl
+else ifeq ($(MATLIB), cuda)
+LFLAGS += -lcudart -lcublas
 endif
 
 INCS = src/database.h src/image.h src/image_entry.h src/matrix.h src/timing.h
@@ -42,12 +50,14 @@ BINS = face-rec test-matrix test-image
 all: config $(BINS)
 
 config:
-	$(info BUILD  = $(BUILD))
-	$(info MATLIB = $(MATLIB))
-	$(info CC     = $(CC))
-	$(info CXX    = $(CXX))
-	$(info CFLAGS = $(CFLAGS))
-	$(info LFLAGS = $(LFLAGS))
+	$(info BUILD   = $(BUILD))
+	$(info MATLIB  = $(MATLIB))
+	$(info CC      = $(CC))
+	$(info CXX     = $(CXX))
+	$(info CCU     = $(CCU))
+	$(info CFLAGS  = $(CFLAGS))
+	$(info CUFLAGS = $(CUFLAGS))
+	$(info LFLAGS  = $(LFLAGS))
 
 image.o: src/image.h src/image.cpp
 	$(CXX) -c $(CFLAGS) src/image.cpp -o $@
@@ -56,7 +66,7 @@ image_entry.o: src/image_entry.h src/image_entry.cpp
 	$(CXX) -c $(CFLAGS) src/image_entry.cpp -o $@
 
 matrix.o: image.o src/matrix.h src/matrix.cu
-	$(CXX) -c -x c++ $(CFLAGS) src/matrix.cu -o $@
+	$(CCU) -c $(CUFLAGS) src/matrix.cu -o $@
 
 database.o: image.o image_entry.o matrix.o src/database.h src/database.cpp
 	$(CXX) -c $(CFLAGS) src/database.cpp -o $@
@@ -90,10 +100,6 @@ test-image: image.o matrix.o test_image.o
 
 test-matrix: matrix.o test_matrix.o
 	$(CXX) $(CFLAGS) $^ $(LFLAGS) -o $@
-
-test-cublas: src/matrix.h src/matrix.cu test_image.o
-	nvcc -c src/matrix.cu -o matrix.o
-	$(CXX) $(CFLAGS) matrix.o test_image.o -lm -lcudart -lcublas -o $@
 
 clean:
 	rm -f *.o $(BINS)

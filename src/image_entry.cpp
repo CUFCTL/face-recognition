@@ -140,8 +140,8 @@ int get_directory_rec(const char *path, dir_entry_t **p_entries, int *p_num_dirs
 	for ( i = 0; i < num_dirs; i++ ) {
 		for ( j = 0; j < dirs[i].size; j++ ) {
 			entries[num] = (dir_entry_t) {
-				.ent_class = i,
-				.name = dirs[i].names[j]
+				i,
+				dirs[i].names[j]
 			};
 
 			num++;
