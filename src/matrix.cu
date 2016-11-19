@@ -578,54 +578,60 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
 /**
  * Compute the eigenvalues and eigenvectors of a symmetric matrix.
  *
- * The eigenvalues are returned as a column vector, and the
+ * The eigenvalues are returned as a diagonal matrix, and the
  * eigenvectors are returned as column vectors. The i-th
  * eigenvalue corresponds to the i-th column vector. The eigenvalues
  * are returned in ascending order.
  *
- * @param M	        pointer to matrix, m-by-n
- * @param p_M_eval  pointer to store eigenvalues matrix, m-by-1
- * @param p_M_evec  pointer to store eigenvectors matrix, m-by-n
+ * @param M
+ * @param p_V
+ * @param p_D
  */
-void m_eigen (matrix_t *M, matrix_t **p_M_eval, matrix_t **p_M_evec)
+void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 {
+	assert(M->rows == M->cols);
+
+	matrix_t *V = m_copy(M);
 	matrix_t *M_eval = m_initialize(M->rows, 1);
-	matrix_t *M_evec = m_copy(M);
 
 	// solve A * x = lambda * x
 #ifdef __NVCC__
 	// TODO: stub
 #else
 	LAPACKE_dsyev(LAPACK_COL_MAJOR, 'V', 'U',
-		M->cols, M_evec->data, M->rows,  // input matrix (eigenvectors)
-		M_eval->data);                   // eigenvalues
+		M->cols, V->data, M->rows,  // input matrix (eigenvectors)
+		M_eval->data);              // eigenvalues
 #endif
 
-	*p_M_eval = M_eval;
-	*p_M_evec = M_evec;
+	// save output
+	*p_V = V;
+	*p_D = m_diagonalize(M_eval);
+
+	// cleanup
+	m_free(M_eval);
 }
 
 /**
  * Compute the generalized eigenvalues and eigenvectors of two
  * symmetric matrices.
  *
- * The eigenvalues are returned as a column vector, and the
+ * The eigenvalues are returned as a diagonal matrix, and the
  * eigenvectors are returned as column vectors. The i-th
  * eigenvalue corresponds to the i-th column vector. The eigenvalues
  * are returned in ascending order.
  *
- * @param A	        pointer to matrix, n-by-n
- * @param B	        pointer to matrix, n-by-n
- * @param p_J_eval  pointer to store eigenvalues matrix, n-by-1
- * @param p_J_evec  pointer to store eigenvectors matrix, n-by-n
+ * @param A
+ * @param B
+ * @param p_V
+ * @param p_D
  */
-void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_J_eval, matrix_t **p_J_evec)
+void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_V, matrix_t **p_D)
 {
 	assert(A->rows == A->cols && B->rows == B->cols);
 	assert(A->rows == B->rows);
 
+	matrix_t *V = m_copy(A);
 	matrix_t *J_eval = m_initialize(A->rows, 1);
-	matrix_t *J_evec = m_copy(A);
 
 	// solve A * x = lambda * B * x
 #ifdef __NVCC__
@@ -634,15 +640,19 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_J_eval, matrix_t **p_J_eve
 	matrix_t *B_work = m_copy(B);
 
 	LAPACKE_dsygv(LAPACK_COL_MAJOR, 1, 'V', 'U',
-		A->cols, J_evec->data, A->rows,  // left input matrix (eigenvectors)
-		B_work->data, B->rows,           // right input matrix
-		J_eval->data);                   // eigenvalues
+		A->cols, V->data, A->rows,  // left input matrix (eigenvectors)
+		B_work->data, B->rows,      // right input matrix
+		J_eval->data);              // eigenvalues
 
 	m_free(B_work);
 #endif
 
-	*p_J_eval = J_eval;
-	*p_J_evec = J_evec;
+	// save outputs
+	*p_V = V;
+	*p_D = m_diagonalize(J_eval);
+
+	// cleanup
+	m_free(J_eval);
 }
 
 /**

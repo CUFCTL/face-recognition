@@ -152,10 +152,10 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     // compute W_fld = eigenvectors of S_w^-1 * S_b
     matrix_t *S_w_inv = m_inverse(S_w);
     matrix_t *J = m_product(S_w_inv, S_b);
-    matrix_t *J_eval;
     matrix_t *J_evec;
+    matrix_t *J_eval;
 
-    m_eigen(J, &J_eval, &J_evec);
+    m_eigen(J, &J_evec, &J_eval);
 
     timing_end("Construct Fisherface Matrix");
 

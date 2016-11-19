@@ -449,41 +449,41 @@ void test_m_eigen()
 		0.3333, 0.6667, 1.0000, 0.7500,
 		0.2500, 0.5000, 0.7500, 1.0000
 	};
-	precision_t M_eval_data[] = {
-		0.2078,
-		0.4078,
-		0.8482,
-		2.5362
-	};
-	precision_t M_evec_data[] = {
+	precision_t V_data[] = {
 		 0.0694, -0.4422, -0.8105,  0.3778,
 		-0.3619,  0.7420, -0.1877,  0.5322,
 		 0.7694,  0.0487,  0.3010,  0.5614,
 		-0.5218, -0.5015,  0.4661,  0.5088
 	};
+	precision_t D_data[] = {
+		0.2078, 0.0000, 0.0000, 0.0000,
+		0.0000, 0.4078, 0.0000, 0.0000,
+		0.0000, 0.0000, 0.8482, 0.0000,
+		0.0000, 0.0000, 0.0000, 2.5362
+	};
 	matrix_t *M = m_initialize_data(4, 4, M_data);
-	matrix_t *M_eval;
-	matrix_t *M_evec;
+	matrix_t *V;
+	matrix_t *D;
 
-	m_eigen(M, &M_eval, &M_evec);
+	m_eigen(M, &V, &D);
 
 	if ( VERBOSE ) {
 		printf("M = \n");
 		m_fprint(stdout, M);
 
-		printf("eigenvalues of M = \n");
-		m_fprint(stdout, M_eval);
+		printf("V = eigenvectors of M = \n");
+		m_fprint(stdout, V);
 
-		printf("eigenvectors of M = \n");
-		m_fprint(stdout, M_evec);
+		printf("D = eigenvalues of M = \n");
+		m_fprint(stdout, D);
 	}
 
-	assert_matrix_value(M_eval, M_eval_data, "eigenvalues of M");
-	assert_matrix_value(M_evec, M_evec_data, "eigenvectors of M");
+	assert_matrix_value(V, V_data, "eigenvectors of M");
+	assert_matrix_value(D, D_data, "eigenvalues of M");
 
 	m_free(M);
-	m_free(M_eval);
-	m_free(M_evec);
+	m_free(V);
+	m_free(D);
 }
 
 /**
@@ -501,22 +501,22 @@ void test_m_eigen2()
 		0, 1, 0,
 		0, 0, 1
 	};
-	precision_t J_eval_data[] = {
-		0.0000,
-		0.0000,
-		3.0000
-	};
-	precision_t J_evec_data[] = {
+	precision_t V_data[] = {
 		 0.4082,  0.7071,  0.5774,
 		 0.4082, -0.7071,  0.5774,
 		-0.8165,  0.0000,  0.5774
 	};
+	precision_t D_data[] = {
+		0.0000, 0.0000, 0.0000,
+		0.0000, 0.0000, 0.0000,
+		0.0000, 0.0000, 3.0000
+	};
 	matrix_t *A = m_initialize_data(3, 3, A_data);
 	matrix_t *B = m_initialize_data(3, 3, B_data);
-	matrix_t *J_eval;
-	matrix_t *J_evec;
+	matrix_t *V;
+	matrix_t *D;
 
-	m_eigen2(A, B, &J_eval, &J_evec);
+	m_eigen2(A, B, &V, &D);
 
 	if ( VERBOSE ) {
 		printf("A = \n");
@@ -525,20 +525,20 @@ void test_m_eigen2()
 		printf("B = \n");
 		m_fprint(stdout, B);
 
-		printf("eigenvalues of A, B = \n");
-		m_fprint(stdout, J_eval);
+		printf("V = eigenvectors of A, B = \n");
+		m_fprint(stdout, V);
 
-		printf("eigenvectors of A, B = \n");
-		m_fprint(stdout, J_evec);
+		printf("D = eigenvalues of A, B = \n");
+		m_fprint(stdout, D);
 	}
 
-	assert_matrix_value(J_eval, J_eval_data, "eigenvalues of A, B");
-	assert_matrix_value(J_evec, J_evec_data, "eigenvectors of A, B");
+	assert_matrix_value(V, V_data, "eigenvectors of A, B");
+	assert_matrix_value(D, D_data, "eigenvalues of A, B");
 
 	m_free(A);
 	m_free(B);
-	m_free(J_eval);
-	m_free(J_evec);
+	m_free(V);
+	m_free(D);
 }
 
 /**
