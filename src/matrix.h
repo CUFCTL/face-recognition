@@ -9,10 +9,6 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdio.h>
 #include "image.h"
 
@@ -80,9 +76,5 @@ void m_shuffle_columns (matrix_t *M);
 void m_subtract (matrix_t *A, matrix_t *B);
 void m_subtract_columns (matrix_t *M, matrix_t *a);
 void m_subtract_rows (matrix_t *M, matrix_t *a);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

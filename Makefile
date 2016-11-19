@@ -1,25 +1,39 @@
+# determine build (debug, release)
 ifndef BUILD
 BUILD = debug
 endif
 
-ifeq ($(CC), cc)
-CC = gcc
+# determine matrix library (netlib, mkl, cuda)
+# TODO: implement flags for cuda option
+ifndef MATLIB
+MATLIB = netlib
 endif
+
+# determine compiler suite (gcc/g++, icc/icpc)
+ifeq ($(MATLIB), netlib)
+CC = gcc
+CXX = g++
+else ifeq ($(ENV), mkl)
+CC = icc
+CXX = icpc
+endif
+
+# determine compiler and linker flags
+CFLAGS =
+LFLAGS = -lm
 
 ifeq ($(BUILD), release)
-CFLAGS = -O3
+CFLAGS += -O3
 else ifeq ($(BUILD), debug)
-CFLAGS = -g -Wall
+CFLAGS += -g -Wall
 endif
 
-ifeq ($(CC), gcc)
-LFLAGS = -lm -lblas -llapacke -lstdc++
-else ifeq ($(CC), icc)
+ifeq ($(MATLIB), netlib)
+LFLAGS += -lblas -llapacke
+else ifeq ($(MATLIB), mkl)
 CFLAGS += -D INTEL_MKL
-LFLAGS = -lm -mkl
+LFLAGS += -mkl
 endif
-
-FLAGS_MATRIX = -x c
 
 INCS = src/database.h src/image.h src/image_entry.h src/matrix.h src/timing.h
 OBJS = database.o image.o image_entry.o matrix.o pca.o lda.o ica.o timing.o
@@ -29,48 +43,58 @@ all: config $(BINS)
 
 config:
 	$(info BUILD  = $(BUILD))
+	$(info MATLIB = $(MATLIB))
 	$(info CC     = $(CC))
+	$(info CXX    = $(CXX))
 	$(info CFLAGS = $(CFLAGS))
 	$(info LFLAGS = $(LFLAGS))
 
-image.o: src/image.h src/image.c
-	$(CC) -c $(CFLAGS) src/image.c -o $@
+image.o: src/image.h src/image.cpp
+	$(CXX) -c $(CFLAGS) src/image.cpp -o $@
 
-image_entry.o: src/image_entry.h src/image_entry.c
-	$(CC) -c $(CFLAGS) src/image_entry.c -o $@
+image_entry.o: src/image_entry.h src/image_entry.cpp
+	$(CXX) -c $(CFLAGS) src/image_entry.cpp -o $@
 
 matrix.o: image.o src/matrix.h src/matrix.cu
-	$(CC) -c $(CFLAGS) $(FLAGS_MATRIX) src/matrix.cu -o $@
+	$(CXX) -c -x c++ $(CFLAGS) src/matrix.cu -o $@
 
-database.o: image.o image_entry.o matrix.o src/database.h src/database.c
-	$(CC) -c $(CFLAGS) src/database.c -o $@
+database.o: image.o image_entry.o matrix.o src/database.h src/database.cpp
+	$(CXX) -c $(CFLAGS) src/database.cpp -o $@
 
 timing.o: src/timing.h src/timing.cpp
 	$(CXX) -c $(CFLAGS) src/timing.cpp -o $@
 
-pca.o: matrix.o timing.o src/database.h src/pca.c
-	$(CC) -c $(CFLAGS) src/pca.c -o $@
+pca.o: matrix.o timing.o src/database.h src/pca.cpp
+	$(CXX) -c $(CFLAGS) src/pca.cpp -o $@
 
-lda.o: matrix.o timing.o src/database.h src/lda.c
-	$(CC) -c $(CFLAGS) src/lda.c -o $@
+lda.o: matrix.o timing.o src/database.h src/lda.cpp
+	$(CXX) -c $(CFLAGS) src/lda.cpp -o $@
 
-ica.o: matrix.o src/database.h src/ica.c
-	$(CC) -c $(CFLAGS) src/ica.c -o $@
+ica.o: matrix.o src/database.h src/ica.cpp
+	$(CXX) -c $(CFLAGS) src/ica.cpp -o $@
 
-face-rec: image.o image_entry.o matrix.o database.o pca.o lda.o ica.o timing.o src/main.c
-	$(CC) $(CFLAGS) image.o image_entry.o matrix.o timing.o database.o pca.o lda.o ica.o $(LFLAGS) src/main.c -o $@
+main.o: database.o timing.o src/main.cpp
+	$(CXX) -c $(CFLAGS) src/main.cpp -o $@
 
-test-image: image.o matrix.o src/test_image.c
-	$(CC) $(CFLAGS) image.o matrix.o $(LFLAGS) src/test_image.c -o $@
+test_image.o: matrix.o image.o src/test_image.cpp
+	$(CXX) -c $(CFLAGS) src/test_image.cpp -o $@
 
-test-matrix: matrix.o src/test_matrix.c
-	$(CC) $(CFLAGS) matrix.o $(LFLAGS) src/test_matrix.c -o $@
+test_matrix.o: matrix.o src/test_matrix.cpp
+	$(CXX) -c $(CFLAGS) src/test_matrix.cpp -o $@
 
-test-cublas: src/matrix.h src/matrix.cu src/test_matrix.c
+face-rec: image.o image_entry.o matrix.o database.o pca.o lda.o ica.o timing.o main.o
+	$(CXX) $(CFLAGS) $^ $(LFLAGS) -o $@
+
+test-image: image.o matrix.o test_image.o
+	$(CXX) $(CFLAGS) $^ $(LFLAGS) -o $@
+
+test-matrix: matrix.o test_matrix.o
+	$(CXX) $(CFLAGS) $^ $(LFLAGS) -o $@
+
+test-cublas: src/matrix.h src/matrix.cu test_image.o
 	nvcc -c src/matrix.cu -o matrix.o
-	gcc -c src/test_matrix.c -o test_matrix.o
-	g++ matrix.o test_matrix.o -lm -lcudart -lcublas -o $@
+	$(CXX) $(CFLAGS) matrix.o test_image.o -lm -lcudart -lcublas -o $@
 
 clean:
-	rm -f *.o *.dat $(BINS)
+	rm -f *.o $(BINS)
 	rm -rf test_images train_images
