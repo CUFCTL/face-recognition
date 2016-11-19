@@ -253,18 +253,40 @@ matrix_t * m_copy (matrix_t *M)
 /**
  * Copy a range of columns in a matrix.
  *
- * @param M      pointer to matrix
- * @param begin  begin index
- * @param end    end index
- * @return pointer to copy of columns [begin, end) of M
+ * @param M
+ * @param i
+ * @param j
+ * @return pointer to copy of columns [i, j) of M
  */
-matrix_t * m_copy_columns (matrix_t *M, int begin, int end)
+matrix_t * m_copy_columns (matrix_t *M, int i, int j)
 {
-	assert(0 <= begin && begin < end && end <= M->cols);
+	assert(0 <= i && i < j && j <= M->cols);
 
-	matrix_t *C = m_initialize(M->rows, end - begin);
+	matrix_t *C = m_initialize(M->rows, j - i);
 
-	memcpy(C->data, &elem(M, 0, begin), C->rows * C->cols * sizeof(precision_t));
+	memcpy(C->data, &elem(M, 0, i), C->rows * C->cols * sizeof(precision_t));
+
+	return C;
+}
+
+/**
+ * Copy a range of rows in a matrix.
+ *
+ * @param M
+ * @param i
+ * @param j
+ * @return pointer to copy of rows [i, j) of M
+ */
+matrix_t * m_copy_rows (matrix_t *M, int i, int j)
+{
+	assert(0 <= i && i < j && j <= M->rows);
+
+	matrix_t *C = m_initialize(j - i, M->cols);
+
+	int k;
+	for ( k = 0; k < M->cols; k++ ) {
+		memcpy(&elem(C, 0, k), &elem(M, i, k), (j - i) * sizeof(precision_t));
+	}
 
 	return C;
 }

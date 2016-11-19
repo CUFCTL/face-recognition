@@ -231,7 +231,7 @@ void test_m_zeros()
 }
 
 /**
- * Test matrix copying.
+ * Test matrix copy.
  */
 void test_m_copy()
 {
@@ -241,36 +241,93 @@ void test_m_copy()
 		 9,  7,  6, 12,
 		 4, 14, 15,  1
 	};
-	precision_t C2_data[] = {
+	matrix_t *A = m_initialize_data(4, 4, A_data);
+	matrix_t *C = m_copy(A);
+
+	if ( VERBOSE ) {
+		printf("A = \n");
+		m_fprint(stdout, A);
+
+		printf("C = A = \n");
+		m_fprint(stdout, C);
+	}
+
+	assert_equal_matrix(A, C, "A(:, :)");
+
+	m_free(A);
+	m_free(C);
+}
+
+/**
+ * Test matrix column copy.
+ */
+void test_m_copy_columns()
+{
+	precision_t A_data[] = {
+		16,  2,  3, 13,
+		 5, 11, 10,  8,
+		 9,  7,  6, 12,
+		 4, 14, 15,  1
+	};
+	precision_t C_data[] = {
 		 2,  3,
 		11, 10,
 		 7,  6,
 		14, 15
 	};
 	matrix_t *A = m_initialize_data(4, 4, A_data);
-	matrix_t *C1 = m_copy(A);
 
-	int begin = 1;
-	int end = 3;
-	matrix_t *C2 = m_copy_columns(A, begin, end);
+	int i = 1;
+	int j = 3;
+	matrix_t *C = m_copy_columns(A, i, j);
 
 	if ( VERBOSE ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("C1 = A = \n");
-		m_fprint(stdout, C1);
-
-		printf("C2 = A(:, %d:%d) = \n", begin + 1, end);
-		m_fprint(stdout, C2);
+		printf("C = A(:, %d:%d) = \n", i + 1, j);
+		m_fprint(stdout, C);
 	}
 
-	assert_equal_matrix(A, C1, "A(:, :)");
-	assert_matrix_value(C2, C2_data, "A(:, 1:3)");
+	assert_matrix_value(C, C_data, "A(:, 1:3)");
 
 	m_free(A);
-	m_free(C1);
-	m_free(C2);
+	m_free(C);
+}
+
+/**
+ * Test matrix row copy.
+ */
+void test_m_copy_rows()
+{
+	precision_t A_data[] = {
+		16,  2,  3, 13,
+		 5, 11, 10,  8,
+		 9,  7,  6, 12,
+		 4, 14, 15,  1
+	};
+	precision_t C_data[] = {
+		 5, 11, 10,  8,
+		 9,  7,  6, 12
+	};
+	matrix_t *A = m_initialize_data(4, 4, A_data);
+
+	int i = 1;
+	int j = 3;
+	matrix_t *C = m_copy_rows(A, i, j);
+
+	if ( VERBOSE ) {
+		printf("A = \n");
+		m_fprint(stdout, A);
+
+		printf("C = A(%d:%d, :) = \n", i + 1, j);
+		m_fprint(stdout, C);
+	}
+
+	assert_matrix_value(C, C_data, "A(1:3, :)");
+
+	m_free(A);
+	m_free(C);
 }
 
 /**
@@ -1151,6 +1208,8 @@ int main (int argc, char **argv)
 		test_m_random,
 		test_m_zeros,
 		test_m_copy,
+		test_m_copy_columns,
+		test_m_copy_rows,
 		test_m_covariance,
 		test_m_diagonalize,
 		test_m_distance,

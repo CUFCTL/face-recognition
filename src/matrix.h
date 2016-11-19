@@ -42,7 +42,8 @@ matrix_t * m_ones (int rows, int cols);
 matrix_t * m_random (int rows, int cols);
 matrix_t * m_zeros (int rows, int cols);
 matrix_t * m_copy (matrix_t *M);
-matrix_t * m_copy_columns (matrix_t *M, int begin, int end);
+matrix_t * m_copy_columns (matrix_t *M, int i, int j);
+matrix_t * m_copy_rows (matrix_t *M, int i, int j);
 void m_free (matrix_t *M);
 
 // I/O functions
