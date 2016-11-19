@@ -22,8 +22,9 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
     matrix_t **X_classes = (matrix_t **)malloc(c * sizeof(matrix_t *));
     matrix_t **U = (matrix_t **)malloc(c * sizeof(matrix_t *));
 
-    // compute the mean of each class
     timing_start("Compute Mean of each Class");
+
+    // compute the mean of each class
     int i, j;
     for ( i = 0, j = 0; i < c; i++ ) {
         // extract the columns of X in class i
@@ -40,12 +41,14 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
         // compute the mean of the class
         U[i] = m_mean_column(X_classes[i]);
     }
+
     timing_end("Compute Mean of each Class");
+
+    timing_start("Compute Mean over all Classes");
 
     // compute the mean of all classes
     matrix_t *u = m_initialize(X->rows, 1);  // m_mean_column(U);
 
-    timing_start("Compute Mean over all Classes");
     for ( i = 0; i < c; i++ ) {
         for ( j = 0; j < X->rows; j++ ) {
             elem(u, j, 0) += elem(U[i], j, 0);
@@ -54,11 +57,13 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
     for ( i = 0; i < X->rows; i++ ) {
         elem(u, i, 0) /= c;
     }
+
     timing_end("Compute Mean over all Classes");
+
+    timing_start("Compute Scatter between and within classes");
 
     // compute the between-scatter S_b = sum(S_b_i, i=1:c)
     // compute the within-scatter S_w = sum(S_w_i, i=1:c)
-    timing_start("Compute Scatter between and within classes");
     for ( i = 0; i < c; i++ ) {
         matrix_t *X_class = X_classes[i];
 
@@ -87,6 +92,7 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
         m_free(X_class_tr);
         m_free(S_w_i);
     }
+
     timing_end("Compute Scatter between and within classes");
 
     // cleanup
@@ -101,6 +107,10 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
 /**
  * Compute the projection matrix of a training set with LDA.
  *
+ * The recommended optimization values are as follows:
+ *   n_opt1  W_pca->cols - c
+ *   n_opt2  c - 1
+ *
  * @param W_pca_tr  PCA projection matrix
  * @param X         image matrix
  * @param c         number of classes
@@ -109,48 +119,64 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
  * @param n_opt2    number of columns in W_fld to use
  * @return projection matrix W_lda'
  */
-matrix_t * LDA(matrix_t *W_pca_tr, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2)
+matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2)
 {
     timing_start("LDA");
 
-    // use only the first n_opt1 columns in W_pca
     timing_start("Truncate the Eigenface Matrix");
-    matrix_t *W_pca = m_transpose(W_pca_tr);
+
+    // if n_opt1 = -1, use all columns in W_pca
+    n_opt1 = (n_opt1 == -1)
+        ? W_pca->cols
+        : n_opt1;
+
+    // use only the first n_opt1 columns in W_pca
     matrix_t *W_pca2 = m_copy_columns(W_pca, 0, n_opt1);
     matrix_t *W_pca2_tr = m_transpose(W_pca2);
     matrix_t *P_pca = m_product(W_pca2_tr, X);
+
     timing_end("Truncate the Eigenface Matrix");
+
+    timing_start("Find scatter matrices");
 
     // compute scatter matrices S_b and S_w
     matrix_t *S_b = m_zeros(P_pca->rows, P_pca->rows);
     matrix_t *S_w = m_zeros(P_pca->rows, P_pca->rows);
 
-    timing_start("Find scatter matrices");
     m_scatter(P_pca, c, entries, S_b, S_w);
+
     timing_end("Find scatter matrices");
 
-    // compute W_fld = eigenvectors of S_w^-1 * S_b
     timing_start("Construct Fisherface Matrix");
+
+    // compute W_fld = eigenvectors of S_w^-1 * S_b
     matrix_t *S_w_inv = m_inverse(S_w);
     matrix_t *J = m_product(S_w_inv, S_b);
     matrix_t *J_eval;
     matrix_t *J_evec;
 
     m_eigen(J, &J_eval, &J_evec);
+
     timing_end("Construct Fisherface Matrix");
 
-    // take only the first n_opt2 columns in J_evec
     timing_start("Truncate Fisherface Matrix");
-    matrix_t *W_fld = m_copy_columns(J_evec, 0, n_opt2);
 
+    // if n_opt2 = -1, use all columns in J_evec
+    n_opt2 = (n_opt2 == -1)
+        ? J_evec->cols
+        : n_opt2;
+
+    // take only the first n_opt2 columns in J_evec
+    matrix_t *W_fld = m_copy_columns(J_evec, 0, n_opt2);
     matrix_t *W_fld_tr = m_transpose(W_fld);
 
-    // compute W_lda' = W_fld' * W_pca'
+    // compute W_lda' = W_fld' * W_pca2'
     matrix_t *W_lda_tr = m_product(W_fld_tr, W_pca2_tr);
+
     timing_end("Truncate Fisherface Matrix");
 
     timing_end("LDA");
-    m_free(W_pca);
+
     m_free(W_pca2);
     m_free(W_pca2_tr);
     m_free(P_pca);

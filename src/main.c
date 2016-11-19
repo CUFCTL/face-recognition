@@ -27,8 +27,8 @@ void print_usage()
 		"  --lda              run LDA\n"
 		"  --ica              run ICA\n"
 		"  --all              run all algorithms (PCA, LDA, ICA)\n"
-		"  --lda1             first optional lda argument\n"
-		"  --lda2             second optional lda argument\n"
+		"  --lda1             LDA parameter #1\n"
+		"  --lda2             LDA parameter #2\n"
 	);
 }
 
@@ -43,8 +43,8 @@ int main(int argc, char **argv)
 	int arg_lda = 0;
 	int arg_ica = 0;
 
-	int n_opt1 = 240;
-	int n_opt2 = 39;
+	int n_opt1 = -1;
+	int n_opt2 = -1;
 
 	char *path_train_set = NULL;
 	char *path_test_set = NULL;
