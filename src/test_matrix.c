@@ -857,6 +857,54 @@ void test_m_assign_column()
 }
 
 /**
+ * Test matrix row assingment.
+ */
+void test_m_assign_row()
+{
+	precision_t A_data1[] = {
+		16,  2,  3, 13,
+		 5, 11, 10,  8,
+		 9,  7,  6, 12,
+		 4, 14, 15,  1
+	};
+	precision_t A_data2[] = {
+		16,  2,  3, 13,
+		 5, 11, 10,  8,
+		 0,  0,  0,  0,
+		 4, 14, 15,  1
+	};
+	precision_t B_data[] = {
+		0, 0, 0, 0
+	};
+	matrix_t *A = m_initialize_data(4, 4, A_data1);
+	matrix_t *B = m_initialize_data(1, 4, B_data);
+	int i = 2;
+	int j = 0;
+
+	if ( VERBOSE ) {
+		printf("A = \n");
+		m_fprint(stdout, A);
+
+		printf("B = \n");
+		m_fprint(stdout, B);
+
+		printf("A(%d, :) = B(%d, :)\n", i, j);
+	}
+
+	m_assign_row(A, i, B, j);
+
+	if ( VERBOSE ) {
+		printf("A = \n");
+		m_fprint(stdout, A);
+	}
+
+	assert_matrix_value(A, A_data2, "A(2, :) = B(0, :)");
+
+	m_free(A);
+	m_free(B);
+}
+
+/**
  * Test matrix subtraction.
  */
 void test_m_subtract()
@@ -1119,6 +1167,7 @@ int main (int argc, char **argv)
 		test_m_add,
 		test_m_subtract,
 		test_m_assign_column,
+		test_m_assign_row,
 		test_m_elem_apply,
 		test_m_elem_mult,
 		test_m_shuffle_columns,

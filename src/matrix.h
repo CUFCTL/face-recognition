@@ -72,6 +72,7 @@ matrix_t * m_transpose (matrix_t *M);
 // mutator functions
 void m_add (matrix_t *A, matrix_t *B);
 void m_assign_column (matrix_t * A, int i, matrix_t * B, int j);
+void m_assign_row (matrix_t * A, int i, matrix_t * B, int j);
 void m_elem_apply (matrix_t * M, elem_func_t f);
 void m_elem_mult (matrix_t *M, precision_t c);
 void m_shuffle_columns (matrix_t *M);

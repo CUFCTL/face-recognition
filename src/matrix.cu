@@ -899,8 +899,30 @@ void m_add (matrix_t *A, matrix_t *B)
 void m_assign_column (matrix_t * A, int i, matrix_t * B, int j)
 {
     assert(A->rows == B->rows);
+    assert(0 <= i && i < A->cols);
+    assert(0 <= j && j < B->cols);
 
     memcpy(&elem(A, 0, i), B->data, B->rows * sizeof(precision_t));
+}
+
+/**
+ * Assign a row of a matrix.
+ *
+ * @param A  pointer to matrix
+ * @param i  lhs row index
+ * @param B  pointer to matrix
+ * @param j  rhs row index
+ */
+void m_assign_row (matrix_t * A, int i, matrix_t * B, int j)
+{
+    assert(A->cols == B->cols);
+    assert(0 <= i && i < A->rows);
+    assert(0 <= j && j < B->rows);
+
+    int k;
+    for ( k = 0; k < A->cols; k++ ) {
+        elem(A, i, k) = elem(B, j, k);
+    }
 }
 
 /**
@@ -1022,4 +1044,3 @@ void m_subtract_rows (matrix_t *M, matrix_t *a)
 		}
 	}
 }
-
