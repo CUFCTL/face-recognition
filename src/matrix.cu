@@ -554,11 +554,12 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
 }
 
 /**
- * Compute the real eigenvalues and right eigenvectors of a matrix.
+ * Compute the eigenvalues and eigenvectors of a symmetric matrix.
  *
  * The eigenvalues are returned as a column vector, and the
  * eigenvectors are returned as column vectors. The i-th
- * eigenvalue corresponds to the i-th column vector.
+ * eigenvalue corresponds to the i-th column vector. The eigenvalues
+ * are returned in ascending order.
  *
  * @param M	        pointer to matrix, m-by-n
  * @param p_M_eval  pointer to store eigenvalues matrix, m-by-1
@@ -567,22 +568,15 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
 void m_eigen (matrix_t *M, matrix_t **p_M_eval, matrix_t **p_M_evec)
 {
 	matrix_t *M_eval = m_initialize(M->rows, 1);
-	matrix_t *M_evec = m_initialize(M->rows, M->cols);
+	matrix_t *M_evec = m_copy(M);
 
+	// solve A * x = lambda * x
 #ifdef __NVCC__
 	// TODO: stub
 #else
-	matrix_t *M_work = m_copy(M);
-	precision_t *wi = (precision_t *)malloc(M->rows * sizeof(precision_t));
-
-	LAPACKE_dgeev(LAPACK_COL_MAJOR, 'N', 'V',
-		M->cols, M_work->data, M->rows,  // input matrix
-		M_eval->data, wi,                // real, imag eigenvalues
-		NULL, M->rows,                   // left eigenvectors
-		M_evec->data, M->rows);          // right eigenvectors
-
-	m_free(M_work);
-	free(wi);
+	LAPACKE_dsyev(LAPACK_COL_MAJOR, 'V', 'U',
+		M->cols, M_evec->data, M->rows,  // input matrix (eigenvectors)
+		M_eval->data);                   // eigenvalues
 #endif
 
 	*p_M_eval = M_eval;
@@ -590,12 +584,13 @@ void m_eigen (matrix_t *M, matrix_t **p_M_eval, matrix_t **p_M_evec)
 }
 
 /**
- * Compute the generalized eigenvalues and right eigenvectors of two
- * square matrices.
+ * Compute the generalized eigenvalues and eigenvectors of two
+ * symmetric matrices.
  *
  * The eigenvalues are returned as a column vector, and the
  * eigenvectors are returned as column vectors. The i-th
- * eigenvalue corresponds to the i-th column vector.
+ * eigenvalue corresponds to the i-th column vector. The eigenvalues
+ * are returned in ascending order.
  *
  * @param A	        pointer to matrix, n-by-n
  * @param B	        pointer to matrix, n-by-n
@@ -608,31 +603,20 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_J_eval, matrix_t **p_J_eve
 	assert(A->rows == B->rows);
 
 	matrix_t *J_eval = m_initialize(A->rows, 1);
-	matrix_t *J_evec = m_initialize(A->rows, A->cols);
+	matrix_t *J_evec = m_copy(A);
 
+	// solve A * x = lambda * B * x
 #ifdef __NVCC__
 	// TODO: stub
 #else
-	matrix_t *A_work = m_copy(A);
 	matrix_t *B_work = m_copy(B);
-	precision_t *alphai = (precision_t *)malloc(A->rows * sizeof(precision_t));
-	precision_t *beta = (precision_t *)malloc(A->rows * sizeof(precision_t));
 
-	LAPACKE_dggev(LAPACK_COL_MAJOR, 'N', 'V',
-		A->cols, A_work->data, A->rows, B_work->data, B->rows,
-		J_eval->data, alphai, beta,      // eigenvalues (lambda = (alphar + i * alphai) / beta)
-		NULL, A->rows,                   // left eigenvectors
-		J_evec->data, A->rows);          // right eigenvectors
+	LAPACKE_dsygv(LAPACK_COL_MAJOR, 1, 'V', 'U',
+		A->cols, J_evec->data, A->rows,  // left input matrix (eigenvectors)
+		B_work->data, B->rows,           // right input matrix
+		J_eval->data);                   // eigenvalues
 
-	int i;
-	for ( i = 0; i < A->rows; i++ ) {
-		elem(J_eval, i, 0) /= beta[i];
-	}
-
-	m_free(A_work);
 	m_free(B_work);
-	free(alphai);
-	free(beta);
 #endif
 
 	*p_J_eval = J_eval;
@@ -654,7 +638,7 @@ matrix_t * m_inverse (matrix_t *M)
 #ifdef __NVCC__
 	// TODO: stub
 #else
-	int *ipiv = (int *)malloc(M->rows * sizeof(int));
+	int *ipiv = (int *)malloc(M->cols * sizeof(int));
 
 	LAPACKE_dgetrf(LAPACK_COL_MAJOR,
 		M->rows, M->cols, M_inv->data, M->rows,

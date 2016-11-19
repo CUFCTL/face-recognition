@@ -393,16 +393,16 @@ void test_m_eigen()
 		0.2500, 0.5000, 0.7500, 1.0000
 	};
 	precision_t M_eval_data[] = {
-		2.5362,
-		0.8482,
+		0.2078,
 		0.4078,
-		0.2078
+		0.8482,
+		2.5362
 	};
 	precision_t M_evec_data[] = {
-		-0.3778, -0.8105, -0.4422, -0.0694,
-		-0.5322, -0.1877,  0.7420,  0.3619,
-		-0.5614,  0.3010,  0.0487, -0.7694,
-		-0.5088,  0.4661, -0.5015,  0.5218
+		 0.0694, -0.4422, -0.8105,  0.3778,
+		-0.3619,  0.7420, -0.1877,  0.5322,
+		 0.7694,  0.0487,  0.3010,  0.5614,
+		-0.5218, -0.5015,  0.4661,  0.5088
 	};
 	matrix_t *M = m_initialize_data(4, 4, M_data);
 	matrix_t *M_eval;
@@ -429,7 +429,6 @@ void test_m_eigen()
 	m_free(M_evec);
 }
 
-// TODO: find more examples, check this example against MATLAB
 /**
  * Test generalized eigenvalues, eigenvectors for two matrices.
  */
@@ -446,9 +445,9 @@ void test_m_eigen2()
 		0, 0, 1
 	};
 	precision_t J_eval_data[] = {
-		3.0000,
 		0.0000,
-		0.0000
+		0.0000,
+		3.0000
 	};
 	precision_t J_evec_data[] = {
 		 0.4082,  0.7071,  0.5774,
