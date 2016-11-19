@@ -12,10 +12,7 @@
 #include "database.h"
 #include "matrix.h"
 
-#define maxNumIterations 100
-#define epsilon 0.0001
-
-matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteningMatrix);
+matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix);
 
 /**
  * An alternate implementation of PCA.
@@ -25,52 +22,73 @@ matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteni
  * our C implementation of PCA. Until these two functions can be resolved,
  * ICA will have to use this function.
  *
- * @param X
- * @param L_eval
+ * @param X    input matrix in columns
+ * @param p_D  pointer to store eigenvalues
  * @return principal components of X in columns
  */
-matrix_t * PCA_alt(matrix_t *X, matrix_t **L_eval)
+matrix_t * PCA_alt(matrix_t *X, matrix_t **p_D)
 {
-    // TODO: add normalization weight param to m_covariance
-    matrix_t *X_tr = m_transpose(X);
-    matrix_t *C = m_covariance(X_tr);
-    matrix_t *W_pca;
+    // compute the covariance of X
+    matrix_t *C = m_covariance(X);
 
-    m_eigen(C, L_eval, &W_pca);
+    // compute the eigenvalues, eigenvectors of the covariance
+    matrix_t *E_temp1;
+    matrix_t *D_temp1;
 
-    m_free(X_tr);
+    m_eigen(C, &E_temp1, &D_temp1);
+
+    // take the highest N-1 eigenvalues
+    matrix_t *E = m_copy_columns(E_temp1, 1, E_temp1->cols);
+    matrix_t *D_temp2 = m_copy_columns(D_temp1, 1, D_temp1->cols);
+    matrix_t *D = m_copy_rows(D_temp2, 1, D_temp2->rows);
+
+    // save outputs
+    *p_D = D;
+
+    // cleanup
     m_free(C);
+    m_free(E_temp1);
+    m_free(D_temp1);
+    m_free(D_temp2);
 
-    return W_pca;
+    return E;
 }
 
 /**
- * Compute the whitening matrix W_z for a matrix X.
+ * Compute the whitening matrix for a matrix X.
  *
  * The whitening matrix, when applied to X, removes
  * the first- and second-order statistics; that is,
  * the mean and covariances are set to zero and the
  * variances are equalized.
  *
- * @param X  mean-subtracted input matrix
- * @return whitening matrix W_z
+ * @param X  input matrix
+ * @param E  matrix of eigenvectors in columns
+ * @param D  diagonal matrix of eigenvalues
+ * @param p_whiteningMatrix
+ * @return whitened output matrix
  */
-matrix_t * sphere (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **whiteningMatrix, matrix_t **dewhiteningMatrix)
+matrix_t * whiten (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **p_whiteningMatrix)
 {
-    // compute whitened data based on whitenv.m
-    m_elem_apply(D, sqrt);
-    matrix_t *inv_sqrt_D = m_inverse(D);
-    matrix_t *E_tr = m_transpose(E);
-    *whiteningMatrix = m_product(inv_sqrt_D, E_tr);
-    *dewhiteningMatrix = m_product(E, D);
+    // compute whitening matrix
+    matrix_t *D_temp1 = m_copy(D);
+    m_elem_apply(D_temp1, sqrt);
 
-    matrix_t * newVectors = m_product(*whiteningMatrix, m_transpose(X));
+    matrix_t *D_temp2 = m_inverse(D_temp1);
+    matrix_t *E_tr = m_transpose(E);
+    matrix_t *whiteningMatrix = m_product(D_temp2, E_tr);
+
+    // compute output matrix
+    matrix_t *whitesig = m_product(whiteningMatrix, X);
 
     // cleanup
-    m_free(inv_sqrt_D);
+    m_free(D_temp1);
+    m_free(D_temp2);
     m_free(E_tr);
 
-    return newVectors;
+    *p_whiteningMatrix = whiteningMatrix;
+
+    return whitesig;
 }
 
 /**
@@ -90,19 +108,18 @@ matrix_t * ICA (matrix_t *X)
     m_subtract_columns(mixedsig, mixedmean);
 
     // compute principal components
-    matrix_t *L_eval;
-    matrix_t *W_pca = PCA_alt(mixedsig, &L_eval);
-    matrix_t *D = m_diagonalize(L_eval);
+    matrix_t *D;
+    matrix_t *E = PCA_alt(X, &D);
 
     // compute whitened input
     matrix_t *whiteningMatrix;
-    matrix_t *dewhiteningMatrix;
-    matrix_t *whitesig = sphere(X, W_pca, D, &whiteningMatrix, &dewhiteningMatrix);
+    matrix_t *whitesig = whiten(mixedsig, E, D, &whiteningMatrix);
 
     // compute mixing matrix
-    matrix_t *W = fpica(whitesig, dewhiteningMatrix, whiteningMatrix);
+    matrix_t *W = fpica(whitesig, whiteningMatrix);
 
     // compute independent components
+    // icasig = W * mixedsig + (W * mixedmean) * ones(1, mixedsig->cols)
     matrix_t *icasig = m_product(W, mixedsig);
     matrix_t *icasig_temp1 = m_product(W, mixedmean);
     matrix_t *icasig_temp2 = m_ones(1, mixedsig->cols);
@@ -113,11 +130,9 @@ matrix_t * ICA (matrix_t *X)
     // cleanup
     m_free(mixedsig);
     m_free(mixedmean);
-    m_free(L_eval);
-    m_free(W_pca);
+    m_free(E);
     m_free(D);
     m_free(whiteningMatrix);
-    m_free(dewhiteningMatrix);
     m_free(whitesig);
     m_free(W);
     m_free(icasig_temp1);
@@ -128,145 +143,146 @@ matrix_t * ICA (matrix_t *X)
 }
 
 /**
- * Function    : fpica
- * Parameters  : X   -> whitened data as column vectors
- * Return      : A   -> mixing matrix (W is A's inverse)
- * Purpose     : This function runs the deflation ICA method from the Matlab
- *               implementation provided by http://research.ics.aalto.fi/ica/fastica/ .
- *               whitesig must be input as a whitened data matrix with the input
- *               and whitened/mean subtracted/PCA-performed preprocessing steps
- *               already complete. The function will return the mixing matrix A
- *               which contain the ICA components.
- *               We are implementing the deflation approach and using the nonlinearity
- *               function pow3.
+ * Compute the third power (cube) of a number.
+ *
+ * @param x
+ * @return x ^ 3
  */
-
-// this translation starts at line 582 of fpica.m
-matrix_t * fpica (matrix_t * X, matrix_t * dewhiteningMatrix, matrix_t * whiteningMatrix)
+precision_t pow3(precision_t x)
 {
-    int round = 1, c = 0;
+    return pow(x, 3);
+}
 
-    int numSamples = X->cols; // make sure this and vectorSize are correct
+/**
+ * Compute the mixing matrix W for an input matrix X using the deflation
+ * approach and the nonlinearity functions pow3. The input matrix should
+ * already be whitened.
+ *
+ * @param X
+ * @param whiteningMatrix
+ * @return mixing matrix W
+ */
+matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
+{
+    const int MAX_ITERATIONS = 1000;
+    const precision_t EPSILON = 0.0001;
+
     int vectorSize = X->rows;
+    int numSamples = X->cols;
 
-    // initialize output matrices
-    matrix_t * B = m_zeros(vectorSize, vectorSize);
-    //matrix_t * A = m_zeros(vectorSize, vectorSize);
-    matrix_t * W = m_zeros(vectorSize, vectorSize);
+    matrix_t *B = m_zeros(vectorSize, vectorSize);
+    matrix_t *W = m_zeros(vectorSize, whiteningMatrix->cols);
+    matrix_t *X_tr = m_transpose(X);
 
-    // initialize matrices
-    matrix_t * wOld = m_zeros(vectorSize, 1);
+    int i;
+    for ( i = 0; i < vectorSize; i++ ) {
+        if ( VERBOSE ) {
+            printf("round %d\n", i + 1);
+        }
 
-    while (round <= vectorSize)
-    {
-        // BEGIN line 613 fpica.m
-        matrix_t * w = m_random(vectorSize, 1);
+        // initialize w as a Gaussian random vector
+        matrix_t *w = m_random(vectorSize, 1);
 
-        // helper matrices for line 613 of fpica.m
-        matrix_t * transposeB = m_transpose(B);
-        matrix_t * tempB = m_product(B, transposeB);
-        matrix_t * tempB_prod_w = m_product(tempB, w);
+        // compute w = (w - B * B' * w), normalize w
+        matrix_t *B_tr = m_transpose(B);
+        matrix_t *w_temp1 = m_product(B, B_tr);
+        matrix_t *w_temp2 = m_product(w_temp1, w);
 
-        m_subtract(w, tempB_prod_w);
+        m_subtract(w, w_temp2);
+        m_elem_mult(w, 1 / m_norm(w));
 
-        m_elem_mult(w, (1/m_norm(w)));
+        m_free(B_tr);
+        m_free(w_temp1);
+        m_free(w_temp2);
 
-        m_free(transposeB);
-        m_free(tempB);
-        m_free(tempB_prod_w);
-        // END line 613 fpica.m
+        // initialize w0
+        matrix_t *w0 = m_zeros(w->rows, w->cols);
 
-        printf("round %d\n", round);
+        int j;
+        for ( j = 0; j < MAX_ITERATIONS; j++ ) {
+            // compute w = (w - B * B' * w), normalize w
+            B_tr = m_transpose(B);
+            w_temp1 = m_product(B, B_tr);
+            w_temp2 = m_product(w_temp1, w);
 
-        int i = 0;
+            m_subtract(w, w_temp2);
+            m_elem_mult(w, 1 / m_norm(w));
 
-        while (i <= maxNumIterations + 1)
-        {
-            // Project the vector into the space orthogonal to the space
-            // spanned by the earlier found basis vectors. Note that we can do
-            // the projection with matrix B, since the zero entries do not
-            // contribute to the projection.
-            transposeB = m_transpose(B);
-            tempB = m_product(B, transposeB);
-            tempB_prod_w = m_product(tempB, w);
+            m_free(B_tr);
+            m_free(w_temp1);
+            m_free(w_temp2);
 
-            m_subtract(w, tempB_prod_w);
-            m_elem_mult(w, (1/m_norm(w)));
+            // compute w_delta1 = w - w0
+            matrix_t *w_delta1 = m_copy(w);
+            m_subtract(w_delta1, w0);
 
-            matrix_t * copy_w = m_copy(w);
-            matrix_t * copy_w2 = m_copy(w);
+            // compute w_delta2 = w + w0
+            matrix_t *w_delta2 = m_copy(w);
+            m_add(w_delta2, w0);
 
-            m_subtract(copy_w, wOld);
-            m_add(copy_w2, wOld);
+            // determine whether the direction of w and w0 are equal
+            precision_t norm1 = m_norm(w_delta1);
+            precision_t norm2 = m_norm(w_delta2);
 
-            // line 680 of fpica.m
-            if (m_norm(copy_w) < epsilon || m_norm(copy_w2) < epsilon)
-            {
-                // save the vector w to the matrix B
-                for (c = 0; c < vectorSize; c++)
-                {
-                    elem(B, c, round) = elem(w, c, 0);
-                }
-
-                // calculate the de-whitened vector
-                //matrix_t * temp_A_vec = m_product(dewhiteningMatrix, w);
-
-                // save the de-whitened vector to matrix A
-                //for (c = 0; c < vectorSize; c++)
-                //{
-                //    elem(A, c, round) = elem(temp_A_vec, c, 0);
-                //}
-
-                //m_free(temp_A_vec);
-
-                // calculate ICA filter
-                matrix_t * temp_W_vec = m_product(m_transpose(w), whiteningMatrix);
-
-                // save the ICA filter vector
-                for (c = 0; c < vectorSize; c++)
-                {
-                    elem(W, round, c) = elem(temp_W_vec, 0, c);
-                }
-
-                m_free(temp_W_vec);
+            if ( VERBOSE ) {
+                printf("%lf %lf\n", norm1, norm2);
             }
 
-            wOld = w;
+            int converged = (norm1 < EPSILON) || (norm2 < EPSILON);
 
-            // pow3 function on w on line 767 of fpica.m
-            matrix_t * X_tran = m_transpose(X);
-            matrix_t * X_tran_w = m_product(X_tran, w);
-            m_free(X_tran);
+            m_free(w_delta1);
+            m_free(w_delta2);
 
-            // raise each element to the third power
-            for (c = 0; c < vectorSize; c++)
-            {
-                elem(X_tran_w, c, 0) = pow(elem(X_tran_w, c, 0), 3);
+            // terminate round if w converges
+            if ( converged ) {
+                // save B(:, i) = w
+                m_assign_column(B, i, w, 0);
+
+                // save W(i, :) = w' * whiteningMatrix
+                matrix_t *w_tr = m_transpose(w);
+                matrix_t *W_temp1 = m_product(w_tr, whiteningMatrix);
+
+                m_assign_row(W, i, W_temp1, 0);
+
+                // cleanup
+                m_free(w_tr);
+                m_free(W_temp1);
+
+                // continue to the next round
+                break;
             }
 
-            matrix_t * w_cpy = m_copy(w);
-            m_elem_mult(w_cpy, 3);
-            w = m_product(X, X_tran_w);
-            m_elem_mult(w, (1/numSamples));
-            m_subtract(w, w_cpy);
+            // update w0
+            m_assign_column(w0, 0, w, 0);
 
-            m_free(w_cpy);
-            m_free(X_tran_w);
+            // compute w = X * ((X' * w) .^ 3) / numSamples - 3 * w
+            w_temp1 = m_product(X_tr, w);
+            m_elem_apply(w_temp1, pow3);
 
-            m_free(copy_w);
-            m_free(copy_w2);
-            m_free(transposeB);
-            m_free(tempB);
-            m_free(tempB_prod_w);
+            w_temp2 = m_copy(w);
+            m_elem_mult(w_temp2, 3);
 
-            m_elem_mult(w, (1/m_norm(w)));
-            i++;
+            w = m_product(X, w_temp1);
+            m_elem_mult(w, 1.0 / numSamples);
+            m_subtract(w, w_temp2);
+
+            // normalize w
+            m_elem_mult(w, 1 / m_norm(w));
+
+            m_free(w_temp1);
+            m_free(w_temp2);
+        }
+
+        if ( VERBOSE ) {
+            printf("iterations: %d\n", j);
         }
 
         m_free(w);
-        round++;
+        m_free(w0);
     }
 
+    m_free(B);
+    m_free(X_tr);
 
     return W;
 }
