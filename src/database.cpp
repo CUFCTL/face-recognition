@@ -279,6 +279,16 @@ int nearest_neighbor(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
 	return min_index;
 }
 
+typedef struct {
+	int enabled;
+	const char * name;
+	matrix_t *W_tr;
+	matrix_t *P;
+	dist_func_t dist_func;
+	int rec_index;
+	int num_correct;
+} rec_params_t;
+
 /**
  * Test a set of images against a database.
  *
@@ -289,6 +299,14 @@ void db_recognize(database_t *db, const char *path)
 {
 	timing_push("Recognition");
 
+	// initialize parameters for each recognition algorithm
+	rec_params_t algorithms[] = {
+		{ db->pca, "PCA", db->W_pca_tr, db->P_pca, m_dist_L2, 0 },
+		{ db->lda, "LDA", db->W_lda_tr, db->P_lda, m_dist_L2, 0 },
+		{ db->ica, "ICA", db->W_ica_tr, db->P_ica, m_dist_COS, 0 }
+	};
+	int num_algorithms = sizeof(algorithms) / sizeof(rec_params_t);
+
 	// get test images
 	char **image_names;
 	int num_test_images = get_directory(path, &image_names);
@@ -296,16 +314,6 @@ void db_recognize(database_t *db, const char *path)
 	// test each image against the database
 	image_t *image = image_construct();
 	matrix_t *T_i = m_initialize(db->num_dimensions, 1);
-	matrix_t *P_test_pca;
-	matrix_t *P_test_lda;
-	matrix_t *P_test_ica;
-	int index_pca;
-	int index_lda;
-	int index_ica;
-
-	int num_correct_pca = 0;
-	int num_correct_lda = 0;
-	int num_correct_ica = 0;
 
 	int i;
 	for ( i = 0; i < num_test_images; i++ ) {
@@ -314,28 +322,17 @@ void db_recognize(database_t *db, const char *path)
 		m_image_read(T_i, 0, image);
 		m_subtract(T_i, db->mean_face);
 
-		// find the nearest neighbor of P_test for PCA
-		if ( db->pca ) {
-			P_test_pca = m_product(db->W_pca_tr, T_i);
-			index_pca = nearest_neighbor(db->P_pca, P_test_pca, m_dist_L2);
+		// perform recognition for each algorithm
+		int j;
+		for ( j = 0; j < num_algorithms; j++ ) {
+			rec_params_t *params = &algorithms[j];
 
-			m_free(P_test_pca);
-		}
+			if ( params->enabled ) {
+				matrix_t *P_test = m_product(params->W_tr, T_i);
+				params->rec_index = nearest_neighbor(params->P, P_test, params->dist_func);
 
-		// find the nearest neighbor of P_test for LCA
-		if ( db->lda ) {
-			P_test_lda = m_product(db->W_lda_tr, T_i);
-			index_lda = nearest_neighbor(db->P_lda, P_test_lda, m_dist_L2);
-
-			m_free(P_test_lda);
-		}
-
-		// find the nearest neighbor of P_test for ICA
-		if ( db->ica ) {
-			P_test_ica = m_product(db->W_ica_tr, T_i);
-			index_ica = nearest_neighbor(db->P_ica, P_test_ica, m_dist_COS);
-
-			m_free(P_test_ica);
+				m_free(P_test);
+			}
 		}
 
 		// print results
@@ -343,33 +340,19 @@ void db_recognize(database_t *db, const char *path)
 			printf("test image: \'%s\'\n", rem_base_dir(image_names[i]));
 		}
 
-		if ( db->pca ) {
-			if ( VERBOSE ) {
-				printf("       PCA: \'%s\'\n", rem_base_dir(db->entries[index_pca].name));
-			}
+		for ( j = 0; j < num_algorithms; j++ ) {
+			rec_params_t *params = &algorithms[j];
 
-			if ( is_same_class(db->entries[index_pca].name, image_names[i]) ) {
-				num_correct_pca++;
-			}
-		}
+			if ( params->enabled ) {
+				char *rec_name = db->entries[params->rec_index].name;
 
-		if ( db->lda ) {
-			if ( VERBOSE ) {
-				printf("       LDA: \'%s\'\n", rem_base_dir(db->entries[index_lda].name));
-			}
+				if ( VERBOSE ) {
+					printf("       %s: \'%s\'\n", params->name, rem_base_dir(rec_name));
+				}
 
-			if ( is_same_class(db->entries[index_lda].name, image_names[i]) ) {
-				num_correct_lda++;
-			}
-		}
-
-		if ( db->ica ) {
-			if ( VERBOSE ) {
-				printf("       ICA: \'%s\'\n", rem_base_dir(db->entries[index_ica].name));
-			}
-
-			if ( is_same_class(db->entries[index_ica].name, image_names[i]) ) {
-				num_correct_ica++;
+				if ( is_same_class(rec_name, image_names[i]) ) {
+					params->num_correct++;
+				}
 			}
 		}
 
@@ -379,36 +362,18 @@ void db_recognize(database_t *db, const char *path)
 	}
 
 	// print accuracy results
-	if ( db->pca ) {
-		double success_rate_pca = 100.0 * num_correct_pca / num_test_images;
+	for ( i = 0; i < num_algorithms; i++ ) {
+		rec_params_t *params = &algorithms[i];
 
-		if ( VERBOSE ) {
-			printf("PCA: %d / %d matched, %.2f%%\n", num_correct_pca, num_test_images, success_rate_pca);
-		}
-		else {
-			printf("%.2f\n", success_rate_pca);
-		}
-	}
+		if ( params->enabled ) {
+			float accuracy = 100.0f * params->num_correct / num_test_images;
 
-	if ( db->lda ) {
-		double success_rate_lda = 100.0 * num_correct_lda / num_test_images;
-
-		if ( VERBOSE ) {
-			printf("LDA: %d / %d matched, %.2f%%\n", num_correct_lda, num_test_images, success_rate_lda);
-		}
-		else {
-			printf("%.2f\n", success_rate_lda);
-		}
-	}
-
-	if ( db->ica ) {
-		double success_rate_ica = 100.0 * num_correct_ica / num_test_images;
-
-		if ( VERBOSE ) {
-			printf("ICA: %d / %d matched, %.2f%%\n", num_correct_ica, num_test_images, success_rate_ica);
-		}
-		else {
-			printf("%.2f\n", success_rate_ica);
+			if ( VERBOSE ) {
+				printf("%s: %d / %d matched, %.2f%%\n", params->name, params->num_correct, num_test_images, accuracy);
+			}
+			else {
+				printf("%.2f\n", accuracy);
+			}
 		}
 	}
 

@@ -16,6 +16,7 @@ test-matrix
 *.dat
 *.log
 *.mat
+*.out
 *.txt
 
 # archives
