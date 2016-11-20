@@ -4,7 +4,6 @@
  * Implementation of PCA (Turk and Pentland, 1991).
  */
 #include "database.h"
-#include "matrix.h"
 #include "timing.h"
 
 /**
@@ -20,48 +19,36 @@
  */
 matrix_t * PCA(matrix_t *X, matrix_t **p_D)
 {
-	timing_start("PCA");
+	timing_push("  PCA");
 
-	timing_start("Find surrogate matrix L");
+	timing_push("    compute surrogate matrix L");
 
 	// compute the surrogate matrix L = X' * X
-	if ( VERBOSE ) {
-		printf("\tFinding Surrogate Matrix...\n");
-	}
-
 	matrix_t *X_tr = m_transpose(X);
 	matrix_t *L = m_product(X_tr, X);
 
 	m_free(X_tr);
 
-	timing_end("Find surrogate matrix L");
+	timing_pop();
 
-	timing_start("Compute Eigenspace of training set");
+	timing_push("    compute eigenvectors of L");
 
 	// compute eigenvalues, eigenvectors of L
-	if ( VERBOSE ) {
-		printf("\tComputing Eigenspace of training set...\n");
-	}
-
 	matrix_t *V;
 	matrix_t *D;
 
 	m_eigen(L, &V, &D);
 
-	timing_end("Compute Eigenspace of training set");
+	timing_pop();
 
-	timing_start("Project Training Set onto Eigenspace");
+	timing_push("    compute PCA projection matrix");
 
 	// compute principal components W_pca = X * V
-	if ( VERBOSE ) {
-		printf("\tProjecting training set onto Eigenspace...\n");
-	}
-
 	matrix_t *W_pca = m_product(X, V);
 
-	timing_end("Project Training Set onto Eigenspace");
+	timing_pop();
 
-	timing_end("PCA");
+	timing_pop();
 
 	// save outputs
 	*p_D = D;

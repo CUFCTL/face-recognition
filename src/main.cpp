@@ -117,31 +117,25 @@ int main(int argc, char **argv)
 	database_t *db = db_construct(arg_pca, arg_lda, arg_ica);
 
 	if ( arg_train && arg_recognize ) {
-		timing_start("Train Database");
 		db_train(db, path_train_set, n_opt1, n_opt2);
-		timing_end("Train Database");
 
-		timing_start("Recognize Images");
 		db_recognize(db, path_test_set);
-		timing_end("Recognize Images");
 	}
 	else if ( arg_train ) {
-		timing_start("Train Database");
 		db_train(db, path_train_set, n_opt1, n_opt2);
-		timing_end("Train Database");
 
 		db_save(db, DB_ENTRIES, DB_DATA);
 	}
 	else if ( arg_recognize ) {
 		db_load(db, DB_ENTRIES, DB_DATA);
 
-		timing_start("Train Database");
 		db_recognize(db, path_test_set);
-		timing_end("Train Database");
 	}
 
 	db_destruct(db);
 
+	// print timing information
 	timing_print();
+
 	return 0;
 }

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "database.h"
 #include "image.h"
+#include "timing.h"
 
 /**
  * Map a collection of images to column vectors.
@@ -101,6 +102,8 @@ void db_destruct(database_t *db)
  */
 void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 {
+	timing_push("Training");
+
 	db->num_images = get_directory_rec(path, &db->entries, &db->num_classes);
 
 	// compute mean-subtracted image matrix X
@@ -130,11 +133,10 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 	if ( db->lda ) {
 		if ( VERBOSE ) {
 			printf("Computing LDA representation...\n");
-		}
 
-		if ( VERBOSE ) {
-			printf("LDA Parameter #1: %d\n", n_opt1);
-			printf("LDA Parameter #2: %d\n\n", n_opt2);
+			printf("n_opt1 = %d\n", n_opt1);
+			printf("n_opt2 = %d\n", n_opt2);
+			putchar('\n');
 		}
 
 		db->W_lda_tr = LDA(W_pca, X, db->num_classes, db->entries, n_opt1, n_opt2);
@@ -151,6 +153,9 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 		db->P_ica = m_product(db->W_ica_tr, X);
 	}
 
+	timing_pop();
+
+	// cleanup
 	m_free(X);
 	m_free(W_pca);
 	m_free(D);
@@ -282,6 +287,8 @@ int nearest_neighbor(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
  */
 void db_recognize(database_t *db, const char *path)
 {
+	timing_push("Recognition");
+
 	// get test images
 	char **image_names;
 	int num_test_images = get_directory(path, &image_names);
@@ -404,6 +411,8 @@ void db_recognize(database_t *db, const char *path)
 			printf("%.2f\n", success_rate_ica);
 		}
 	}
+
+	timing_pop();
 
 	// cleanup
 	image_destruct(image);

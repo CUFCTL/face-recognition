@@ -4,7 +4,6 @@
  * Implementation of LDA (Belhumeur et al., 1996; Zhao et al., 1998).
  */
 #include "database.h"
-#include "matrix.h"
 #include "timing.h"
 #include <stdlib.h>
 
@@ -21,8 +20,6 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
 {
     matrix_t **X_classes = (matrix_t **)malloc(c * sizeof(matrix_t *));
     matrix_t **U = (matrix_t **)malloc(c * sizeof(matrix_t *));
-
-    timing_start("Compute Mean of each Class");
 
     // compute the mean of each class
     int i, j;
@@ -42,10 +39,6 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
         U[i] = m_mean_column(X_classes[i]);
     }
 
-    timing_end("Compute Mean of each Class");
-
-    timing_start("Compute Mean over all Classes");
-
     // compute the mean of all classes
     matrix_t *u = m_initialize(X->rows, 1);  // m_mean_column(U);
 
@@ -57,10 +50,6 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
     for ( i = 0; i < X->rows; i++ ) {
         elem(u, i, 0) /= c;
     }
-
-    timing_end("Compute Mean over all Classes");
-
-    timing_start("Compute Scatter between and within classes");
 
     // compute the between-scatter S_b = sum(S_b_i, i=1:c)
     // compute the within-scatter S_w = sum(S_w_i, i=1:c)
@@ -93,8 +82,6 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
         m_free(S_w_i);
     }
 
-    timing_end("Compute Scatter between and within classes");
-
     // cleanup
     for ( i = 0; i < c; i++ ) {
         m_free(X_classes[i]);
@@ -121,9 +108,9 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
  */
 matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2)
 {
-    timing_start("LDA");
+    timing_push("  LDA");
 
-    timing_start("Truncate the Eigenface Matrix");
+    timing_push("    truncate eigenfaces and projected images");
 
     // if n_opt1 = -1, use all columns in W_pca
     n_opt1 = (n_opt1 == -1)
@@ -135,9 +122,9 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     matrix_t *W_pca2_tr = m_transpose(W_pca2);
     matrix_t *P_pca = m_product(W_pca2_tr, X);
 
-    timing_end("Truncate the Eigenface Matrix");
+    timing_pop();
 
-    timing_start("Find scatter matrices");
+    timing_push("    compute scatter matrices");
 
     // compute scatter matrices S_b and S_w
     matrix_t *S_b = m_zeros(P_pca->rows, P_pca->rows);
@@ -145,9 +132,9 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     m_scatter(P_pca, c, entries, S_b, S_w);
 
-    timing_end("Find scatter matrices");
+    timing_pop();
 
-    timing_start("Construct Fisherface Matrix");
+    timing_push("    compute eigenvectors of scatter matrices");
 
     // compute W_fld = eigenvectors of S_w^-1 * S_b
     matrix_t *S_w_inv = m_inverse(S_w);
@@ -156,10 +143,6 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     matrix_t *J_eval;
 
     m_eigen(J, &J_evec, &J_eval);
-
-    timing_end("Construct Fisherface Matrix");
-
-    timing_start("Truncate Fisherface Matrix");
 
     // if n_opt2 = -1, use all columns in J_evec
     n_opt2 = (n_opt2 == -1)
@@ -170,12 +153,16 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     matrix_t *W_fld = m_copy_columns(J_evec, 0, n_opt2);
     matrix_t *W_fld_tr = m_transpose(W_fld);
 
+    timing_pop();
+
+    timing_push("    compute LDA projection matrix");
+
     // compute W_lda' = W_fld' * W_pca2'
     matrix_t *W_lda_tr = m_product(W_fld_tr, W_pca2_tr);
 
-    timing_end("Truncate Fisherface Matrix");
+    timing_pop();
 
-    timing_end("LDA");
+    timing_pop();
 
     m_free(W_pca2);
     m_free(W_pca2_tr);

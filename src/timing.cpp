@@ -4,69 +4,83 @@
  * Functions for timing code
  */
 #include "timing.h"
-#include <string.h>
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include <vector>
 
 // Global vector of timing values
 std::vector<timing_info_t> v;
 
 /**
- * Add new timing unit to vector, start timer
+ * Start a new timing item.
  *
+ * @param name
  */
-void timing_start(const char *name)
+void timing_push(const char *name)
 {
-if (TIMING) {
+if ( TIMING ) {
 	timing_info_t ti;
-
 	ti.name = name;
 	ti.start = clock();
+	ti.duration = -1;
 
 	v.push_back(ti);
 }
 }
 
 /**
- * Stop timer
+ * Stop the most recent timing item which is still running.
+ *
+ * @param id
  */
-void timing_end(const char *name)
+void timing_pop(void)
 {
-if (TIMING) {
-	std::vector<timing_info_t>::iterator n;
+if ( TIMING ) {
+	std::vector<timing_info_t>::reverse_iterator iter;
 
-	for (n = v.begin(); n != v.end(); n++) {
-		if (strcmp(n->name, name) == 0) break;
+	for ( iter = v.rbegin(); iter != v.rend(); iter++ ) {
+		if ( iter->duration == -1 ) {
+			break;
+		}
 	}
 
-	// If not true at runtime, bug exists in usage
-	assert(strcmp(n->name, name) == 0);
+	assert(iter != v.rend());
 
-	n->end = clock();
-	n->duration = (double) (n->end - n->start) / CLOCKS_PER_SEC;
+	iter->end = clock();
+	iter->duration = (double)(iter->end - iter->start) / CLOCKS_PER_SEC;
 }
 }
 
 /**
- * Print all timing values
+ * Print all timing items.
  */
 void timing_print(void)
 {
-if (TIMING) {
-	std::vector<timing_info_t>::iterator n;
-	n = v.begin();
+if ( TIMING ) {
+	std::vector<timing_info_t>::iterator iter;
 
-	printf("\n\n");
+	// determine the maximum string length
+	int max_length = 0;
+
+	for ( iter = v.begin(); iter != v.end(); iter++ ) {
+		int len = strlen(iter->name);
+
+		if ( max_length < len ) {
+			max_length = len;
+		}
+	}
+
+	// print timing items
+	putchar('\n');
 	printf("Timing Statistics\n");
-	printf("Name, Duration\n");
+	putchar('\n');
+	printf("%-*s  %s\n", max_length, "Name", "Duration (s)");
+	printf("%-*s  %s\n", max_length, "----", "------------");
 
-	do {
-		printf("%s, ", n->name);
-		printf("%.3lf\n", n->duration);
-		n++;
-	} while (n != v.end());
-
-	printf("\n\n");
+	for ( iter = v.begin(); iter != v.end(); iter++ ) {
+		printf("%-*s  % 12.3lf\n", max_length, iter->name, iter->duration);
+	}
+	putchar('\n');
 }
 }

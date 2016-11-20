@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "database.h"
-#include "matrix.h"
+#include "timing.h"
 
 matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix);
 
@@ -101,22 +101,42 @@ matrix_t * whiten (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **p_whitening
  */
 matrix_t * ICA (matrix_t *X)
 {
+    timing_push("  ICA");
+
+    timing_push("    subtract mean from input matrix");
+
     // compute mixedsig = X', subtract mean column
     matrix_t *mixedsig = m_transpose(X);
     matrix_t *mixedmean = m_mean_column(mixedsig);
 
     m_subtract_columns(mixedsig, mixedmean);
 
+    timing_pop();
+
+    timing_push("    compute principal components of input matrix");
+
     // compute principal components
     matrix_t *D;
     matrix_t *E = PCA_alt(X, &D);
+
+    timing_pop();
+
+    timing_push("    compute whitening matrix and whitened input matrix");
 
     // compute whitened input
     matrix_t *whiteningMatrix;
     matrix_t *whitesig = whiten(mixedsig, E, D, &whiteningMatrix);
 
+    timing_pop();
+
+    timing_push("    compute mixing matrix W");
+
     // compute mixing matrix
     matrix_t *W = fpica(whitesig, whiteningMatrix);
+
+    timing_pop();
+
+    timing_push("    compute independent components");
 
     // compute independent components
     // icasig = W * mixedsig + (W * mixedmean) * ones(1, mixedsig->cols)
@@ -126,6 +146,10 @@ matrix_t * ICA (matrix_t *X)
     matrix_t *icasig_temp3 = m_product(icasig_temp1, icasig_temp2);
 
     m_add(icasig, icasig_temp3);
+
+    timing_pop();
+
+    timing_pop();
 
     // cleanup
     m_free(mixedsig);
@@ -224,9 +248,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
             precision_t norm1 = m_norm(w_delta1);
             precision_t norm2 = m_norm(w_delta2);
 
-            if ( VERBOSE ) {
-                printf("%lf %lf\n", norm1, norm2);
-            }
+            // printf("%lf %lf\n", norm1, norm2);
 
             int converged = (norm1 < EPSILON) || (norm2 < EPSILON);
 

@@ -68,7 +68,7 @@ image_entry.o: src/image_entry.h src/image_entry.cpp
 matrix.o: image.o src/matrix.h src/matrix.cu
 	$(CCU) -c $(CUFLAGS) src/matrix.cu -o $@
 
-database.o: image.o image_entry.o matrix.o src/database.h src/database.cpp
+database.o: image.o image_entry.o matrix.o timing.o src/database.h src/database.cpp
 	$(CXX) -c $(CFLAGS) src/database.cpp -o $@
 
 timing.o: src/timing.h src/timing.cpp
@@ -80,7 +80,7 @@ pca.o: matrix.o timing.o src/database.h src/pca.cpp
 lda.o: matrix.o timing.o src/database.h src/lda.cpp
 	$(CXX) -c $(CFLAGS) src/lda.cpp -o $@
 
-ica.o: matrix.o src/database.h src/ica.cpp
+ica.o: matrix.o timing.o src/database.h src/ica.cpp
 	$(CXX) -c $(CFLAGS) src/ica.cpp -o $@
 
 main.o: database.o timing.o src/main.cpp
