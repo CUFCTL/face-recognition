@@ -106,7 +106,7 @@ matrix_t * m_initialize (int rows, int cols)
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
 	M->rows = rows;
 	M->cols = cols;
-	M->data = (precision_t *) malloc(rows * cols * sizeof(precision_t));
+	M->data = (precision_t *)malloc(rows * cols * sizeof(precision_t));
 
 	cublas_alloc_matrix(M);
 
@@ -124,7 +124,7 @@ matrix_t * m_identity (int rows)
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
 	M->rows = rows;
 	M->cols = rows;
-	M->data = (precision_t *) calloc(rows * rows, sizeof(precision_t));
+	M->data = (precision_t *)calloc(rows * rows, sizeof(precision_t));
 
 	int i;
 	for ( i = 0; i < rows; i++ ) {
@@ -190,8 +190,8 @@ precision_t rand_normal(precision_t mu, precision_t sigma)
 	precision_t u1 = drand48();
 	precision_t u2 = drand48();
 
-	z0 = sqrt(-2.0 * log(u1)) * cos(2.0 * M_PI * u2);
-	z1 = sqrt(-2.0 * log(u1)) * sin(2.0 * M_PI * u2);
+	z0 = sqrtf(-2.0 * logf(u1)) * cosf(2.0 * M_PI * u2);
+	z1 = sqrtf(-2.0 * logf(u1)) * sinf(2.0 * M_PI * u2);
 
 	return z0 * sigma + mu;
 }
@@ -231,7 +231,7 @@ matrix_t * m_zeros (int rows, int cols)
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
 	M->rows = rows;
 	M->cols = cols;
-	M->data = (precision_t *) calloc(rows * cols, sizeof(precision_t));
+	M->data = (precision_t *)calloc(rows * cols, sizeof(precision_t));
 
 	cublas_alloc_matrix(M);
 	cublas_set_matrix(M);
@@ -319,7 +319,7 @@ void m_fprint (FILE *stream, matrix_t *M)
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
 		for ( j = 0; j < M->cols; j++ ) {
-			fprintf(stream, "% 8.4lf ", elem(M, i, j));
+			fprintf(stream, M_ELEM_FPRINT " ", elem(M, i, j));
 		}
 		fprintf(stream, "\n");
 	}
@@ -353,7 +353,7 @@ matrix_t * m_fscan (FILE *stream)
 	int i, j;
 	for ( i = 0; i < rows; i++ ) {
 		for ( j = 0; j < cols; j++ ) {
-			fscanf(stream, "%lf", &(elem(M, i, j)));
+			fscanf(stream, M_ELEM_FSCAN, &(elem(M, i, j)));
 		}
 	}
 
@@ -441,21 +441,21 @@ matrix_t * m_covariance (matrix_t *M)
 	// compute C = 1/(N - 1) * A' * A
 	matrix_t *C = m_zeros(A->cols, A->cols);
 
-	double alpha = 1;
-	double beta = 0;
+	precision_t alpha = 1;
+	precision_t beta = 0;
 
 	// C := alpha * A' * A + beta * C
 #ifdef __NVCC__
 	cublasHandle_t handle = cublas_handle();
 
-	cublasStatus_t stat = cublasDgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
+	cublasStatus_t stat = cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
 		A->cols, A->cols, A->rows,
 		&alpha, A->data_dev, A->rows, A->data_dev, A->rows,
 		&beta, C->data_dev, C->rows);
 
 	assert(stat == CUBLAS_STATUS_SUCCESS);
 #else
-	cblas_dgemm(CblasColMajor, CblasTrans, CblasNoTrans,
+	cblas_sgemm(CblasColMajor, CblasTrans, CblasNoTrans,
 		A->cols, A->cols, A->rows,
 		alpha, A->data, A->rows, A->data, A->rows,
 		beta, C->data, C->rows);
@@ -528,7 +528,7 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
 		abs_y += elem(B, k, j) * elem(B, k, j);
 	}
 
-	return -x_dot_y / sqrt(abs_x * abs_y);
+	return -x_dot_y / sqrtf(abs_x * abs_y);
 }
 
 /**
@@ -545,7 +545,7 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
  */
 precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j)
 {
-	return sqrt(m_dist_L2(A, i, B, j));
+	return sqrtf(m_dist_L2(A, i, B, j));
 }
 
 /**
@@ -598,7 +598,7 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 #ifdef __NVCC__
 	// TODO: stub
 #else
-	LAPACKE_dsyev(LAPACK_COL_MAJOR, 'V', 'U',
+	LAPACKE_ssyev(LAPACK_COL_MAJOR, 'V', 'U',
 		M->cols, V->data, M->rows,  // input matrix (eigenvectors)
 		M_eval->data);              // eigenvalues
 #endif
@@ -639,7 +639,7 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_V, matrix_t **p_D)
 #else
 	matrix_t *B_work = m_copy(B);
 
-	LAPACKE_dsygv(LAPACK_COL_MAJOR, 1, 'V', 'U',
+	LAPACKE_ssygv(LAPACK_COL_MAJOR, 1, 'V', 'U',
 		A->cols, V->data, A->rows,  // left input matrix (eigenvectors)
 		B_work->data, B->rows,      // right input matrix
 		J_eval->data);              // eigenvalues
@@ -672,11 +672,11 @@ matrix_t * m_inverse (matrix_t *M)
 #else
 	int *ipiv = (int *)malloc(M->cols * sizeof(int));
 
-	LAPACKE_dgetrf(LAPACK_COL_MAJOR,
+	LAPACKE_sgetrf(LAPACK_COL_MAJOR,
 		M->rows, M->cols, M_inv->data, M->rows,
 		ipiv);
 
-	LAPACKE_dgetri(LAPACK_COL_MAJOR,
+	LAPACKE_sgetri(LAPACK_COL_MAJOR,
 		M->cols, M_inv->data, M->rows,
 		ipiv);
 
@@ -753,13 +753,13 @@ precision_t m_norm(matrix_t *v)
 	cublasHandle_t handle = cublas_handle();
 	precision_t result;
 
-	cublasStatus_t stat = cublasDnrm2(handle, N, v->data_dev, incX, &result);
+	cublasStatus_t stat = cublasSnrm2(handle, N, v->data_dev, incX, &result);
 
 	assert(stat == CUBLAS_STATUS_SUCCESS);
 
 	return result;
 #else
-	return cblas_dnrm2(N, v->data, incX);
+	return cblas_snrm2(N, v->data, incX);
 #endif
 }
 
@@ -776,21 +776,21 @@ matrix_t * m_product (matrix_t *A, matrix_t *B)
 
 	matrix_t *C = m_zeros(A->rows, B->cols);
 
-	double alpha = 1;
-	double beta = 0;
+	precision_t alpha = 1;
+	precision_t beta = 0;
 
 	// C := alpha * A * B + beta * C
 #ifdef __NVCC__
 	cublasHandle_t handle = cublas_handle();
 
-	cublasStatus_t stat = cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
+	cublasStatus_t stat = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
 		A->rows, B->cols, A->cols,
 		&alpha, A->data_dev, A->rows, B->data_dev, B->rows,
 		&beta, C->data_dev, C->rows);
 
 	assert(stat == CUBLAS_STATUS_SUCCESS);
 #else
-	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+	cblas_sgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
 		A->rows, B->cols, A->cols,
 		alpha, A->data, A->rows, B->data, B->rows,
 		beta, C->data, C->rows);
@@ -824,9 +824,9 @@ matrix_t * m_sqrtm (matrix_t *M)
 	int num_eval;
 	int *ISUPPZ = (int *)malloc(2 * M->rows * sizeof(int));
 
-	LAPACKE_dsyevr(LAPACK_COL_MAJOR, 'V', 'A', 'L',
+	LAPACKE_ssyevr(LAPACK_COL_MAJOR, 'V', 'A', 'L',
 		M->cols, M_work->data, M->rows,
-		0, 0, 0, 0, LAPACKE_dlamch('S'),
+		0, 0, 0, 0, LAPACKE_slamch('S'),
 		&num_eval, M_eval->data, M_evec->data, M_evec->rows,
 		ISUPPZ);
 
@@ -854,7 +854,7 @@ matrix_t * m_sqrtm (matrix_t *M)
 	// X := alpha * B * M_evec' + beta * X, alpha = 1, beta = 0
 	matrix_t *X = m_initialize(B->rows, M_evec->rows);
 
-	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasTrans,
+	cblas_sgemm(CblasColMajor, CblasNoTrans, CblasTrans,
 		B->rows, M_evec->rows, B->cols,
 		1, B->data, B->rows, M_evec->data, M_evec->rows,
 		0, X->data, X->rows);

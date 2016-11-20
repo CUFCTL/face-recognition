@@ -72,7 +72,7 @@ matrix_t * whiten (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **p_whitening
 {
     // compute whitening matrix
     matrix_t *D_temp1 = m_copy(D);
-    m_elem_apply(D_temp1, sqrt);
+    m_elem_apply(D_temp1, sqrtf);
 
     matrix_t *D_temp2 = m_inverse(D_temp1);
     matrix_t *E_tr = m_transpose(E);

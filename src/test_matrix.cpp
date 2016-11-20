@@ -55,7 +55,7 @@ int is_equal (precision_t a, precision_t b)
 {
 	static precision_t EPSILON = 10e-4;
 
-	return fabs(a - b) < EPSILON;
+	return fabsf(a - b) < EPSILON;
 }
 
 /**
@@ -425,9 +425,9 @@ void test_m_distance()
 		printf("b = \n");
 		m_fprint(stdout, b);
 
-		printf("d_COS(a, b) = % 8.4lf\n", dist_COS);
-		printf("d_L1 (a, b) = % 8.4lf\n", dist_L1);
-		printf("d_L2 (a, b) = % 8.4lf\n", dist_L2);
+		printf("d_COS(a, b) = " M_ELEM_FPRINT "\n", dist_COS);
+		printf("d_L1 (a, b) = " M_ELEM_FPRINT "\n", dist_L1);
+		printf("d_L2 (a, b) = " M_ELEM_FPRINT "\n", dist_L2);
 	}
 
 	assert_equal(dist_COS, 0.0000, "d_COS(a, b)");
@@ -486,6 +486,7 @@ void test_m_eigen()
 	m_free(D);
 }
 
+// TODO: find a better test example
 /**
  * Test generalized eigenvalues, eigenvectors for two matrices.
  */
@@ -649,7 +650,7 @@ void test_m_norm()
 		printf("v = \n");
 		m_fprint(stdout, v);
 
-		printf("norm(v) = % 8.4lf\n", n);
+		printf("norm(v) = " M_ELEM_FPRINT "\n", n);
 	}
 
 	assert_equal(n, 3.7417, "norm(v)");
@@ -1021,7 +1022,7 @@ void test_m_elem_apply()
 		m_fprint(stdout, A);
 	}
 
-	m_elem_apply(A, sqrt);
+	m_elem_apply(A, sqrtf);
 
 	if ( VERBOSE ) {
 		printf("sqrt(A) = \n");
@@ -1057,7 +1058,7 @@ void test_m_elem_mult()
 	m_elem_mult(A, c);
 
 	if ( VERBOSE ) {
-		printf("%lg * A = \n", c);
+		printf(M_ELEM_FPRINT " * A = \n", c);
 		m_fprint(stdout, A);
 	}
 
