@@ -94,10 +94,6 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
 /**
  * Compute the projection matrix of a training set with LDA.
  *
- * The recommended optimization values are as follows:
- *   n_opt1  W_pca->cols - c
- *   n_opt2  c - 1
- *
  * @param W_pca_tr  PCA projection matrix
  * @param X         image matrix
  * @param c         number of classes
@@ -112,13 +108,13 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     timing_push("    truncate eigenfaces and projected images");
 
-    // if n_opt1 = -1, use all columns in W_pca
+    // if n_opt1 = -1, use N - c
     n_opt1 = (n_opt1 == -1)
-        ? W_pca->cols
+        ? X->cols - c
         : n_opt1;
 
-    // use only the first n_opt1 columns in W_pca
-    matrix_t *W_pca2 = m_copy_columns(W_pca, 0, n_opt1);
+    // use only the last n_opt1 columns in W_pca
+    matrix_t *W_pca2 = m_copy_columns(W_pca, W_pca->cols - n_opt1, W_pca->cols);
     matrix_t *W_pca2_tr = m_transpose(W_pca2);
     matrix_t *P_pca = m_product(W_pca2_tr, X);
 
@@ -144,13 +140,13 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     m_eigen(J, &J_evec, &J_eval);
 
-    // if n_opt2 = -1, use all columns in J_evec
+    // if n_opt2 = -1, use c - 1
     n_opt2 = (n_opt2 == -1)
-        ? J_evec->cols
+        ? c - 1
         : n_opt2;
 
-    // take only the first n_opt2 columns in J_evec
-    matrix_t *W_fld = m_copy_columns(J_evec, 0, n_opt2);
+    // take only the last n_opt2 columns in J_evec
+    matrix_t *W_fld = m_copy_columns(J_evec, J_evec->cols - n_opt2, J_evec->cols);
     matrix_t *W_fld_tr = m_transpose(W_fld);
 
     timing_pop();
