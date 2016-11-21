@@ -88,13 +88,15 @@ void image_read(image_t *image, const char *path)
 	}
 
 	skip_to_next_value(in);
+
 	fscanf(in, "%d", &image->height);
-
 	skip_to_next_value(in);
+
 	fscanf(in, "%d", &image->width);
-
 	skip_to_next_value(in);
+
 	fscanf(in, "%d", &image->max_value);
+	fgetc(in);
 
 	int num = image->channels * image->height * image->width;
 
