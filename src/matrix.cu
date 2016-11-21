@@ -20,6 +20,8 @@
 
 #include "matrix.h"
 
+extern int VERBOSE;
+
 #ifdef __NVCC__
 
 /**
@@ -603,9 +605,19 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 		M_eval->data);              // eigenvalues
 #endif
 
+	// diagonalize eigenvalues
+	matrix_t *D = m_diagonalize(M_eval);
+
 	// save output
 	*p_V = V;
-	*p_D = m_diagonalize(M_eval);
+	*p_D = D;
+
+	if ( VERBOSE ) {
+		printf("%s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d])\n",
+		       "V", V->rows, V->cols,
+		       "D", D->rows, D->cols,
+		       "M", M->rows, M->cols);
+	}
 
 	// cleanup
 	m_free(M_eval);
@@ -795,6 +807,14 @@ matrix_t * m_product (matrix_t *A, matrix_t *B)
 		alpha, A->data, A->rows, B->data, B->rows,
 		beta, C->data, C->rows);
 #endif
+
+	// print debug information
+	if ( VERBOSE ) {
+		printf("%s [%d,%d] <- %s [%d,%d] * %s [%d,%d]\n",
+		       "C", C->rows, C->cols,
+		       "A", A->rows, A->cols,
+		       "B", B->rows, B->cols);
+	}
 
 	return C;
 }

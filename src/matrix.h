@@ -18,9 +18,9 @@ typedef float precision_t;
 #define M_ELEM_FSCAN   "%f"
 
 typedef struct {
-	precision_t *data;
 	int rows;
 	int cols;
+	precision_t *data;
 #ifdef __NVCC__
 	precision_t *data_dev;
 #endif

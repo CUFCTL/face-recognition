@@ -23,17 +23,13 @@ matrix_t * PCA(matrix_t *X, matrix_t **p_D)
 
 	timing_push("    compute surrogate matrix L");
 
-	// compute the surrogate matrix L = X' * X
 	matrix_t *X_tr = m_transpose(X);
 	matrix_t *L = m_product(X_tr, X);
-
-	m_free(X_tr);
 
 	timing_pop();
 
 	timing_push("    compute eigenvectors of L");
 
-	// compute eigenvalues, eigenvectors of L
 	matrix_t *V;
 	matrix_t *D;
 
@@ -43,7 +39,6 @@ matrix_t * PCA(matrix_t *X, matrix_t **p_D)
 
 	timing_push("    compute PCA projection matrix");
 
-	// compute principal components W_pca = X * V
 	matrix_t *W_pca = m_product(X, V);
 
 	timing_pop();
@@ -54,6 +49,7 @@ matrix_t * PCA(matrix_t *X, matrix_t **p_D)
 	*p_D = D;
 
 	// cleanup
+	m_free(X_tr);
 	m_free(L);
 	m_free(V);
 

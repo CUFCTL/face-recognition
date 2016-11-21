@@ -7,6 +7,8 @@
 #include "matrix.h"
 #include "image.h"
 
+int VERBOSE;
+
 int main(int argc, char **argv)
 {
 	if ( argc != 2 ) {
