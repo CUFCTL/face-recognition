@@ -14,7 +14,7 @@
 
 typedef float precision_t;
 
-#define M_ELEM_FPRINT  "% 8.4f"
+#define M_ELEM_FPRINT  "% 10.4g"
 #define M_ELEM_FSCAN   "%f"
 
 typedef struct {

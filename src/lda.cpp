@@ -43,13 +43,9 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
     matrix_t *u = m_initialize(X->rows, 1);  // m_mean_column(U);
 
     for ( i = 0; i < c; i++ ) {
-        for ( j = 0; j < X->rows; j++ ) {
-            elem(u, j, 0) += elem(U[i], j, 0);
-        }
+        m_add(u, U[i]);
     }
-    for ( i = 0; i < X->rows; i++ ) {
-        elem(u, i, 0) /= c;
-    }
+    m_elem_mult(u, 1.0f / c);
 
     // compute the between-scatter S_b = sum(S_b_i, i=1:c)
     // compute the within-scatter S_w = sum(S_w_i, i=1:c)
