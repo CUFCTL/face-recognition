@@ -925,12 +925,22 @@ void m_add (matrix_t *A, matrix_t *B)
 {
 	assert(A->rows == B->rows && A->cols == B->cols);
 
-	int i, j;
-	for ( i = 0; i < A->rows; i++ ) {
-		for ( j = 0; j < A->cols; j++ ) {
-			elem(A, i, j) += elem(B, i, j);
-		}
-	}
+	int N = A->rows * A->cols;
+	precision_t alpha = 1.0f;
+	int incX = 1;
+	int incY = 1;
+
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasSaxpy(handle, N, &alpha,
+		B->data_dev, incX,
+		A->data_dev, incY);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#else
+	cblas_saxpy(N, alpha, B->data, incX, A->data, incY);
+#endif
 }
 
 /**
@@ -980,12 +990,22 @@ void m_subtract (matrix_t *A, matrix_t *B)
 {
 	assert(A->rows == B->rows && A->cols == B->cols);
 
-	int i, j;
-	for ( i = 0; i < A->rows; i++ ) {
-		for ( j = 0; j < A->cols; j++ ) {
-			elem(A, i, j) -= elem(B, i, j);
-		}
-	}
+	int N = A->rows * A->cols;
+	precision_t alpha = -1.0f;
+	int incX = 1;
+	int incY = 1;
+
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasSaxpy(handle, N, &alpha,
+		B->data_dev, incX,
+		A->data_dev, incY);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#else
+	cblas_saxpy(N, alpha, B->data, incX, A->data, incY);
+#endif
 }
 
 /**
@@ -1013,12 +1033,18 @@ void m_elem_apply (matrix_t * M, elem_func_t f)
  */
 void m_elem_mult (matrix_t *M, precision_t c)
 {
-	int i, j;
-	for ( i = 0; i < M->rows; i++ ) {
-		for ( j = 0; j < M->cols; j++ ) {
-			elem(M, i, j) *= c;
-		}
-	}
+	int N = M->rows * M->cols;
+	int incX = 1;
+
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasSscal(handle, N, &c, M->data_dev, incX);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#else
+	cblas_sscal(N, c, M->data, incX);
+#endif
 }
 
 /**
