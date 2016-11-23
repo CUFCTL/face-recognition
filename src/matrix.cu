@@ -537,7 +537,7 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
  * Compute the L1 distance between two column vectors.
  *
  * L1 is the Euclidean distance:
- * d_L1(x, y) = ||x - y||
+ * d_L1(x, y) = |x - y|
  *
  * @param A  pointer to matrix
  * @param i  column index of A
@@ -547,14 +547,23 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
  */
 precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j)
 {
-	return sqrtf(m_dist_L2(A, i, B, j));
+	assert(A->rows == B->rows);
+
+	precision_t dist = 0;
+
+	int k;
+	for ( k = 0; k < A->rows; k++ ) {
+		dist += abs(elem(A, k, i) - elem(B, k, j));
+	}
+
+	return dist;
 }
 
 /**
  * Compute the L2 distance between two column vectors.
  *
  * L2 is the square of the Euclidean distance:
- * d_L2(x, y) = ||x - y||^2
+ * d_L2(x, y) = ||x - y||
  *
  * @param A  pointer to matrix
  * @param i  column index of A
@@ -574,7 +583,7 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
 		dist += diff * diff;
 	}
 
-	return dist;
+	return sqrt(dist);
 }
 
 /**

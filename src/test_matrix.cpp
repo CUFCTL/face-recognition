@@ -430,9 +430,9 @@ void test_m_distance()
 		printf("d_L2 (a, b) = " M_ELEM_FPRINT "\n", dist_L2);
 	}
 
-	assert_equal(dist_COS, 0.0000, "d_COS(a, b)");
-	assert_equal(dist_L1, 1.4142, "d_L1(a, b)");
-	assert_equal(dist_L2, 2.0000, "d_L2(a, b)");
+	assert_equal(dist_COS, 0, "d_COS(a, b)");
+	assert_equal(dist_L1, 2, "d_L1(a, b)");
+	assert_equal(dist_L2, 1.4142, "d_L2(a, b)");
 
 	m_free(a);
 	m_free(b);
