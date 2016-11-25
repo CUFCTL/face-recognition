@@ -8,15 +8,15 @@
 #include <stdlib.h>
 
 /**
- * Compute the scatter matrices S_w and S_b for a set of images.
+ * Compute the scatter matrices S_b and S_w for a matrix X.
  *
- * @param X        pointer to input matrix
+ * @param X        input matrix
  * @param c        number of classes
  * @param entries  list of entries for each column of X
- * @param S_b      pointer to store between-scatter matrix
- * @param S_w      pointer to store within-scatter matrix
+ * @param p_S_b    pointer to store between-scatter matrix
+ * @param p_S_w    pointer to store within-scatter matrix
  */
-void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix_t *S_w)
+void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, matrix_t **p_S_w)
 {
     matrix_t **X_classes = (matrix_t **)malloc(c * sizeof(matrix_t *));
     matrix_t **U = (matrix_t **)malloc(c * sizeof(matrix_t *));
@@ -49,6 +49,9 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
 
     // compute the between-scatter S_b = sum(S_b_i, i=1:c)
     // compute the within-scatter S_w = sum(S_w_i, i=1:c)
+    matrix_t *S_b = m_zeros(X->rows, X->rows);
+    matrix_t *S_w = m_zeros(X->rows, X->rows);
+
     for ( i = 0; i < c; i++ ) {
         matrix_t *X_class = X_classes[i];
 
@@ -74,6 +77,10 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
         m_free(S_w_i);
     }
 
+    // save outputs
+    *p_S_b = S_b;
+    *p_S_w = S_w;
+
     // cleanup
     for ( i = 0; i < c; i++ ) {
         m_free(X_classes[i]);
@@ -81,6 +88,7 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
     }
     free(X_classes);
     free(U);
+    m_free(u);
 }
 
 /**
@@ -114,10 +122,10 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     timing_push("    compute scatter matrices");
 
     // compute scatter matrices S_b and S_w
-    matrix_t *S_b = m_zeros(P_pca->rows, P_pca->rows);
-    matrix_t *S_w = m_zeros(P_pca->rows, P_pca->rows);
+    matrix_t *S_b;
+    matrix_t *S_w;
 
-    m_scatter(P_pca, c, entries, S_b, S_w);
+    m_scatter(P_pca, c, entries, &S_b, &S_w);
 
     timing_pop();
 
