@@ -23,8 +23,7 @@ matrix_t * PCA(matrix_t *X, matrix_t **p_D)
 
 	timing_push("    compute surrogate matrix L");
 
-	matrix_t *X_tr = m_transpose(X);
-	matrix_t *L = m_product(X_tr, X);
+	matrix_t *L = m_product(X, X, true, false);
 
 	timing_pop();
 
@@ -49,7 +48,6 @@ matrix_t * PCA(matrix_t *X, matrix_t **p_D)
 	*p_D = D;
 
 	// cleanup
-	m_free(X_tr);
 	m_free(L);
 	m_free(V);
 

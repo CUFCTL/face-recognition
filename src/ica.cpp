@@ -2,8 +2,6 @@
  * @file ica.c
  *
  * Implementation of ICA (Hyvarinen, 1999).
- *
- * Random normal distribution code from http://www.csee.usf.edu/~kchriste/tools/gennorm.c
  */
 #include <assert.h>
 #include <math.h>
@@ -70,13 +68,12 @@ matrix_t * PCA_alt(matrix_t *X, matrix_t **p_D)
  */
 matrix_t * whiten (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **p_whiteningMatrix)
 {
-    // compute whitening matrix
+    // compute whitening matrix W_z = inv(sqrt(D)) * E'
     matrix_t *D_temp1 = m_copy(D);
     m_elem_apply(D_temp1, sqrtf);
 
     matrix_t *D_temp2 = m_inverse(D_temp1);
-    matrix_t *E_tr = m_transpose(E);
-    matrix_t *whiteningMatrix = m_product(D_temp2, E_tr);
+    matrix_t *whiteningMatrix = m_product(D_temp2, E, false, true);
 
     // compute output matrix
     matrix_t *whitesig = m_product(whiteningMatrix, X);
@@ -84,7 +81,6 @@ matrix_t * whiten (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **p_whitening
     // cleanup
     m_free(D_temp1);
     m_free(D_temp2);
-    m_free(E_tr);
 
     *p_whiteningMatrix = whiteningMatrix;
 
@@ -147,6 +143,10 @@ matrix_t * ICA (matrix_t *X)
 
     m_add(icasig, icasig_temp3);
 
+    // compute W_ica = icasig'
+    // TODO: review for optimization
+    matrix_t *W_ica = m_transpose(icasig);
+
     timing_pop();
 
     timing_pop();
@@ -162,8 +162,9 @@ matrix_t * ICA (matrix_t *X)
     m_free(icasig_temp1);
     m_free(icasig_temp2);
     m_free(icasig_temp3);
+    m_free(icasig);
 
-    return icasig;
+    return W_ica;
 }
 
 /**
@@ -196,7 +197,6 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
 
     matrix_t *B = m_zeros(vectorSize, vectorSize);
     matrix_t *W = m_zeros(vectorSize, whiteningMatrix->cols);
-    matrix_t *X_tr = m_transpose(X);
 
     int i;
     for ( i = 0; i < vectorSize; i++ ) {
@@ -208,14 +208,12 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
         matrix_t *w = m_random(vectorSize, 1);
 
         // compute w = (w - B * B' * w), normalize w
-        matrix_t *B_tr = m_transpose(B);
-        matrix_t *w_temp1 = m_product(B, B_tr);
+        matrix_t *w_temp1 = m_product(B, B, false, true);
         matrix_t *w_temp2 = m_product(w_temp1, w);
 
         m_subtract(w, w_temp2);
         m_elem_mult(w, 1 / m_norm(w));
 
-        m_free(B_tr);
         m_free(w_temp1);
         m_free(w_temp2);
 
@@ -225,14 +223,12 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
         int j;
         for ( j = 0; j < MAX_ITERATIONS; j++ ) {
             // compute w = (w - B * B' * w), normalize w
-            B_tr = m_transpose(B);
-            w_temp1 = m_product(B, B_tr);
+            w_temp1 = m_product(B, B, false, true);
             w_temp2 = m_product(w_temp1, w);
 
             m_subtract(w, w_temp2);
             m_elem_mult(w, 1 / m_norm(w));
 
-            m_free(B_tr);
             m_free(w_temp1);
             m_free(w_temp2);
 
@@ -261,13 +257,11 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
                 m_assign_column(B, i, w, 0);
 
                 // save W(i, :) = w' * whiteningMatrix
-                matrix_t *w_tr = m_transpose(w);
-                matrix_t *W_temp1 = m_product(w_tr, whiteningMatrix);
+                matrix_t *W_temp1 = m_product(w, whiteningMatrix, true, false);
 
                 m_assign_row(W, i, W_temp1, 0);
 
                 // cleanup
-                m_free(w_tr);
                 m_free(W_temp1);
 
                 // continue to the next round
@@ -278,7 +272,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
             m_assign_column(w0, 0, w, 0);
 
             // compute w = X * ((X' * w) .^ 3) / numSamples - 3 * w
-            w_temp1 = m_product(X_tr, w);
+            w_temp1 = m_product(X, w, true, false);
             m_elem_apply(w_temp1, pow3);
 
             w_temp2 = m_copy(w);
@@ -304,7 +298,6 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
     }
 
     m_free(B);
-    m_free(X_tr);
 
     return W;
 }

@@ -65,7 +65,7 @@ matrix_t * m_inverse (matrix_t *M);
 matrix_t * m_mean_column (matrix_t *M);
 matrix_t * m_mean_row (matrix_t *M);
 precision_t m_norm(matrix_t *v);
-matrix_t * m_product (matrix_t *A, matrix_t *B);
+matrix_t * m_product (matrix_t *A, matrix_t *B, bool transA=false, bool transB=false);
 matrix_t * m_sqrtm (matrix_t *M);
 matrix_t * m_transpose (matrix_t *M);
 

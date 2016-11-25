@@ -441,27 +441,7 @@ matrix_t * m_covariance (matrix_t *M)
 	m_subtract_rows(A, mu);
 
 	// compute C = 1/(N - 1) * A' * A
-	matrix_t *C = m_zeros(A->cols, A->cols);
-
-	precision_t alpha = 1;
-	precision_t beta = 0;
-
-	// C := alpha * A' * A + beta * C
-#ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
-
-	cublasStatus_t stat = cublasSgemm(handle, CUBLAS_OP_T, CUBLAS_OP_N,
-		A->cols, A->cols, A->rows,
-		&alpha, A->data_dev, A->rows, A->data_dev, A->rows,
-		&beta, C->data_dev, C->rows);
-
-	assert(stat == CUBLAS_STATUS_SUCCESS);
-#else
-	cblas_sgemm(CblasColMajor, CblasTrans, CblasNoTrans,
-		A->cols, A->cols, A->rows,
-		alpha, A->data, A->rows, A->data, A->rows,
-		beta, C->data, C->rows);
-#endif
+	matrix_t *C = m_product(A, A, true, false);
 
 	precision_t c = (M->rows > 1)
 		? M->rows - 1
@@ -787,15 +767,22 @@ precision_t m_norm(matrix_t *v)
 /**
  * Get the product of two matrices.
  *
- * @param A  pointer to left matrix
- * @param B  pointer to right matrix
+ * @param A
+ * @param B
+ * @param transA
+ * @param transB
  * @return pointer to new matrix equal to A * B
  */
-matrix_t * m_product (matrix_t *A, matrix_t *B)
+matrix_t * m_product (matrix_t *A, matrix_t *B, bool transA, bool transB)
 {
-	assert(A->cols == B->rows);
+	int M = transA ? A->cols : A->rows;
+	int K = transA ? A->rows : A->cols;
+	int K2 = transB ? B->cols : B->rows;
+	int N = transB ? B->rows : B->cols;
 
-	matrix_t *C = m_zeros(A->rows, B->cols);
+	assert(K == K2);
+
+	matrix_t *C = m_zeros(M, N);
 
 	precision_t alpha = 1;
 	precision_t beta = 0;
@@ -803,26 +790,39 @@ matrix_t * m_product (matrix_t *A, matrix_t *B)
 	// C := alpha * A * B + beta * C
 #ifdef __NVCC__
 	cublasHandle_t handle = cublas_handle();
+	cublasOperation_t transa = transA
+		? CUBLAS_OP_T
+		: CUBLAS_OP_N;
+	cublasOperation_t transb = transB
+		? CUBLAS_OP_T
+		: CUBLAS_OP_N;
 
-	cublasStatus_t stat = cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N,
-		A->rows, B->cols, A->cols,
+	cublasStatus_t stat = cublasSgemm(handle, transa, transb,
+		M, N, K,
 		&alpha, A->data_dev, A->rows, B->data_dev, B->rows,
 		&beta, C->data_dev, C->rows);
 
 	assert(stat == CUBLAS_STATUS_SUCCESS);
 #else
-	cblas_sgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-		A->rows, B->cols, A->cols,
+	CBLAS_TRANSPOSE TransA = transA
+		? CblasTrans
+		: CblasNoTrans;
+	CBLAS_TRANSPOSE TransB = transB
+		? CblasTrans
+		: CblasNoTrans;
+
+	cblas_sgemm(CblasColMajor, TransA, TransB,
+		M, N, K,
 		alpha, A->data, A->rows, B->data, B->rows,
 		beta, C->data, C->rows);
 #endif
 
 	// print debug information
 	if ( VERBOSE ) {
-		printf("%s [%d,%d] <- %s [%d,%d] * %s [%d,%d]\n",
-		       "C", C->rows, C->cols,
-		       "A", A->rows, A->cols,
-		       "B", B->rows, B->cols);
+		printf("%s [%d,%d] <- %s%s [%d,%d] * %s%s [%d,%d]\n",
+		       "C", M, N,
+		       "A", transA ? "'" : "", M, K,
+		       "B", transB ? "'" : "", K, N);
 	}
 
 	return C;
@@ -840,63 +840,33 @@ matrix_t * m_sqrtm (matrix_t *M)
 {
 	assert(M->rows == M->cols);
 
-#ifdef __NVCC__
-	// TODO: stub
+	// compute [V, D] = eig(M)
+	matrix_t *V;
+	matrix_t *D;
 
-	return NULL;
-#else
-	// compute eigenvalues, eigenvectors
-	matrix_t *M_work = m_copy(M);
-	matrix_t *M_eval = m_initialize(M->rows, 1);
-	matrix_t *M_evec = m_initialize(M->rows, M->cols);
+	m_eigen(M, &V, &D);
 
-	int num_eval;
-	int *ISUPPZ = (int *)malloc(2 * M->rows * sizeof(int));
+	// compute B = V * sqrt(D)
+	m_elem_apply(D, sqrtf);
 
-	LAPACKE_ssyevr(LAPACK_COL_MAJOR, 'V', 'A', 'L',
-		M->cols, M_work->data, M->rows,
-		0, 0, 0, 0, LAPACKE_slamch('S'),
-		&num_eval, M_eval->data, M_evec->data, M_evec->rows,
-		ISUPPZ);
+	matrix_t *B = m_product(V, D);
 
-	m_free(M_work);
-	free(ISUPPZ);
+	// compute X = B * V'
+	matrix_t *X = m_product(B, V, false, true);
 
-	assert(num_eval == M->rows);
-
-	// compute B = M_evec * sqrt(D),
-	//   D = eigenvalues of M in the diagonal
-	matrix_t *B = m_copy(M_evec);
-
-	int i, j;
-	for ( j = 0; j < B->cols; j++ ) {
-		precision_t lambda = sqrt(elem(M_eval, j, 0));
-
-		for ( i = 0; i < B->rows; i++ ) {
-			elem(B, i, j) *= lambda;
-		}
-	}
-
-	m_free(M_eval);
-
-	// compute X = B * M_evec'
-	// X := alpha * B * M_evec' + beta * X, alpha = 1, beta = 0
-	matrix_t *X = m_initialize(B->rows, M_evec->rows);
-
-	cblas_sgemm(CblasColMajor, CblasNoTrans, CblasTrans,
-		B->rows, M_evec->rows, B->cols,
-		1, B->data, B->rows, M_evec->data, M_evec->rows,
-		0, X->data, X->rows);
-
+	// cleanup
 	m_free(B);
-	m_free(M_evec);
+	m_free(V);
+	m_free(D);
 
 	return X;
-#endif
 }
 
 /**
  * Get the transpose of a matrix.
+ *
+ * NOTE: This function should not be necessary since
+ * most transposes should be handled by m_product().
  *
  * @param M  pointer to matrix
  * @return pointer to new transposed matrix

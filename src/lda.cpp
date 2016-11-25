@@ -56,8 +56,7 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
         matrix_t *u_i = m_copy(U[i]);
         m_subtract(u_i, u);
 
-        matrix_t *u_i_tr = m_transpose(u_i);
-        matrix_t *S_b_i = m_product(u_i, u_i_tr);
+        matrix_t *S_b_i = m_product(u_i, u_i, false, true);
         m_elem_mult(S_b_i, X_class->cols);
 
         m_add(S_b, S_b_i);
@@ -65,16 +64,13 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
         // compute S_w_i = X_class * X_class', X_class is mean-subtracted
         m_subtract_columns(X_class, U[i]);
 
-        matrix_t *X_class_tr = m_transpose(X_class);
-        matrix_t *S_w_i = m_product(X_class, X_class_tr);
+        matrix_t *S_w_i = m_product(X_class, X_class, false, true);
 
         m_add(S_w, S_w_i);
 
         // cleanup
         m_free(u_i);
-        m_free(u_i_tr);
         m_free(S_b_i);
-        m_free(X_class_tr);
         m_free(S_w_i);
     }
 
@@ -90,13 +86,13 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t *S_b, matrix
 /**
  * Compute the projection matrix of a training set with LDA.
  *
- * @param W_pca_tr  PCA projection matrix
- * @param X         image matrix
- * @param c         number of classes
- * @param entries   list of entries for each image
- * @param n_opt1    number of columns in W_pca to use
- * @param n_opt2    number of columns in W_fld to use
- * @return projection matrix W_lda'
+ * @param W_pca    PCA projection matrix
+ * @param X        image matrix
+ * @param c        number of classes
+ * @param entries  list of entries for each image
+ * @param n_opt1   number of columns in W_pca to use
+ * @param n_opt2   number of columns in W_fld to use
+ * @return projection matrix W_lda
  */
 matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2)
 {
@@ -111,8 +107,7 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     // use only the last n_opt1 columns in W_pca
     matrix_t *W_pca2 = m_copy_columns(W_pca, W_pca->cols - n_opt1, W_pca->cols);
-    matrix_t *W_pca2_tr = m_transpose(W_pca2);
-    matrix_t *P_pca = m_product(W_pca2_tr, X);
+    matrix_t *P_pca = m_product(W_pca2, X, true, false);
 
     timing_pop();
 
@@ -143,21 +138,19 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     // take only the last n_opt2 columns in J_evec
     matrix_t *W_fld = m_copy_columns(J_evec, J_evec->cols - n_opt2, J_evec->cols);
-    matrix_t *W_fld_tr = m_transpose(W_fld);
 
     timing_pop();
 
     timing_push("    compute LDA projection matrix");
 
-    // compute W_lda' = W_fld' * W_pca2'
-    matrix_t *W_lda_tr = m_product(W_fld_tr, W_pca2_tr);
+    // compute W_lda = (W_fld' * W_pca2')' = W_pca2 * W_fld
+    matrix_t *W_lda = m_product(W_pca2, W_fld);
 
     timing_pop();
 
     timing_pop();
 
     m_free(W_pca2);
-    m_free(W_pca2_tr);
     m_free(P_pca);
     m_free(S_b);
     m_free(S_w);
@@ -166,7 +159,6 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     m_free(J_eval);
     m_free(J_evec);
     m_free(W_fld);
-    m_free(W_fld_tr);
 
-    return W_lda_tr;
+    return W_lda;
 }

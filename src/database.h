@@ -21,15 +21,15 @@ typedef struct {
 	matrix_t *mean_face;
 
 	int pca;
-	matrix_t *W_pca_tr;
+	matrix_t *W_pca;
 	matrix_t *P_pca;
 
 	int lda;
-	matrix_t *W_lda_tr;
+	matrix_t *W_lda;
 	matrix_t *P_lda;
 
 	int ica;
-	matrix_t *W_ica_tr;
+	matrix_t *W_ica;
 	matrix_t *P_ica;
 } database_t;
 

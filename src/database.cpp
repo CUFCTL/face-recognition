@@ -77,17 +77,17 @@ void db_destruct(database_t *db)
 	m_free(db->mean_face);
 
 	if ( db->pca || db->lda || db->ica ) {
-		m_free(db->W_pca_tr);
+		m_free(db->W_pca);
 		m_free(db->P_pca);
 	}
 
 	if ( db->lda ) {
-		m_free(db->W_lda_tr);
+		m_free(db->W_lda);
 		m_free(db->P_lda);
 	}
 
 	if ( db->ica ) {
-		m_free(db->W_ica_tr);
+		m_free(db->W_ica);
 		m_free(db->P_ica);
 	}
 
@@ -106,7 +106,7 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 
 	db->num_images = get_directory_rec(path, &db->entries, &db->num_classes);
 
-	// compute mean-subtracted image matrix X
+	// subtract mean from X
 	matrix_t *X = get_image_matrix(db->entries, db->num_images);
 
 	db->num_dimensions = X->rows;
@@ -115,7 +115,6 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 	m_subtract_columns(X, db->mean_face);
 
 	// compute PCA representation
-	matrix_t *W_pca;
 	matrix_t *D;
 
 	if ( db->pca || db->lda || db->ica ) {
@@ -123,10 +122,8 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 			printf("Computing PCA representation...\n");
 		}
 
-		W_pca = PCA(X, &D);
-
-		db->W_pca_tr = m_transpose(W_pca);
-		db->P_pca = m_product(db->W_pca_tr, X);
+		db->W_pca = PCA(X, &D);
+		db->P_pca = m_product(db->W_pca, X, true, false);
 	}
 
 	// compute LDA representation
@@ -139,8 +136,8 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 			putchar('\n');
 		}
 
-		db->W_lda_tr = LDA(W_pca, X, db->num_classes, db->entries, n_opt1, n_opt2);
-		db->P_lda = m_product(db->W_lda_tr, X);
+		db->W_lda = LDA(db->W_pca, X, db->num_classes, db->entries, n_opt1, n_opt2);
+		db->P_lda = m_product(db->W_lda, X, true, false);
 	}
 
 	// compute ICA representation
@@ -149,15 +146,14 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 			printf("Computing ICA representation...\n");
 		}
 
-		db->W_ica_tr = ICA(X); // W_pca, D
-		db->P_ica = m_product(db->W_ica_tr, X);
+		db->W_ica = ICA(X); // W_pca, D
+		db->P_ica = m_product(db->W_ica, X, true, false);
 	}
 
 	timing_pop();
 
 	// cleanup
 	m_free(X);
-	m_free(W_pca);
 	m_free(D);
 }
 
@@ -185,17 +181,17 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 	m_fwrite(tdata, db->mean_face);
 
 	if ( db->pca || db->lda || db->ica ) {
-		m_fwrite(tdata, db->W_pca_tr);
+		m_fwrite(tdata, db->W_pca);
 		m_fwrite(tdata, db->P_pca);
 	}
 
 	if ( db->lda ) {
-		m_fwrite(tdata, db->W_lda_tr);
+		m_fwrite(tdata, db->W_lda);
 		m_fwrite(tdata, db->P_lda);
 	}
 
 	if ( db->ica ) {
-		m_fwrite(tdata, db->W_ica_tr);
+		m_fwrite(tdata, db->W_ica);
 		m_fwrite(tdata, db->P_ica);
 	}
 
@@ -217,17 +213,17 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 	db->mean_face = m_fread(tdata);
 
 	if ( db->pca || db->lda || db->ica ) {
-		db->W_pca_tr = m_fread(tdata);
+		db->W_pca = m_fread(tdata);
 		db->P_pca = m_fread(tdata);
 	}
 
 	if ( db->lda ) {
-		db->W_lda_tr = m_fread(tdata);
+		db->W_lda = m_fread(tdata);
 		db->P_lda = m_fread(tdata);
 	}
 
 	if ( db->ica ) {
-		db->W_ica_tr = m_fread(tdata);
+		db->W_ica = m_fread(tdata);
 		db->P_ica = m_fread(tdata);
 	}
 
@@ -282,7 +278,7 @@ int nearest_neighbor(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
 typedef struct {
 	int enabled;
 	const char * name;
-	matrix_t *W_tr;
+	matrix_t *W;
 	matrix_t *P;
 	dist_func_t dist_func;
 	int rec_index;
@@ -301,9 +297,9 @@ void db_recognize(database_t *db, const char *path)
 
 	// initialize parameters for each recognition algorithm
 	rec_params_t algorithms[] = {
-		{ db->pca, "PCA", db->W_pca_tr, db->P_pca, m_dist_L2, 0 },
-		{ db->lda, "LDA", db->W_lda_tr, db->P_lda, m_dist_L2, 0 },
-		{ db->ica, "ICA", db->W_ica_tr, db->P_ica, m_dist_COS, 0 }
+		{ db->pca, "PCA", db->W_pca, db->P_pca, m_dist_L2, 0 },
+		{ db->lda, "LDA", db->W_lda, db->P_lda, m_dist_L2, 0 },
+		{ db->ica, "ICA", db->W_ica, db->P_ica, m_dist_COS, 0 }
 	};
 	int num_algorithms = sizeof(algorithms) / sizeof(rec_params_t);
 
@@ -328,7 +324,7 @@ void db_recognize(database_t *db, const char *path)
 			rec_params_t *params = &algorithms[j];
 
 			if ( params->enabled ) {
-				matrix_t *P_test = m_product(params->W_tr, T_i);
+				matrix_t *P_test = m_product(params->W, T_i, true, false);
 				params->rec_index = nearest_neighbor(params->P, P_test, params->dist_func);
 
 				m_free(P_test);
