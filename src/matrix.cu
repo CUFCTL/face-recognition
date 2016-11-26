@@ -582,25 +582,37 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 {
 	assert(M->rows == M->cols);
 
-	matrix_t *V = m_copy(M);
-	matrix_t *M_eval = m_initialize(M->rows, 1);
+	static precision_t EPSILON = 1e-8;
+
+	matrix_t *V_temp1 = m_copy(M);
+	matrix_t *D_temp1 = m_initialize(M->rows, 1);
 
 	// solve A * x = lambda * x
 #ifdef __NVCC__
 	// TODO: stub
 #else
 	LAPACKE_ssyev(LAPACK_COL_MAJOR, 'V', 'U',
-		M->cols, V->data, M->rows,  // input matrix (eigenvectors)
-		M_eval->data);              // eigenvalues
+		M->cols, V_temp1->data, M->rows,  // input matrix (eigenvectors)
+		D_temp1->data);                   // eigenvalues
 #endif
 
+	// remove eigenvalues <= 0
+	int i = 0;
+	while ( i < D_temp1->rows && elem(D_temp1, i, 0) < EPSILON ) {
+		i++;
+	}
+
+	matrix_t *V = m_copy_columns(V_temp1, i, V_temp1->cols);
+	matrix_t *D_temp2 = m_copy_rows(D_temp1, i, D_temp1->rows);
+
 	// diagonalize eigenvalues
-	matrix_t *D = m_diagonalize(M_eval);
+	matrix_t *D = m_diagonalize(D_temp2);
 
 	// save output
 	*p_V = V;
 	*p_D = D;
 
+	// print debug information
 	if ( VERBOSE ) {
 		printf("%s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d])\n",
 		       "V", V->rows, V->cols,
@@ -609,7 +621,9 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 	}
 
 	// cleanup
-	m_free(M_eval);
+	m_free(V_temp1);
+	m_free(D_temp1);
+	m_free(D_temp2);
 }
 
 /**

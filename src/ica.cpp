@@ -30,24 +30,16 @@ matrix_t * PCA_alt(matrix_t *X, matrix_t **p_D)
     matrix_t *C = m_covariance(X);
 
     // compute the eigenvalues, eigenvectors of the covariance
-    matrix_t *E_temp1;
-    matrix_t *D_temp1;
+    matrix_t *E;
+    matrix_t *D;
 
-    m_eigen(C, &E_temp1, &D_temp1);
-
-    // take the highest N-1 eigenvalues
-    matrix_t *E = m_copy_columns(E_temp1, 1, E_temp1->cols);
-    matrix_t *D_temp2 = m_copy_columns(D_temp1, 1, D_temp1->cols);
-    matrix_t *D = m_copy_rows(D_temp2, 1, D_temp2->rows);
+    m_eigen(C, &E, &D);
 
     // save outputs
     *p_D = D;
 
     // cleanup
     m_free(C);
-    m_free(E_temp1);
-    m_free(D_temp1);
-    m_free(D_temp2);
 
     return E;
 }
