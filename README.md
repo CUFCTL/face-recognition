@@ -18,6 +18,11 @@ To test MATLAB code with ORL database:
     # test with 3 random samples removed, 10 iterations
     ./scripts/cross-validate.sh -p orl_faces --matlab-only -t 3 -i 10 [--pca --lda --ica]
 
+To generate profiling information with `gprof`:
+
+    ./face-rec ...
+    gprof ./face-rec > [logfile]
+
 ## The Image Library
 
 This software currently supports a subset of the [Netpbm](https://en.wikipedia.org/wiki/Netpbm_format) format, particularly with PGM and PPM images.

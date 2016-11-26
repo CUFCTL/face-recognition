@@ -8,98 +8,95 @@ ifndef MATLIB
 MATLIB = netlib
 endif
 
-# determine compiler suite (gcc/g++, icc/icpc)
+# determine compiler suite (gcc/g++, icc/icpc, nvcc)
 ifeq ($(MATLIB), netlib)
-CC = gcc
 CXX = g++
-CCU = g++
+NVCC = g++
 else ifeq ($(MATLIB), mkl)
-CC = icc
 CXX = icpc
-CCU = icpc
+NVCC = icpc
 else ifeq ($(MATLIB), cuda)
-CCU = nvcc
+NVCC = nvcc
 endif
 
-# determine compiler and linker flags
-CFLAGS =
-CUFLAGS = -x c++
-LFLAGS = -lm
+# determine compiler, library flags
+LIBS = -lm
+CXXFLAGS =
+NVCCFLAGS = -x c++
 
 ifeq ($(BUILD), release)
-CFLAGS += -O3
+CXXFLAGS += -O3
 else ifeq ($(BUILD), debug)
-CFLAGS += -g -Wall
+CXXFLAGS += -g -pg -Wall
 endif
 
 ifeq ($(MATLIB), netlib)
-CUFLAGS += $(CFLAGS)
-LFLAGS += -lblas -llapacke
+LIBS += -lblas -llapacke
+NVCCFLAGS += $(CXXFLAGS)
 else ifeq ($(MATLIB), mkl)
-CFLAGS += -D INTEL_MKL
-CUFLAGS += $(CFLAGS)
-LFLAGS += -mkl
+LIBS += -mkl
+CXXFLAGS += -D INTEL_MKL
+NVCCFLAGS += $(CXXFLAGS)
 else ifeq ($(MATLIB), cuda)
-LFLAGS += -lcudart -lcublas
+LIBS += -lcudart -lcublas
 endif
 
-INCS = src/database.h src/image.h src/image_entry.h src/matrix.h src/timing.h
-OBJS = database.o image.o image_entry.o matrix.o pca.o lda.o ica.o timing.o
-BINS = face-rec test-matrix test-image
+INCS = src/database.h src/image_entry.h src/image.h src/matrix.h src/timing.h
+OBJS = database.o ica.o image_entry.o image.o lda.o main.o matrix.o pca.o test_image.o test_matrix.o timing.o
+BINS = face-rec test-image test-matrix
 
 all: config $(BINS)
 
 config:
-	$(info BUILD   = $(BUILD))
-	$(info MATLIB  = $(MATLIB))
-	$(info CC      = $(CC))
-	$(info CXX     = $(CXX))
-	$(info CCU     = $(CCU))
-	$(info CFLAGS  = $(CFLAGS))
-	$(info CUFLAGS = $(CUFLAGS))
-	$(info LFLAGS  = $(LFLAGS))
+	$(info BUILD     = $(BUILD))
+	$(info MATLIB    = $(MATLIB))
+	$(info CXX       = $(CXX))
+	$(info NVCC      = $(NVCC))
+	$(info LIBS      = $(LIBS))
+	$(info CXXFLAGS  = $(CXXFLAGS))
+	$(info NVCCFLAGS = $(NVCCFLAGS))
 
-image.o: src/image.h src/image.cpp
-	$(CXX) -c $(CFLAGS) src/image.cpp -o $@
+database.o: src/database.cpp src/database.h image_entry.o image.o matrix.o timing.o
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-image_entry.o: src/image_entry.h src/image_entry.cpp
-	$(CXX) -c $(CFLAGS) src/image_entry.cpp -o $@
+ica.o: src/ica.cpp src/database.h matrix.o timing.o
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-matrix.o: image.o src/matrix.h src/matrix.cu
-	$(CCU) -c $(CUFLAGS) src/matrix.cu -o $@
+image_entry.o: src/image_entry.cpp src/image_entry.h
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-database.o: image.o image_entry.o matrix.o timing.o src/database.h src/database.cpp
-	$(CXX) -c $(CFLAGS) src/database.cpp -o $@
+image.o: src/image.cpp src/image.h
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-timing.o: src/timing.h src/timing.cpp
-	$(CXX) -c $(CFLAGS) src/timing.cpp -o $@
+lda.o: src/lda.cpp src/database.h matrix.o timing.o
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-pca.o: matrix.o timing.o src/database.h src/pca.cpp
-	$(CXX) -c $(CFLAGS) src/pca.cpp -o $@
+main.o: src/main.cpp database.o timing.o
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-lda.o: matrix.o timing.o src/database.h src/lda.cpp
-	$(CXX) -c $(CFLAGS) src/lda.cpp -o $@
+matrix.o: src/matrix.cu src/matrix.h image.o
+	$(NVCC) -c $(NVCCFLAGS) -o $@ $<
 
-ica.o: matrix.o timing.o src/database.h src/ica.cpp
-	$(CXX) -c $(CFLAGS) src/ica.cpp -o $@
+pca.o: src/pca.cpp src/database.h matrix.o timing.o
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-main.o: database.o timing.o src/main.cpp
-	$(CXX) -c $(CFLAGS) src/main.cpp -o $@
+timing.o: src/timing.cpp src/timing.h
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-test_image.o: matrix.o image.o src/test_image.cpp
-	$(CXX) -c $(CFLAGS) src/test_image.cpp -o $@
+test_image.o: src/test_image.cpp image.o matrix.o
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-test_matrix.o: matrix.o src/test_matrix.cpp
-	$(CXX) -c $(CFLAGS) src/test_matrix.cpp -o $@
+test_matrix.o: src/test_matrix.cpp matrix.o
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-face-rec: image.o image_entry.o matrix.o database.o pca.o lda.o ica.o timing.o main.o
-	$(CXX) $(CFLAGS) $^ $(LFLAGS) -o $@
+face-rec: database.o ica.o image_entry.o image.o lda.o main.o matrix.o pca.o timing.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 test-image: image.o matrix.o test_image.o
-	$(CXX) $(CFLAGS) $^ $(LFLAGS) -o $@
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 test-matrix: matrix.o test_matrix.o
-	$(CXX) $(CFLAGS) $^ $(LFLAGS) -o $@
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 clean:
 	rm -f *.o $(BINS)
