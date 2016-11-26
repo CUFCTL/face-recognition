@@ -49,14 +49,35 @@ matrix_t * get_image_matrix(image_entry_t *entries, int num_images)
  * @param pca
  * @param lda
  * @param ica
+ * @param params
  * @return pointer to new database
  */
-database_t * db_construct(int pca, int lda, int ica)
+database_t * db_construct(int pca, int lda, int ica, db_params_t params)
 {
 	database_t *db = (database_t *)calloc(1, sizeof(database_t));
-	db->pca = pca;
-	db->lda = lda;
-	db->ica = ica;
+	db->params = params;
+
+	db->pca = (db_algorithm_t) {
+		pca || lda || ica, pca,
+		"PCA",
+		NULL, NULL,
+		m_dist_L2,
+		0, 0
+	};
+	db->lda = (db_algorithm_t) {
+		lda, lda,
+		"LDA",
+		NULL, NULL,
+		m_dist_L2,
+		0, 0
+	};
+	db->ica = (db_algorithm_t) {
+		ica, ica,
+		"ICA",
+		NULL, NULL,
+		m_dist_COS,
+		0, 0
+	};
 
 	return db;
 }
@@ -76,19 +97,16 @@ void db_destruct(database_t *db)
 
 	m_free(db->mean_face);
 
-	if ( db->pca || db->lda || db->ica ) {
-		m_free(db->W_pca);
-		m_free(db->P_pca);
-	}
+	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
+	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
 
-	if ( db->lda ) {
-		m_free(db->W_lda);
-		m_free(db->P_lda);
-	}
+	for ( i = 0; i < num_algorithms; i++ ) {
+		db_algorithm_t *algo = algorithms[i];
 
-	if ( db->ica ) {
-		m_free(db->W_ica);
-		m_free(db->P_ica);
+		if ( algo->train ) {
+			m_free(algo->W);
+			m_free(algo->P);
+		}
 	}
 
 	free(db);
@@ -100,7 +118,7 @@ void db_destruct(database_t *db)
  * @param db	pointer to database
  * @param path  directory of training images
  */
-void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
+void db_train(database_t *db, const char *path)
 {
 	timing_push("Training");
 
@@ -117,37 +135,40 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 	// compute PCA representation
 	matrix_t *D;
 
-	if ( db->pca || db->lda || db->ica ) {
+	if ( db->pca.train ) {
 		if ( VERBOSE ) {
 			printf("Computing PCA representation...\n");
-		}
 
-		db->W_pca = PCA_cols(X, &D);
-		db->P_pca = m_product(db->W_pca, X, true, false);
-	}
-
-	// compute LDA representation
-	if ( db->lda ) {
-		if ( VERBOSE ) {
-			printf("Computing LDA representation...\n");
-
-			printf("n_opt1 = %d\n", n_opt1);
-			printf("n_opt2 = %d\n", n_opt2);
+			printf("pca_n1 = %d\n", db->params.pca_n1);
 			putchar('\n');
 		}
 
-		db->W_lda = LDA(db->W_pca, X, db->num_classes, db->entries, n_opt1, n_opt2);
-		db->P_lda = m_product(db->W_lda, X, true, false);
+		db->pca.W = PCA_cols(X, db->params.pca_n1, &D);
+		db->pca.P = m_product(db->pca.W, X, true, false);
+	}
+
+	// compute LDA representation
+	if ( db->lda.train ) {
+		if ( VERBOSE ) {
+			printf("Computing LDA representation...\n");
+
+			printf("lda_n1 = %d\n", db->params.lda_n1);
+			printf("lda_n2 = %d\n", db->params.lda_n2);
+			putchar('\n');
+		}
+
+		db->lda.W = LDA(db->pca.W, X, db->num_classes, db->entries, db->params.lda_n1, db->params.lda_n2);
+		db->lda.P = m_product(db->lda.W, X, true, false);
 	}
 
 	// compute ICA representation
-	if ( db->ica ) {
+	if ( db->ica.train ) {
 		if ( VERBOSE ) {
 			printf("Computing ICA representation...\n");
 		}
 
-		db->W_ica = ICA(X); // W_pca, D
-		db->P_ica = m_product(db->W_ica, X, true, false);
+		db->ica.W = ICA(X); // W_pca, D
+		db->ica.P = m_product(db->ica.W, X, true, false);
 	}
 
 	timing_pop();
@@ -175,24 +196,22 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 	}
 	fclose(tset);
 
-	// save the mean face and PCA/LDA/ICA representations
+	// save the number of images, mean face, PCA/LDA/ICA representations
 	FILE *tdata = fopen(path_tdata, "w");
 
+	fwrite(&db->num_images, sizeof(db->num_images), 1, tdata);
 	m_fwrite(tdata, db->mean_face);
 
-	if ( db->pca || db->lda || db->ica ) {
-		m_fwrite(tdata, db->W_pca);
-		m_fwrite(tdata, db->P_pca);
-	}
+	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
+	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
 
-	if ( db->lda ) {
-		m_fwrite(tdata, db->W_lda);
-		m_fwrite(tdata, db->P_lda);
-	}
+	for ( i = 0; i < num_algorithms; i++ ) {
+		db_algorithm_t *algo = algorithms[i];
 
-	if ( db->ica ) {
-		m_fwrite(tdata, db->W_ica);
-		m_fwrite(tdata, db->P_ica);
+		if ( algo->train ) {
+			m_fwrite(tdata, algo->W);
+			m_fwrite(tdata, algo->P);
+		}
 	}
 
 	fclose(tdata);
@@ -207,28 +226,26 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
  */
 void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 {
-	// read the mean face and PCA/LDA/ICA representations
+	// read the number of images, mean face, PCA/LDA/ICA representations
 	FILE *tdata = fopen(path_tdata, "r");
 
+	fread(&db->num_images, sizeof(db->num_images), 1, tdata);
+
 	db->mean_face = m_fread(tdata);
-
-	if ( db->pca || db->lda || db->ica ) {
-		db->W_pca = m_fread(tdata);
-		db->P_pca = m_fread(tdata);
-	}
-
-	if ( db->lda ) {
-		db->W_lda = m_fread(tdata);
-		db->P_lda = m_fread(tdata);
-	}
-
-	if ( db->ica ) {
-		db->W_ica = m_fread(tdata);
-		db->P_ica = m_fread(tdata);
-	}
-
-	db->num_images = db->P_pca->cols;
 	db->num_dimensions = db->mean_face->rows;
+
+	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
+	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
+
+	int i;
+	for ( i = 0; i < num_algorithms; i++ ) {
+		db_algorithm_t *algo = algorithms[i];
+
+		if ( algo->train ) {
+			algo->W = m_fread(tdata);
+			algo->P = m_fread(tdata);
+		}
+	}
 
 	fclose(tdata);
 
@@ -237,7 +254,6 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 
 	db->entries = (image_entry_t *)malloc(db->num_images * sizeof(image_entry_t));
 
-	int i;
 	for ( i = 0; i < db->num_images; i++ ) {
 		db->entries[i].name = (char *)malloc(64 * sizeof(char));
 		fscanf(tset, "%d %s", &db->entries[i].ent_class, db->entries[i].name);
@@ -275,16 +291,6 @@ int nearest_neighbor(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
 	return min_index;
 }
 
-typedef struct {
-	int enabled;
-	const char * name;
-	matrix_t *W;
-	matrix_t *P;
-	dist_func_t dist_func;
-	int rec_index;
-	int num_correct;
-} rec_params_t;
-
 /**
  * Test a set of images against a database.
  *
@@ -296,12 +302,8 @@ void db_recognize(database_t *db, const char *path)
 	timing_push("Recognition");
 
 	// initialize parameters for each recognition algorithm
-	rec_params_t algorithms[] = {
-		{ db->pca, "PCA", db->W_pca, db->P_pca, m_dist_L2, 0 },
-		{ db->lda, "LDA", db->W_lda, db->P_lda, m_dist_L2, 0 },
-		{ db->ica, "ICA", db->W_ica, db->P_ica, m_dist_COS, 0 }
-	};
-	int num_algorithms = sizeof(algorithms) / sizeof(rec_params_t);
+	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
+	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
 
 	// get test images
 	char **image_names;
@@ -321,11 +323,11 @@ void db_recognize(database_t *db, const char *path)
 		// perform recognition for each algorithm
 		int j;
 		for ( j = 0; j < num_algorithms; j++ ) {
-			rec_params_t *params = &algorithms[j];
+			db_algorithm_t *algo = algorithms[j];
 
-			if ( params->enabled ) {
-				matrix_t *P_test = m_product(params->W, T_i, true, false);
-				params->rec_index = nearest_neighbor(params->P, P_test, params->dist_func);
+			if ( algo->rec ) {
+				matrix_t *P_test = m_product(algo->W, T_i, true, false);
+				algo->rec_index = nearest_neighbor(algo->P, P_test, algo->dist_func);
 
 				m_free(P_test);
 			}
@@ -337,17 +339,17 @@ void db_recognize(database_t *db, const char *path)
 		}
 
 		for ( j = 0; j < num_algorithms; j++ ) {
-			rec_params_t *params = &algorithms[j];
+			db_algorithm_t *algo = algorithms[j];
 
-			if ( params->enabled ) {
-				char *rec_name = db->entries[params->rec_index].name;
+			if ( algo->rec ) {
+				char *rec_name = db->entries[algo->rec_index].name;
 
 				if ( VERBOSE ) {
-					printf("       %s: \'%s\'\n", params->name, rem_base_dir(rec_name));
+					printf("       %s: \'%s\'\n", algo->name, rem_base_dir(rec_name));
 				}
 
 				if ( is_same_class(rec_name, image_names[i]) ) {
-					params->num_correct++;
+					algo->num_correct++;
 				}
 			}
 		}
@@ -359,13 +361,13 @@ void db_recognize(database_t *db, const char *path)
 
 	// print accuracy results
 	for ( i = 0; i < num_algorithms; i++ ) {
-		rec_params_t *params = &algorithms[i];
+		db_algorithm_t *algo = algorithms[i];
 
-		if ( params->enabled ) {
-			float accuracy = 100.0f * params->num_correct / num_test_images;
+		if ( algo->rec ) {
+			float accuracy = 100.0f * algo->num_correct / num_test_images;
 
 			if ( VERBOSE ) {
-				printf("%s: %d / %d matched, %.2f%%\n", params->name, params->num_correct, num_test_images, accuracy);
+				printf("%s: %d / %d matched, %.2f%%\n", algo->name, algo->num_correct, num_test_images, accuracy);
 			}
 			else {
 				printf("%.2f\n", accuracy);

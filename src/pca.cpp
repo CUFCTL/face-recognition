@@ -14,11 +14,12 @@
  * The principal components of a matrix are the eigenvectors of
  * the covariance matrix.
  *
- * @param X    input matrix
- * @param p_D  pointer to save eigenvalues
+ * @param X       input matrix
+ * @param n_opt1  number of columns in W_pca to use
+ * @param p_D     pointer to save eigenvalues
  * @return principal components of X in columns
  */
-matrix_t * PCA_cols(matrix_t *X, matrix_t **p_D)
+matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 {
 	timing_push("  PCA");
 
@@ -39,7 +40,13 @@ matrix_t * PCA_cols(matrix_t *X, matrix_t **p_D)
 
 	timing_push("    compute PCA projection matrix");
 
+	// if n_opt1 = -1, use N - 1
+	n_opt1 = (n_opt1 == -1)
+		? X->cols - 1
+		: n_opt1;
+
 	matrix_t *W_pca = m_product(X, V);
+	matrix_t *W_pca2 = m_copy_columns(W_pca, W_pca->cols - n_opt1, W_pca->cols);
 
 	timing_pop();
 
@@ -51,8 +58,9 @@ matrix_t * PCA_cols(matrix_t *X, matrix_t **p_D)
 	// cleanup
 	m_free(L);
 	m_free(V);
+	m_free(W_pca);
 
-	return W_pca;
+	return W_pca2;
 }
 
 /**
