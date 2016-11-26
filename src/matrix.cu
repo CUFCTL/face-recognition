@@ -591,9 +591,10 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 #ifdef __NVCC__
 	// TODO: stub
 #else
-	LAPACKE_ssyev(LAPACK_COL_MAJOR, 'V', 'U',
+	int info = LAPACKE_ssyev(LAPACK_COL_MAJOR, 'V', 'U',
 		M->cols, V_temp1->data, M->rows,  // input matrix (eigenvectors)
 		D_temp1->data);                   // eigenvalues
+	assert(info == 0);
 #endif
 
 	// remove eigenvalues <= 0
@@ -628,7 +629,8 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 
 /**
  * Compute the generalized eigenvalues and eigenvectors of two
- * symmetric matrices.
+ * symmetric matrices. The matrix B is also assumed to be positive
+ * definite.
  *
  * The eigenvalues are returned as a diagonal matrix, and the
  * eigenvectors are returned as column vectors. The i-th
@@ -654,10 +656,11 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_V, matrix_t **p_D)
 #else
 	matrix_t *B_work = m_copy(B);
 
-	LAPACKE_ssygv(LAPACK_COL_MAJOR, 1, 'V', 'U',
+	int info = LAPACKE_ssygv(LAPACK_COL_MAJOR, 1, 'V', 'U',
 		A->cols, V->data, A->rows,  // left input matrix (eigenvectors)
 		B_work->data, B->rows,      // right input matrix
 		J_eval->data);              // eigenvalues
+	assert(info == 0);
 
 	m_free(B_work);
 #endif
@@ -687,13 +690,15 @@ matrix_t * m_inverse (matrix_t *M)
 #else
 	int *ipiv = (int *)malloc(M->cols * sizeof(int));
 
-	LAPACKE_sgetrf(LAPACK_COL_MAJOR,
+	int info = LAPACKE_sgetrf(LAPACK_COL_MAJOR,
 		M->rows, M->cols, M_inv->data, M->rows,
 		ipiv);
+	assert(info == 0);
 
-	LAPACKE_sgetri(LAPACK_COL_MAJOR,
+	info = LAPACKE_sgetri(LAPACK_COL_MAJOR,
 		M->cols, M_inv->data, M->rows,
 		ipiv);
+	assert(info == 0);
 
 	free(ipiv);
 #endif

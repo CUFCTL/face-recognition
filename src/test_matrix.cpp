@@ -486,31 +486,30 @@ void test_m_eigen()
 	m_free(D);
 }
 
-// TODO: find a better test example
 /**
  * Test generalized eigenvalues, eigenvectors for two matrices.
  */
 void test_m_eigen2()
 {
 	precision_t A_data[] = {
-		1, 1, 1,
-		1, 1, 1,
-		1, 1, 1
+		 0.5377,  0.8622, -0.4336,
+		 0.8622,  0.3188,  0.3426,
+		-0.4336,  0.3426,  3.5784
 	};
 	precision_t B_data[] = {
-		1, 0, 0,
-		0, 1, 0,
-		0, 0, 1
+		 2, -1,  0,
+		-1,  2, -1,
+		 0, -1,  2
 	};
 	precision_t V_data[] = {
-		 0.4082,  0.7071,  0.5774,
-		 0.4082, -0.7071,  0.5774,
-		-0.8165,  0.0000,  0.5774
+		 0.3714,  0.6224,  0.4740,
+		-0.4204,  0.4574,  0.7836,
+		 0.0606, -0.2616,  0.8233
 	};
 	precision_t D_data[] = {
-		0.0000, 0.0000, 0.0000,
-		0.0000, 0.0000, 0.0000,
-		0.0000, 0.0000, 3.0000
+		-0.1626,  0.0000,  0.0000,
+		 0.0000,  1.0700,  0.0000,
+		 0.0000,  0.0000,  3.4864
 	};
 	matrix_t *A = m_initialize_data(3, 3, A_data);
 	matrix_t *B = m_initialize_data(3, 3, B_data);

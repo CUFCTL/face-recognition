@@ -139,6 +139,9 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     m_eigen(J, &J_evec, &J_eval);
 
+    // TODO: compare results, see if this will work
+    // m_eigen2(S_b, S_w, &J_evec, &J_eval);
+
     // if n_opt2 = -1, use c - 1
     n_opt2 = (n_opt2 == -1)
         ? c - 1
@@ -158,6 +161,7 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     timing_pop();
 
+    // cleanup
     m_free(W_pca2);
     m_free(P_pca);
     m_free(S_b);
