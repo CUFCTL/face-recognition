@@ -13,38 +13,6 @@
 matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix);
 
 /**
- * An alternate implementation of PCA.
- *
- * This implementation conforms to pcamat.m in the MATLAB ICA code;
- * however, it produces eigenvectors with different dimensions from
- * our C implementation of PCA. Until these two functions can be resolved,
- * ICA will have to use this function.
- *
- * @param X    input matrix in columns
- * @param p_D  pointer to store eigenvalues
- * @return principal components of X in columns
- */
-matrix_t * PCA_alt(matrix_t *X, matrix_t **p_D)
-{
-    // compute the covariance of X
-    matrix_t *C = m_covariance(X);
-
-    // compute the eigenvalues, eigenvectors of the covariance
-    matrix_t *E;
-    matrix_t *D;
-
-    m_eigen(C, &E, &D);
-
-    // save outputs
-    *p_D = D;
-
-    // cleanup
-    m_free(C);
-
-    return E;
-}
-
-/**
  * Compute the whitening matrix for a matrix X.
  *
  * The whitening matrix, when applied to X, removes
@@ -80,11 +48,15 @@ matrix_t * whiten (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **p_whitening
 }
 
 /**
- * Compute the independent components of a matrix of image vectors.
+ * Compute the independent components of a matrix X, which
+ * consists of observations in columns.
  *
- * TODO: should we not subtract the mean column from X beforehand?
+ * NOTE: Curently, X is transposed before it is processed, which
+ * causes there to be two extra transposes, an extra mean subtraction,
+ * and an extra PCA calculation. We should try to refactor ICA to use
+ * X in its original form to eliminate these redundancies.
  *
- * @param X  matrix of mean-subtracted images in columns
+ * @param X  input matrix
  * @return independent components of X in columns
  */
 matrix_t * ICA (matrix_t *X)
@@ -105,7 +77,7 @@ matrix_t * ICA (matrix_t *X)
 
     // compute principal components
     matrix_t *D;
-    matrix_t *E = PCA_alt(X, &D);
+    matrix_t *E = PCA_rows(X, &D);
 
     timing_pop();
 
@@ -136,7 +108,6 @@ matrix_t * ICA (matrix_t *X)
     m_add(icasig, icasig_temp3);
 
     // compute W_ica = icasig'
-    // TODO: review for optimization
     matrix_t *W_ica = m_transpose(icasig);
 
     timing_pop();

@@ -122,7 +122,7 @@ void db_train(database_t *db, const char *path, int n_opt1, int n_opt2)
 			printf("Computing PCA representation...\n");
 		}
 
-		db->W_pca = PCA(X, &D);
+		db->W_pca = PCA_cols(X, &D);
 		db->P_pca = m_product(db->W_pca, X, true, false);
 	}
 
