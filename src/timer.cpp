@@ -29,7 +29,7 @@ void timer_push(const char *name)
 		items.push_back(item);
 	}
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("%s\n", name);
 	}
 }

@@ -78,7 +78,7 @@ database_t * db_construct(int pca, int lda, int ica, db_params_t params)
 		m_dist_COS
 	};
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("Hyperparameters\n");
 		printf("PCA\n");
 		printf("  pca_n1   %10d\n", db->params.pca_n1);
@@ -383,7 +383,7 @@ void db_recognize(database_t *db, const char *path)
 			float accuracy = 100.0f * num_correct / num_entries;
 
 			// print results
-			if ( LOGLEVEL >= LL_VERBOSE ) {
+			if ( LOGGER(LL_VERBOSE) ) {
 				printf("  %s\n", algo->name);
 
 				for ( j = 0; j < num_entries; j++ ) {
@@ -391,7 +391,7 @@ void db_recognize(database_t *db, const char *path)
 						? "(!)"
 						: "";
 
-					printf("    %-10s -> %4s %s\n", basename(entries[j].name), rec_labels[j]->name, s);
+					printf("    %-10s -> %-4s %s\n", basename(entries[j].name), rec_labels[j]->name, s);
 				}
 
 				printf("    %d / %d matched, %.2f%%\n", num_correct, num_entries, accuracy);

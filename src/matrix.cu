@@ -613,7 +613,7 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 	*p_D = D;
 
 	// print debug information
-	if ( LOGLEVEL >= LL_DEBUG ) {
+	if ( LOGGER(LL_DEBUG) ) {
 		printf("%s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d])\n",
 		       "V", V->rows, V->cols,
 		       "D", D->rows, D->cols,
@@ -836,7 +836,7 @@ matrix_t * m_product (matrix_t *A, matrix_t *B, bool transA, bool transB)
 #endif
 
 	// print debug information
-	if ( LOGLEVEL >= LL_DEBUG ) {
+	if ( LOGGER(LL_DEBUG) ) {
 		printf("%s [%d,%d] <- %s%s [%d,%d] * %s%s [%d,%d]\n",
 		       "C", M, N,
 		       "A", transA ? "'" : "", M, K,

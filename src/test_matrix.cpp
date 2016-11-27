@@ -152,7 +152,7 @@ void test_m_identity()
 	};
 	matrix_t *I = m_identity(4);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("I = eye(%d) = \n", I->rows);
 		m_fprint(stdout, I);
 	}
@@ -175,7 +175,7 @@ void test_m_ones()
 	};
 	matrix_t *X = m_ones(4, 4);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("X = ones(%d, %d) = \n", X->rows, X->cols);
 		m_fprint(stdout, X);
 	}
@@ -199,7 +199,7 @@ void test_m_random()
 	};
 	matrix_t *X = m_random(5, 5);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("X = randn(%d, %d) = \n", X->rows, X->cols);
 		m_fprint(stdout, X);
 	}
@@ -222,7 +222,7 @@ void test_m_zeros()
 	};
 	matrix_t *X = m_zeros(4, 4);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("X = zeros(%d, %d) = \n", X->rows, X->cols);
 		m_fprint(stdout, X);
 	}
@@ -246,7 +246,7 @@ void test_m_copy()
 	matrix_t *A = m_initialize_data(4, 4, A_data);
 	matrix_t *C = m_copy(A);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -283,7 +283,7 @@ void test_m_copy_columns()
 	int j = 3;
 	matrix_t *C = m_copy_columns(A, i, j);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -318,7 +318,7 @@ void test_m_copy_rows()
 	int j = 3;
 	matrix_t *C = m_copy_rows(A, i, j);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -353,7 +353,7 @@ void test_m_covariance()
 
 	cublas_get_matrix(C);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -385,7 +385,7 @@ void test_m_diagonalize()
 	matrix_t *v = m_initialize_data(1, 5, v_data);
 	matrix_t *D = m_diagonalize(v);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("v = \n");
 		m_fprint(stdout, v);
 
@@ -420,7 +420,7 @@ void test_m_distance()
 	precision_t dist_L1 = m_dist_L1(a, 0, b, 0);
 	precision_t dist_L2 = m_dist_L2(a, 0, b, 0);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("a = \n");
 		m_fprint(stdout, a);
 
@@ -469,7 +469,7 @@ void test_m_eigen()
 
 	m_eigen(M, &V, &D);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("M = \n");
 		m_fprint(stdout, M);
 
@@ -520,7 +520,7 @@ void test_m_eigen2()
 
 	m_eigen2(A, B, &V, &D);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -561,7 +561,7 @@ void test_m_inverse()
 	matrix_t *X = m_initialize_data(3, 3, X_data);
 	matrix_t *Y = m_inverse(X);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("X = \n");
 		m_fprint(stdout, X);
 
@@ -591,7 +591,7 @@ void test_m_mean_column()
 	matrix_t *A = m_initialize_data(2, 3, A_data);
 	matrix_t *m = m_mean_column(A);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -622,7 +622,7 @@ void test_m_mean_row()
 	matrix_t *A = m_initialize_data(4, 3, A_data);
 	matrix_t *m = m_mean_row(A);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -647,7 +647,7 @@ void test_m_norm()
 	matrix_t *v = m_initialize_data(1, 3, v_data);
 	precision_t n = m_norm(v);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("v = \n");
 		m_fprint(stdout, v);
 
@@ -692,7 +692,7 @@ void test_m_product()
 	cublas_get_matrix(C1);
 	cublas_get_matrix(C2);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A1);
 
@@ -734,7 +734,7 @@ void test_m_product()
 
 	cublas_get_matrix(C3);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A2);
 
@@ -774,7 +774,7 @@ void test_m_sqrtm()
 	matrix_t *A = m_initialize_data(5, 5, A_data);
 	matrix_t *X = m_sqrtm(A);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -808,7 +808,7 @@ void test_m_transpose()
 	matrix_t *A = m_initialize_data(4, 4, A_data);
 	matrix_t *B = m_transpose(A);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -842,7 +842,7 @@ void test_m_add()
 	matrix_t *A = m_initialize_data(2, 2, A_data1);
 	matrix_t *B = m_initialize_data(2, 2, B_data);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -852,7 +852,7 @@ void test_m_add()
 
 	m_add(A, B);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A + B = \n");
 		m_fprint(stdout, A);
 	}
@@ -891,7 +891,7 @@ void test_m_assign_column()
 	int i = 2;
 	int j = 0;
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -903,7 +903,7 @@ void test_m_assign_column()
 
 	m_assign_column(A, i, B, j);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 	}
@@ -939,7 +939,7 @@ void test_m_assign_row()
 	int i = 2;
 	int j = 0;
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -951,7 +951,7 @@ void test_m_assign_row()
 
 	m_assign_row(A, i, B, j);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 	}
@@ -982,7 +982,7 @@ void test_m_subtract()
 	matrix_t *A = m_initialize_data(2, 2, A_data1);
 	matrix_t *B = m_initialize_data(2, 2, B_data);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 
@@ -992,7 +992,7 @@ void test_m_subtract()
 
 	m_subtract(A, B);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A - B = \n");
 		m_fprint(stdout, A);
 	}
@@ -1018,14 +1018,14 @@ void test_m_elem_apply()
 	};
 	matrix_t *A = m_initialize_data(2, 3, A_data1);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 	}
 
 	m_elem_apply(A, sqrtf);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("sqrt(A) = \n");
 		m_fprint(stdout, A);
 	}
@@ -1051,14 +1051,14 @@ void test_m_elem_mult()
 	matrix_t *A = m_initialize_data(2, 3, A_data1);
 	precision_t c = 3;
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 	}
 
 	m_elem_mult(A, c);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf(M_ELEM_FPRINT " * A = \n", c);
 		m_fprint(stdout, A);
 	}
@@ -1083,14 +1083,14 @@ void test_m_shuffle_columns()
 	};
 	matrix_t *A = m_initialize_data(2, 4, A_data1);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A = \n");
 		m_fprint(stdout, A);
 	}
 
 	m_shuffle_columns(A);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("A(:, randperm(size(A, 2))) = \n");
 		m_fprint(stdout, A);
 	}
@@ -1123,7 +1123,7 @@ void test_m_subtract_columns()
 	matrix_t *M = m_initialize_data(3, 4, M_data1);
 	matrix_t *a = m_initialize_data(3, 1, a_data);;
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("M = \n");
 		m_fprint(stdout, M);
 
@@ -1133,7 +1133,7 @@ void test_m_subtract_columns()
 
 	m_subtract_columns(M, a);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("M - a * 1_N' = \n");
 		m_fprint(stdout, M);
 	}
@@ -1165,7 +1165,7 @@ void test_m_subtract_rows()
 	matrix_t *M = m_initialize_data(3, 4, M_data1);
 	matrix_t *a = m_initialize_data(1, 4, a_data);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("M = \n");
 		m_fprint(stdout, M);
 
@@ -1175,7 +1175,7 @@ void test_m_subtract_rows()
 
 	m_subtract_rows(M, a);
 
-	if ( LOGLEVEL >= LL_VERBOSE ) {
+	if ( LOGGER(LL_VERBOSE) ) {
 		printf("M - 1_N * a = \n");
 		m_fprint(stdout, M);
 	}

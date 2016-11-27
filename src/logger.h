@@ -14,4 +14,6 @@ typedef enum logger_level_t {
 
 extern logger_level_t LOGLEVEL;
 
+#define LOGGER(level) (LOGLEVEL >= (level))
+
 #endif
