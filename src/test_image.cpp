@@ -4,10 +4,11 @@
  * Test suite for the image library.
  */
 #include <stdio.h>
-#include "matrix.h"
 #include "image.h"
+#include "logger.h"
+#include "matrix.h"
 
-int VERBOSE;
+logger_level_t LOGLEVEL = LL_INFO;
 
 int main(int argc, char **argv)
 {

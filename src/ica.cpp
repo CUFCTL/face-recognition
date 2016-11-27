@@ -156,7 +156,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix, int max_iterations, pr
 
     int i;
     for ( i = 0; i < vectorSize; i++ ) {
-        if ( VERBOSE ) {
+        if ( LOGLEVEL >= LL_VERBOSE ) {
             printf("round %d\n", i + 1);
         }
 
@@ -245,7 +245,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix, int max_iterations, pr
             m_free(w_temp2);
         }
 
-        if ( VERBOSE ) {
+        if ( LOGLEVEL >= LL_VERBOSE ) {
             printf("iterations: %d\n", j);
         }
 

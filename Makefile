@@ -41,7 +41,7 @@ else ifeq ($(MATLIB), cuda)
 LIBS += -lcudart -lcublas
 endif
 
-INCS = src/database.h src/image_entry.h src/image.h src/matrix.h src/timer.h
+INCS = src/database.h src/image_entry.h src/image.h src/logger.h src/matrix.h src/timer.h
 OBJS = database.o ica.o image_entry.o image.o lda.o main.o matrix.o pca.o test_image.o test_matrix.o timer.o
 BINS = face-rec test-image test-matrix
 

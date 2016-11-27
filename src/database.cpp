@@ -136,7 +136,7 @@ void db_train(database_t *db, const char *path)
 	matrix_t *D;
 
 	if ( db->pca.train ) {
-		if ( VERBOSE ) {
+		if ( LOGLEVEL >= LL_VERBOSE ) {
 			printf("Computing PCA representation...\n");
 
 			printf("pca_n1 = %d\n", db->params.pca_n1);
@@ -149,7 +149,7 @@ void db_train(database_t *db, const char *path)
 
 	// compute LDA representation
 	if ( db->lda.train ) {
-		if ( VERBOSE ) {
+		if ( LOGLEVEL >= LL_VERBOSE ) {
 			printf("Computing LDA representation...\n");
 
 			printf("lda_n1 = %d\n", db->params.lda_n1);
@@ -163,7 +163,7 @@ void db_train(database_t *db, const char *path)
 
 	// compute ICA representation
 	if ( db->ica.train ) {
-		if ( VERBOSE ) {
+		if ( LOGLEVEL >= LL_VERBOSE ) {
 			printf("Computing ICA representation...\n");
 
 			printf("ica_mi = %d\n", db->params.ica_max_iterations);
@@ -338,7 +338,7 @@ void db_recognize(database_t *db, const char *path)
 		}
 
 		// print results
-		if ( VERBOSE ) {
+		if ( LOGLEVEL >= LL_VERBOSE ) {
 			printf("test image: \'%s\'\n", rem_base_dir(image_names[i]));
 		}
 
@@ -348,7 +348,7 @@ void db_recognize(database_t *db, const char *path)
 			if ( algo->rec ) {
 				char *rec_name = db->entries[algo->rec_index].name;
 
-				if ( VERBOSE ) {
+				if ( LOGLEVEL >= LL_VERBOSE ) {
 					printf("       %s: \'%s\'\n", algo->name, rem_base_dir(rec_name));
 				}
 
@@ -358,7 +358,7 @@ void db_recognize(database_t *db, const char *path)
 			}
 		}
 
-		if ( VERBOSE ) {
+		if ( LOGLEVEL >= LL_VERBOSE ) {
 			putchar('\n');
 		}
 	}
@@ -370,7 +370,7 @@ void db_recognize(database_t *db, const char *path)
 		if ( algo->rec ) {
 			float accuracy = 100.0f * algo->num_correct / num_test_images;
 
-			if ( VERBOSE ) {
+			if ( LOGLEVEL >= LL_VERBOSE ) {
 				printf("%s: %d / %d matched, %.2f%%\n", algo->name, algo->num_correct, num_test_images, accuracy);
 			}
 			else {

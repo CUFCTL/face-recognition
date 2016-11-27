@@ -8,9 +8,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "database.h"
+#include "logger.h"
 #include "timer.h"
 
-int VERBOSE = 0;
+logger_level_t LOGLEVEL = LL_INFO;
 int TIMING = 0;
 
 void print_usage()
@@ -19,7 +20,7 @@ void print_usage()
 		"Usage: ./face-rec [options]\n"
 		"\n"
 		"Options:\n"
-		"  --verbose          enable verbose output\n"
+		"  --loglevel LEVEL   set the log level (1=info, 2=verbose, 3=debug)\n"
 		"  --timing           print timing information\n"
 		"  --train DIRECTORY  create a database from a training set\n"
 		"  --rec DIRECTORY    test a set of images against a database\n"
@@ -58,7 +59,7 @@ int main(int argc, char **argv)
 	char *path_test_set = NULL;
 
 	struct option long_options[] = {
-		{ "verbose", no_argument, 0, 'v' },
+		{ "loglevel", required_argument, 0, 'e' },
 		{ "timing", no_argument, 0, 's' },
 		{ "train", required_argument, 0, 't' },
 		{ "rec", required_argument, 0, 'r' },
@@ -78,8 +79,8 @@ int main(int argc, char **argv)
 	int opt;
 	while ( (opt = getopt_long_only(argc, argv, "", long_options, NULL)) != -1 ) {
 		switch ( opt ) {
-		case 'v':
-			VERBOSE = 1;
+		case 'e':
+			LOGLEVEL = (logger_level_t) atoi(optarg);
 			break;
 		case 's':
 			TIMING = 1;

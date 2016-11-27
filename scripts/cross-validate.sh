@@ -13,19 +13,10 @@ PCA=0
 LDA=0
 ICA=0
 
-N_OPT1=360
-N_OPT2=9
-
 while [[ $# -gt 0 ]]; do
     key="$1"
 
     case $key in
-    -v|--verbose)
-        ARGS="$ARGS --verbose"
-	;;
-    -s|--timing)
-	ARGS="$ARGS --timing"
-        ;;
     -p|--path)
         DB_PATH="$2"
         shift
@@ -56,11 +47,24 @@ while [[ $# -gt 0 ]]; do
         ARGS="$ARGS $1"
         ICA=1
         ;;
-    --lda1)
-        N_OPT1="$2"
+    -e|--loglevel)
+        ARGS="$ARGS --loglevel $2"
+        shift
 	;;
-    --lda2)
-        N_OPT2="$2"
+    -s|--timing)
+        ARGS="$ARGS --timing"
+        ;;
+    --pca_n1)
+        ARGS="$ARGS --pca_n1 $2"
+        shift
+	;;
+    --lda_n1)
+        ARGS="$ARGS --lda_n1 $2"
+        shift
+	;;
+    --lda_n2)
+        ARGS="$ARGS --lda_n2 $2"
+        shift
 	;;
     *)
         # unknown option
@@ -74,17 +78,21 @@ if [[ -z $DB_PATH || -z $NUM_TEST || -z $NUM_ITER || ($PCA = 0 && $LDA = 0 && $I
     >&2 echo "usage: ./scripts/cross-validate.sh [options]"
     >&2 echo
     >&2 echo "options:"
-    >&2 echo "  -v, --verbose   print all warnings and logs"
-    >&2 echo "  -p, --path      path to image database"
-    >&2 echo "  -t, --num-test  number of samples to remove from training set"
-    >&2 echo "  -i, --num-iter  number of random iterations"
-    >&2 echo "  --matlab-only   run MATLAB code only"
-    >&2 echo "  --c-only        run C code only"
-    >&2 echo "  --pca           run PCA"
-    >&2 echo "  --lda           run LDA"
-    >&2 echo "  --ica           run ICA"
-    >&2 echo "  --lda1          values for first optional lda parameter"
-    >&2 echo "  --lda2          values for second optional lda parameter"
+    >&2 echo "  -p, --path        path to image database"
+    >&2 echo "  -t, --num-test N  number of samples to remove from training set"
+    >&2 echo "  -i, --num-iter N  number of random iterations"
+    >&2 echo "  --matlab-only     run MATLAB code only"
+    >&2 echo "  --c-only          run C code only"
+    >&2 echo "  --pca             run PCA"
+    >&2 echo "  --lda             run LDA"
+    >&2 echo "  --ica             run ICA"
+    >&2 echo
+    >&2 echo "options for C code:"
+    >&2 echo "  --loglevel LEVEL  set the log level"
+    >&2 echo "  --timing          print timing information"
+    >&2 echo "  --pca_n1 N        (PCA) number of columns in W_pca to use"
+    >&2 echo "  --lda_n1 N        (LDA) number of columns in W_pca to use"
+    >&2 echo "  --lda_n2 N        (LDA) number of columns in W_fld to use"
     exit 1
 fi
 
