@@ -79,6 +79,19 @@ database_t * db_construct(int pca, int lda, int ica, db_params_t params)
 		0, 0
 	};
 
+	if ( LOGLEVEL >= LL_VERBOSE ) {
+		printf("Hyperparameters\n");
+		printf("PCA\n");
+		printf("  pca_n1   %10d\n", db->params.pca_n1);
+		printf("LDA\n");
+		printf("  lda_n1   %10d\n", db->params.lda_n1);
+		printf("  lda_n2   %10d\n", db->params.lda_n2);
+		printf("ICA\n");
+		printf("  ica_mi   %10d\n", db->params.ica_max_iterations);
+		printf("  ica_eps  %10f\n", db->params.ica_epsilon);
+		putchar('\n');
+	}
+
 	return db;
 }
 
@@ -136,41 +149,18 @@ void db_train(database_t *db, const char *path)
 	matrix_t *D;
 
 	if ( db->pca.train ) {
-		if ( LOGLEVEL >= LL_VERBOSE ) {
-			printf("Computing PCA representation...\n");
-
-			printf("pca_n1 = %d\n", db->params.pca_n1);
-			putchar('\n');
-		}
-
 		db->pca.W = PCA_cols(X, db->params.pca_n1, &D);
 		db->pca.P = m_product(db->pca.W, X, true, false);
 	}
 
 	// compute LDA representation
 	if ( db->lda.train ) {
-		if ( LOGLEVEL >= LL_VERBOSE ) {
-			printf("Computing LDA representation...\n");
-
-			printf("lda_n1 = %d\n", db->params.lda_n1);
-			printf("lda_n2 = %d\n", db->params.lda_n2);
-			putchar('\n');
-		}
-
 		db->lda.W = LDA(db->pca.W, X, db->num_classes, db->entries, db->params.lda_n1, db->params.lda_n2);
 		db->lda.P = m_product(db->lda.W, X, true, false);
 	}
 
 	// compute ICA representation
 	if ( db->ica.train ) {
-		if ( LOGLEVEL >= LL_VERBOSE ) {
-			printf("Computing ICA representation...\n");
-
-			printf("ica_mi = %d\n", db->params.ica_max_iterations);
-			printf("lda_eps = " M_ELEM_FPRINT "\n", db->params.ica_epsilon);
-			putchar('\n');
-		}
-
 		db->ica.W = ICA(X, db->params.ica_max_iterations, db->params.ica_epsilon); // W_pca, D
 		db->ica.P = m_product(db->ica.W, X, true, false);
 	}
