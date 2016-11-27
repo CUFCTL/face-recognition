@@ -28,12 +28,10 @@ typedef struct {
 typedef struct {
 	bool train;
 	bool rec;
-	const char * name;
+	const char *name;
 	matrix_t *W;
 	matrix_t *P;
 	dist_func_t dist_func;
-	int rec_index;
-	int num_correct;
 } db_algorithm_t;
 
 typedef struct {
@@ -41,10 +39,10 @@ typedef struct {
 	db_params_t params;
 
 	// input
-	int num_classes;
-	int num_images;
-	int num_dimensions;
+	int num_entries;
 	image_entry_t *entries;
+	int num_labels;
+	image_label_t *labels;
 	matrix_t *mean_face;
 
 	// algorithms

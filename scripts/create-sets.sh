@@ -5,9 +5,9 @@
 # The face database should have the following structure:
 # database/
 #   class1/
-#     image1.[ext]
-#     image2.[ext]
-#     image3.[ext]
+#     1.[ext]
+#     2.[ext]
+#     3.[ext]
 #     ...
 #   class2/
 #   class3/
@@ -59,16 +59,30 @@ if [[ -z $DB_PATH || -z $EXT || -z $SAMPLES ]]; then
 fi
 
 # initialize training set and test set
-rm -rf train_images test_images
-cp -r $DB_PATH train_images
-mkdir test_images
+TEMP_PATH="$DB_PATH"_temp
+TRAIN_PATH=train_images
+TEST_PATH=test_images
+
+rm -rf $TEMP_PATH $TRAIN_PATH $TEST_PATH
+cp -r $DB_PATH $TEMP_PATH
+mkdir $TRAIN_PATH $TEST_PATH
 
 # transform samples argument into space-separated list
 SAMPLES=$(echo $SAMPLES | tr ',' ' ')
 
-# move specified observations from each class to the test set
-for f in train_images/*; do
+# partition the data set into the training/test sets
+for f in $TEMP_PATH/*; do
+    class=$(basename $f)
+
+    # move test images
     for i in $SAMPLES; do
-        mv $f/$i.$EXT test_images/$(basename $f)_$i.$EXT
+        mv $f/$i.$EXT $TEST_PATH/"$class"_$i.$EXT
+    done
+
+    # move training images
+    for img in $f/*; do
+        mv $img $TRAIN_PATH/"$class"_$(basename $img)
     done
 done
+
+rm -rf $TEMP_PATH

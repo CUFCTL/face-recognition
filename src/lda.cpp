@@ -27,7 +27,7 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
         // extract the columns of X in class i
         int k;
         for ( k = j; k < X->cols; k++ ) {
-            if ( entries[k].ent_class != entries[j].ent_class ) {
+            if ( entries[k].label->id != entries[j].label->id ) {
                 break;
             }
         }

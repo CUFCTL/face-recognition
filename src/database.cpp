@@ -3,8 +3,10 @@
  *
  * Implementation of the database type.
  */
+#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "database.h"
 #include "image.h"
 #include "timer.h"
@@ -16,24 +18,24 @@
  * pixels in each image and n is the number of images. The
  * images must all have the same size.
  *
- * @param entries     pointer to list of image entries
- * @param num_images  number of images
+ * @param entries
+ * @param num_entries
  * @return pointer to image matrix
  */
-matrix_t * get_image_matrix(image_entry_t *entries, int num_images)
+matrix_t * get_image_matrix(image_entry_t *entries, int num_entries)
 {
 	// get the image size from the first image
 	image_t *image = image_construct();
-
 	image_read(image, entries[0].name);
 
-	matrix_t *T = m_initialize(image->channels * image->height * image->width, num_images);
+	// construct image matrix
+	matrix_t *T = m_initialize(image->channels * image->height * image->width, num_entries);
 
 	// map each image to a column vector
 	m_image_read(T, 0, image);
 
 	int i;
-	for ( i = 1; i < num_images; i++ ) {
+	for ( i = 1; i < num_entries; i++ ) {
 		image_read(image, entries[i].name);
 		m_image_read(T, i, image);
 	}
@@ -61,22 +63,19 @@ database_t * db_construct(int pca, int lda, int ica, db_params_t params)
 		pca || lda || ica, pca,
 		"PCA",
 		NULL, NULL,
-		m_dist_L2,
-		0, 0
+		m_dist_L2
 	};
 	db->lda = (db_algorithm_t) {
 		lda, lda,
 		"LDA",
 		NULL, NULL,
-		m_dist_L2,
-		0, 0
+		m_dist_L2
 	};
 	db->ica = (db_algorithm_t) {
 		ica, ica,
 		"ICA",
 		NULL, NULL,
-		m_dist_COS,
-		0, 0
+		m_dist_COS
 	};
 
 	if ( LOGLEVEL >= LL_VERBOSE ) {
@@ -98,15 +97,20 @@ database_t * db_construct(int pca, int lda, int ica, db_params_t params)
 /**
  * Destruct a database.
  *
- * @param db  pointer to database
+ * @param db
  */
 void db_destruct(database_t *db)
 {
 	int i;
-	for ( i = 0; i < db->num_images; i++ ) {
+	for ( i = 0; i < db->num_entries; i++ ) {
 		free(db->entries[i].name);
 	}
 	free(db->entries);
+
+	for ( i = 0; i < db->num_labels; i++ ) {
+		free(db->labels[i].name);
+	}
+	free(db->labels);
 
 	m_free(db->mean_face);
 
@@ -126,23 +130,23 @@ void db_destruct(database_t *db)
 }
 
 /**
- * Train a database with a set of images.
+ * Perform training on a training set.
  *
- * @param db	pointer to database
- * @param path  directory of training images
+ * @param db
+ * @param path
  */
 void db_train(database_t *db, const char *path)
 {
 	timer_push("Training");
 
-	db->num_images = get_directory_rec(path, &db->entries, &db->num_classes);
+	// get entries, labels
+	db->num_entries = get_directory(path, &db->entries, &db->num_labels, &db->labels);
+
+	// get image matrix X
+	matrix_t *X = get_image_matrix(db->entries, db->num_entries);
 
 	// subtract mean from X
-	matrix_t *X = get_image_matrix(db->entries, db->num_images);
-
-	db->num_dimensions = X->rows;
 	db->mean_face = m_mean_column(X);
-
 	m_subtract_columns(X, db->mean_face);
 
 	// compute PCA representation
@@ -155,7 +159,7 @@ void db_train(database_t *db, const char *path)
 
 	// compute LDA representation
 	if ( db->lda.train ) {
-		db->lda.W = LDA(db->pca.W, X, db->num_classes, db->entries, db->params.lda_n1, db->params.lda_n2);
+		db->lda.W = LDA(db->pca.W, X, db->num_labels, db->entries, db->params.lda_n1, db->params.lda_n2);
 		db->lda.P = m_product(db->lda.W, X, true, false);
 	}
 
@@ -181,19 +185,27 @@ void db_train(database_t *db, const char *path)
  */
 void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 {
-	// save the image filenames
+	// save the labels and entries
 	FILE *tset = fopen(path_tset, "w");
 
+	fprintf(tset, "%d\n", db->num_labels);
+
 	int i;
-	for ( i = 0; i < db->num_images; i++ ) {
-		fprintf(tset, "%d %s\n", db->entries[i].ent_class, db->entries[i].name);
+	for ( i = 0; i < db->num_labels; i++ ) {
+		fprintf(tset, "%d %s\n", db->labels[i].id, db->labels[i].name);
 	}
+
+	fprintf(tset, "%d\n", db->num_entries);
+
+	for ( i = 0; i < db->num_entries; i++ ) {
+		fprintf(tset, "%d %s\n", db->entries[i].label->id, db->entries[i].name);
+	}
+
 	fclose(tset);
 
-	// save the number of images, mean face, PCA/LDA/ICA representations
+	// save the mean face, PCA/LDA/ICA representations
 	FILE *tdata = fopen(path_tdata, "w");
 
-	fwrite(&db->num_images, sizeof(db->num_images), 1, tdata);
 	m_fwrite(tdata, db->mean_face);
 
 	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
@@ -220,13 +232,10 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
  */
 void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 {
-	// read the number of images, mean face, PCA/LDA/ICA representations
+	// read the mean face, PCA/LDA/ICA representations
 	FILE *tdata = fopen(path_tdata, "r");
 
-	fread(&db->num_images, sizeof(db->num_images), 1, tdata);
-
 	db->mean_face = m_fread(tdata);
-	db->num_dimensions = db->mean_face->rows;
 
 	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
 	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
@@ -243,14 +252,29 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 
 	fclose(tdata);
 
-	// get image filenames
+	// read labels and entries
 	FILE *tset = fopen(path_tset, "r");
 
-	db->entries = (image_entry_t *)malloc(db->num_images * sizeof(image_entry_t));
+	db->labels = (image_label_t *)malloc(db->num_labels * sizeof(image_label_t));
 
-	for ( i = 0; i < db->num_images; i++ ) {
-		db->entries[i].name = (char *)malloc(64 * sizeof(char));
-		fscanf(tset, "%d %s", &db->entries[i].ent_class, db->entries[i].name);
+	fscanf(tset, "%d", &db->num_labels);
+
+	for ( i = 0; i < db->num_labels; i++ ) {
+		db->labels[i].name = (char *)malloc(32 * sizeof(char));
+		fscanf(tset, "%d %s", &db->labels[i].id, db->labels[i].name);
+	}
+
+	db->entries = (image_entry_t *)malloc(db->num_entries * sizeof(image_entry_t));
+
+	fscanf(tset, "%d", &db->num_entries);
+
+	for ( i = 0; i < db->num_entries; i++ ) {
+		int label_id;
+
+		db->entries[i].name = (char *)malloc(32 * sizeof(char));
+		fscanf(tset, "%d %s", &label_id, db->entries[i].name);
+
+		db->entries[i].label = &db->labels[label_id];
 	}
 
 	fclose(tset);
@@ -258,22 +282,23 @@ void db_load(database_t *db, const char *path_tset, const char *path_tdata)
 
 /**
  * Find the column vector in a matrix P with minimum distance from
- * a test vector P_test.
+ * a column vector in P_test.
  *
  * @param P          pointer to matrix
- * @param P_test     pointer to column vector
+ * @param P_test     pointer to matrix
+ * @param i          column index
  * @param dist_func  pointer to distance function
  * @return index of matching column in P
  */
-int nearest_neighbor(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
+int nearest_neighbor(matrix_t *P, matrix_t *P_test, int i, dist_func_t dist_func)
 {
 	int min_index = -1;
 	precision_t min_dist = -1;
 
 	int j;
 	for ( j = 0; j < P->cols; j++ ) {
-		// compute the distance between the two images
-		precision_t dist = dist_func(P_test, 0, P, j);
+		// compute the distance between the two vectors
+		precision_t dist = dist_func(P_test, i, P, j);
 
 		// update the running minimum
 		if ( min_dist == -1 || dist < min_dist ) {
@@ -286,97 +311,99 @@ int nearest_neighbor(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
 }
 
 /**
- * Test a set of images against a database.
+ * Perform recognition on a test set.
  *
- * @param db    pointer to database
- * @param path  directory of test images
+ * @param db
+ * @param path
  */
 void db_recognize(database_t *db, const char *path)
 {
 	timer_push("Recognition");
 
-	// initialize parameters for each recognition algorithm
+	// get entries, labels
+	image_label_t *labels;
+	int num_labels;
+
+	image_entry_t *entries;
+	int num_entries = get_directory(path, &entries, &num_labels, &labels);
+
+	// get image matrix X_test
+	matrix_t *X_test = get_image_matrix(entries, num_entries);
+
+	// subtract database mean from X_test
+	m_subtract_columns(X_test, db->mean_face);
+
+	// initialize list of recognition algorithms
 	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
 	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
 
-	// get test images
-	char **image_names;
-	int num_test_images = get_directory(path, &image_names);
-
-	// test each image against the database
-	image_t *image = image_construct();
-	matrix_t *T_i = m_initialize(db->num_dimensions, 1);
-
+	// perform recognition for each algorithm
 	int i;
-	for ( i = 0; i < num_test_images; i++ ) {
-		// read the test image T_i
-		image_read(image, image_names[i]);
-		m_image_read(T_i, 0, image);
-		m_subtract(T_i, db->mean_face);
-
-		// perform recognition for each algorithm
-		int j;
-		for ( j = 0; j < num_algorithms; j++ ) {
-			db_algorithm_t *algo = algorithms[j];
-
-			if ( algo->rec ) {
-				matrix_t *P_test = m_product(algo->W, T_i, true, false);
-				algo->rec_index = nearest_neighbor(algo->P, P_test, algo->dist_func);
-
-				m_free(P_test);
-			}
-		}
-
-		// print results
-		if ( LOGLEVEL >= LL_VERBOSE ) {
-			printf("test image: \'%s\'\n", rem_base_dir(image_names[i]));
-		}
-
-		for ( j = 0; j < num_algorithms; j++ ) {
-			db_algorithm_t *algo = algorithms[j];
-
-			if ( algo->rec ) {
-				char *rec_name = db->entries[algo->rec_index].name;
-
-				if ( LOGLEVEL >= LL_VERBOSE ) {
-					printf("       %s: \'%s\'\n", algo->name, rem_base_dir(rec_name));
-				}
-
-				if ( is_same_class(rec_name, image_names[i]) ) {
-					algo->num_correct++;
-				}
-			}
-		}
-
-		if ( LOGLEVEL >= LL_VERBOSE ) {
-			putchar('\n');
-		}
-	}
-
-	// print accuracy results
 	for ( i = 0; i < num_algorithms; i++ ) {
 		db_algorithm_t *algo = algorithms[i];
 
 		if ( algo->rec ) {
-			float accuracy = 100.0f * algo->num_correct / num_test_images;
+			// compute projected test images
+			matrix_t *P_test = m_product(algo->W, X_test, true, false);
 
+			// compute labels for each test image
+			image_label_t **rec_labels = (image_label_t **)malloc(num_entries * sizeof(image_label_t *));
+
+			int j;
+			for ( j = 0; j < num_entries; j++ ) {
+				int rec_index = nearest_neighbor(algo->P, P_test, j, algo->dist_func);
+
+				rec_labels[j] = db->entries[rec_index].label;
+			}
+
+			// compute accuracy
+			int num_correct = 0;
+
+			for ( j = 0; j < num_entries; j++ ) {
+				if ( strcmp(rec_labels[j]->name, entries[j].label->name) == 0 ) {
+					num_correct++;
+				}
+			}
+
+			float accuracy = 100.0f * num_correct / num_entries;
+
+			// print results
 			if ( LOGLEVEL >= LL_VERBOSE ) {
-				printf("%s: %d / %d matched, %.2f%%\n", algo->name, algo->num_correct, num_test_images, accuracy);
+				printf("  %s\n", algo->name);
+
+				for ( j = 0; j < num_entries; j++ ) {
+					const char *s = (strcmp(rec_labels[j]->name, entries[j].label->name) != 0)
+						? "(!)"
+						: "";
+
+					printf("    %-10s -> %4s %s\n", basename(entries[j].name), rec_labels[j]->name, s);
+				}
+
+				printf("    %d / %d matched, %.2f%%\n", num_correct, num_entries, accuracy);
+				putchar('\n');
 			}
 			else {
 				printf("%.2f\n", accuracy);
 			}
+
+			// cleanup
+			m_free(P_test);
+			free(rec_labels);
 		}
 	}
 
 	timer_pop();
 
 	// cleanup
-	image_destruct(image);
-	m_free(T_i);
-
-	for ( i = 0; i < num_test_images; i++ ) {
-		free(image_names[i]);
+	for ( i = 0; i < num_entries; i++ ) {
+		free(entries[i].name);
 	}
-	free(image_names);
+	free(entries);
+
+	for ( i = 0; i < num_labels; i++ ) {
+		free(labels[i].name);
+	}
+	free(labels);
+
+	m_free(X_test);
 }
