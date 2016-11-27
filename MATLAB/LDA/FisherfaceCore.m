@@ -11,74 +11,57 @@
 % images of the same class (or person) move closer together and images of difference
 % classes move further apart: Yi = V_Fisher' * Zi = V_Fisher' * V_PCA' * (Ti - m_database)
 %
-% Argument:      T                      - (M*NxP) A 2D matrix, containing all 1D image vectors.
+% Argument:      X                      - (M*NxP) A 2D matrix, containing all 1D image vectors.
 %                                         All of 1D column vectors have the same length of M*N
-%                                         and 'T' will be a MNxP 2D matrix.
-%                NumberClasses           - number of classes
+%                                         and 'X' will be a MNxP 2D matrix.
+%                NumberClasses          - number of classes
 %
-% Returns:       m_database             - (M*Nx1) Mean of the training database
-%                V_PCA                  - (M*Nx(P-C)) Eigen vectors of the covariance matrix of the
-%                                         training database
-%                V_Fisher               - ((P-C)x(C-1)) Largest (C-1) eigen vectors of matrix J = inv(Sw) * Sb
-%                ProjectedImages_Fisher - ((C-1)xP) Training images, which are projected onto Fisher linear space
+% Returns:       W_lda                  - Projection matrix
 %
 % See also: EIG
 %
 % Original version by Amir Hossein Omidvarnia, October 2007
 %                     Email: aomidvar@ece.ut.ac.ir
 %
-function [m_database, V_PCA, V_Fisher, ProjectedImages_Fisher] = FisherfaceCore(T, NumberClasses)
+function W_lda = FisherfaceCore(X, NumberClasses)
 
-TotalImages = size(T, 2);                        % Number of columns in T, num images
+TotalImages = size(X, 2);
 ClassSize = TotalImages / NumberClasses;   % Number of images per individual
 NumEigenvaluesUsed = TotalImages - NumberClasses;
 NumEigenvaluesFisher = NumberClasses - 1;
 
-%%%%%%%%%%%%%%%%%%%%%%%% calculating the mean image
-m_database = mean(T,2);
-
-%%%%%%%%%%%%%%%%%%%%%%%% Calculating the deviation of each image from mean image
-CenteredImageDatabase = T - repmat(m_database,1,TotalImages);
-
 %%%%%%%%%%%%%%%%%%%%%%%% Snapshot method of Eigenface algorithm
-L = CenteredImageDatabase' * CenteredImageDatabase; % L is the surrogate of
- % covariance matrix C = CenteredImageDatabase * CenteredImageDatabase'
-[V, D] = eig(L); % Diagonal elements of D are the eigenvalues for both
- % L = CenteredImageDatabase' * CenteredImageDatabase and
- % C = CenteredImageDatabase * CenteredImageDatabase'.
+% L is the surrogate of covariance matrix C = X * X'
+L = X' * X;
+
+% Diagonal elements of D are the eigenvalues for both L = X' * X and C = X * X'
+[V, D] = eig(L);
+
 % Flip left-right to place largest eigenvalues in the leftmost column
 V = fliplr(V);
 D = fliplr(D);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Sorting and eliminating small eigenvalues
-L_eig_vec = [];
-for i = 1 : NumEigenvaluesUsed
-    L_eig_vec = [V(:,i) L_eig_vec];
-end
+L_eig_vec = V(:, 1 : NumEigenvaluesUsed);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the eigenvectors of covariance matrix 'C'
-V_PCA = CenteredImageDatabase * L_eig_vec; % CenteredImageDatabase: centered image vectors
+V_PCA = X * L_eig_vec;
 
 %%%%%%%%%%%%%%%%%%%%%%%% Projecting centered image vectors onto eigenspace
-% Zi = V_PCA' * (Ti-m_database)
-ProjectedImages_PCA = [];
-for i = 1 : TotalImages
-    temp = V_PCA' * CenteredImageDatabase(:,i);
-    ProjectedImages_PCA = [ProjectedImages_PCA temp];
-end
+P_PCA = V_PCA' * X;
 
 %%%%%%%%%%%%%%%%%%%%%%%% Calculating the mean of each class in eigenspace
-m_PCA = mean(ProjectedImages_PCA,2); % Total mean in eigenspace
+m_PCA = mean(P_PCA, 2); % Total mean in eigenspace
 m = zeros(NumEigenvaluesUsed,NumberClasses);
 Sw = zeros(NumEigenvaluesUsed,NumEigenvaluesUsed); % ;Initialization of Within Scatter Matrix
 Sb = zeros(NumEigenvaluesUsed,NumEigenvaluesUsed); % Initialization of Between Scatter Matrix
 
 for i = 1 : NumberClasses
-    m(:,i) = mean( ( ProjectedImages_PCA(:,((i-1)*ClassSize+1):i*ClassSize) ), 2 )';
+    m(:,i) = mean( ( P_PCA(:,((i-1)*ClassSize+1):i*ClassSize) ), 2 )';
 
     S  = zeros(NumEigenvaluesUsed,NumEigenvaluesUsed);
     for j = ( (i-1)*ClassSize+1 ) : ( i*ClassSize )
-        S = S + (ProjectedImages_PCA(:,j)-m(:,i))*(ProjectedImages_PCA(:,j)-m(:,i))';
+        S = S + (P_PCA(:,j)-m(:,i))*(P_PCA(:,j)-m(:,i))';
     end
 
     Sw = Sw + S; % Within Scatter Matrix
@@ -89,17 +72,11 @@ end
 % We want to maximize the Between Scatter Matrix, while minimising the
 % Within Scatter Matrix. Thus, a cost function J is defined, so that this condition is satisfied.
 [J_eig_vec, J_eig_val] = eig(Sb,Sw); % Cost function J = inv(Sw) * Sb
+
 J_eig_vec = fliplr(J_eig_vec);
 
 %%%%%%%%%%%%%%%%%%%%%%%% Eliminating zero eigens and sorting in descend order
-V_Fisher = [];
+V_Fisher = J_eig_vec(:, 1 : NumEigenvaluesFisher);
 
-for i = 1 : NumEigenvaluesFisher
-    V_Fisher(:,i) = J_eig_vec(:,i); % Largest (C-1) eigen vectors of matrix J
-end
-
-%%%%%%%%%%%%%%%%%%%%%%%% Projecting images onto Fisher linear space
-% Yi = V_Fisher' * V_PCA' * (Ti - m_database)
-for i = 1 : NumberClasses*ClassSize
-    ProjectedImages_Fisher(:,i) = V_Fisher' * ProjectedImages_PCA(:,i);
-end
+% compute final projection matrix
+W_lda = V_PCA * V_Fisher;

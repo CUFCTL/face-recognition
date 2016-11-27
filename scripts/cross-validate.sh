@@ -50,14 +50,14 @@ while [[ $# -gt 0 ]]; do
     -e|--loglevel)
         ARGS="$ARGS --loglevel $2"
         shift
-	;;
+        ;;
     -s|--timing)
         ARGS="$ARGS --timing"
         ;;
     --pca_n1)
         ARGS="$ARGS --pca_n1 $2"
         shift
-	;;
+        ;;
     --lda_n1)
         ARGS="$ARGS --lda_n1 $2"
         shift
@@ -65,7 +65,7 @@ while [[ $# -gt 0 ]]; do
     --lda_n2)
         ARGS="$ARGS --lda_n2 $2"
         shift
-	;;
+        ;;
     *)
         # unknown option
         ;;
@@ -130,17 +130,9 @@ for (( i = 1; i <= $NUM_ITER; i++ )); do
             echo "MATLAB:"
         fi
 
-        if [ $PCA = 1 ]; then
-            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/PCA; run_pca(false); quit" | tail -n 2
-        fi
+        NUM_LINES=$((1 + PCA + LDA + ICA))
 
-        if [ $LDA = 1 ]; then
-            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/LDA; run_lda(false); quit" | tail -n 2
-        fi
-
-        if [ $ICA = 1 ]; then
-            matlab -nojvm -nodisplay -nosplash -r "cd MATLAB/ICA; run_ica(false); quit" | tail -n 2
-        fi
+        matlab -nojvm -nodisplay -nosplash -r "cd MATLAB; face_rec('../train_images', '../test_images', $PCA, $LDA, $ICA, false); quit" | tail -n $NUM_LINES
     fi
 
     if [ $RUN_C = 1 ]; then
