@@ -10,23 +10,20 @@
 #include "database.h"
 #include "timing.h"
 
-matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix);
+matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix, int max_iterations, precision_t epsilon);
 
 /**
  * Compute the whitening matrix for a matrix X.
  *
- * The whitening matrix, when applied to X, removes
- * the first- and second-order statistics; that is,
- * the mean and covariances are set to zero and the
- * variances are equalized.
+ * The whitening (sphering) matrix, when applied to X, normalizes
+ * the data to have zero mean and unity variance.
  *
  * @param X  input matrix
  * @param E  matrix of eigenvectors in columns
  * @param D  diagonal matrix of eigenvalues
- * @param p_whiteningMatrix
- * @return whitened output matrix
+ * @return whitening matrix
  */
-matrix_t * whiten (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **p_whiteningMatrix)
+matrix_t * m_whiten (matrix_t *X, matrix_t *E, matrix_t *D)
 {
     // compute whitening matrix W_z = inv(sqrt(D)) * E'
     matrix_t *D_temp1 = m_copy(D);
@@ -35,16 +32,11 @@ matrix_t * whiten (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **p_whitening
     matrix_t *D_temp2 = m_inverse(D_temp1);
     matrix_t *whiteningMatrix = m_product(D_temp2, E, false, true);
 
-    // compute output matrix
-    matrix_t *whitesig = m_product(whiteningMatrix, X);
-
     // cleanup
     m_free(D_temp1);
     m_free(D_temp2);
 
-    *p_whiteningMatrix = whiteningMatrix;
-
-    return whitesig;
+    return whiteningMatrix;
 }
 
 /**
@@ -56,10 +48,12 @@ matrix_t * whiten (matrix_t *X, matrix_t *E, matrix_t *D, matrix_t **p_whitening
  * and an extra PCA calculation. We should try to refactor ICA to use
  * X in its original form to eliminate these redundancies.
  *
- * @param X  input matrix
+ * @param X
+ * @param max_iterations
+ * @param epsilon
  * @return independent components of X in columns
  */
-matrix_t * ICA (matrix_t *X)
+matrix_t * ICA (matrix_t *X, int max_iterations, precision_t epsilon)
 {
     timing_push("  ICA");
 
@@ -84,15 +78,15 @@ matrix_t * ICA (matrix_t *X)
     timing_push("    compute whitening matrix and whitened input matrix");
 
     // compute whitened input
-    matrix_t *whiteningMatrix;
-    matrix_t *whitesig = whiten(mixedsig, E, D, &whiteningMatrix);
+    matrix_t *whiteningMatrix = m_whiten(mixedsig, E, D);
+    matrix_t *whitesig = m_product(whiteningMatrix, mixedsig);
 
     timing_pop();
 
     timing_push("    compute mixing matrix W");
 
     // compute mixing matrix
-    matrix_t *W = fpica(whitesig, whiteningMatrix);
+    matrix_t *W = fpica(whitesig, whiteningMatrix, max_iterations, epsilon);
 
     timing_pop();
 
@@ -148,13 +142,12 @@ precision_t pow3(precision_t x)
  *
  * @param X
  * @param whiteningMatrix
+ * @param max_iterations
+ * @param epsilon
  * @return mixing matrix W
  */
-matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
+matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix, int max_iterations, precision_t epsilon)
 {
-    const int MAX_ITERATIONS = 1000;
-    const precision_t EPSILON = 0.0001;
-
     int vectorSize = X->rows;
     int numSamples = X->cols;
 
@@ -184,7 +177,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
         matrix_t *w0 = m_zeros(w->rows, w->cols);
 
         int j;
-        for ( j = 0; j < MAX_ITERATIONS; j++ ) {
+        for ( j = 0; j < max_iterations; j++ ) {
             // compute w = (w - B * B' * w), normalize w
             w_temp1 = m_product(B, B, false, true);
             w_temp2 = m_product(w_temp1, w);
@@ -209,7 +202,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix)
 
             // printf("%lf %lf\n", norm1, norm2);
 
-            int converged = (norm1 < EPSILON) || (norm2 < EPSILON);
+            int converged = (norm1 < epsilon) || (norm2 < epsilon);
 
             m_free(w_delta1);
             m_free(w_delta2);

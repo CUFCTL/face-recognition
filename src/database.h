@@ -21,7 +21,9 @@ typedef struct {
 	int lda_n1;
 	int lda_n2;
 
-	// TODO: ICA hyperparameters
+	// ICA hyperparameters
+	int ica_max_iterations;
+	precision_t ica_epsilon;
 } db_params_t;
 
 typedef struct {
@@ -57,13 +59,12 @@ void db_destruct(database_t *db);
 
 void db_train(database_t *db, const char *path);
 void db_save(database_t *db, const char *path_tset, const char *path_tdata);
-
 void db_load(database_t *db, const char *path_tset, const char *path_tdata);
 void db_recognize(database_t *db, const char *path);
 
 matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D);
 matrix_t * PCA_rows(matrix_t *X, matrix_t **p_D);
 matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2);
-matrix_t * ICA(matrix_t *X);
+matrix_t * ICA(matrix_t *X, int max_iterations, precision_t epsilon);
 
 #endif

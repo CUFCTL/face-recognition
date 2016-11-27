@@ -165,9 +165,13 @@ void db_train(database_t *db, const char *path)
 	if ( db->ica.train ) {
 		if ( VERBOSE ) {
 			printf("Computing ICA representation...\n");
+
+			printf("ica_mi = %d\n", db->params.ica_max_iterations);
+			printf("lda_eps = " M_ELEM_FPRINT "\n", db->params.ica_epsilon);
+			putchar('\n');
 		}
 
-		db->ica.W = ICA(X); // W_pca, D
+		db->ica.W = ICA(X, db->params.ica_max_iterations, db->params.ica_epsilon); // W_pca, D
 		db->ica.P = m_product(db->ica.W, X, true, false);
 	}
 

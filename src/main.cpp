@@ -32,6 +32,8 @@ void print_usage()
 		"  --pca_n1 N         (PCA) number of columns in W_pca to use\n"
 		"  --lda_n1 N         (LDA) number of columns in W_pca to use\n"
 		"  --lda_n2 N         (LDA) number of columns in W_fld to use\n"
+		"  --ica_mi N         (ICA) maximum iterations\n"
+		"  --ica_eps X        (ICA) convergence threshold for w\n"
 	);
 }
 
@@ -46,7 +48,11 @@ int main(int argc, char **argv)
 	int arg_lda = 0;
 	int arg_ica = 0;
 
-	db_params_t db_params = { -1, -1, -1 };
+	db_params_t db_params = {
+		-1,
+		-1, -1,
+		1000, 0.0001f
+	};
 
 	char *path_train_set = NULL;
 	char *path_test_set = NULL;
@@ -63,6 +69,8 @@ int main(int argc, char **argv)
 		{ "pca_n1", required_argument, 0, '1' },
 		{ "lda_n1", required_argument, 0, '2' },
 		{ "lda_n2", required_argument, 0, '3' },
+		{ "ica_mi", required_argument, 0, '4' },
+		{ "ica_eps", required_argument, 0, '5' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -106,6 +114,12 @@ int main(int argc, char **argv)
 			break;
 		case '3':
 			db_params.lda_n2 = atoi(optarg);
+			break;
+		case '4':
+			db_params.ica_max_iterations = atoi(optarg);
+			break;
+		case '5':
+			db_params.ica_epsilon = atof(optarg);
 			break;
 		case '?':
 			print_usage();
