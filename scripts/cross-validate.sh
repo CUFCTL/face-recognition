@@ -148,7 +148,7 @@ for (( i = 1; i <= $NUM_ITER; i++ )); do
             echo "C:"
         fi
 
-        ./face-rec --train train_images --rec test_images $ARGS
+        ./face-rec --train train_images --test test_images $ARGS
     fi
 
     echo

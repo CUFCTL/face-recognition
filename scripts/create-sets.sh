@@ -59,6 +59,7 @@ if [[ -z $DB_PATH || -z $EXT || -z $SAMPLES ]]; then
 fi
 
 # initialize training set and test set
+DB_PATH=$(basename $DB_PATH)
 TEMP_PATH="$DB_PATH"_temp
 TRAIN_PATH=train_images
 TEST_PATH=test_images

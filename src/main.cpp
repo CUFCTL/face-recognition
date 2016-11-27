@@ -22,8 +22,8 @@ void print_usage()
 		"Options:\n"
 		"  --loglevel LEVEL   set the log level (1=info, 2=verbose, 3=debug)\n"
 		"  --timing           print timing information\n"
-		"  --train DIRECTORY  create a database from a training set\n"
-		"  --rec DIRECTORY    test a set of images against a database\n"
+		"  --train DIRECTORY  train a database with a training set\n"
+		"  --test DIRECTORY   perform recognition on a test set\n"
 		"  --pca              run PCA\n"
 		"  --lda              run LDA\n"
 		"  --ica              run ICA\n"
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 	const char *DB_DATA = "./database.dat";
 
 	int arg_train = 0;
-	int arg_recognize = 0;
+	int arg_test = 0;
 	int arg_pca = 0;
 	int arg_lda = 0;
 	int arg_ica = 0;
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 		{ "loglevel", required_argument, 0, 'e' },
 		{ "timing", no_argument, 0, 's' },
 		{ "train", required_argument, 0, 't' },
-		{ "rec", required_argument, 0, 'r' },
+		{ "test", required_argument, 0, 'r' },
 		{ "pca", no_argument, 0, 'p' },
 		{ "lda", no_argument, 0, 'l' },
 		{ "ica", no_argument, 0, 'i' },
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 			path_train_set = optarg;
 			break;
 		case 'r':
-			arg_recognize = 1;
+			arg_test = 1;
 			path_test_set = optarg;
 			break;
 		case 'p':
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 	}
 
 	// validate arguments
-	if ( !arg_train && !arg_recognize ) {
+	if ( !arg_train && !arg_test ) {
 		print_usage();
 		exit(1);
 	}
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 		db_load(db, DB_DATA);
 	}
 
-	if ( arg_recognize ) {
+	if ( arg_test ) {
 		db_recognize(db, path_test_set);
 	}
 	else {
