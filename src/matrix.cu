@@ -532,7 +532,7 @@ precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j)
 
 	int k;
 	for ( k = 0; k < A->rows; k++ ) {
-		dist += abs(elem(A, k, i) - elem(B, k, j));
+		dist += fabsf(elem(A, k, i) - elem(B, k, j));
 	}
 
 	return dist;
@@ -562,7 +562,7 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
 		dist += diff * diff;
 	}
 
-	return sqrt(dist);
+	return sqrtf(dist);
 }
 
 /**
@@ -614,7 +614,7 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
-		printf("%s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d])\n",
+		printf("debug: %s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d])\n",
 		       "V", V->rows, V->cols,
 		       "D", D->rows, D->cols,
 		       "M", M->rows, M->cols);
@@ -722,9 +722,7 @@ matrix_t * m_mean_column (matrix_t *M)
 		}
 	}
 
-	for ( i = 0; i < M->rows; i++ ) {
-		elem(a, i, 0) /= M->cols;
-	}
+	m_elem_mult(a, 1.0f / M->cols);
 
 	return a;
 }
@@ -746,9 +744,7 @@ matrix_t * m_mean_row (matrix_t *M)
 		}
 	}
 
-	for ( i = 0; i < M->cols; i++ ) {
-		elem(a, 0, i) /= M->rows;
-	}
+	m_elem_mult(a, 1.0f / M->rows);
 
 	return a;
 }
@@ -837,7 +833,7 @@ matrix_t * m_product (matrix_t *A, matrix_t *B, bool transA, bool transB)
 
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
-		printf("%s [%d,%d] <- %s%s [%d,%d] * %s%s [%d,%d]\n",
+		printf("debug: %s [%d,%d] <- %s%s [%d,%d] * %s%s [%d,%d]\n",
 		       "C", M, N,
 		       "A", transA ? "'" : "", M, K,
 		       "B", transB ? "'" : "", K, N);
