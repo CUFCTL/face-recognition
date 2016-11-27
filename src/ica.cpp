@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "database.h"
-#include "timing.h"
+#include "timer.h"
 
 matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix, int max_iterations, precision_t epsilon);
 
@@ -55,9 +55,9 @@ matrix_t * m_whiten (matrix_t *X, matrix_t *E, matrix_t *D)
  */
 matrix_t * ICA (matrix_t *X, int max_iterations, precision_t epsilon)
 {
-    timing_push("  ICA");
+    timer_push("  ICA");
 
-    timing_push("    subtract mean from input matrix");
+    timer_push("    subtract mean from input matrix");
 
     // compute mixedsig = X', subtract mean column
     matrix_t *mixedsig = m_transpose(X);
@@ -65,32 +65,32 @@ matrix_t * ICA (matrix_t *X, int max_iterations, precision_t epsilon)
 
     m_subtract_columns(mixedsig, mixedmean);
 
-    timing_pop();
+    timer_pop();
 
-    timing_push("    compute principal components of input matrix");
+    timer_push("    compute principal components of input matrix");
 
     // compute principal components
     matrix_t *D;
     matrix_t *E = PCA_rows(X, &D);
 
-    timing_pop();
+    timer_pop();
 
-    timing_push("    compute whitening matrix and whitened input matrix");
+    timer_push("    compute whitening matrix and whitened input matrix");
 
     // compute whitened input
     matrix_t *whiteningMatrix = m_whiten(mixedsig, E, D);
     matrix_t *whitesig = m_product(whiteningMatrix, mixedsig);
 
-    timing_pop();
+    timer_pop();
 
-    timing_push("    compute mixing matrix W");
+    timer_push("    compute mixing matrix W");
 
     // compute mixing matrix
     matrix_t *W = fpica(whitesig, whiteningMatrix, max_iterations, epsilon);
 
-    timing_pop();
+    timer_pop();
 
-    timing_push("    compute independent components");
+    timer_push("    compute independent components");
 
     // compute independent components
     // icasig = W * mixedsig + (W * mixedmean) * ones(1, mixedsig->cols)
@@ -104,9 +104,9 @@ matrix_t * ICA (matrix_t *X, int max_iterations, precision_t epsilon)
     // compute W_ica = icasig'
     matrix_t *W_ica = m_transpose(icasig);
 
-    timing_pop();
+    timer_pop();
 
-    timing_pop();
+    timer_pop();
 
     // cleanup
     m_free(mixedsig);

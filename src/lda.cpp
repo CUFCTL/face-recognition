@@ -4,7 +4,7 @@
  * Implementation of LDA (Belhumeur et al., 1996; Zhao et al., 1998).
  */
 #include "database.h"
-#include "timing.h"
+#include "timer.h"
 #include <stdlib.h>
 
 /**
@@ -104,9 +104,9 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
  */
 matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2)
 {
-    timing_push("  LDA");
+    timer_push("  LDA");
 
-    timing_push("    truncate eigenfaces and projected images");
+    timer_push("    truncate eigenfaces and projected images");
 
     // if n_opt1 = -1, use N - c
     n_opt1 = (n_opt1 == -1)
@@ -117,9 +117,9 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     matrix_t *W_pca2 = m_copy_columns(W_pca, W_pca->cols - n_opt1, W_pca->cols);
     matrix_t *P_pca = m_product(W_pca2, X, true, false);
 
-    timing_pop();
+    timer_pop();
 
-    timing_push("    compute scatter matrices");
+    timer_push("    compute scatter matrices");
 
     // compute scatter matrices S_b and S_w
     matrix_t *S_b;
@@ -127,9 +127,9 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     m_scatter(P_pca, c, entries, &S_b, &S_w);
 
-    timing_pop();
+    timer_pop();
 
-    timing_push("    compute eigenvectors of scatter matrices");
+    timer_push("    compute eigenvectors of scatter matrices");
 
     // compute W_fld = eigenvectors of S_w^-1 * S_b
     matrix_t *S_w_inv = m_inverse(S_w);
@@ -150,16 +150,16 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     // take only the last n_opt2 columns in J_evec
     matrix_t *W_fld = m_copy_columns(J_evec, J_evec->cols - n_opt2, J_evec->cols);
 
-    timing_pop();
+    timer_pop();
 
-    timing_push("    compute LDA projection matrix");
+    timer_push("    compute LDA projection matrix");
 
     // compute W_lda = (W_fld' * W_pca2')' = W_pca2 * W_fld
     matrix_t *W_lda = m_product(W_pca2, W_fld);
 
-    timing_pop();
+    timer_pop();
 
-    timing_pop();
+    timer_pop();
 
     // cleanup
     m_free(W_pca2);

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "database.h"
-#include "timing.h"
+#include "timer.h"
 
 int VERBOSE = 0;
 int TIMING = 0;
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 	db_destruct(db);
 
 	// print timing information
-	timing_print();
+	timer_print();
 
 	return 0;
 }

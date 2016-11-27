@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include "database.h"
 #include "image.h"
-#include "timing.h"
+#include "timer.h"
 
 /**
  * Map a collection of images to column vectors.
@@ -120,7 +120,7 @@ void db_destruct(database_t *db)
  */
 void db_train(database_t *db, const char *path)
 {
-	timing_push("Training");
+	timer_push("Training");
 
 	db->num_images = get_directory_rec(path, &db->entries, &db->num_classes);
 
@@ -175,7 +175,7 @@ void db_train(database_t *db, const char *path)
 		db->ica.P = m_product(db->ica.W, X, true, false);
 	}
 
-	timing_pop();
+	timer_pop();
 
 	// cleanup
 	m_free(X);
@@ -303,7 +303,7 @@ int nearest_neighbor(matrix_t *P, matrix_t *P_test, dist_func_t dist_func)
  */
 void db_recognize(database_t *db, const char *path)
 {
-	timing_push("Recognition");
+	timer_push("Recognition");
 
 	// initialize parameters for each recognition algorithm
 	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
@@ -379,7 +379,7 @@ void db_recognize(database_t *db, const char *path)
 		}
 	}
 
-	timing_pop();
+	timer_pop();
 
 	// cleanup
 	image_destruct(image);

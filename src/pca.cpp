@@ -4,7 +4,7 @@
  * Implementation of PCA (Turk and Pentland, 1991).
  */
 #include "database.h"
-#include "timing.h"
+#include "timer.h"
 
 /**
  * Compute the principal components of a matrix X, which
@@ -21,24 +21,24 @@
  */
 matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 {
-	timing_push("  PCA");
+	timer_push("  PCA");
 
-	timing_push("    compute surrogate matrix L");
+	timer_push("    compute surrogate matrix L");
 
 	matrix_t *L = m_product(X, X, true, false);
 
-	timing_pop();
+	timer_pop();
 
-	timing_push("    compute eigenvectors of L");
+	timer_push("    compute eigenvectors of L");
 
 	matrix_t *V;
 	matrix_t *D;
 
 	m_eigen(L, &V, &D);
 
-	timing_pop();
+	timer_pop();
 
-	timing_push("    compute PCA projection matrix");
+	timer_push("    compute PCA projection matrix");
 
 	// if n_opt1 = -1, use N - 1
 	n_opt1 = (n_opt1 == -1)
@@ -48,9 +48,9 @@ matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 	matrix_t *W_pca = m_product(X, V);
 	matrix_t *W_pca2 = m_copy_columns(W_pca, W_pca->cols - n_opt1, W_pca->cols);
 
-	timing_pop();
+	timer_pop();
 
-	timing_pop();
+	timer_pop();
 
 	// save outputs
 	*p_D = D;
