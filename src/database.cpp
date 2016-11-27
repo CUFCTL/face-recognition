@@ -101,19 +101,23 @@ database_t * db_construct(int pca, int lda, int ica, db_params_t params)
  */
 void db_destruct(database_t *db)
 {
+	// free entries
 	int i;
 	for ( i = 0; i < db->num_entries; i++ ) {
 		free(db->entries[i].name);
 	}
 	free(db->entries);
 
+	// free labels
 	for ( i = 0; i < db->num_labels; i++ ) {
 		free(db->labels[i].name);
 	}
 	free(db->labels);
 
+	// free mean face
 	m_free(db->mean_face);
 
+	// free algorithm data
 	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
 	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
 
@@ -177,37 +181,42 @@ void db_train(database_t *db, const char *path)
 }
 
 /**
- * Save a database to the file system.
+ * Save a database to a data file.
  *
- * @param db		  pointer to database
- * @param path_tset   path to save image filenames
- * @param path_tdata  path to save matrix data
+ * @param db
+ * @param path
  */
-void db_save(database_t *db, const char *path_tset, const char *path_tdata)
+void db_save(database_t *db, const char *path)
 {
-	// save the labels and entries
-	FILE *tset = fopen(path_tset, "w");
+	FILE *file = fopen(path, "w");
 
-	fprintf(tset, "%d\n", db->num_labels);
+	// save labels
+	fwrite(&db->num_labels, sizeof(int), 1, file);
 
 	int i;
 	for ( i = 0; i < db->num_labels; i++ ) {
-		fprintf(tset, "%d %s\n", db->labels[i].id, db->labels[i].name);
+		fwrite(&db->labels[i].id, sizeof(int), 1, file);
+
+		int num = strlen(db->labels[i].name) + 1;
+		fwrite(&num, sizeof(int), 1, file);
+		fwrite(db->labels[i].name, sizeof(char), num, file);
 	}
 
-	fprintf(tset, "%d\n", db->num_entries);
+	// save entries
+	fwrite(&db->num_entries, sizeof(int), 1, file);
 
 	for ( i = 0; i < db->num_entries; i++ ) {
-		fprintf(tset, "%d %s\n", db->entries[i].label->id, db->entries[i].name);
+		fwrite(&db->entries[i].label->id, sizeof(int), 1, file);
+
+		int num = strlen(db->entries[i].name) + 1;
+		fwrite(&num, sizeof(int), 1, file);
+		fwrite(db->entries[i].name, sizeof(char), num, file);
 	}
 
-	fclose(tset);
+	// save mean face
+	m_fwrite(file, db->mean_face);
 
-	// save the mean face, PCA/LDA/ICA representations
-	FILE *tdata = fopen(path_tdata, "w");
-
-	m_fwrite(tdata, db->mean_face);
-
+	// save algorithm data
 	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
 	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
 
@@ -215,69 +224,75 @@ void db_save(database_t *db, const char *path_tset, const char *path_tdata)
 		db_algorithm_t *algo = algorithms[i];
 
 		if ( algo->train ) {
-			m_fwrite(tdata, algo->W);
-			m_fwrite(tdata, algo->P);
+			m_fwrite(file, algo->W);
+			m_fwrite(file, algo->P);
 		}
 	}
 
-	fclose(tdata);
+	fclose(file);
 }
 
 /**
- * Load a database from the file system.
+ * Load a database from a file.
  *
- * @param db          pointer to database
- * @param path_tset   path to read image filenames
- * @param path_tdata  path to read matrix data
+ * @param db
+ * @param path
  */
-void db_load(database_t *db, const char *path_tset, const char *path_tdata)
+void db_load(database_t *db, const char *path)
 {
-	// read the mean face, PCA/LDA/ICA representations
-	FILE *tdata = fopen(path_tdata, "r");
+	FILE *file = fopen(path, "r");
 
-	db->mean_face = m_fread(tdata);
+	// read labels
+	fread(&db->num_labels, sizeof(int), 1, file);
 
+	db->labels = (image_label_t *)malloc(db->num_labels * sizeof(image_label_t));
+
+	int i;
+	for ( i = 0; i < db->num_labels; i++ ) {
+		fread(&db->labels[i].id, sizeof(int), 1, file);
+
+		int num;
+		fread(&num, sizeof(int), 1, file);
+
+		db->labels[i].name = (char *)malloc(num * sizeof(char));
+		fread(db->labels[i].name, sizeof(char), num, file);
+	}
+
+	// read entries
+	fread(&db->num_entries, sizeof(int), 1, file);
+
+	db->entries = (image_entry_t *)malloc(db->num_entries * sizeof(image_entry_t));
+
+	for ( i = 0; i < db->num_entries; i++ ) {
+		int label_id;
+		fread(&label_id, sizeof(int), 1, file);
+
+		db->entries[i].label = &db->labels[label_id];
+
+		int num;
+		fread(&num, sizeof(int), 1, file);
+
+		db->entries[i].name = (char *)malloc(num * sizeof(char));
+		fread(db->entries[i].name, sizeof(char), num, file);
+	}
+
+	// read mean face
+	db->mean_face = m_fread(file);
+
+	// read algorithm data
 	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
 	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
 
-	int i;
 	for ( i = 0; i < num_algorithms; i++ ) {
 		db_algorithm_t *algo = algorithms[i];
 
 		if ( algo->train ) {
-			algo->W = m_fread(tdata);
-			algo->P = m_fread(tdata);
+			algo->W = m_fread(file);
+			algo->P = m_fread(file);
 		}
 	}
 
-	fclose(tdata);
-
-	// read labels and entries
-	FILE *tset = fopen(path_tset, "r");
-
-	db->labels = (image_label_t *)malloc(db->num_labels * sizeof(image_label_t));
-
-	fscanf(tset, "%d", &db->num_labels);
-
-	for ( i = 0; i < db->num_labels; i++ ) {
-		db->labels[i].name = (char *)malloc(32 * sizeof(char));
-		fscanf(tset, "%d %s", &db->labels[i].id, db->labels[i].name);
-	}
-
-	db->entries = (image_entry_t *)malloc(db->num_entries * sizeof(image_entry_t));
-
-	fscanf(tset, "%d", &db->num_entries);
-
-	for ( i = 0; i < db->num_entries; i++ ) {
-		int label_id;
-
-		db->entries[i].name = (char *)malloc(32 * sizeof(char));
-		fscanf(tset, "%d %s", &label_id, db->entries[i].name);
-
-		db->entries[i].label = &db->labels[label_id];
-	}
-
-	fclose(tset);
+	fclose(file);
 }
 
 /**

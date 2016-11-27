@@ -55,8 +55,8 @@ database_t * db_construct(int pca, int lda, int ica, db_params_t params);
 void db_destruct(database_t *db);
 
 void db_train(database_t *db, const char *path);
-void db_save(database_t *db, const char *path_tset, const char *path_tdata);
-void db_load(database_t *db, const char *path_tset, const char *path_tdata);
+void db_save(database_t *db, const char *path);
+void db_load(database_t *db, const char *path);
 void db_recognize(database_t *db, const char *path);
 
 matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D);

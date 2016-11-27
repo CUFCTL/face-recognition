@@ -40,8 +40,7 @@ void print_usage()
 
 int main(int argc, char **argv)
 {
-	const char *DB_ENTRIES = "./db_training_set.dat";
-	const char *DB_DATA = "./db_training_data.dat";
+	const char *DB_DATA = "./database.dat";
 
 	int arg_train = 0;
 	int arg_recognize = 0;
@@ -141,14 +140,14 @@ int main(int argc, char **argv)
 		db_train(db, path_train_set);
 	}
 	else {
-		db_load(db, DB_ENTRIES, DB_DATA);
+		db_load(db, DB_DATA);
 	}
 
 	if ( arg_recognize ) {
 		db_recognize(db, path_test_set);
 	}
 	else {
-		db_save(db, DB_ENTRIES, DB_DATA);
+		db_save(db, DB_DATA);
 	}
 
 	db_destruct(db);
