@@ -10,7 +10,7 @@
 #include "database.h"
 #include "timer.h"
 
-matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix, int max_iterations, precision_t epsilon);
+matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix, int num_ic, int max_iterations, precision_t epsilon);
 
 /**
  * Compute the whitening matrix for a matrix X.
@@ -49,11 +49,12 @@ matrix_t * m_whiten (matrix_t *X, matrix_t *E, matrix_t *D)
  * X in its original form to eliminate these redundancies.
  *
  * @param X
+ * @param num_ic
  * @param max_iterations
  * @param epsilon
  * @return independent components of X in columns
  */
-matrix_t * ICA (matrix_t *X, int max_iterations, precision_t epsilon)
+matrix_t * ICA (matrix_t *X, int num_ic, int max_iterations, precision_t epsilon)
 {
     timer_push("  ICA");
 
@@ -86,7 +87,7 @@ matrix_t * ICA (matrix_t *X, int max_iterations, precision_t epsilon)
     timer_push("    compute mixing matrix W");
 
     // compute mixing matrix
-    matrix_t *W = fpica(whitesig, whiteningMatrix, max_iterations, epsilon);
+    matrix_t *W = fpica(whitesig, whiteningMatrix, num_ic, max_iterations, epsilon);
 
     timer_pop();
 
@@ -142,20 +143,26 @@ precision_t pow3(precision_t x)
  *
  * @param X
  * @param whiteningMatrix
+ * @param num_ic
  * @param max_iterations
  * @param epsilon
  * @return mixing matrix W
  */
-matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix, int max_iterations, precision_t epsilon)
+matrix_t * fpica (matrix_t *X, matrix_t *whiteningMatrix, int num_ic, int max_iterations, precision_t epsilon)
 {
     int vectorSize = X->rows;
     int numSamples = X->cols;
 
+    // if num_ic is -1, use vectorSize
+    num_ic = (num_ic == -1)
+        ? vectorSize
+        : num_ic;
+
     matrix_t *B = m_zeros(vectorSize, vectorSize);
-    matrix_t *W = m_zeros(vectorSize, whiteningMatrix->cols);
+    matrix_t *W = m_zeros(num_ic, whiteningMatrix->cols);
 
     int i;
-    for ( i = 0; i < vectorSize; i++ ) {
+    for ( i = 0; i < num_ic; i++ ) {
         if ( LOGGER(LL_VERBOSE) ) {
             printf("round %d\n", i + 1);
         }

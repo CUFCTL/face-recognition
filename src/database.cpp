@@ -79,15 +79,18 @@ database_t * db_construct(int pca, int lda, int ica, db_params_t params)
 	};
 
 	if ( LOGGER(LL_VERBOSE) ) {
+		int len = 20;
+
 		printf("Hyperparameters\n");
 		printf("PCA\n");
-		printf("  pca_n1   %10d\n", db->params.pca_n1);
+		printf("  %-*s  %10d\n", len, "pca_n1", db->params.pca_n1);
 		printf("LDA\n");
-		printf("  lda_n1   %10d\n", db->params.lda_n1);
-		printf("  lda_n2   %10d\n", db->params.lda_n2);
+		printf("  %-*s  %10d\n", len, "lda_n1", db->params.lda_n1);
+		printf("  %-*s  %10d\n", len, "lda_n2", db->params.lda_n2);
 		printf("ICA\n");
-		printf("  ica_mi   %10d\n", db->params.ica_max_iterations);
-		printf("  ica_eps  %10f\n", db->params.ica_epsilon);
+		printf("  %-*s  %10d\n", len, "ica_num_ic", db->params.ica_num_ic);
+		printf("  %-*s  %10d\n", len, "ica_max_iterations", db->params.ica_max_iterations);
+		printf("  %-*s  %10f\n", len, "ica_epsilon", db->params.ica_epsilon);
 		putchar('\n');
 	}
 
@@ -169,7 +172,7 @@ void db_train(database_t *db, const char *path)
 
 	// compute ICA representation
 	if ( db->ica.train ) {
-		db->ica.W = ICA(X, db->params.ica_max_iterations, db->params.ica_epsilon); // W_pca, D
+		db->ica.W = ICA(X, db->params.ica_num_ic, db->params.ica_max_iterations, db->params.ica_epsilon); // W_pca, D
 		db->ica.P = m_product(db->ica.W, X, true, false);
 	}
 
