@@ -102,9 +102,10 @@ void cublas_get_matrix(matrix_t *M)
  * @param cols
  * @return pointer to a new matrix
  */
-matrix_t * m_initialize (int rows, int cols)
+matrix_t * m_initialize (const char *name, int rows, int cols)
 {
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
+	M->name = name;
 	M->rows = rows;
 	M->cols = cols;
 	M->data = (precision_t *)malloc(rows * cols * sizeof(precision_t));
@@ -120,9 +121,10 @@ matrix_t * m_initialize (int rows, int cols)
  * @param rows
  * @return pointer to a new identity matrix
  */
-matrix_t * m_identity (int rows)
+matrix_t * m_identity (const char *name, int rows)
 {
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
+	M->name = name;
 	M->rows = rows;
 	M->cols = rows;
 	M->data = (precision_t *)calloc(rows * rows, sizeof(precision_t));
@@ -135,6 +137,13 @@ matrix_t * m_identity (int rows)
 	cublas_alloc_matrix(M);
 	cublas_set_matrix(M);
 
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- eye(%d)\n",
+		       M->name, M->rows, M->cols,
+		       rows);
+	}
+
 	return M;
 }
 
@@ -145,9 +154,9 @@ matrix_t * m_identity (int rows)
  * @param cols
  * @return pointer to a new ones matrix
  */
-matrix_t * m_ones(int rows, int cols)
+matrix_t * m_ones(const char *name, int rows, int cols)
 {
-    matrix_t *M = m_initialize(rows, cols);
+    matrix_t *M = m_initialize(name, rows, cols);
 
     int i, j;
     for ( i = 0; i < rows; i++ ) {
@@ -157,6 +166,13 @@ matrix_t * m_ones(int rows, int cols)
     }
 
 	cublas_set_matrix(M);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- ones(%d, %d)\n",
+		       M->name, M->rows, M->cols,
+		       rows, cols);
+	}
 
     return M;
 }
@@ -204,9 +220,9 @@ precision_t rand_normal(precision_t mu, precision_t sigma)
  * @param cols
  * @return pointer to a new random matrix
  */
-matrix_t * m_random (int rows, int cols)
+matrix_t * m_random (const char *name, int rows, int cols)
 {
-    matrix_t *M = m_initialize(rows, cols);
+    matrix_t *M = m_initialize(name, rows, cols);
 
     int i, j;
     for ( i = 0; i < rows; i++ ) {
@@ -216,6 +232,13 @@ matrix_t * m_random (int rows, int cols)
     }
 
 	cublas_set_matrix(M);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- randn(%d, %d)\n",
+		       M->name, M->rows, M->cols,
+		       rows, cols);
+	}
 
     return M;
 }
@@ -227,15 +250,23 @@ matrix_t * m_random (int rows, int cols)
  * @param cols
  * @return pointer to a new zero matrix
  */
-matrix_t * m_zeros (int rows, int cols)
+matrix_t * m_zeros (const char *name, int rows, int cols)
 {
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
+	M->name = name;
 	M->rows = rows;
 	M->cols = cols;
 	M->data = (precision_t *)calloc(rows * cols, sizeof(precision_t));
 
 	cublas_alloc_matrix(M);
 	cublas_set_matrix(M);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- zeros(%d, %d)\n",
+		       M->name, M->rows, M->cols,
+		       rows, cols);
+	}
 
 	return M;
 }
@@ -246,9 +277,9 @@ matrix_t * m_zeros (int rows, int cols)
  * @param M  pointer to matrix
  * @return pointer to copy of M
  */
-matrix_t * m_copy (matrix_t *M)
+matrix_t * m_copy (const char *name, matrix_t *M)
 {
-	return m_copy_columns(M, 0, M->cols);
+	return m_copy_columns(name, M, 0, M->cols);
 }
 
 /**
@@ -259,13 +290,20 @@ matrix_t * m_copy (matrix_t *M)
  * @param j
  * @return pointer to copy of columns [i, j) of M
  */
-matrix_t * m_copy_columns (matrix_t *M, int i, int j)
+matrix_t * m_copy_columns (const char *name, matrix_t *M, int i, int j)
 {
 	assert(0 <= i && i < j && j <= M->cols);
 
-	matrix_t *C = m_initialize(M->rows, j - i);
+	matrix_t *C = m_initialize(name, M->rows, j - i);
 
 	memcpy(C->data, &elem(M, 0, i), C->rows * C->cols * sizeof(precision_t));
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- %s(:, %d:%d) [%d,%d]\n",
+		       C->name, C->rows, C->cols,
+		       M->name, i + 1, j, M->rows, j - i);
+	}
 
 	return C;
 }
@@ -278,15 +316,22 @@ matrix_t * m_copy_columns (matrix_t *M, int i, int j)
  * @param j
  * @return pointer to copy of rows [i, j) of M
  */
-matrix_t * m_copy_rows (matrix_t *M, int i, int j)
+matrix_t * m_copy_rows (const char *name, matrix_t *M, int i, int j)
 {
 	assert(0 <= i && i < j && j <= M->rows);
 
-	matrix_t *C = m_initialize(j - i, M->cols);
+	matrix_t *C = m_initialize(name, j - i, M->cols);
 
 	int k;
 	for ( k = 0; k < M->cols; k++ ) {
 		memcpy(&elem(C, 0, k), &elem(M, i, k), (j - i) * sizeof(precision_t));
+	}
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- %s(%d:%d, :) [%d,%d]\n",
+		       C->name, C->rows, C->cols,
+		       M->name, i + 1, j, j - i, M->cols);
 	}
 
 	return C;
@@ -315,7 +360,7 @@ void m_free (matrix_t *M)
  */
 void m_fprint (FILE *stream, matrix_t *M)
 {
-	fprintf(stream, "%d %d\n", M->rows, M->cols);
+	fprintf(stream, "%s [%d, %d]\n", M->name, M->rows, M->cols);
 
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
@@ -350,7 +395,7 @@ matrix_t * m_fscan (FILE *stream)
 	int rows, cols;
 	fscanf(stream, "%d %d", &rows, &cols);
 
-	matrix_t *M = m_initialize(rows, cols);
+	matrix_t *M = m_initialize("", rows, cols);
 	int i, j;
 	for ( i = 0; i < rows; i++ ) {
 		for ( j = 0; j < cols; j++ ) {
@@ -373,7 +418,7 @@ matrix_t * m_fread (FILE *stream)
 	fread(&rows, sizeof(int), 1, stream);
 	fread(&cols, sizeof(int), 1, stream);
 
-	matrix_t *M = m_initialize(rows, cols);
+	matrix_t *M = m_initialize("", rows, cols);
 	fread(M->data, sizeof(precision_t), M->rows * M->cols, stream);
 
 	return M;
@@ -431,24 +476,32 @@ void m_image_write (matrix_t *M, int col, image_t *image)
  * @param M  pointer to matrix
  * @return pointer to covariance matrix of M
  */
-matrix_t * m_covariance (matrix_t *M)
+matrix_t * m_covariance (const char *name, matrix_t *M)
 {
 	// compute A = M - 1_N * mu
-	matrix_t *A = m_copy(M);
-	matrix_t *mu = m_mean_row(A);
+	matrix_t *A = m_copy("A", M);
+	matrix_t *mu = m_mean_row("mu", A);
 
 	m_subtract_rows(A, mu);
 
 	// compute C = 1/(N - 1) * A' * A
-	matrix_t *C = m_product(A, A, true, false);
+	matrix_t *C = m_product(name, A, A, true, false);
 
 	precision_t c = (M->rows > 1)
 		? M->rows - 1
 		: 1;
 	m_elem_mult(C, 1 / c);
 
+	// cleanup
 	m_free(A);
 	m_free(mu);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- cov(%s [%d,%d])\n",
+		       C->name, C->rows, C->cols,
+		       M->name, M->rows, M->cols);
+	}
 
 	return C;
 }
@@ -459,19 +512,26 @@ matrix_t * m_covariance (matrix_t *M)
  * @param v  pointer to vector
  * @return pointer to diagonal matrix of v
  */
-matrix_t * m_diagonalize (matrix_t *v)
+matrix_t * m_diagonalize (const char *name, matrix_t *v)
 {
 	assert(v->rows == 1 || v->cols == 1);
 
 	int n = (v->rows == 1)
 		? v->cols
 		: v->rows;
-    matrix_t *D = m_zeros(n, n);
+    matrix_t *D = m_zeros(name, n, n);
 
     int i;
     for ( i = 0; i < n; i++ ) {
         elem(D, i, i) = v->data[i];
     }
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- diag(%s [%d,%d])\n",
+		       D->name, D->rows, D->cols,
+		       v->name, v->rows, v->cols);
+	}
 
     return D;
 }
@@ -509,13 +569,24 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
 		abs_y += elem(B, k, j) * elem(B, k, j);
 	}
 
-	return -x_dot_y / sqrtf(abs_x * abs_y);
+	// compute distance
+	precision_t dist = -x_dot_y / sqrtf(abs_x * abs_y);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: d_COS(%s(:, %d) [%d,%d], %s(:, %d) [%d,%d]) = %g\n",
+		       A->name, i + 1, A->rows, 1,
+		       B->name, j + 1, B->rows, 1,
+		       dist);
+	}
+
+	return dist;
 }
 
 /**
  * Compute the L1 distance between two column vectors.
  *
- * L1 is the Euclidean distance:
+ * L1 is the Taxicab distance:
  * d_L1(x, y) = |x - y|
  *
  * @param A  pointer to matrix
@@ -535,13 +606,21 @@ precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j)
 		dist += fabsf(elem(A, k, i) - elem(B, k, j));
 	}
 
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: d_L1(%s(:, %d) [%d,%d], %s(:, %d) [%d,%d]) = %g\n",
+		       A->name, i + 1, A->rows, 1,
+		       B->name, j + 1, B->rows, 1,
+		       dist);
+	}
+
 	return dist;
 }
 
 /**
  * Compute the L2 distance between two column vectors.
  *
- * L2 is the square of the Euclidean distance:
+ * L2 is the Euclidean distance:
  * d_L2(x, y) = ||x - y||
  *
  * @param A  pointer to matrix
@@ -562,7 +641,17 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
 		dist += diff * diff;
 	}
 
-	return sqrtf(dist);
+	dist = sqrtf(dist);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: d_L2(%s(:, %d) [%d,%d], %s(:, %d) [%d,%d]) = %g\n",
+		       A->name, i + 1, A->rows, 1,
+		       B->name, j + 1, B->rows, 1,
+		       dist);
+	}
+
+	return dist;
 }
 
 /**
@@ -577,14 +666,14 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
  * @param p_V
  * @param p_D
  */
-void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
+void m_eigen (const char *name_V, const char *name_D, matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 {
 	assert(M->rows == M->cols);
 
 	static precision_t EPSILON = 1e-8;
 
-	matrix_t *V_temp1 = m_copy(M);
-	matrix_t *D_temp1 = m_initialize(M->rows, 1);
+	matrix_t *V_temp1 = m_copy(name_V, M);
+	matrix_t *D_temp1 = m_initialize(name_D, M->rows, 1);
 
 	// solve A * x = lambda * x
 #ifdef __NVCC__
@@ -602,28 +691,28 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
 		i++;
 	}
 
-	matrix_t *V = m_copy_columns(V_temp1, i, V_temp1->cols);
-	matrix_t *D_temp2 = m_copy_rows(D_temp1, i, D_temp1->rows);
+	matrix_t *V = m_copy_columns(name_V, V_temp1, i, V_temp1->cols);
+	matrix_t *D_temp2 = m_copy_rows(name_D, D_temp1, i, D_temp1->rows);
 
 	// diagonalize eigenvalues
-	matrix_t *D = m_diagonalize(D_temp2);
-
-	// save output
-	*p_V = V;
-	*p_D = D;
-
-	// print debug information
-	if ( LOGGER(LL_DEBUG) ) {
-		printf("debug: %s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d])\n",
-		       "V", V->rows, V->cols,
-		       "D", D->rows, D->cols,
-		       "M", M->rows, M->cols);
-	}
+	matrix_t *D = m_diagonalize(name_D, D_temp2);
 
 	// cleanup
 	m_free(V_temp1);
 	m_free(D_temp1);
 	m_free(D_temp2);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d])\n",
+		       V->name, V->rows, V->cols,
+		       D->name, D->rows, D->cols,
+		       M->name, M->rows, M->cols);
+	}
+
+	// save outputs
+	*p_V = V;
+	*p_D = D;
 }
 
 /**
@@ -641,35 +730,47 @@ void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D)
  * @param p_V
  * @param p_D
  */
-void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_V, matrix_t **p_D)
+void m_eigen2 (const char *name_V, const char *name_D, matrix_t *A, matrix_t *B, matrix_t **p_V, matrix_t **p_D)
 {
 	assert(A->rows == A->cols && B->rows == B->cols);
 	assert(A->rows == B->rows);
 
-	matrix_t *V = m_copy(A);
-	matrix_t *J_eval = m_initialize(A->rows, 1);
+	matrix_t *V = m_copy(name_V, A);
+	matrix_t *D_temp1 = m_initialize(name_D, A->rows, 1);
 
 	// solve A * x = lambda * B * x
 #ifdef __NVCC__
 	// TODO: stub
 #else
-	matrix_t *B_work = m_copy(B);
+	matrix_t *B_work = m_copy("B", B);
 
 	int info = LAPACKE_ssygv(LAPACK_COL_MAJOR, 1, 'V', 'U',
 		A->cols, V->data, A->rows,  // left input matrix (eigenvectors)
 		B_work->data, B->rows,      // right input matrix
-		J_eval->data);              // eigenvalues
+		D_temp1->data);             // eigenvalues
 	assert(info == 0);
 
 	m_free(B_work);
 #endif
 
-	// save outputs
-	*p_V = V;
-	*p_D = m_diagonalize(J_eval);
+	// diagonalize eigenvalues
+	matrix_t *D = m_diagonalize(name_D, D_temp1);
 
 	// cleanup
-	m_free(J_eval);
+	m_free(D_temp1);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d], %s [%d,%d])\n",
+		       V->name, V->rows, V->cols,
+		       D->name, D->rows, D->cols,
+		       A->name, A->rows, A->cols,
+		       B->name, B->rows, B->cols);
+	}
+
+	// save outputs
+	*p_V = V;
+	*p_D = D;
 }
 
 /**
@@ -678,11 +779,11 @@ void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_V, matrix_t **p_D)
  * @param M  pointer to matrix
  * @return pointer to new matrix equal to M^-1
  */
-matrix_t * m_inverse (matrix_t *M)
+matrix_t * m_inverse (const char *name, matrix_t *M)
 {
 	assert(M->rows == M->cols);
 
-	matrix_t *M_inv = m_copy(M);
+	matrix_t *M_inv = m_copy(name, M);
 
 #ifdef __NVCC__
 	// TODO: stub
@@ -702,6 +803,13 @@ matrix_t * m_inverse (matrix_t *M)
 	free(ipiv);
 #endif
 
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- inv(%s [%d,%d])\n",
+		       M_inv->name, M_inv->rows, M_inv->cols,
+		       M->name, M->rows, M->cols);
+	}
+
 	return M_inv;
 }
 
@@ -711,9 +819,9 @@ matrix_t * m_inverse (matrix_t *M)
  * @param M  pointer to matrix
  * @return pointer to mean column vector
  */
-matrix_t * m_mean_column (matrix_t *M)
+matrix_t * m_mean_column (const char *name, matrix_t *M)
 {
-	matrix_t *a = m_zeros(M->rows, 1);
+	matrix_t *a = m_zeros(name, M->rows, 1);
 
 	int i, j;
 	for ( i = 0; i < M->cols; i++ ) {
@@ -724,6 +832,13 @@ matrix_t * m_mean_column (matrix_t *M)
 
 	m_elem_mult(a, 1.0f / M->cols);
 
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- mean(%s [%d,%d], 2)\n",
+		       a->name, a->rows, a->cols,
+		       M->name, M->rows, M->cols);
+	}
+
 	return a;
 }
 
@@ -733,9 +848,9 @@ matrix_t * m_mean_column (matrix_t *M)
  * @param M  pointer to matrix
  * @return pointer to mean row vector
  */
-matrix_t * m_mean_row (matrix_t *M)
+matrix_t * m_mean_row (const char *name, matrix_t *M)
 {
-	matrix_t *a = m_zeros(1, M->cols);
+	matrix_t *a = m_zeros(name, 1, M->cols);
 
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
@@ -745,6 +860,13 @@ matrix_t * m_mean_row (matrix_t *M)
 	}
 
 	m_elem_mult(a, 1.0f / M->rows);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- mean(%s [%d,%d], 1)\n",
+		       a->name, a->rows, a->cols,
+		       M->name, M->rows, M->cols);
+	}
 
 	return a;
 }
@@ -764,18 +886,26 @@ precision_t m_norm(matrix_t *v)
 		: v->rows;
 	int incX = 1;
 
+	precision_t norm;
+
 #ifdef __NVCC__
 	cublasHandle_t handle = cublas_handle();
-	precision_t result;
 
-	cublasStatus_t stat = cublasSnrm2(handle, N, v->data_dev, incX, &result);
+	cublasStatus_t stat = cublasSnrm2(handle, N, v->data_dev, incX, &norm);
 
 	assert(stat == CUBLAS_STATUS_SUCCESS);
-
-	return result;
 #else
-	return cblas_snrm2(N, v->data, incX);
+	norm = cblas_snrm2(N, v->data, incX);
 #endif
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: norm(%s [%d,%d]) = %g\n",
+		       v->name, v->rows, v->cols,
+		       norm);
+	}
+
+	return norm;
 }
 
 /**
@@ -787,7 +917,7 @@ precision_t m_norm(matrix_t *v)
  * @param transB
  * @return pointer to new matrix equal to A * B
  */
-matrix_t * m_product (matrix_t *A, matrix_t *B, bool transA, bool transB)
+matrix_t * m_product (const char *name, matrix_t *A, matrix_t *B, bool transA, bool transB)
 {
 	int M = transA ? A->cols : A->rows;
 	int K = transA ? A->rows : A->cols;
@@ -796,7 +926,7 @@ matrix_t * m_product (matrix_t *A, matrix_t *B, bool transA, bool transB)
 
 	assert(K == K2);
 
-	matrix_t *C = m_zeros(M, N);
+	matrix_t *C = m_zeros(name, M, N);
 
 	precision_t alpha = 1;
 	precision_t beta = 0;
@@ -834,9 +964,9 @@ matrix_t * m_product (matrix_t *A, matrix_t *B, bool transA, bool transB)
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
 		printf("debug: %s [%d,%d] <- %s%s [%d,%d] * %s%s [%d,%d]\n",
-		       "C", M, N,
-		       "A", transA ? "'" : "", M, K,
-		       "B", transB ? "'" : "", K, N);
+		       C->name, M, N,
+		       A->name, transA ? "'" : "", M, K,
+		       B->name, transB ? "'" : "", K, N);
 	}
 
 	return C;
@@ -850,7 +980,7 @@ matrix_t * m_product (matrix_t *A, matrix_t *B, bool transA, bool transB)
  * @param M  pointer to symmetric matrix
  * @return pointer to square root matrix
  */
-matrix_t * m_sqrtm (matrix_t *M)
+matrix_t * m_sqrtm (const char *name, matrix_t *M)
 {
 	assert(M->rows == M->cols);
 
@@ -858,20 +988,27 @@ matrix_t * m_sqrtm (matrix_t *M)
 	matrix_t *V;
 	matrix_t *D;
 
-	m_eigen(M, &V, &D);
+	m_eigen("V", "D", M, &V, &D);
 
 	// compute B = V * sqrt(D)
 	m_elem_apply(D, sqrtf);
 
-	matrix_t *B = m_product(V, D);
+	matrix_t *B = m_product("B", V, D);
 
 	// compute X = B * V'
-	matrix_t *X = m_product(B, V, false, true);
+	matrix_t *X = m_product(name, B, V, false, true);
 
 	// cleanup
 	m_free(B);
 	m_free(V);
 	m_free(D);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- sqrtm(%s [%d,%d])\n",
+		       X->name, X->rows, X->cols,
+		       M->name, M->rows, M->cols);
+	}
 
 	return X;
 }
@@ -885,9 +1022,9 @@ matrix_t * m_sqrtm (matrix_t *M)
  * @param M  pointer to matrix
  * @return pointer to new transposed matrix
  */
-matrix_t * m_transpose (matrix_t *M)
+matrix_t * m_transpose (const char *name, matrix_t *M)
 {
-	matrix_t *T = m_initialize(M->cols, M->rows);
+	matrix_t *T = m_initialize(name, M->cols, M->rows);
 
 	int i, j;
 	for ( i = 0; i < T->rows; i++ ) {
@@ -896,14 +1033,21 @@ matrix_t * m_transpose (matrix_t *M)
 		}
 	}
 
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- transpose(%s [%d,%d])\n",
+		       T->name, T->rows, T->cols,
+		       M->name, M->rows, M->cols);
+	}
+
 	return T;
 }
 
 /**
  * Add a matrix to another matrix.
  *
- * @param A  pointer to matrix
- * @param B  pointer to matrix
+ * @param A
+ * @param B
  */
 void m_add (matrix_t *A, matrix_t *B)
 {
@@ -925,6 +1069,14 @@ void m_add (matrix_t *A, matrix_t *B)
 #else
 	cblas_saxpy(N, alpha, B->data, incX, A->data, incY);
 #endif
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- %s [%d,%d] + %s [%d,%d]\n",
+		       A->name, A->rows, A->cols,
+		       A->name, A->rows, A->cols,
+		       B->name, B->rows, B->cols);
+	}
 }
 
 /**
@@ -942,6 +1094,13 @@ void m_assign_column (matrix_t * A, int i, matrix_t * B, int j)
     assert(0 <= j && j < B->cols);
 
     memcpy(&elem(A, 0, i), B->data, B->rows * sizeof(precision_t));
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s(:, %d) [%d,%d] <- %s(:, %d) [%d,%d]\n",
+		       A->name, i + 1, A->rows, 1,
+		       B->name, j + 1, B->rows, 1);
+	}
 }
 
 /**
@@ -962,13 +1121,20 @@ void m_assign_row (matrix_t * A, int i, matrix_t * B, int j)
     for ( k = 0; k < A->cols; k++ ) {
         elem(A, i, k) = elem(B, j, k);
     }
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s(%d, :) [%d,%d] <- %s(%d, :) [%d,%d]\n",
+		       A->name, i + 1, 1, A->cols,
+		       B->name, j + 1, 1, B->cols);
+	}
 }
 
 /**
  * Subtract a matrix from another matrix.
  *
- * @param A  pointer to matrix
- * @param B  pointer to matrix
+ * @param A
+ * @param B
  */
 void m_subtract (matrix_t *A, matrix_t *B)
 {
@@ -990,6 +1156,14 @@ void m_subtract (matrix_t *A, matrix_t *B)
 #else
 	cblas_saxpy(N, alpha, B->data, incX, A->data, incY);
 #endif
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- %s [%d,%d] - %s [%d,%d]\n",
+		       A->name, A->rows, A->cols,
+		       A->name, A->rows, A->cols,
+		       B->name, B->rows, B->cols);
+	}
 }
 
 /**
@@ -1007,6 +1181,13 @@ void m_elem_apply (matrix_t * M, elem_func_t f)
             elem(M, i, j) = f(elem(M, i, j));
         }
     }
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- f(%s [%d,%d])\n",
+		       M->name, M->rows, M->cols,
+		       M->name, M->rows, M->cols);
+	}
 }
 
 /**
@@ -1029,6 +1210,13 @@ void m_elem_mult (matrix_t *M, precision_t c)
 #else
 	cblas_sscal(N, c, M->data, incX);
 #endif
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- %g * %s [%d,%d]\n",
+		       M->name, M->rows, M->cols,
+		       c, M->name, M->rows, M->cols);
+	}
 }
 
 /**
@@ -1054,6 +1242,13 @@ void m_shuffle_columns (matrix_t *M)
 	}
 
 	free(temp);
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- %s(:, randperm(size(%s, 2))) [%d,%d]\n",
+		       M->name, M->rows, M->cols,
+		       M->name, M->name, M->rows, M->cols);
+	}
 }
 
 /**
@@ -1076,6 +1271,15 @@ void m_subtract_columns (matrix_t *M, matrix_t *a)
 			elem(M, j, i) -= elem(a, j, 0);
 		}
 	}
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- %s [%d,%d] - %s [%d,%d] * %s [%d,%d]\n",
+		       M->name, M->rows, M->cols,
+		       M->name, M->rows, M->cols,
+		       a->name, a->rows, a->cols,
+		       "1_N'", 1, M->cols);
+	}
 }
 
 /**
@@ -1097,5 +1301,14 @@ void m_subtract_rows (matrix_t *M, matrix_t *a)
 		for ( j = 0; j < M->cols; j++ ) {
 			elem(M, i, j) -= elem(a, 0, j);
 		}
+	}
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- %s [%d,%d] - %s [%d,%d] * %s [%d,%d]\n",
+		       M->name, M->rows, M->cols,
+		       M->name, M->rows, M->cols,
+		       "1_N", M->rows, 1,
+		       a->name, a->rows, a->cols);
 	}
 }

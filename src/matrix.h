@@ -18,6 +18,7 @@ typedef float precision_t;
 #define M_ELEM_FSCAN   "%f"
 
 typedef struct {
+	const char *name;
 	int rows;
 	int cols;
 	precision_t *data;
@@ -35,14 +36,14 @@ void cublas_set_matrix(matrix_t *M);
 void cublas_get_matrix(matrix_t *M);
 
 // constructor, destructor functions
-matrix_t * m_initialize (int rows, int cols);
-matrix_t * m_identity (int rows);
-matrix_t * m_ones (int rows, int cols);
-matrix_t * m_random (int rows, int cols);
-matrix_t * m_zeros (int rows, int cols);
-matrix_t * m_copy (matrix_t *M);
-matrix_t * m_copy_columns (matrix_t *M, int i, int j);
-matrix_t * m_copy_rows (matrix_t *M, int i, int j);
+matrix_t * m_initialize (const char *name, int rows, int cols);
+matrix_t * m_identity (const char *name, int rows);
+matrix_t * m_ones (const char *name, int rows, int cols);
+matrix_t * m_random (const char *name, int rows, int cols);
+matrix_t * m_zeros (const char *name, int rows, int cols);
+matrix_t * m_copy (const char *name, matrix_t *M);
+matrix_t * m_copy_columns (const char *name, matrix_t *M, int i, int j);
+matrix_t * m_copy_rows (const char *name, matrix_t *M, int i, int j);
 void m_free (matrix_t *M);
 
 // I/O functions
@@ -54,20 +55,20 @@ void m_image_read (matrix_t *M, int col, image_t *image);
 void m_image_write (matrix_t *M, int col, image_t *image);
 
 // getter functions
-matrix_t * m_covariance (matrix_t *M);
-matrix_t * m_diagonalize (matrix_t *v);
+matrix_t * m_covariance (const char *name, matrix_t *M);
+matrix_t * m_diagonalize (const char *name, matrix_t *v);
 precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j);
-void m_eigen (matrix_t *M, matrix_t **p_V, matrix_t **p_D);
-void m_eigen2 (matrix_t *A, matrix_t *B, matrix_t **p_V, matrix_t **p_D);
-matrix_t * m_inverse (matrix_t *M);
-matrix_t * m_mean_column (matrix_t *M);
-matrix_t * m_mean_row (matrix_t *M);
+void m_eigen (const char *name_V, const char *name_D, matrix_t *M, matrix_t **p_V, matrix_t **p_D);
+void m_eigen2 (const char *name_V, const char *name_D, matrix_t *A, matrix_t *B, matrix_t **p_V, matrix_t **p_D);
+matrix_t * m_inverse (const char *name, matrix_t *M);
+matrix_t * m_mean_column (const char *name, matrix_t *M);
+matrix_t * m_mean_row (const char *name, matrix_t *M);
 precision_t m_norm(matrix_t *v);
-matrix_t * m_product (matrix_t *A, matrix_t *B, bool transA=false, bool transB=false);
-matrix_t * m_sqrtm (matrix_t *M);
-matrix_t * m_transpose (matrix_t *M);
+matrix_t * m_product (const char *name, matrix_t *A, matrix_t *B, bool transA=false, bool transB=false);
+matrix_t * m_sqrtm (const char *name, matrix_t *M);
+matrix_t * m_transpose (const char *name, matrix_t *M);
 
 // mutator functions
 void m_add (matrix_t *A, matrix_t *B);

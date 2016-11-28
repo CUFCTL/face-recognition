@@ -30,9 +30,9 @@ logger_level_t LOGLEVEL = LL_INFO;
  * @param data
  * @return pointer to matrix
  */
-matrix_t * m_initialize_data (int rows, int cols, precision_t *data)
+matrix_t * m_initialize_data (const char *name, int rows, int cols, precision_t *data)
 {
-	matrix_t *M = m_initialize(rows, cols);
+	matrix_t *M = m_initialize(name, rows, cols);
 
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
@@ -132,7 +132,7 @@ void assert_equal_matrix (matrix_t *A, matrix_t *B, const char *name)
  */
 void assert_matrix_value (matrix_t *M, precision_t *data, const char *name)
 {
-	matrix_t *M_test = m_initialize_data(M->rows, M->cols, data);
+	matrix_t *M_test = m_initialize_data("M_test", M->rows, M->cols, data);
 
 	assert_equal_matrix(M, M_test, name);
 
@@ -150,10 +150,9 @@ void test_m_identity()
 		0, 0, 1, 0,
 		0, 0, 0, 1
 	};
-	matrix_t *I = m_identity(4);
+	matrix_t *I = m_identity("I", 4);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("I = eye(%d) = \n", I->rows);
 		m_fprint(stdout, I);
 	}
 
@@ -173,10 +172,9 @@ void test_m_ones()
 		1, 1, 1, 1,
 		1, 1, 1, 1
 	};
-	matrix_t *X = m_ones(4, 4);
+	matrix_t *X = m_ones("X", 4, 4);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("X = ones(%d, %d) = \n", X->rows, X->cols);
 		m_fprint(stdout, X);
 	}
 
@@ -197,10 +195,9 @@ void test_m_random()
 		 0.2610,  0.2159,  1.0133,  0.4165,  0.5066,
 		 0.2370,  0.9451, -2.8396, -1.4088, -0.2007
 	};
-	matrix_t *X = m_random(5, 5);
+	matrix_t *X = m_random("X", 5, 5);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("X = randn(%d, %d) = \n", X->rows, X->cols);
 		m_fprint(stdout, X);
 	}
 
@@ -220,10 +217,9 @@ void test_m_zeros()
 		0, 0, 0, 0,
 		0, 0, 0, 0
 	};
-	matrix_t *X = m_zeros(4, 4);
+	matrix_t *X = m_zeros("X", 4, 4);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("X = zeros(%d, %d) = \n", X->rows, X->cols);
 		m_fprint(stdout, X);
 	}
 
@@ -243,14 +239,12 @@ void test_m_copy()
 		 9,  7,  6, 12,
 		 4, 14, 15,  1
 	};
-	matrix_t *A = m_initialize_data(4, 4, A_data);
-	matrix_t *C = m_copy(A);
+	matrix_t *A = m_initialize_data("A", 4, 4, A_data);
+	matrix_t *C = m_copy("C", A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("C = A = \n");
 		m_fprint(stdout, C);
 	}
 
@@ -277,21 +271,19 @@ void test_m_copy_columns()
 		 7,  6,
 		14, 15
 	};
-	matrix_t *A = m_initialize_data(4, 4, A_data);
+	matrix_t *A = m_initialize_data("A", 4, 4, A_data);
 
 	int i = 1;
 	int j = 3;
-	matrix_t *C = m_copy_columns(A, i, j);
+	matrix_t *C = m_copy_columns("C", A, i, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("C = A(:, %d:%d) = \n", i + 1, j);
 		m_fprint(stdout, C);
 	}
 
-	assert_matrix_value(C, C_data, "A(:, 1:3)");
+	assert_matrix_value(C, C_data, "A(:, i:j)");
 
 	m_free(A);
 	m_free(C);
@@ -312,21 +304,19 @@ void test_m_copy_rows()
 		 5, 11, 10,  8,
 		 9,  7,  6, 12
 	};
-	matrix_t *A = m_initialize_data(4, 4, A_data);
+	matrix_t *A = m_initialize_data("A", 4, 4, A_data);
 
 	int i = 1;
 	int j = 3;
-	matrix_t *C = m_copy_rows(A, i, j);
+	matrix_t *C = m_copy_rows("C", A, i, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("C = A(%d:%d, :) = \n", i + 1, j);
 		m_fprint(stdout, C);
 	}
 
-	assert_matrix_value(C, C_data, "A(1:3, :)");
+	assert_matrix_value(C, C_data, "A(i:j, :)");
 
 	m_free(A);
 	m_free(C);
@@ -348,16 +338,14 @@ void test_m_covariance()
 		-3.0000,  6.5000,  7.0000,  1.0000,
 		 5.6667, 24.1667,  1.0000, 12.3333
 	};
-	matrix_t *A = m_initialize_data(3, 4, A_data);
-	matrix_t *C = m_covariance(A);
+	matrix_t *A = m_initialize_data("A", 3, 4, A_data);
+	matrix_t *C = m_covariance("C", A);
 
 	cublas_get_matrix(C);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("cov(A) = \n");
 		m_fprint(stdout, C);
 	}
 
@@ -382,14 +370,12 @@ void test_m_diagonalize()
 		0,  0,  0, -2,  0,
 		0,  0,  0,  0, -5
 	};
-	matrix_t *v = m_initialize_data(1, 5, v_data);
-	matrix_t *D = m_diagonalize(v);
+	matrix_t *v = m_initialize_data("v", 1, 5, v_data);
+	matrix_t *D = m_diagonalize("D", v);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("v = \n");
 		m_fprint(stdout, v);
 
-		printf("diag(v) = \n");
 		m_fprint(stdout, D);
 	}
 
@@ -414,22 +400,16 @@ void test_m_distance()
 		1,
 		0
 	};
-	matrix_t *a = m_initialize_data(3, 1, a_data);
-	matrix_t *b = m_initialize_data(3, 1, b_data);
+	matrix_t *a = m_initialize_data("a", 3, 1, a_data);
+	matrix_t *b = m_initialize_data("b", 3, 1, b_data);
 	precision_t dist_COS = m_dist_COS(a, 0, b, 0);
 	precision_t dist_L1 = m_dist_L1(a, 0, b, 0);
 	precision_t dist_L2 = m_dist_L2(a, 0, b, 0);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("a = \n");
 		m_fprint(stdout, a);
 
-		printf("b = \n");
 		m_fprint(stdout, b);
-
-		printf("d_COS(a, b) = " M_ELEM_FPRINT "\n", dist_COS);
-		printf("d_L1 (a, b) = " M_ELEM_FPRINT "\n", dist_L1);
-		printf("d_L2 (a, b) = " M_ELEM_FPRINT "\n", dist_L2);
 	}
 
 	assert_equal(dist_COS, 0, "d_COS(a, b)");
@@ -463,20 +443,17 @@ void test_m_eigen()
 		0.0000, 0.0000, 0.8482, 0.0000,
 		0.0000, 0.0000, 0.0000, 2.5362
 	};
-	matrix_t *M = m_initialize_data(4, 4, M_data);
+	matrix_t *M = m_initialize_data("M", 4, 4, M_data);
 	matrix_t *V;
 	matrix_t *D;
 
-	m_eigen(M, &V, &D);
+	m_eigen("V", "D", M, &V, &D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("M = \n");
 		m_fprint(stdout, M);
 
-		printf("V = eigenvectors of M = \n");
 		m_fprint(stdout, V);
 
-		printf("D = eigenvalues of M = \n");
 		m_fprint(stdout, D);
 	}
 
@@ -513,24 +490,20 @@ void test_m_eigen2()
 		 0.0000,  1.0700,  0.0000,
 		 0.0000,  0.0000,  3.4864
 	};
-	matrix_t *A = m_initialize_data(3, 3, A_data);
-	matrix_t *B = m_initialize_data(3, 3, B_data);
+	matrix_t *A = m_initialize_data("A", 3, 3, A_data);
+	matrix_t *B = m_initialize_data("B", 3, 3, B_data);
 	matrix_t *V;
 	matrix_t *D;
 
-	m_eigen2(A, B, &V, &D);
+	m_eigen2("V", "D", A, B, &V, &D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("B = \n");
 		m_fprint(stdout, B);
 
-		printf("V = eigenvectors of A, B = \n");
 		m_fprint(stdout, V);
 
-		printf("D = eigenvalues of A, B = \n");
 		m_fprint(stdout, D);
 	}
 
@@ -558,14 +531,12 @@ void test_m_inverse()
 		0.1765,  0.1765,  0.0392,
 		0.0588,  0.0588, -0.0980
 	};
-	matrix_t *X = m_initialize_data(3, 3, X_data);
-	matrix_t *Y = m_inverse(X);
+	matrix_t *X = m_initialize_data("X", 3, 3, X_data);
+	matrix_t *Y = m_inverse("Y", X);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("X = \n");
 		m_fprint(stdout, X);
 
-		printf("Y = inv(X) = \n");
 		m_fprint(stdout, Y);
 	}
 
@@ -588,14 +559,12 @@ void test_m_mean_column()
 		0.6667,
 		2.3333
 	};
-	matrix_t *A = m_initialize_data(2, 3, A_data);
-	matrix_t *m = m_mean_column(A);
+	matrix_t *A = m_initialize_data("A", 2, 3, A_data);
+	matrix_t *m = m_mean_column("m", A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("mean(A, 2) = \n");
 		m_fprint(stdout, m);
 	}
 
@@ -619,14 +588,12 @@ void test_m_mean_row()
 	precision_t m_data[] = {
 		1.7500, 2.2500, 1.7500
 	};
-	matrix_t *A = m_initialize_data(4, 3, A_data);
-	matrix_t *m = m_mean_row(A);
+	matrix_t *A = m_initialize_data("A", 4, 3, A_data);
+	matrix_t *m = m_mean_row("m", A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("mean(A, 1) = \n");
 		m_fprint(stdout, m);
 	}
 
@@ -644,14 +611,11 @@ void test_m_norm()
 	precision_t v_data[] = {
 		-2, 3, 1
 	};
-	matrix_t *v = m_initialize_data(1, 3, v_data);
+	matrix_t *v = m_initialize_data("v", 1, 3, v_data);
 	precision_t n = m_norm(v);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("v = \n");
 		m_fprint(stdout, v);
-
-		printf("norm(v) = " M_ELEM_FPRINT "\n", n);
 	}
 
 	assert_equal(n, 3.7417, "norm(v)");
@@ -684,25 +648,21 @@ void test_m_product()
 		3, 3, 0, 0,
 		4, 4, 0, 0
 	};
-	matrix_t *A1 = m_initialize_data(1, 4, A1_data);
-	matrix_t *B1 = m_initialize_data(4, 1, B1_data);
-	matrix_t *C1 = m_product(A1, B1);
-	matrix_t *C2 = m_product(B1, A1);
+	matrix_t *A1 = m_initialize_data("A1", 1, 4, A1_data);
+	matrix_t *B1 = m_initialize_data("B1", 4, 1, B1_data);
+	matrix_t *C1 = m_product("C1", A1, B1);
+	matrix_t *C2 = m_product("C2", B1, A1);
 
 	cublas_get_matrix(C1);
 	cublas_get_matrix(C2);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A1);
 
-		printf("B = \n");
 		m_fprint(stdout, B1);
 
-		printf("A * B = \n");
 		m_fprint(stdout, C1);
 
-		printf("B * A = \n");
 		m_fprint(stdout, C2);
 	}
 
@@ -728,20 +688,17 @@ void test_m_product()
 		24, 35, 114,
 		30, 52, 162
 	};
-	matrix_t *A2 = m_initialize_data(2, 3, A2_data);
-	matrix_t *B2 = m_initialize_data(3, 3, B2_data);
-	matrix_t *C3 = m_product(A2, B2);
+	matrix_t *A2 = m_initialize_data("A2", 2, 3, A2_data);
+	matrix_t *B2 = m_initialize_data("B2", 3, 3, B2_data);
+	matrix_t *C3 = m_product("C3", A2, B2);
 
 	cublas_get_matrix(C3);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A2);
 
-		printf("B = \n");
 		m_fprint(stdout, B2);
 
-		printf("A * B = \n");
 		m_fprint(stdout, C3);
 	}
 
@@ -771,14 +728,12 @@ void test_m_sqrtm()
 		 0.0046,  0.0118, -0.9746,  2.0503, -0.9200,
 		 0.0032,  0.0094,  0.0263, -0.9200,  2.2700
 	};
-	matrix_t *A = m_initialize_data(5, 5, A_data);
-	matrix_t *X = m_sqrtm(A);
+	matrix_t *A = m_initialize_data("A", 5, 5, A_data);
+	matrix_t *X = m_sqrtm("X", A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("X = sqrtm(A) = \n");
 		m_fprint(stdout, X);
 	}
 
@@ -805,14 +760,12 @@ void test_m_transpose()
 		 3, 10,  6, 15,
 		13,  8, 12,  1
 	};
-	matrix_t *A = m_initialize_data(4, 4, A_data);
-	matrix_t *B = m_transpose(A);
+	matrix_t *A = m_initialize_data("A", 4, 4, A_data);
+	matrix_t *B = m_transpose("B", A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("B = A' = \n");
 		m_fprint(stdout, B);
 	}
 
@@ -839,21 +792,18 @@ void test_m_add()
 		5, 9,
 		2, 1
 	};
-	matrix_t *A = m_initialize_data(2, 2, A_data1);
-	matrix_t *B = m_initialize_data(2, 2, B_data);
+	matrix_t *A = m_initialize_data("A", 2, 2, A_data1);
+	matrix_t *B = m_initialize_data("B", 2, 2, B_data);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("B = \n");
 		m_fprint(stdout, B);
 	}
 
 	m_add(A, B);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A + B = \n");
 		m_fprint(stdout, A);
 	}
 
@@ -886,29 +836,24 @@ void test_m_assign_column()
 		0,
 		0
 	};
-	matrix_t *A = m_initialize_data(4, 4, A_data1);
-	matrix_t *B = m_initialize_data(4, 1, B_data);
+	matrix_t *A = m_initialize_data("A", 4, 4, A_data1);
+	matrix_t *B = m_initialize_data("B", 4, 1, B_data);
 	int i = 2;
 	int j = 0;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("B = \n");
 		m_fprint(stdout, B);
-
-		printf("A(:, %d) = B(:, %d)\n", i, j);
 	}
 
 	m_assign_column(A, i, B, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 	}
 
-	assert_matrix_value(A, A_data2, "A(:, 2) = B(:, 0)");
+	assert_matrix_value(A, A_data2, "A(:, i) = B(:, j)");
 
 	m_free(A);
 	m_free(B);
@@ -934,29 +879,24 @@ void test_m_assign_row()
 	precision_t B_data[] = {
 		0, 0, 0, 0
 	};
-	matrix_t *A = m_initialize_data(4, 4, A_data1);
-	matrix_t *B = m_initialize_data(1, 4, B_data);
+	matrix_t *A = m_initialize_data("A", 4, 4, A_data1);
+	matrix_t *B = m_initialize_data("B", 1, 4, B_data);
 	int i = 2;
 	int j = 0;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("B = \n");
 		m_fprint(stdout, B);
-
-		printf("A(%d, :) = B(%d, :)\n", i, j);
 	}
 
 	m_assign_row(A, i, B, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 	}
 
-	assert_matrix_value(A, A_data2, "A(2, :) = B(0, :)");
+	assert_matrix_value(A, A_data2, "A(i, :) = B(j, :)");
 
 	m_free(A);
 	m_free(B);
@@ -979,21 +919,18 @@ void test_m_subtract()
 		5, 9,
 		2, 1
 	};
-	matrix_t *A = m_initialize_data(2, 2, A_data1);
-	matrix_t *B = m_initialize_data(2, 2, B_data);
+	matrix_t *A = m_initialize_data("A", 2, 2, A_data1);
+	matrix_t *B = m_initialize_data("B", 2, 2, B_data);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 
-		printf("B = \n");
 		m_fprint(stdout, B);
 	}
 
 	m_subtract(A, B);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A - B = \n");
 		m_fprint(stdout, A);
 	}
 
@@ -1016,17 +953,15 @@ void test_m_elem_apply()
 		1.0000, 0.0000, 1.4142,
 		1.7321, 1.0000, 2.0000
 	};
-	matrix_t *A = m_initialize_data(2, 3, A_data1);
+	matrix_t *A = m_initialize_data("A", 2, 3, A_data1);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 	}
 
 	m_elem_apply(A, sqrtf);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("sqrt(A) = \n");
 		m_fprint(stdout, A);
 	}
 
@@ -1048,22 +983,20 @@ void test_m_elem_mult()
 		3, 0, 6,
 		9, 3, 12
 	};
-	matrix_t *A = m_initialize_data(2, 3, A_data1);
+	matrix_t *A = m_initialize_data("A", 2, 3, A_data1);
 	precision_t c = 3;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 	}
 
 	m_elem_mult(A, c);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf(M_ELEM_FPRINT " * A = \n", c);
 		m_fprint(stdout, A);
 	}
 
-	assert_matrix_value(A, A_data2, "3 * A");
+	assert_matrix_value(A, A_data2, "c * A");
 
 	m_free(A);
 }
@@ -1081,17 +1014,15 @@ void test_m_shuffle_columns()
 		4, 3, 1, 2,
 		8, 7, 5, 6
 	};
-	matrix_t *A = m_initialize_data(2, 4, A_data1);
+	matrix_t *A = m_initialize_data("A", 2, 4, A_data1);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A = \n");
 		m_fprint(stdout, A);
 	}
 
 	m_shuffle_columns(A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("A(:, randperm(size(A, 2))) = \n");
 		m_fprint(stdout, A);
 	}
 
@@ -1120,21 +1051,18 @@ void test_m_subtract_columns()
 		1,
 		1
 	};
-	matrix_t *M = m_initialize_data(3, 4, M_data1);
-	matrix_t *a = m_initialize_data(3, 1, a_data);;
+	matrix_t *M = m_initialize_data("M", 3, 4, M_data1);
+	matrix_t *a = m_initialize_data("a", 3, 1, a_data);;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("M = \n");
 		m_fprint(stdout, M);
 
-		printf("a = \n");
 		m_fprint(stdout, a);
 	}
 
 	m_subtract_columns(M, a);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("M - a * 1_N' = \n");
 		m_fprint(stdout, M);
 	}
 
@@ -1162,21 +1090,18 @@ void test_m_subtract_rows()
 	precision_t a_data[] = {
 		0, 2, 1, 4
 	};
-	matrix_t *M = m_initialize_data(3, 4, M_data1);
-	matrix_t *a = m_initialize_data(1, 4, a_data);
+	matrix_t *M = m_initialize_data("M", 3, 4, M_data1);
+	matrix_t *a = m_initialize_data("a", 1, 4, a_data);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("M = \n");
 		m_fprint(stdout, M);
 
-		printf("a = \n");
 		m_fprint(stdout, a);
 	}
 
 	m_subtract_rows(M, a);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("M - 1_N * a = \n");
 		m_fprint(stdout, M);
 	}
 

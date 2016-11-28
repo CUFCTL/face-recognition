@@ -23,9 +23,9 @@ matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 {
 	timer_push("  PCA");
 
-	timer_push("    compute surrogate matrix L");
+	timer_push("    compute surrogate of covariance matrix L");
 
-	matrix_t *L = m_product(X, X, true, false);
+	matrix_t *L = m_product("L", X, X, true, false);
 
 	timer_pop();
 
@@ -34,7 +34,7 @@ matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 	matrix_t *V;
 	matrix_t *D;
 
-	m_eigen(L, &V, &D);
+	m_eigen("V", "D", L, &V, &D);
 
 	timer_pop();
 
@@ -45,8 +45,8 @@ matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 		? X->cols - 1
 		: n_opt1;
 
-	matrix_t *W_pca = m_product(X, V);
-	matrix_t *W_pca2 = m_copy_columns(W_pca, W_pca->cols - n_opt1, W_pca->cols);
+	matrix_t *W_pca = m_product("W_pca", X, V);
+	matrix_t *W_pca2 = m_copy_columns("W_pca", W_pca, W_pca->cols - n_opt1, W_pca->cols);
 
 	timer_pop();
 
@@ -78,13 +78,13 @@ matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 matrix_t * PCA_rows(matrix_t *X, matrix_t **p_D)
 {
     // compute the covariance of X
-    matrix_t *C = m_covariance(X);
+    matrix_t *C = m_covariance("C", X);
 
     // compute the eigenvalues, eigenvectors of the covariance
     matrix_t *E;
     matrix_t *D;
 
-    m_eigen(C, &E, &D);
+    m_eigen("E", "D", C, &E, &D);
 
     // save outputs
     *p_D = D;

@@ -29,20 +29,20 @@ matrix_t * get_image_matrix(image_entry_t *entries, int num_entries)
 	image_read(image, entries[0].name);
 
 	// construct image matrix
-	matrix_t *T = m_initialize(image->channels * image->height * image->width, num_entries);
+	matrix_t *X = m_initialize("X", image->channels * image->height * image->width, num_entries);
 
 	// map each image to a column vector
-	m_image_read(T, 0, image);
+	m_image_read(X, 0, image);
 
 	int i;
 	for ( i = 1; i < num_entries; i++ ) {
 		image_read(image, entries[i].name);
-		m_image_read(T, i, image);
+		m_image_read(X, i, image);
 	}
 
 	image_destruct(image);
 
-	return T;
+	return X;
 }
 
 /**
@@ -153,7 +153,7 @@ void db_train(database_t *db, const char *path)
 	matrix_t *X = get_image_matrix(db->entries, db->num_entries);
 
 	// subtract mean from X
-	db->mean_face = m_mean_column(X);
+	db->mean_face = m_mean_column("m", X);
 	m_subtract_columns(X, db->mean_face);
 
 	// compute PCA representation
@@ -161,19 +161,19 @@ void db_train(database_t *db, const char *path)
 
 	if ( db->pca.train ) {
 		db->pca.W = PCA_cols(X, db->params.pca_n1, &D);
-		db->pca.P = m_product(db->pca.W, X, true, false);
+		db->pca.P = m_product("P_pca", db->pca.W, X, true, false);
 	}
 
 	// compute LDA representation
 	if ( db->lda.train ) {
 		db->lda.W = LDA(db->pca.W, X, db->num_labels, db->entries, db->params.lda_n1, db->params.lda_n2);
-		db->lda.P = m_product(db->lda.W, X, true, false);
+		db->lda.P = m_product("P_lda", db->lda.W, X, true, false);
 	}
 
 	// compute ICA representation
 	if ( db->ica.train ) {
 		db->ica.W = ICA(X, db->params.ica_num_ic, db->params.ica_max_iterations, db->params.ica_epsilon); // W_pca, D
-		db->ica.P = m_product(db->ica.W, X, true, false);
+		db->ica.P = m_product("P_ica", db->ica.W, X, true, false);
 	}
 
 	timer_pop();
@@ -362,7 +362,7 @@ void db_recognize(database_t *db, const char *path)
 
 		if ( algo->rec ) {
 			// compute projected test images
-			matrix_t *P_test = m_product(algo->W, X_test, true, false);
+			matrix_t *P_test = m_product("P_test", algo->W, X_test, true, false);
 
 			// compute labels for each test image
 			image_label_t **rec_labels = (image_label_t **)malloc(num_entries * sizeof(image_label_t *));

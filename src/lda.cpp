@@ -32,15 +32,15 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
             }
         }
 
-        X_classes[i] = m_copy_columns(X, j, k);
+        X_classes[i] = m_copy_columns("X_class_i", X, j, k);
         j = k;
 
         // compute the mean of the class
-        U[i] = m_mean_column(X_classes[i]);
+        U[i] = m_mean_column("u_i", X_classes[i]);
     }
 
     // compute the mean of all classes
-    matrix_t *u = m_initialize(X->rows, 1);  // m_mean_column(U);
+    matrix_t *u = m_initialize("u", X->rows, 1);  // m_mean_column(U);
 
     for ( i = 0; i < c; i++ ) {
         m_add(u, U[i]);
@@ -49,17 +49,17 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
 
     // compute the between-scatter S_b = sum(S_b_i, i=1:c)
     // compute the within-scatter S_w = sum(S_w_i, i=1:c)
-    matrix_t *S_b = m_zeros(X->rows, X->rows);
-    matrix_t *S_w = m_zeros(X->rows, X->rows);
+    matrix_t *S_b = m_zeros("S_b", X->rows, X->rows);
+    matrix_t *S_w = m_zeros("S_w", X->rows, X->rows);
 
     for ( i = 0; i < c; i++ ) {
         matrix_t *X_class = X_classes[i];
 
         // compute S_b_i = n_i * (u_i - u) * (u_i - u)'
-        matrix_t *u_i = m_copy(U[i]);
+        matrix_t *u_i = m_copy("u_i - u", U[i]);
         m_subtract(u_i, u);
 
-        matrix_t *S_b_i = m_product(u_i, u_i, false, true);
+        matrix_t *S_b_i = m_product("S_b_i", u_i, u_i, false, true);
         m_elem_mult(S_b_i, X_class->cols);
 
         m_add(S_b, S_b_i);
@@ -67,7 +67,7 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
         // compute S_w_i = X_class * X_class', X_class is mean-subtracted
         m_subtract_columns(X_class, U[i]);
 
-        matrix_t *S_w_i = m_product(X_class, X_class, false, true);
+        matrix_t *S_w_i = m_product("S_w_i", X_class, X_class, false, true);
 
         m_add(S_w, S_w_i);
 
@@ -114,8 +114,8 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
         : n_opt1;
 
     // use only the last n_opt1 columns in W_pca
-    matrix_t *W_pca2 = m_copy_columns(W_pca, W_pca->cols - n_opt1, W_pca->cols);
-    matrix_t *P_pca = m_product(W_pca2, X, true, false);
+    matrix_t *W_pca2 = m_copy_columns("W_pca", W_pca, W_pca->cols - n_opt1, W_pca->cols);
+    matrix_t *P_pca = m_product("P_pca", W_pca2, X, true, false);
 
     timer_pop();
 
@@ -132,15 +132,15 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     timer_push("    compute eigenvectors of scatter matrices");
 
     // compute W_fld = eigenvectors of S_w^-1 * S_b
-    matrix_t *S_w_inv = m_inverse(S_w);
-    matrix_t *J = m_product(S_w_inv, S_b);
+    matrix_t *S_w_inv = m_inverse("inv(S_w)", S_w);
+    matrix_t *J = m_product("J", S_w_inv, S_b);
     matrix_t *J_evec;
     matrix_t *J_eval;
 
-    m_eigen(J, &J_evec, &J_eval);
+    m_eigen("J_evec", "J_eval", J, &J_evec, &J_eval);
 
     // TODO: compare results, see if this will work
-    // m_eigen2(S_b, S_w, &J_evec, &J_eval);
+    // m_eigen2("J_evec", "J_eval", S_b, S_w, &J_evec, &J_eval);
 
     // if n_opt2 = -1, use c - 1
     n_opt2 = (n_opt2 == -1)
@@ -148,14 +148,14 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
         : n_opt2;
 
     // take only the last n_opt2 columns in J_evec
-    matrix_t *W_fld = m_copy_columns(J_evec, J_evec->cols - n_opt2, J_evec->cols);
+    matrix_t *W_fld = m_copy_columns("W_fld", J_evec, J_evec->cols - n_opt2, J_evec->cols);
 
     timer_pop();
 
     timer_push("    compute LDA projection matrix");
 
     // compute W_lda = (W_fld' * W_pca2')' = W_pca2 * W_fld
-    matrix_t *W_lda = m_product(W_pca2, W_fld);
+    matrix_t *W_lda = m_product("W_lda", W_pca2, W_fld);
 
     timer_pop();
 
