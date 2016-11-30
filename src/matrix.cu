@@ -60,42 +60,6 @@ void cublas_alloc_matrix(matrix_t *M)
 }
 
 /**
- * Write a matrix to the GPU.
- *
- * @param M
- */
-void cublas_set_matrix(matrix_t *M)
-{
-#ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
-
-	cublasStatus_t stat = cublasSetMatrix(M->rows, M->cols, sizeof(precision_t),
-		M->data, M->rows,
-		M->data_dev, M->rows);
-
-	assert(stat == CUBLAS_STATUS_SUCCESS);
-#endif
-}
-
-/**
- * Read a matrix from the GPU.
- *
- * @param M
- */
-void cublas_get_matrix(matrix_t *M)
-{
-#ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
-
-	cublasStatus_t stat = cublasGetMatrix(M->rows, M->cols, sizeof(precision_t),
-		M->data_dev, M->rows,
-		M->data, M->rows);
-
-	assert(stat == CUBLAS_STATUS_SUCCESS);
-#endif
-}
-
-/**
  * Construct a matrix.
  *
  * @param rows
@@ -135,7 +99,7 @@ matrix_t * m_identity (const char *name, int rows)
 	}
 
 	cublas_alloc_matrix(M);
-	cublas_set_matrix(M);
+	m_gpu_write(M);
 
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
@@ -165,7 +129,7 @@ matrix_t * m_ones(const char *name, int rows, int cols)
         }
     }
 
-	cublas_set_matrix(M);
+	m_gpu_write(M);
 
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
@@ -231,7 +195,7 @@ matrix_t * m_random (const char *name, int rows, int cols)
         }
     }
 
-	cublas_set_matrix(M);
+	m_gpu_write(M);
 
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
@@ -259,7 +223,7 @@ matrix_t * m_zeros (const char *name, int rows, int cols)
 	M->data = (precision_t *)calloc(rows * cols, sizeof(precision_t));
 
 	cublas_alloc_matrix(M);
-	cublas_set_matrix(M);
+	m_gpu_write(M);
 
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
@@ -422,6 +386,42 @@ matrix_t * m_fread (FILE *stream)
 	fread(M->data, sizeof(precision_t), M->rows * M->cols, stream);
 
 	return M;
+}
+
+/**
+ * Copy matrix data from host memory to device memory.
+ *
+ * @param M
+ */
+void m_gpu_write (matrix_t *M)
+{
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasSetMatrix(M->rows, M->cols, sizeof(precision_t),
+		M->data, M->rows,
+		M->data_dev, M->rows);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#endif
+}
+
+/**
+ * Copy matrix data from device memory to host memory.
+ *
+ * @param M
+ */
+void m_gpu_read (matrix_t *M)
+{
+#ifdef __NVCC__
+	cublasHandle_t handle = cublas_handle();
+
+	cublasStatus_t stat = cublasGetMatrix(M->rows, M->cols, sizeof(precision_t),
+		M->data_dev, M->rows,
+		M->data, M->rows);
+
+	assert(stat == CUBLAS_STATUS_SUCCESS);
+#endif
 }
 
 /**

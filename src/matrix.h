@@ -31,10 +31,6 @@ typedef precision_t (*elem_func_t)(precision_t);
 
 #define elem(M, i, j) (M)->data[(j) * (M)->rows + (i)]
 
-// cuBLAS helper functions
-void cublas_set_matrix(matrix_t *M);
-void cublas_get_matrix(matrix_t *M);
-
 // constructor, destructor functions
 matrix_t * m_initialize (const char *name, int rows, int cols);
 matrix_t * m_identity (const char *name, int rows);
@@ -51,6 +47,8 @@ void m_fprint (FILE *stream, matrix_t *M);
 void m_fwrite (FILE *stream, matrix_t *M);
 matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
+void m_gpu_read (matrix_t *M);
+void m_gpu_write (matrix_t *M);
 void m_image_read (matrix_t *M, int col, image_t *image);
 void m_image_write (matrix_t *M, int col, image_t *image);
 

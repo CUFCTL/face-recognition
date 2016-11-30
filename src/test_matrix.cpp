@@ -41,7 +41,7 @@ matrix_t * m_initialize_data (const char *name, int rows, int cols, precision_t 
 		}
 	}
 
-	cublas_set_matrix(M);
+	m_gpu_write(M);
 
 	return M;
 }
@@ -341,7 +341,7 @@ void test_m_covariance()
 	matrix_t *A = m_initialize_data("A", 3, 4, A_data);
 	matrix_t *C = m_covariance("C", A);
 
-	cublas_get_matrix(C);
+	m_gpu_read(C);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -653,8 +653,8 @@ void test_m_product()
 	matrix_t *C1 = m_product("C1", A1, B1);
 	matrix_t *C2 = m_product("C2", B1, A1);
 
-	cublas_get_matrix(C1);
-	cublas_get_matrix(C2);
+	m_gpu_read(C1);
+	m_gpu_read(C2);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A1);
@@ -692,7 +692,7 @@ void test_m_product()
 	matrix_t *B2 = m_initialize_data("B2", 3, 3, B2_data);
 	matrix_t *C3 = m_product("C3", A2, B2);
 
-	cublas_get_matrix(C3);
+	m_gpu_read(C3);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A2);
