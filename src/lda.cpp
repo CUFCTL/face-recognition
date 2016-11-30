@@ -147,6 +147,12 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
         ? c - 1
         : n_opt2;
 
+    // temporary bounds check for n_opt2
+    if ( J_eval->cols < n_opt2 ) {
+        printf("warning: J has only %d eigenvalues, thresholding lda_n2\n", J_eval->cols);
+        n_opt2 = J_eval->cols;
+    }
+
     // take only the last n_opt2 columns in J_evec
     matrix_t *W_fld = m_copy_columns("W_fld", J_evec, J_evec->cols - n_opt2, J_evec->cols);
 

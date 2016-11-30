@@ -27,7 +27,7 @@ NVCCFLAGS = -x c++
 ifeq ($(BUILD), release)
 CXXFLAGS += -O3
 else ifeq ($(BUILD), debug)
-CXXFLAGS += -g -pg -Wall
+CXXFLAGS += -pg -Wall
 endif
 
 ifeq ($(MATLIB), netlib)
