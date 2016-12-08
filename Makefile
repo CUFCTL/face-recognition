@@ -20,14 +20,18 @@ NVCC = nvcc
 endif
 
 # determine compiler, library flags
+MAGMA_DIR = ../magma-2.2.0
+
 LIBS = -lm
 CXXFLAGS =
-NVCCFLAGS = -x c++
+NVCCFLAGS = -x c++ -I$(MAGMA_DIR)/include
 
 ifeq ($(BUILD), release)
 CXXFLAGS += -O3
+NVCCFLAGS += -O3
 else ifeq ($(BUILD), debug)
 CXXFLAGS += -pg -Wall
+NVCCFLAGS += -pg
 endif
 
 ifeq ($(MATLIB), netlib)
@@ -38,7 +42,7 @@ LIBS += -mkl
 CXXFLAGS += -D INTEL_MKL
 NVCCFLAGS += $(CXXFLAGS)
 else ifeq ($(MATLIB), cuda)
-LIBS += -lcudart -lcublas
+LIBS += -lcudart -lcublas -L$(MAGMA_DIR)/lib -lmagma
 endif
 
 INCS = src/database.h src/image_entry.h src/image.h src/logger.h src/matrix.h src/timer.h

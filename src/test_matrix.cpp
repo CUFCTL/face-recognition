@@ -10,8 +10,13 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "logger.h"
 #include "matrix.h"
+
+#ifdef __NVCC__
+	#include "magma_v2.h"
+#endif
 
 #define ANSI_RED    "\x1b[31m"
 #define ANSI_BOLD   "\x1b[1m"
@@ -449,6 +454,9 @@ void test_m_eigen()
 
 	m_eigen("V", "D", M, &V, &D);
 
+	m_gpu_read(V);
+	m_gpu_read(D);
+
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, M);
 
@@ -497,6 +505,9 @@ void test_m_eigen2()
 
 	m_eigen2("V", "D", A, B, &V, &D);
 
+	m_gpu_read(V);
+	m_gpu_read(D);
+
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
 
@@ -534,6 +545,8 @@ void test_m_inverse()
 	matrix_t *X = m_initialize_data("X", 3, 3, X_data);
 	matrix_t *Y = m_inverse("Y", X);
 
+	m_gpu_read(Y);
+
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, X);
 
@@ -561,6 +574,8 @@ void test_m_mean_column()
 	};
 	matrix_t *A = m_initialize_data("A", 2, 3, A_data);
 	matrix_t *m = m_mean_column("m", A);
+
+	m_gpu_read(m);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -590,6 +605,8 @@ void test_m_mean_row()
 	};
 	matrix_t *A = m_initialize_data("A", 4, 3, A_data);
 	matrix_t *m = m_mean_row("m", A);
+
+	m_gpu_read(m);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -802,6 +819,7 @@ void test_m_add()
 	}
 
 	m_add(A, B);
+	m_gpu_read(A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -903,44 +921,6 @@ void test_m_assign_row()
 }
 
 /**
- * Test matrix subtraction.
- */
-void test_m_subtract()
-{
-	precision_t A_data1[] = {
-		1, 0,
-		2, 4
-	};
-	precision_t A_data2[] = {
-		-4, -9,
-		 0,  3
-	};
-	precision_t B_data[] = {
-		5, 9,
-		2, 1
-	};
-	matrix_t *A = m_initialize_data("A", 2, 2, A_data1);
-	matrix_t *B = m_initialize_data("B", 2, 2, B_data);
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, B);
-	}
-
-	m_subtract(A, B);
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-	}
-
-	assert_matrix_value(A, A_data2, "A - B");
-
-	m_free(A);
-	m_free(B);
-}
-
-/**
  * Test matrix element-wise function application.
  */
 void test_m_elem_apply()
@@ -991,6 +971,7 @@ void test_m_elem_mult()
 	}
 
 	m_elem_mult(A, c);
+	m_gpu_read(A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -1029,6 +1010,45 @@ void test_m_shuffle_columns()
 	assert_matrix_value(A, A_data2, "A(:, randperm(size(A, 2)))");
 
 	m_free(A);
+}
+
+/**
+ * Test matrix subtraction.
+ */
+void test_m_subtract()
+{
+	precision_t A_data1[] = {
+		1, 0,
+		2, 4
+	};
+	precision_t A_data2[] = {
+		-4, -9,
+		 0,  3
+	};
+	precision_t B_data[] = {
+		5, 9,
+		2, 1
+	};
+	matrix_t *A = m_initialize_data("A", 2, 2, A_data1);
+	matrix_t *B = m_initialize_data("B", 2, 2, B_data);
+
+	if ( LOGGER(LL_VERBOSE) ) {
+		m_fprint(stdout, A);
+
+		m_fprint(stdout, B);
+	}
+
+	m_subtract(A, B);
+	m_gpu_read(A);
+
+	if ( LOGGER(LL_VERBOSE) ) {
+		m_fprint(stdout, A);
+	}
+
+	assert_matrix_value(A, A_data2, "A - B");
+
+	m_free(A);
+	m_free(B);
 }
 
 /**
@@ -1141,6 +1161,12 @@ int main (int argc, char **argv)
 		}
 	}
 
+	// TODO: compile with nvcc to include this code
+#ifdef __NVCC__
+	magma_int_t stat = magma_init();
+	assert(stat == MAGMA_SUCCESS);
+#endif
+
 	// run tests
 	test_func_t tests[] = {
 		test_m_identity,
@@ -1183,6 +1209,11 @@ int main (int argc, char **argv)
 		test();
 		putchar('\n');
 	}
+
+#ifdef __NVCC__
+	stat = magma_finalize();
+	assert(stat == MAGMA_SUCCESS);
+#endif
 
 	return 0;
 }

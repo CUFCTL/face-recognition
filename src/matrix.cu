@@ -10,7 +10,7 @@
 
 #if defined(__NVCC__)
 	#include <cuda_runtime.h>
-	#include "cublas_v2.h"
+	#include "magma_v2.h"
 #elif defined(INTEL_MKL)
 	#include <mkl.h>
 #else
@@ -21,41 +21,112 @@
 #include "logger.h"
 #include "matrix.h"
 
-#ifdef __NVCC__
-
 /**
- * Get a cuBLAS handle.
+ * Determine the max of two integers.
  *
- * @return cuBLAS handle
+ * @param x
+ * @param y
  */
-cublasHandle_t cublas_handle()
+int max(int x, int y)
 {
-	static int init = 1;
-	static cublasHandle_t handle;
-
-	if ( init == 1 ) {
-		cublasStatus_t stat = cublasCreate(&handle);
-
-		assert(stat == CUBLAS_STATUS_SUCCESS);
-		init = 0;
-	}
-
-	return handle;
+	return x > y ? x : y;
 }
 
+/**
+ * Determine the min of two integers.
+ *
+ * @param x
+ * @param y
+ */
+int min(int x, int y)
+{
+	return x < y ? x : y;
+}
+
+/**
+ * Allocate memory on the GPU.
+ *
+ * @param size
+ * @return pointer to memory
+ */
+void * gpu_malloc(size_t size)
+{
+	void *ptr = NULL;
+
+#ifdef __NVCC__
+	int stat = magma_malloc(&ptr, size);
+	assert(stat == MAGMA_SUCCESS);
 #endif
+
+	return ptr;
+}
+
+/**
+ * Free memory on the GPU.
+ *
+ * @param ptr
+ */
+void gpu_free(void *ptr)
+{
+#ifdef __NVCC__
+	int stat = magma_free(ptr);
+	assert(stat == MAGMA_SUCCESS);
+#endif
+}
 
 /**
  * Allocate a cuBLAS matrix.
  *
  * @param M
  */
-void cublas_alloc_matrix(matrix_t *M)
+void gpu_malloc_matrix(matrix_t *M)
 {
 #ifdef __NVCC__
-	cudaError_t stat = cudaMalloc((void **)&M->data_dev, M->rows * M->cols * sizeof(precision_t));
+	M->data_gpu = (precision_t *)gpu_malloc(M->rows * M->cols * sizeof(precision_t));
+#endif
+}
 
-	assert(stat == cudaSuccess);
+/**
+ * Get a MAGMA queue.
+ *
+ * @return MAGMA queue
+ */
+#ifdef __NVCC__
+magma_queue_t magma_queue()
+{
+	static int init = 1;
+	static int device = 0;
+	static magma_queue_t queue;
+
+	if ( init == 1 ) {
+		magma_queue_create(device, &queue);
+
+		init = 0;
+	}
+
+	return queue;
+}
+#endif
+
+/**
+ * Helper function for scaled vector addition.
+ *
+ * @param N
+ * @param alpha
+ * @param dx
+ * @param dy
+ */
+void helper_axpy (int N, precision_t alpha, precision_t *dx, precision_t *dy)
+{
+	int incX = 1;
+	int incY = 1;
+
+#ifdef __NVCC__
+	magma_queue_t queue = magma_queue();
+
+	magma_saxpy(N, alpha, dx, incX, dy, incY, queue);
+#else
+	cblas_saxpy(N, alpha, dx, incX, dy, incY);
 #endif
 }
 
@@ -74,7 +145,7 @@ matrix_t * m_initialize (const char *name, int rows, int cols)
 	M->cols = cols;
 	M->data = (precision_t *)malloc(rows * cols * sizeof(precision_t));
 
-	cublas_alloc_matrix(M);
+	gpu_malloc_matrix(M);
 
 	return M;
 }
@@ -98,7 +169,7 @@ matrix_t * m_identity (const char *name, int rows)
 		elem(M, i, i) = 1;
 	}
 
-	cublas_alloc_matrix(M);
+	gpu_malloc_matrix(M);
 	m_gpu_write(M);
 
 	// print debug information
@@ -222,7 +293,7 @@ matrix_t * m_zeros (const char *name, int rows, int cols)
 	M->cols = cols;
 	M->data = (precision_t *)calloc(rows * cols, sizeof(precision_t));
 
-	cublas_alloc_matrix(M);
+	gpu_malloc_matrix(M);
 	m_gpu_write(M);
 
 	// print debug information
@@ -308,11 +379,8 @@ matrix_t * m_copy_rows (const char *name, matrix_t *M, int i, int j)
  */
 void m_free (matrix_t *M)
 {
-#ifdef __NVCC__
-	cudaFree(M->data_dev);
-#endif
-
 	free(M->data);
+	gpu_free(M->data_gpu);
 	free(M);
 }
 
@@ -389,24 +457,6 @@ matrix_t * m_fread (FILE *stream)
 }
 
 /**
- * Copy matrix data from host memory to device memory.
- *
- * @param M
- */
-void m_gpu_write (matrix_t *M)
-{
-#ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
-
-	cublasStatus_t stat = cublasSetMatrix(M->rows, M->cols, sizeof(precision_t),
-		M->data, M->rows,
-		M->data_dev, M->rows);
-
-	assert(stat == CUBLAS_STATUS_SUCCESS);
-#endif
-}
-
-/**
  * Copy matrix data from device memory to host memory.
  *
  * @param M
@@ -414,13 +464,29 @@ void m_gpu_write (matrix_t *M)
 void m_gpu_read (matrix_t *M)
 {
 #ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
+	magma_queue_t queue = magma_queue();
 
-	cublasStatus_t stat = cublasGetMatrix(M->rows, M->cols, sizeof(precision_t),
-		M->data_dev, M->rows,
-		M->data, M->rows);
+	magma_getmatrix(M->rows, M->cols, sizeof(precision_t),
+		M->data_gpu, M->rows,
+		M->data, M->rows,
+		queue);
+#endif
+}
 
-	assert(stat == CUBLAS_STATUS_SUCCESS);
+/**
+ * Copy matrix data from host memory to device memory.
+ *
+ * @param M
+ */
+void m_gpu_write (matrix_t *M)
+{
+#ifdef __NVCC__
+	magma_queue_t queue = magma_queue();
+
+	magma_setmatrix(M->rows, M->cols, sizeof(precision_t),
+		M->data, M->rows,
+		M->data_gpu, M->rows,
+		queue);
 #endif
 }
 
@@ -677,7 +743,32 @@ void m_eigen (const char *name_V, const char *name_D, matrix_t *M, matrix_t **p_
 
 	// solve A * x = lambda * x
 #ifdef __NVCC__
-	// TODO: stub
+	// TODO: segfault occurs in magma_ssyevd_gpu
+	int n = M->cols;
+	int nb = magma_get_ssytrd_nb(n);
+
+	int ldwa = n;
+	int lwork = max(2*n + n*nb, 1 + 6*n + 2*n*n);
+	int liwork = 3 + 5*n;
+	precision_t *wA = (precision_t *)gpu_malloc(ldwa * n * sizeof(precision_t));
+	precision_t *work = (precision_t *)gpu_malloc(lwork * sizeof(precision_t));
+	int *iwork = (int *)gpu_malloc(liwork * sizeof(int));
+	int info;
+
+	m_gpu_write(V_temp1);
+
+	magma_ssyevd_gpu(MagmaVec, MagmaUpper,
+		n, V_temp1->data_gpu, M->rows,  // input matrix (eigenvectors)
+		D_temp1->data_gpu,              // eigenvalues
+		wA, ldwa,                       // workspace
+		work, lwork,
+		iwork, liwork,
+		&info);
+	assert(info == 0);
+
+	gpu_free(wA);
+	gpu_free(work);
+	gpu_free(iwork);
 #else
 	int info = LAPACKE_ssyev(LAPACK_COL_MAJOR, 'V', 'U',
 		M->cols, V_temp1->data, M->rows,  // input matrix (eigenvectors)
@@ -786,7 +877,23 @@ matrix_t * m_inverse (const char *name, matrix_t *M)
 	matrix_t *M_inv = m_copy(name, M);
 
 #ifdef __NVCC__
-	// TODO: stub
+	// TODO: segfault occurs in magma_sgetrf_gpu
+	int n = M->cols;
+	int nb = magma_get_sgetri_nb(n);
+	int lwork = n * nb;
+	int *ipiv = (int *)gpu_malloc(n * sizeof(int));
+	precision_t *dwork = (precision_t *)gpu_malloc(lwork * sizeof(precision_t));
+	int info;
+
+	magma_sgetrf_gpu(M->rows, n, M_inv->data_gpu, M->rows,
+		ipiv, &info);
+	assert(info == 0);
+
+	magma_sgetri_gpu(n, M_inv->data_gpu, M->rows,
+		ipiv, dwork, lwork, &info);
+	assert(info == 0);
+
+	free(ipiv);
 #else
 	int *ipiv = (int *)malloc(M->cols * sizeof(int));
 
@@ -823,12 +930,14 @@ matrix_t * m_mean_column (const char *name, matrix_t *M)
 {
 	matrix_t *a = m_zeros(name, M->rows, 1);
 
+	// TODO: implement with helper_axpy()
 	int i, j;
 	for ( i = 0; i < M->cols; i++ ) {
 		for ( j = 0; j < M->rows; j++ ) {
 			elem(a, j, 0) += elem(M, j, i);
 		}
 	}
+	m_gpu_write(a);
 
 	m_elem_mult(a, 1.0f / M->cols);
 
@@ -852,12 +961,14 @@ matrix_t * m_mean_row (const char *name, matrix_t *M)
 {
 	matrix_t *a = m_zeros(name, 1, M->cols);
 
+	// TODO: implement with helper_axpy()
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
 		for ( j = 0; j < M->cols; j++ ) {
 			elem(a, 0, j) += elem(M, i, j);
 		}
 	}
+	m_gpu_write(a);
 
 	m_elem_mult(a, 1.0f / M->rows);
 
@@ -889,11 +1000,9 @@ precision_t m_norm(matrix_t *v)
 	precision_t norm;
 
 #ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
+	magma_queue_t queue = magma_queue();
 
-	cublasStatus_t stat = cublasSnrm2(handle, N, v->data_dev, incX, &norm);
-
-	assert(stat == CUBLAS_STATUS_SUCCESS);
+	norm = magma_snrm2(N, v->data_gpu, incX, queue);
 #else
 	norm = cblas_snrm2(N, v->data, incX);
 #endif
@@ -933,27 +1042,18 @@ matrix_t * m_product (const char *name, matrix_t *A, matrix_t *B, bool transA, b
 
 	// C := alpha * A * B + beta * C
 #ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
-	cublasOperation_t transa = transA
-		? CUBLAS_OP_T
-		: CUBLAS_OP_N;
-	cublasOperation_t transb = transB
-		? CUBLAS_OP_T
-		: CUBLAS_OP_N;
+	magma_queue_t queue = magma_queue();
+	magma_trans_t TransA = transA ? MagmaTrans : MagmaNoTrans;
+	magma_trans_t TransB = transB ? MagmaTrans : MagmaNoTrans;
 
-	cublasStatus_t stat = cublasSgemm(handle, transa, transb,
+	magma_sgemm(TransA, TransB,
 		M, N, K,
-		&alpha, A->data_dev, A->rows, B->data_dev, B->rows,
-		&beta, C->data_dev, C->rows);
-
-	assert(stat == CUBLAS_STATUS_SUCCESS);
+		alpha, A->data_gpu, A->rows, B->data_gpu, B->rows,
+		beta, C->data_gpu, C->rows,
+		queue);
 #else
-	CBLAS_TRANSPOSE TransA = transA
-		? CblasTrans
-		: CblasNoTrans;
-	CBLAS_TRANSPOSE TransB = transB
-		? CblasTrans
-		: CblasNoTrans;
+	CBLAS_TRANSPOSE TransA = transA ? CblasTrans : CblasNoTrans;
+	CBLAS_TRANSPOSE TransB = transB ? CblasTrans : CblasNoTrans;
 
 	cblas_sgemm(CblasColMajor, TransA, TransB,
 		M, N, K,
@@ -1055,19 +1155,11 @@ void m_add (matrix_t *A, matrix_t *B)
 
 	int N = A->rows * A->cols;
 	precision_t alpha = 1.0f;
-	int incX = 1;
-	int incY = 1;
 
 #ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
-
-	cublasStatus_t stat = cublasSaxpy(handle, N, &alpha,
-		B->data_dev, incX,
-		A->data_dev, incY);
-
-	assert(stat == CUBLAS_STATUS_SUCCESS);
+	helper_axpy(N, alpha, B->data_gpu, A->data_gpu);
 #else
-	cblas_saxpy(N, alpha, B->data, incX, A->data, incY);
+	helper_axpy(N, alpha, B->data, A->data);
 #endif
 
 	// print debug information
@@ -1131,42 +1223,6 @@ void m_assign_row (matrix_t * A, int i, matrix_t * B, int j)
 }
 
 /**
- * Subtract a matrix from another matrix.
- *
- * @param A
- * @param B
- */
-void m_subtract (matrix_t *A, matrix_t *B)
-{
-	assert(A->rows == B->rows && A->cols == B->cols);
-
-	int N = A->rows * A->cols;
-	precision_t alpha = -1.0f;
-	int incX = 1;
-	int incY = 1;
-
-#ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
-
-	cublasStatus_t stat = cublasSaxpy(handle, N, &alpha,
-		B->data_dev, incX,
-		A->data_dev, incY);
-
-	assert(stat == CUBLAS_STATUS_SUCCESS);
-#else
-	cblas_saxpy(N, alpha, B->data, incX, A->data, incY);
-#endif
-
-	// print debug information
-	if ( LOGGER(LL_DEBUG) ) {
-		printf("debug: %s [%d,%d] <- %s [%d,%d] - %s [%d,%d]\n",
-		       A->name, A->rows, A->cols,
-		       A->name, A->rows, A->cols,
-		       B->name, B->rows, B->cols);
-	}
-}
-
-/**
  * Apply a function to each element of a matrix.
  *
  * @param M  pointer to a matrix
@@ -1202,11 +1258,9 @@ void m_elem_mult (matrix_t *M, precision_t c)
 	int incX = 1;
 
 #ifdef __NVCC__
-	cublasHandle_t handle = cublas_handle();
+	magma_queue_t queue = magma_queue();
 
-	cublasStatus_t stat = cublasSscal(handle, N, &c, M->data_dev, incX);
-
-	assert(stat == CUBLAS_STATUS_SUCCESS);
+	magma_sscal(N, c, M->data_gpu, incX, queue);
 #else
 	cblas_sscal(N, c, M->data, incX);
 #endif
@@ -1252,6 +1306,34 @@ void m_shuffle_columns (matrix_t *M)
 }
 
 /**
+ * Subtract a matrix from another matrix.
+ *
+ * @param A
+ * @param B
+ */
+void m_subtract (matrix_t *A, matrix_t *B)
+{
+	assert(A->rows == B->rows && A->cols == B->cols);
+
+	int N = A->rows * A->cols;
+	precision_t alpha = -1.0f;
+
+#ifdef __NVCC__
+	helper_axpy(N, alpha, B->data_gpu, A->data_gpu);
+#else
+	helper_axpy(N, alpha, B->data, A->data);
+#endif
+
+	// print debug information
+	if ( LOGGER(LL_DEBUG) ) {
+		printf("debug: %s [%d,%d] <- %s [%d,%d] - %s [%d,%d]\n",
+		       A->name, A->rows, A->cols,
+		       A->name, A->rows, A->cols,
+		       B->name, B->rows, B->cols);
+	}
+}
+
+/**
  * Subtract a column vector from each column in a matrix.
  *
  * This function is equivalent to:
@@ -1265,12 +1347,16 @@ void m_subtract_columns (matrix_t *M, matrix_t *a)
 {
 	assert(M->rows == a->rows && a->cols == 1);
 
+	// TODO: implement with helper_axpy()
+	m_gpu_read(a);
+
 	int i, j;
 	for ( i = 0; i < M->cols; i++ ) {
 		for ( j = 0; j < M->rows; j++ ) {
 			elem(M, j, i) -= elem(a, j, 0);
 		}
 	}
+	m_gpu_write(M);
 
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
@@ -1296,12 +1382,16 @@ void m_subtract_rows (matrix_t *M, matrix_t *a)
 {
 	assert(M->cols == a->cols && a->rows == 1);
 
+	// TODO: implement with helper_axpy()
+	m_gpu_read(a);
+
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
 		for ( j = 0; j < M->cols; j++ ) {
 			elem(M, i, j) -= elem(a, 0, j);
 		}
 	}
+	m_gpu_write(M);
 
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {

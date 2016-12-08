@@ -22,9 +22,7 @@ typedef struct {
 	int rows;
 	int cols;
 	precision_t *data;
-#ifdef __NVCC__
-	precision_t *data_dev;
-#endif
+	precision_t *data_gpu;
 } matrix_t;
 
 typedef precision_t (*elem_func_t)(precision_t);
