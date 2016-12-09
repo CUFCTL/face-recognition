@@ -33,7 +33,7 @@ image_t * image_construct()
 /**
  * Destruct an image.
  *
- * @param image  pointer to image
+ * @param image
  */
 void image_destruct(image_t *image)
 {
@@ -66,8 +66,8 @@ void skip_to_next_value(FILE* in)
 /**
  * Read an image from a PGM/PPM file.
  *
- * @param image  pointer to image
- * @param path   image filename
+ * @param image
+ * @param path
  */
 void image_read(image_t *image, const char *path)
 {
@@ -112,8 +112,8 @@ void image_read(image_t *image, const char *path)
 /**
  * Write an image to a PGM/PPM file.
  *
- * @param image  pointer to image
- * @param path   image filename
+ * @param image
+ * @param path
  */
 void image_write(image_t *image, const char *path)
 {

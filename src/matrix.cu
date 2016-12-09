@@ -217,7 +217,7 @@ matrix_t * m_ones(const char *name, int rows, int cols)
  * using the Box-Muller transform.
  *
  * @param mu      mean
- * @param signma  standard deviation
+ * @param sigma   standard deviation
  * @return normally-distributed random number
  */
 precision_t rand_normal(precision_t mu, precision_t sigma)
@@ -375,7 +375,7 @@ matrix_t * m_copy_rows (const char *name, matrix_t *M, int i, int j)
 /**
  * Deconstruct a matrix.
  *
- * @param M  pointer to matrix
+ * @param M
  */
 void m_free (matrix_t *M)
 {
@@ -387,8 +387,8 @@ void m_free (matrix_t *M)
 /**
  * Write a matrix in text format to a stream.
  *
- * @param stream  pointer to file stream
- * @param M       pointer to matrix
+ * @param stream
+ * @param M
  */
 void m_fprint (FILE *stream, matrix_t *M)
 {
@@ -406,8 +406,8 @@ void m_fprint (FILE *stream, matrix_t *M)
 /**
  * Write a matrix in binary format to a stream.
  *
- * @param stream  pointer to file stream
- * @param M       pointer to matrix
+ * @param stream
+ * @param M
  */
 void m_fwrite (FILE *stream, matrix_t *M)
 {
@@ -419,7 +419,7 @@ void m_fwrite (FILE *stream, matrix_t *M)
 /**
  * Read a matrix in text format from a stream.
  *
- * @param stream  pointer to file stream
+ * @param stream
  * @return pointer to new matrix
  */
 matrix_t * m_fscan (FILE *stream)
@@ -441,7 +441,7 @@ matrix_t * m_fscan (FILE *stream)
 /**
  * Read a matrix in binary format from a stream.
  *
- * @param stream  pointer to file stream
+ * @param stream
  * @return pointer to new matrix
  */
 matrix_t * m_fread (FILE *stream)
@@ -493,34 +493,34 @@ void m_gpu_write (matrix_t *M)
 /**
  * Read a column vector from an image.
  *
- * @param M      pointer to matrix
- * @param col    column index
- * @param image  pointer to image
+ * @param M
+ * @param i
+ * @param image
  */
-void m_image_read (matrix_t *M, int col, image_t *image)
+void m_image_read (matrix_t *M, int i, image_t *image)
 {
 	assert(M->rows == image->channels * image->height * image->width);
 
-	int i;
-	for ( i = 0; i < M->rows; i++ ) {
-		elem(M, i, col) = (precision_t) image->pixels[i];
+	int j;
+	for ( j = 0; j < M->rows; j++ ) {
+		elem(M, j, i) = (precision_t) image->pixels[j];
 	}
 }
 
 /**
  * Write a column of a matrix to an image.
  *
- * @param M      pointer to matrix
- * @param col    column index
- * @param image  pointer to image
+ * @param M
+ * @param i
+ * @param image
  */
-void m_image_write (matrix_t *M, int col, image_t *image)
+void m_image_write (matrix_t *M, int i, image_t *image)
 {
 	assert(M->rows == image->channels * image->height * image->width);
 
-	int i;
-	for ( i = 0; i < M->rows; i++ ) {
-		image->pixels[i] = (unsigned char) elem(M, i, col);
+	int j;
+	for ( j = 0; j < M->rows; j++ ) {
+		image->pixels[j] = (unsigned char) elem(M, j, i);
 	}
 }
 
@@ -539,7 +539,7 @@ void m_image_write (matrix_t *M, int col, image_t *image)
  *
  *   C = 1/(N - 1) (M - 1_N * mu)' (M - 1_N * mu), N = M->rows
  *
- * @param M  pointer to matrix
+ * @param M
  * @return pointer to covariance matrix of M
  */
 matrix_t * m_covariance (const char *name, matrix_t *M)
@@ -553,10 +553,7 @@ matrix_t * m_covariance (const char *name, matrix_t *M)
 	// compute C = 1/(N - 1) * A' * A
 	matrix_t *C = m_product(name, A, A, true, false);
 
-	precision_t c = (M->rows > 1)
-		? M->rows - 1
-		: 1;
-	m_elem_mult(C, 1 / c);
+	m_elem_mult(C, 1.0f / max(M->rows - 1, 1));
 
 	// cleanup
 	m_free(A);
@@ -575,7 +572,7 @@ matrix_t * m_covariance (const char *name, matrix_t *M)
 /**
  * Compute the diagonal matrix of a vector.
  *
- * @param v  pointer to vector
+ * @param v
  * @return pointer to diagonal matrix of v
  */
 matrix_t * m_diagonalize (const char *name, matrix_t *v)
@@ -608,10 +605,10 @@ matrix_t * m_diagonalize (const char *name, matrix_t *v)
  * COS is the cosine angle:
  * d_cos(x, y) = -x * y / (||x|| * ||y||)
  *
- * @param A  pointer to matrix
- * @param i  column index of A
- * @param B  pointer to matrix
- * @param j  column index of B
+ * @param A
+ * @param i
+ * @param B
+ * @param j
  * @return COS distance between A_i and B_j
  */
 precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
@@ -655,10 +652,10 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
  * L1 is the Taxicab distance:
  * d_L1(x, y) = |x - y|
  *
- * @param A  pointer to matrix
- * @param i  column index of A
- * @param B  pointer to matrix
- * @param j  column index of B
+ * @param A
+ * @param i
+ * @param B
+ * @param j
  * @return L1 distance between A_i and B_j
  */
 precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j)
@@ -689,10 +686,10 @@ precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j)
  * L2 is the Euclidean distance:
  * d_L2(x, y) = ||x - y||
  *
- * @param A  pointer to matrix
- * @param i  column index of A
- * @param B  pointer to matrix
- * @param j  column index of B
+ * @param A
+ * @param i
+ * @param B
+ * @param j
  * @return L2 distance between A_i and B_j
  */
 precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
@@ -867,7 +864,7 @@ void m_eigen2 (const char *name_V, const char *name_D, matrix_t *A, matrix_t *B,
 /**
  * Compute the inverse of a square matrix.
  *
- * @param M  pointer to matrix
+ * @param M
  * @return pointer to new matrix equal to M^-1
  */
 matrix_t * m_inverse (const char *name, matrix_t *M)
@@ -923,7 +920,7 @@ matrix_t * m_inverse (const char *name, matrix_t *M)
 /**
  * Get the mean column of a matrix.
  *
- * @param M  pointer to matrix
+ * @param M
  * @return pointer to mean column vector
  */
 matrix_t * m_mean_column (const char *name, matrix_t *M)
@@ -954,7 +951,7 @@ matrix_t * m_mean_column (const char *name, matrix_t *M)
 /**
  * Get the mean row of a matrix.
  *
- * @param M  pointer to matrix
+ * @param M
  * @return pointer to mean row vector
  */
 matrix_t * m_mean_row (const char *name, matrix_t *M)
@@ -985,7 +982,7 @@ matrix_t * m_mean_row (const char *name, matrix_t *M)
 /**
  * Compute the 2-norm of a vector.
  *
- * @param v  pointer to vector
+ * @param v
  * @return 2-norm of v
  */
 precision_t m_norm(matrix_t *v)
@@ -1077,8 +1074,8 @@ matrix_t * m_product (const char *name, matrix_t *A, matrix_t *B, bool transA, b
  * is, compute X such that X * X = M and X is the unique square root
  * for which every eigenvalue has non-negative real part.
  *
- * @param M  pointer to symmetric matrix
- * @return pointer to square root matrix
+ * @param M
+ * @return pointer to square root matrix of M
  */
 matrix_t * m_sqrtm (const char *name, matrix_t *M)
 {
@@ -1119,8 +1116,8 @@ matrix_t * m_sqrtm (const char *name, matrix_t *M)
  * NOTE: This function should not be necessary since
  * most transposes should be handled by m_product().
  *
- * @param M  pointer to matrix
- * @return pointer to new transposed matrix
+ * @param M
+ * @return pointer to new matrix M'
  */
 matrix_t * m_transpose (const char *name, matrix_t *M)
 {
@@ -1225,8 +1222,8 @@ void m_assign_row (matrix_t * A, int i, matrix_t * B, int j)
 /**
  * Apply a function to each element of a matrix.
  *
- * @param M  pointer to a matrix
- * @param f  pointer to element-wise function
+ * @param M
+ * @param f
  */
 void m_elem_apply (matrix_t * M, elem_func_t f)
 {
@@ -1249,8 +1246,8 @@ void m_elem_apply (matrix_t * M, elem_func_t f)
 /**
  * Multiply a matrix by a scalar.
  *
- * @param M  pointer to matrix
- * @param c  scalar
+ * @param M
+ * @param c
  */
 void m_elem_mult (matrix_t *M, precision_t c)
 {
@@ -1276,7 +1273,7 @@ void m_elem_mult (matrix_t *M, precision_t c)
 /**
  * Shuffle the columns of a matrix.
  *
- * @param M  pointer to matrix
+ * @param M
  */
 void m_shuffle_columns (matrix_t *M)
 {
