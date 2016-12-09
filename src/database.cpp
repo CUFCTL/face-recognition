@@ -63,19 +63,19 @@ database_t * db_construct(int pca, int lda, int ica, db_params_t params)
 		pca || lda || ica, pca,
 		"PCA",
 		NULL, NULL,
-		m_dist_L2
+		db->params.pca_dist
 	};
 	db->lda = (db_algorithm_t) {
 		lda, lda,
 		"LDA",
 		NULL, NULL,
-		m_dist_L2
+		db->params.lda_dist
 	};
 	db->ica = (db_algorithm_t) {
 		ica, ica,
 		"ICA",
 		NULL, NULL,
-		m_dist_COS
+		db->params.ica_dist
 	};
 
 	if ( LOGGER(LL_VERBOSE) ) {
