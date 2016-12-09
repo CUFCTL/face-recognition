@@ -36,6 +36,7 @@ void print_usage()
 		"  --ica_num_ic N          (ICA) number of independent components to estimate\n"
 		"  --ica_max_iterations N  (ICA) maximum iterations\n"
 		"  --ica_epsilon X         (ICA) convergence threshold for w\n"
+		"  --knn_k N               (kNN) number of nearest neighbors to use\n"
 	);
 }
 
@@ -52,7 +53,8 @@ int main(int argc, char **argv)
 	db_params_t db_params = {
 		-1,
 		-1, -1,
-		-1, 1000, 0.0001f
+		-1, 1000, 0.0001f,
+		1
 	};
 
 	char *path_train_set = NULL;
@@ -73,6 +75,7 @@ int main(int argc, char **argv)
 		{ "ica_num_ic", required_argument, 0, '4' },
 		{ "ica_max_iterations", required_argument, 0, '5' },
 		{ "ica_epsilon", required_argument, 0, '6' },
+		{ "knn_k", required_argument, 0, '7' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -125,6 +128,9 @@ int main(int argc, char **argv)
 			break;
 		case '6':
 			db_params.ica_epsilon = atof(optarg);
+			break;
+		case '7':
+			db_params.knn_k = atoi(optarg);
 			break;
 		case '?':
 			print_usage();

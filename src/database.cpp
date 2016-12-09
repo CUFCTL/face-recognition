@@ -91,6 +91,8 @@ database_t * db_construct(int pca, int lda, int ica, db_params_t params)
 		printf("  %-*s  %10d\n", len, "ica_num_ic", db->params.ica_num_ic);
 		printf("  %-*s  %10d\n", len, "ica_max_iterations", db->params.ica_max_iterations);
 		printf("  %-*s  %10f\n", len, "ica_epsilon", db->params.ica_epsilon);
+		printf("kNN\n");
+		printf("  %-*s  %10d\n", len, "knn_k", db->params.knn_k);
 		putchar('\n');
 	}
 
@@ -298,34 +300,72 @@ void db_load(database_t *db, const char *path)
 	fclose(file);
 }
 
-/**
- * Find the column vector in a matrix P with minimum distance from
- * a column vector in P_test.
- *
- * @param P          pointer to matrix
- * @param P_test     pointer to matrix
- * @param i          column index
- * @param dist_func  pointer to distance function
- * @return index of matching column in P
- */
-int nearest_neighbor(matrix_t *P, matrix_t *P_test, int i, dist_func_t dist_func)
+typedef struct {
+	image_label_t *label;
+	precision_t dist;
+} neighbor_t;
+
+typedef struct {
+	image_label_t *label;
+	int count;
+} label_count_t;
+
+int kNN_compare(const void *a, const void *b)
 {
-	int min_index = -1;
-	precision_t min_dist = -1;
+	neighbor_t *n1 = (neighbor_t *)a;
+	neighbor_t *n2 = (neighbor_t *)b;
+
+	return (int)(n1->dist - n2->dist);
+}
+
+/**
+ * Classify an observation using k-nearest neighbors.
+ *
+ * @param X
+ * @param Y
+ * @param X_test
+ * @param i
+ * @param k
+ * @param dist_func
+ * @return predicted label of the test observation
+ */
+image_label_t * kNN(matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, int k, dist_func_t dist_func)
+{
+	// compute distance between X_test_i and each observation in X
+	neighbor_t *neighbors = (neighbor_t *)malloc(X->cols * sizeof(neighbor_t));
 
 	int j;
-	for ( j = 0; j < P->cols; j++ ) {
-		// compute the distance between the two vectors
-		precision_t dist = dist_func(P_test, i, P, j);
+	for ( j = 0; j < X->cols; j++ ) {
+		neighbors[j].label = Y[j].label;
+		neighbors[j].dist = dist_func(X_test, i, X, j);
+	}
 
-		// update the running minimum
-		if ( min_dist == -1 || dist < min_dist ) {
-			min_index = j;
-			min_dist = dist;
+	// sort the neighbors by distance
+	qsort(neighbors, X->cols, sizeof(neighbor_t), kNN_compare);
+
+	// determine the mode of the k nearest labels
+	// TODO: maybe replace with mode function
+	label_count_t *counts = (label_count_t *)calloc(k, sizeof(label_count_t));
+
+	for ( j = 0; j < k; j++ ) {
+		int n = 0;
+		while ( counts[n].label != NULL && counts[n].label != neighbors[j].label ) {
+			n++;
+		}
+
+		counts[n].label = neighbors[j].label;
+		counts[n].count++;
+	}
+
+	label_count_t *max = NULL;
+
+	for ( j = 0; counts[j].label != NULL; j++ ) {
+		if ( max == NULL || max->count < counts[j].count ) {
+			max = &counts[j];
 		}
 	}
 
-	return min_index;
+	return max->label;
 }
 
 /**
@@ -369,9 +409,7 @@ void db_recognize(database_t *db, const char *path)
 
 			int j;
 			for ( j = 0; j < num_entries; j++ ) {
-				int rec_index = nearest_neighbor(algo->P, P_test, j, algo->dist_func);
-
-				rec_labels[j] = db->entries[rec_index].label;
+				rec_labels[j] = kNN(algo->P, db->entries, P_test, j, db->params.knn_k, algo->dist_func);
 			}
 
 			// compute accuracy

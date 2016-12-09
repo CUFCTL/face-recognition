@@ -24,6 +24,9 @@ typedef struct {
 	int ica_num_ic;
 	int ica_max_iterations;
 	precision_t ica_epsilon;
+
+	// kNN hyperparameters
+	int knn_k;
 } db_params_t;
 
 typedef struct {
@@ -60,9 +63,13 @@ void db_save(database_t *db, const char *path);
 void db_load(database_t *db, const char *path);
 void db_recognize(database_t *db, const char *path);
 
+// training algorithms
 matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D);
 matrix_t * PCA_rows(matrix_t *X, matrix_t **p_D);
 matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2);
 matrix_t * ICA(matrix_t *X, int num_ic, int max_iterations, precision_t epsilon);
+
+// classification algorithms
+image_label_t * kNN(matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, int k, dist_func_t dist_func);
 
 #endif
