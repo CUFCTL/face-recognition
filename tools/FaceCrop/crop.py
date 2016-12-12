@@ -5,43 +5,58 @@
 import sys
 import os
 import subprocess
+import numpy as np
+import cv2
 from time import sleep
 
+# function to split up the path of an image into a list
+def splitall(path):
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path: # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
+
+# check for proper input arguments
 if len(sys.argv) != 3:
-    print '\n  ***USAGE: python crop.py [directory/to/be/cropped] [output/directory]***\n'
+    print '\n  ***USAGE: python crop.py in_img.jpg out_img.jpg***\n'
     sys.exit(1)
 
-contents = os.listdir(sys.argv[1])
+# split up the path and return the filename without an extension
+file_comps = splitall(sys.argv[2])
+filename = os.path.splitext(file_comps[-1])[0]
 
-subprocess.call(["mkdir", sys.argv[2]])
+# load the cascade classifier files
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
+eye_cascade = cv2.CascadeClassifier('haarcascade_eye_tree_eyeglasses.xml')
 
-print contents
+# read in the input image and convert to grayscale
+img = cv2.imread(sys.argv[1])
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-print 'Cleaning...\n'
-subprocess.call(["make", "clean"])
+# run the detection function on the gray image
+faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-print 'Compiling...\n'
-subprocess.call(["make"])
+i = 0
 
-print 'Running ./detect on ' + sys.argv[1] + '\n'
+# draw a rectangle around each face that is found, then save it to a new file
+for (x,y,w,h) in faces:
+    cv2.rectangle(img,(x,y-15),(x+w,y+h+15),(255,0,0),2)
+    roi = img[y-15:y+h+15, x:x+w]
+    path = './cropped/' + filename + '_' + str(i) + '.jpg'
+    print(path)
+    cv2.imwrite('./cropped/' + filename + '_' + str(i) + '.jpg', roi)
+    i = i + 1
 
-i = 0.0
-
-for subdir in contents:
-    # print status of program
-    sys.stdout.write('\r')
-    sys.stdout.write("[%-*s] %d/%d %3.1f%%" % (len(contents), '='*int(i), i+1, len(contents), ((i+1.0)/len(contents))*100.0))
-    sys.stdout.flush();
-
-    # get proper paths for i/o, configure args
-    path_in = sys.argv[1] + "/" + subdir
-    path_out = sys.argv[2] + "/" + subdir
-
-    args = ["./detect", path_in, path_out]
-
-    # run detect on each subdirectory
-    subprocess.call(args)
-
-    i += 1
-
-print '\n\nCropping complete, images in ' + sys.argv[2] + '\n'
+cv2.imshow('img',img)
+cv2.imwrite(sys.argv[2], img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
