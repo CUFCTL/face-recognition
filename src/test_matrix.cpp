@@ -454,9 +454,6 @@ void test_m_eigen()
 
 	m_eigen("V", "D", M, &V, &D);
 
-	m_gpu_read(V);
-	m_gpu_read(D);
-
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, M);
 
@@ -506,7 +503,6 @@ void test_m_eigen2()
 	m_eigen2("V", "D", A, B, &V, &D);
 
 	m_gpu_read(V);
-	m_gpu_read(D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -544,8 +540,6 @@ void test_m_inverse()
 	};
 	matrix_t *X = m_initialize_data("X", 3, 3, X_data);
 	matrix_t *Y = m_inverse("Y", X);
-
-	m_gpu_read(Y);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, X);
@@ -747,6 +741,8 @@ void test_m_sqrtm()
 	};
 	matrix_t *A = m_initialize_data("A", 5, 5, A_data);
 	matrix_t *X = m_sqrtm("X", A);
+
+	m_gpu_read(X);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -1161,7 +1157,6 @@ int main (int argc, char **argv)
 		}
 	}
 
-	// TODO: compile with nvcc to include this code
 #ifdef __NVCC__
 	magma_int_t stat = magma_init();
 	assert(stat == MAGMA_SUCCESS);

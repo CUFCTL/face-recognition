@@ -1,12 +1,8 @@
 # determine build (debug, release)
-ifndef BUILD
-BUILD = debug
-endif
+BUILD ?= debug
 
 # determine matrix library (netlib, mkl, cuda)
-ifndef MATLIB
-MATLIB = netlib
-endif
+MATLIB ?= netlib
 
 # determine compiler suite (gcc/g++, icc/icpc, nvcc)
 ifeq ($(MATLIB), netlib)
@@ -20,11 +16,11 @@ NVCC = nvcc
 endif
 
 # determine compiler, library flags
-MAGMA_DIR = ../magma-2.2.0
+MAGMADIR ?= ../magma-2.2.0
 
-LIBS = -lm
-CXXFLAGS =
-NVCCFLAGS = -x c++ -I$(MAGMA_DIR)/include
+LIBS      = -lm
+CXXFLAGS  =
+NVCCFLAGS = -x c++ -I$(MAGMADIR)/include
 
 ifeq ($(BUILD), release)
 CXXFLAGS += -O3
@@ -42,7 +38,7 @@ LIBS += -mkl
 CXXFLAGS += -D INTEL_MKL
 NVCCFLAGS += $(CXXFLAGS)
 else ifeq ($(MATLIB), cuda)
-LIBS += -lcudart -lcublas -L$(MAGMA_DIR)/lib -lmagma
+LIBS += -L$(MAGMADIR)/lib -lmagma -lcudart -lcublas
 endif
 
 INCS = src/database.h src/image_entry.h src/image.h src/logger.h src/matrix.h src/timer.h
@@ -91,7 +87,7 @@ test_image.o: src/test_image.cpp image.o matrix.o
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
 test_matrix.o: src/test_matrix.cpp matrix.o
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
+	$(NVCC) -c $(NVCCFLAGS) -o $@ $<
 
 face-rec: database.o ica.o image_entry.o image.o lda.o main.o matrix.o pca.o timer.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)

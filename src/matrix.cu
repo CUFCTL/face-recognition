@@ -740,32 +740,33 @@ void m_eigen (const char *name_V, const char *name_D, matrix_t *M, matrix_t **p_
 
 	// solve A * x = lambda * x
 #ifdef __NVCC__
-	// TODO: segfault occurs in magma_ssyevd_gpu
 	int n = M->cols;
 	int nb = magma_get_ssytrd_nb(n);
 
 	int ldwa = n;
 	int lwork = max(2*n + n*nb, 1 + 6*n + 2*n*n);
 	int liwork = 3 + 5*n;
-	precision_t *wA = (precision_t *)gpu_malloc(ldwa * n * sizeof(precision_t));
-	precision_t *work = (precision_t *)gpu_malloc(lwork * sizeof(precision_t));
-	int *iwork = (int *)gpu_malloc(liwork * sizeof(int));
+	precision_t *wA = (precision_t *)malloc(ldwa * n * sizeof(precision_t));
+	precision_t *work = (precision_t *)malloc(lwork * sizeof(precision_t));
+	int *iwork = (int *)malloc(liwork * sizeof(int));
 	int info;
 
 	m_gpu_write(V_temp1);
 
 	magma_ssyevd_gpu(MagmaVec, MagmaUpper,
 		n, V_temp1->data_gpu, M->rows,  // input matrix (eigenvectors)
-		D_temp1->data_gpu,              // eigenvalues
+		D_temp1->data,                  // eigenvalues
 		wA, ldwa,                       // workspace
 		work, lwork,
 		iwork, liwork,
 		&info);
 	assert(info == 0);
 
-	gpu_free(wA);
-	gpu_free(work);
-	gpu_free(iwork);
+	free(wA);
+	free(work);
+	free(iwork);
+
+	m_gpu_read(V_temp1);
 #else
 	int info = LAPACKE_ssyev(LAPACK_COL_MAJOR, 'V', 'U',
 		M->cols, V_temp1->data, M->rows,  // input matrix (eigenvectors)
@@ -874,13 +875,14 @@ matrix_t * m_inverse (const char *name, matrix_t *M)
 	matrix_t *M_inv = m_copy(name, M);
 
 #ifdef __NVCC__
-	// TODO: segfault occurs in magma_sgetrf_gpu
 	int n = M->cols;
 	int nb = magma_get_sgetri_nb(n);
 	int lwork = n * nb;
-	int *ipiv = (int *)gpu_malloc(n * sizeof(int));
+	int *ipiv = (int *)malloc(n * sizeof(int));
 	precision_t *dwork = (precision_t *)gpu_malloc(lwork * sizeof(precision_t));
 	int info;
+
+	m_gpu_write(M_inv);
 
 	magma_sgetrf_gpu(M->rows, n, M_inv->data_gpu, M->rows,
 		ipiv, &info);
@@ -891,6 +893,9 @@ matrix_t * m_inverse (const char *name, matrix_t *M)
 	assert(info == 0);
 
 	free(ipiv);
+	gpu_free(dwork);
+
+	m_gpu_read(M_inv);
 #else
 	int *ipiv = (int *)malloc(M->cols * sizeof(int));
 
@@ -1089,6 +1094,7 @@ matrix_t * m_sqrtm (const char *name, matrix_t *M)
 
 	// compute B = V * sqrt(D)
 	m_elem_apply(D, sqrtf);
+	m_gpu_write(D);
 
 	matrix_t *B = m_product("B", V, D);
 
