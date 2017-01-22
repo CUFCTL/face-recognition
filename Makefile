@@ -1,93 +1,61 @@
-# determine build (debug, release)
-BUILD ?= debug
+# define build parameters
+DEBUG ?= 1
+GPU   ?= 0
 
-# determine matrix library (netlib, mkl, cuda)
-MATLIB ?= netlib
+# define compiler suite
+CXX  = g++
 
-# determine compiler suite (gcc/g++, icc/icpc, nvcc)
-ifeq ($(MATLIB), netlib)
-CXX = g++
-NVCC = g++
-else ifeq ($(MATLIB), mkl)
-CXX = icpc
-NVCC = icpc
-else ifeq ($(MATLIB), cuda)
+ifeq ($(GPU), 1)
 NVCC = nvcc
+else
+NVCC = g++
 endif
 
-# determine compiler, library flags
-MAGMADIR ?= ../magma-2.2.0
+# define library paths
+CUDADIR     ?= /usr/local/cuda
+MAGMADIR    ?= ../magma-2.2.0
+OPENBLASDIR ?= ../OpenBLAS-0.2.19
 
+# define compiler flags, libraries
 LIBS      = -lm
-CXXFLAGS  =
-NVCCFLAGS = -x c++ -I$(MAGMADIR)/include
+CXXFLAGS  = -I$(OPENBLASDIR)/include
+NVCCFLAGS = -I$(CUDADIR)/include \
+            -I$(MAGMADIR)/include \
+            -I$(OPENBLASDIR)/include
 
-ifeq ($(BUILD), release)
-CXXFLAGS += -O3
+ifeq ($(DEBUG), 1)
+CXXFLAGS  += -pg -Wall
+NVCCFLAGS += -pg -Xcompiler -Wall
+else
+CXXFLAGS  += -O3
 NVCCFLAGS += -O3
-else ifeq ($(BUILD), debug)
-CXXFLAGS += -pg -Wall
-NVCCFLAGS += -pg
 endif
 
-ifeq ($(MATLIB), netlib)
-LIBS += -lblas -llapacke
-NVCCFLAGS += $(CXXFLAGS)
-else ifeq ($(MATLIB), mkl)
-LIBS += -mkl
-CXXFLAGS += -D INTEL_MKL
-NVCCFLAGS += $(CXXFLAGS)
-else ifeq ($(MATLIB), cuda)
-LIBS += -L$(MAGMADIR)/lib -lmagma -lcudart -lcublas
+ifeq ($(GPU), 1)
+LIBS      += -L$(MAGMADIR)/lib -lmagma \
+             -L$(CUDADIR)/lib64 -lcudart -lcublas \
+             -L$(OPENBLASDIR)/lib -lopenblas
+else
+LIBS      += -L$(OPENBLASDIR)/lib -lopenblas
+NVCCFLAGS = $(CXXFLAGS)
 endif
 
-INCS = src/database.h src/image_entry.h src/image.h src/logger.h src/matrix.h src/timer.h
-OBJS = database.o ica.o image_entry.o image.o lda.o main.o matrix.o pca.o test_image.o test_matrix.o timer.o
+# define binary targets
 BINS = face-rec test-image test-matrix
 
-all: config $(BINS)
+all: echo $(BINS)
 
-config:
-	$(info BUILD     = $(BUILD))
-	$(info MATLIB    = $(MATLIB))
+echo:
+	$(info DEBUG     = $(DEBUG))
+	$(info GPU       = $(GPU))
 	$(info CXX       = $(CXX))
 	$(info NVCC      = $(NVCC))
 	$(info LIBS      = $(LIBS))
 	$(info CXXFLAGS  = $(CXXFLAGS))
 	$(info NVCCFLAGS = $(NVCCFLAGS))
 
-database.o: src/database.cpp src/database.h image_entry.o image.o matrix.o timer.o
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
-ica.o: src/ica.cpp src/database.h matrix.o timer.o
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
-image_entry.o: src/image_entry.cpp src/image_entry.h
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
-image.o: src/image.cpp src/image.h
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
-lda.o: src/lda.cpp src/database.h matrix.o timer.o
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
-main.o: src/main.cpp database.o timer.o
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
-matrix.o: src/matrix.cu src/matrix.h image.o
-	$(NVCC) -c $(NVCCFLAGS) -o $@ $<
-
-pca.o: src/pca.cpp src/database.h matrix.o timer.o
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
-timer.o: src/timer.cpp src/timer.h
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
-test_image.o: src/test_image.cpp image.o matrix.o
-	$(CXX) -c $(CXXFLAGS) -o $@ $<
-
-test_matrix.o: src/test_matrix.cpp matrix.o
-	$(NVCC) -c $(NVCCFLAGS) -o $@ $<
+%.o: src/%.cpp
+	$(NVCC) $(NVCCFLAGS) -c -o $@ $<
 
 face-rec: database.o ica.o image_entry.o image.o lda.o main.o matrix.o pca.o timer.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)

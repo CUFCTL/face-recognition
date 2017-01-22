@@ -58,7 +58,7 @@ typedef struct {
 	db_algorithm_t ica;
 } database_t;
 
-database_t * db_construct(int pca, int lda, int ica, db_params_t params);
+database_t * db_construct(bool pca, bool lda, bool ica, db_params_t params);
 void db_destruct(database_t *db);
 
 void db_train(database_t *db, const char *path);

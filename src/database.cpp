@@ -54,7 +54,7 @@ matrix_t * get_image_matrix(image_entry_t *entries, int num_entries)
  * @param params
  * @return pointer to new database
  */
-database_t * db_construct(int pca, int lda, int ica, db_params_t params)
+database_t * db_construct(bool pca, bool lda, bool ica, db_params_t params)
 {
 	database_t *db = (database_t *)calloc(1, sizeof(database_t));
 	db->params = params;

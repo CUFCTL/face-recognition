@@ -11,8 +11,6 @@
 #if defined(__NVCC__)
 	#include <cuda_runtime.h>
 	#include "magma_v2.h"
-#elif defined(INTEL_MKL)
-	#include <mkl.h>
 #else
 	#include <cblas.h>
 	#include <lapacke.h>

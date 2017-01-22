@@ -91,11 +91,11 @@ int main(int argc, char **argv)
 {
 	const char *DB_DATA = "./database.dat";
 
-	int arg_train = 0;
-	int arg_test = 0;
-	int arg_pca = 0;
-	int arg_lda = 0;
-	int arg_ica = 0;
+	bool arg_train = false;
+	bool arg_test = false;
+	bool arg_pca = false;
+	bool arg_lda = false;
+	bool arg_ica = false;
 
 	db_params_t db_params = {
 		-1, m_dist_L2,
@@ -140,26 +140,26 @@ int main(int argc, char **argv)
 			TIMING = 1;
 			break;
 		case OPTION_TRAIN:
-			arg_train = 1;
+			arg_train = true;
 			path_train_set = optarg;
 			break;
 		case OPTION_TEST:
-			arg_test = 1;
+			arg_test = true;
 			path_test_set = optarg;
 			break;
 		case OPTION_PCA:
-			arg_pca = 1;
+			arg_pca = true;
 			break;
 		case OPTION_LDA:
-			arg_lda = 1;
+			arg_lda = true;
 			break;
 		case OPTION_ICA:
-			arg_ica = 1;
+			arg_ica = true;
 			break;
 		case OPTION_ALL:
-			arg_pca = 1;
-			arg_lda = 1;
-			arg_ica = 1;
+			arg_pca = true;
+			arg_lda = true;
+			arg_ica = true;
 			break;
 		case OPTION_PCA_N1:
 			db_params.pca_n1 = atoi(optarg);
