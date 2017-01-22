@@ -1,5 +1,5 @@
 /**
- * @file main.c
+ * @file main.cpp
  *
  * User interface to the face recognition system.
  */

@@ -1,5 +1,5 @@
 /**
- * @file test_matrix.c
+ * @file test_matrix.cpp
  *
  * Test suite for the matrix library.
  *

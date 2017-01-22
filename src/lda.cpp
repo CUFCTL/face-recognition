@@ -1,5 +1,5 @@
 /**
- * @file lda.c
+ * @file lda.cpp
  *
  * Implementation of LDA (Belhumeur et al., 1996; Zhao et al., 1998).
  */

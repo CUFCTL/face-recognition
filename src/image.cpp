@@ -1,5 +1,5 @@
 /**
- * @file image.c
+ * @file image.cpp
  *
  * Implementation of the image type.
  *

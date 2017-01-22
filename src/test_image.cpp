@@ -1,5 +1,5 @@
 /**
- * @file test_image.c
+ * @file test_image.cpp
  *
  * Test suite for the image library.
  */

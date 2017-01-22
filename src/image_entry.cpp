@@ -1,5 +1,5 @@
 /**
- * @file image_entry.c
+ * @file image_entry.cpp
  *
  * Implementation of the image entry type.
  */
