@@ -1,10 +1,10 @@
-# Clemson FCT Facial Recognition
+# Facial Recognition Creative Inquiry
 
-This repository contains the code for a face recognition system that combines three popular algorithms: PCA, LDA, and ICA.
+This repository contains the code for the face recognition system developed by the FACE creative inquiry. We are developing an accelerated, real-time recognition system based on several popular face recognition techniques.
 
 ## Getting Started
 
-New team members should look at CONTRIBUTING.md to learn about our work-flow, especially those who are unfamiliar with Github.
+New team members should look at the [Wiki](https://github.com/CUFCTL/face-recognition/wiki), especially the pages on Git and Installation.
 
 ## Testing
 
@@ -40,62 +40,3 @@ To convert JPEG images to PGM with ImageMagick:
 ## Results
 
 Not quite ready
-
-## The Algorithms
-
-Here is the working flow graph for the combined algorithm:
-
-    m = number of dimensions per image
-    n = number of images
-
-    train: X -> (a, W', P)
-        X = [X_1 ... X_n] (image matrix) (m-by-n)
-        a = sum(X_i, 1:i:n) / n (mean face) (m-by-1)
-        X = [(X_1 - a) ... (X_n - a)] (mean-subtracted image matrix) (m-by-n)
-        W_pca' = PCA(X) (PCA projection matrix) (n-by-m)
-        P_pca = W_pca' * X (PCA projected image matrix) (n-by-n)
-        W_lda' = LDA(W_pca, P_pca) (LDA projection matrix) (n-by-m)
-        P_lda = W_lda' * X (LDA projected image matrix) (n-by-n)
-        W_ica' = ICA(W_pca, P_pca) (ICA projection matrix) (n-by-m)
-        P_ica = W_ica' * X (ICA projected image matrix) (n-by-n)
-
-    recognize: X_test -> P_match
-        a = mean face (m-by-1)
-        (W_pca, W_lda, W_ica) = projection matrices (m-by-n)
-        (P_pca, P_lda, P_ica) = projected image matrices (n-by-n)
-        X_test = test image (m-by-1)
-        P_test_pca = W_pca' * (X_test - a) (n-by-1)
-        P_test_lda = W_lda' * (X_test - a) (n-by-1)
-        P_test_ica = W_ica' * (X_test - a) (n-by-1)
-        P_match_pca = nearest neighbor of P_test_pca (n-by-1)
-        P_match_lda = nearest neighbor of P_test_lda (n-by-1)
-        P_match_ica = nearest neighbor of P_test_ica (n-by-1)
-
-    PCA: X -> (L_eval, W_pca)
-        X = [X_1 ... X_n] (image matrix) (m-by-n)
-        L = X' * X (surrogate matrix) (n-by-n)
-        L_eval = eigenvalues of L (n-by-n)
-        L_evec = eigenvectors of L (n-by-n)
-        W_pca = X * L_evec (eigenfaces) (m-by-n)
-
-    LDA: (X, W_pca, c, n_opt1, n_opt2) -> W_lda'
-        c = number of classes
-        n_opt1 = number of columns to take from W_pca
-        n_opt2 = number of columns to take from W_fld
-        W_pca2 = W_pca(1 : n_opt1) (m by n_opt1)
-        P_pca = W_pca2' * X (n_opt1 by n)
-        n_i = size of class i
-        U_i = sum(P_pca_j, j in class i) / n_i (n_opt1 by 1)
-        u = sum(U_i, 1:i:c) / c (n_opt1 by 1)
-        S_b = sum((U_i - u) * (U_i - u)', 1:i:c) (n_opt1 by n_opt1)
-        S_w = sum(sum((P_pca_j - U_i) * (P_pca_j - U_i)', j in class i), 1:i:c) (n_opt1 by n_opt1)
-        W_fld = eigenvectors of (S_b, S_w) (n_opt1 by n_opt2)
-        W_lda' = W_fld' * W_pca2' (n_opt2 by m)
-
-    ICA: (W_pca, P_pca) -> W_ica'
-        X = P_pca (n-by-n)
-        W_z = 2 * Cov(X)^(-1/2) (n-by-n)
-        X_sph = W_z * X (n-by-n)
-        W = (train with sep96) (n-by-n)
-        W_I = W * W_z (n-by-n)
-        W_ica' = W_I * W_pca' (n-by-m)
