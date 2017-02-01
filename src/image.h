@@ -10,8 +10,8 @@
 
 typedef struct {
 	int channels;
-	int height;
 	int width;
+	int height;
 	int max_value;
 	unsigned char *pixels;
 } image_t;

@@ -22,8 +22,8 @@ image_t * image_construct()
 {
 	image_t *image = (image_t *)malloc(sizeof(image_t));
 	image->channels = 0;
-	image->height = 0;
 	image->width = 0;
+	image->height = 0;
 	image->max_value = 0;
 	image->pixels = NULL;
 
@@ -89,16 +89,16 @@ void image_read(image_t *image, const char *path)
 
 	skip_to_next_value(in);
 
-	fscanf(in, "%d", &image->height);
+	fscanf(in, "%d", &image->width);
 	skip_to_next_value(in);
 
-	fscanf(in, "%d", &image->width);
+	fscanf(in, "%d", &image->height);
 	skip_to_next_value(in);
 
 	fscanf(in, "%d", &image->max_value);
 	fgetc(in);
 
-	int num = image->channels * image->height * image->width;
+	int num = image->channels * image->width * image->height;
 
 	if ( image->pixels == NULL ) {
 		image->pixels = (unsigned char *)malloc(num * sizeof(unsigned char));
@@ -131,10 +131,10 @@ void image_write(image_t *image, const char *path)
 		exit(1);
 	}
 
-	fprintf(out, "%d %d %d\n", image->height, image->width, image->max_value);
+	fprintf(out, "%d %d %d\n", image->width, image->height, image->max_value);
 
 	// write pixel data
-	fwrite(image->pixels, sizeof(unsigned char), image->channels * image->height * image->width, out);
+	fwrite(image->pixels, sizeof(unsigned char), image->channels * image->width * image->height, out);
 
 	fclose(out);
 }
