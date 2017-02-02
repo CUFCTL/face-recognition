@@ -7,12 +7,24 @@ import time
 import cv2
 
 # parse command-line arguments
-if len(sys.argv) != 2:
-    print "usage: python crop.py [input-image]"
+FNAME_IN = ""
+BOUNDING_BOX = False
+
+for i in xrange(1, len(sys.argv)):
+    arg = sys.argv[i]
+
+    if arg == "-b" or arg == "--bounding-box":
+        BOUNDING_BOX = True
+    else:
+        FNAME_IN = arg
+
+if len(FNAME_IN) == 0:
+    print "usage: python crop.py [options] [input-image]"
+    print "options:"
+    print "  -b, --bounding-box  save original image with bounding boxes"
     sys.exit(1)
 
-parts = os.path.splitext(sys.argv[1])
-FNAME_IN = sys.argv[1]
+parts = os.path.splitext(FNAME_IN)
 FOLDER_OUT = parts[0] + "_cropped"
 FNAME_OUT = FOLDER_OUT + parts[1]
 
@@ -45,9 +57,11 @@ for (x,y,w,h) in faces:
     roi = img[y1:y2, x1:x2]
     cv2.imwrite(path, roi)
 
-    cv2.rectangle(img, (x1,y1), (x2,y2), (255,0,0), 2)
+    if BOUNDING_BOX:
+        cv2.rectangle(img, (x1,y1), (x2,y2), (255,0,0), 2)
 
     i = i + 1
 
 # save image with rectangles
-cv2.imwrite(FNAME_OUT, img)
+if BOUNDING_BOX:
+    cv2.imwrite(FNAME_OUT, img)
