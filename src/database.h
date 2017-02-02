@@ -13,23 +13,32 @@
 typedef precision_t (*dist_func_t)(matrix_t *, int, matrix_t *, int);
 
 typedef struct {
-	// PCA hyperparameters
-	int pca_n1;
-	dist_func_t pca_dist;
+	int n1;
+	dist_func_t dist;
+} pca_params_t;
 
-	// LDA hyperparameters
-	int lda_n1;
-	int lda_n2;
-	dist_func_t lda_dist;
+typedef struct {
+	int n1;
+	int n2;
+	dist_func_t dist;
+} lda_params_t;
 
-	// ICA hyperparameters
-	int ica_num_ic;
-	int ica_max_iterations;
-	precision_t ica_epsilon;
-	dist_func_t ica_dist;
+typedef struct {
+	int num_ic;
+	int max_iterations;
+	precision_t epsilon;
+	dist_func_t dist;
+} ica_params_t;
 
-	// kNN hyperparameters
-	int knn_k;
+typedef struct {
+	int k;
+} knn_params_t;
+
+typedef struct {
+	pca_params_t pca;
+	lda_params_t lda;
+	ica_params_t ica;
+	knn_params_t knn;
 } db_params_t;
 
 typedef struct {

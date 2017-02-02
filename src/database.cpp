@@ -63,19 +63,19 @@ database_t * db_construct(bool pca, bool lda, bool ica, db_params_t params)
 		pca || lda || ica, pca,
 		"PCA",
 		NULL, NULL,
-		db->params.pca_dist
+		db->params.pca.dist
 	};
 	db->lda = (db_algorithm_t) {
 		lda, lda,
 		"LDA",
 		NULL, NULL,
-		db->params.lda_dist
+		db->params.lda.dist
 	};
 	db->ica = (db_algorithm_t) {
 		ica, ica,
 		"ICA",
 		NULL, NULL,
-		db->params.ica_dist
+		db->params.ica.dist
 	};
 
 	if ( LOGGER(LL_VERBOSE) ) {
@@ -83,16 +83,16 @@ database_t * db_construct(bool pca, bool lda, bool ica, db_params_t params)
 
 		printf("Hyperparameters\n");
 		printf("PCA\n");
-		printf("  %-*s  %10d\n", len, "pca_n1", db->params.pca_n1);
+		printf("  %-*s  %10d\n", len, "n1", db->params.pca.n1);
 		printf("LDA\n");
-		printf("  %-*s  %10d\n", len, "lda_n1", db->params.lda_n1);
-		printf("  %-*s  %10d\n", len, "lda_n2", db->params.lda_n2);
+		printf("  %-*s  %10d\n", len, "n1", db->params.lda.n1);
+		printf("  %-*s  %10d\n", len, "n2", db->params.lda.n2);
 		printf("ICA\n");
-		printf("  %-*s  %10d\n", len, "ica_num_ic", db->params.ica_num_ic);
-		printf("  %-*s  %10d\n", len, "ica_max_iterations", db->params.ica_max_iterations);
-		printf("  %-*s  %10f\n", len, "ica_epsilon", db->params.ica_epsilon);
+		printf("  %-*s  %10d\n", len, "num_ic", db->params.ica.num_ic);
+		printf("  %-*s  %10d\n", len, "max_iterations", db->params.ica.max_iterations);
+		printf("  %-*s  %10f\n", len, "epsilon", db->params.ica.epsilon);
 		printf("kNN\n");
-		printf("  %-*s  %10d\n", len, "knn_k", db->params.knn_k);
+		printf("  %-*s  %10d\n", len, "k", db->params.knn.k);
 		putchar('\n');
 	}
 
@@ -162,19 +162,19 @@ void db_train(database_t *db, const char *path)
 	matrix_t *D;
 
 	if ( db->pca.train ) {
-		db->pca.W = PCA_cols(X, db->params.pca_n1, &D);
+		db->pca.W = PCA_cols(X, db->params.pca.n1, &D);
 		db->pca.P = m_product("P_pca", db->pca.W, X, true, false);
 	}
 
 	// compute LDA representation
 	if ( db->lda.train ) {
-		db->lda.W = LDA(db->pca.W, X, db->num_labels, db->entries, db->params.lda_n1, db->params.lda_n2);
+		db->lda.W = LDA(db->pca.W, X, db->num_labels, db->entries, db->params.lda.n1, db->params.lda.n2);
 		db->lda.P = m_product("P_lda", db->lda.W, X, true, false);
 	}
 
 	// compute ICA representation
 	if ( db->ica.train ) {
-		db->ica.W = ICA(X, db->params.ica_num_ic, db->params.ica_max_iterations, db->params.ica_epsilon); // W_pca, D
+		db->ica.W = ICA(X, db->params.ica.num_ic, db->params.ica.max_iterations, db->params.ica.epsilon); // W_pca, D
 		db->ica.P = m_product("P_ica", db->ica.W, X, true, false);
 	}
 
@@ -341,7 +341,7 @@ void db_recognize(database_t *db, const char *path)
 
 			int j;
 			for ( j = 0; j < num_entries; j++ ) {
-				rec_labels[j] = kNN(algo->P, db->entries, P_test, j, db->params.knn_k, algo->dist_func);
+				rec_labels[j] = kNN(algo->P, db->entries, P_test, j, db->params.knn.k, algo->dist_func);
 			}
 
 			// compute accuracy

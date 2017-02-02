@@ -98,10 +98,10 @@ int main(int argc, char **argv)
 	bool arg_ica = false;
 
 	db_params_t db_params = {
-		-1, m_dist_L2,
-		-1, -1, m_dist_L2,
-		-1, 1000, 0.0001f, m_dist_COS,
-		1
+		{ -1, m_dist_L2 },
+		{ -1, -1, m_dist_L2 },
+		{ -1, 1000, 0.0001f, m_dist_COS },
+		{ 1 }
 	};
 
 	char *path_train_set = NULL;
@@ -162,34 +162,34 @@ int main(int argc, char **argv)
 			arg_ica = true;
 			break;
 		case OPTION_PCA_N1:
-			db_params.pca_n1 = atoi(optarg);
+			db_params.pca.n1 = atoi(optarg);
 			break;
 		case OPTION_PCA_DIST:
-			db_params.pca_dist = parse_dist_func(optarg);
+			db_params.pca.dist = parse_dist_func(optarg);
 			break;
 		case OPTION_LDA_N1:
-			db_params.lda_n1 = atoi(optarg);
+			db_params.lda.n1 = atoi(optarg);
 			break;
 		case OPTION_LDA_N2:
-			db_params.lda_n2 = atoi(optarg);
+			db_params.lda.n2 = atoi(optarg);
 			break;
 		case OPTION_LDA_DIST:
-			db_params.lda_dist = parse_dist_func(optarg);
+			db_params.lda.dist = parse_dist_func(optarg);
 			break;
 		case OPTION_ICA_NUM_IC:
-			db_params.ica_num_ic = atoi(optarg);
+			db_params.ica.num_ic = atoi(optarg);
 			break;
 		case OPTION_ICA_MAX_ITERATIONS:
-			db_params.ica_max_iterations = atoi(optarg);
+			db_params.ica.max_iterations = atoi(optarg);
 			break;
 		case OPTION_ICA_EPSILON:
-			db_params.ica_epsilon = atof(optarg);
+			db_params.ica.epsilon = atof(optarg);
 			break;
 		case OPTION_ICA_DIST:
-			db_params.ica_dist = parse_dist_func(optarg);
+			db_params.ica.dist = parse_dist_func(optarg);
 			break;
 		case OPTION_KNN_K:
-			db_params.knn_k = atoi(optarg);
+			db_params.knn.k = atoi(optarg);
 			break;
 		case OPTION_UNKNOWN:
 			print_usage();
@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	if ( db_params.pca_dist == NULL || db_params.lda_dist == NULL || db_params.ica_dist == NULL ) {
+	if ( db_params.pca.dist == NULL || db_params.lda.dist == NULL || db_params.ica.dist == NULL ) {
 		fprintf(stderr, "error: dist function must be L1 | L2 | COS\n");
 		exit(1);
 	}
