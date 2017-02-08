@@ -20,8 +20,6 @@
 #
 # Remove 4.pgm - 7.pgm from each class:
 # ./scripts/create-sets.sh -p [db-path] -e pgm -s 4,5,6,7
-#
-# TODO: maybe implement ranges with a dash (i.e. '4-7')
 
 # parse arguments
 while [[ $# -gt 0 ]]; do
@@ -73,6 +71,11 @@ SAMPLES=$(echo $SAMPLES | tr ',' ' ')
 
 # partition the data set into the training/test sets
 for f in $TEMP_PATH/*; do
+    # skip regular files (e.g. the README)
+    if [ -f $f ]; then
+        continue
+    fi
+
     class=$(basename $f)
 
     # move test images
