@@ -47,27 +47,9 @@ while [[ $# -gt 0 ]]; do
         ARGS="$ARGS $1"
         ICA=1
         ;;
-    -e|--loglevel)
-        ARGS="$ARGS --loglevel $2"
-        shift
-        ;;
-    -s|--timing)
-        ARGS="$ARGS --timing"
-        ;;
-    --pca_n1)
-        ARGS="$ARGS --pca_n1 $2"
-        shift
-        ;;
-    --lda_n1)
-        ARGS="$ARGS --lda_n1 $2"
-        shift
-	;;
-    --lda_n2)
-        ARGS="$ARGS --lda_n2 $2"
-        shift
-        ;;
     *)
-        # unknown option
+        # pass other arguments to face-rec
+        ARGS="$ARGS $1"
         ;;
     esac
 
@@ -90,9 +72,8 @@ if [[ -z $DB_PATH || -z $NUM_TEST || -z $NUM_ITER || ($PCA = 0 && $LDA = 0 && $I
     >&2 echo "options for C code:"
     >&2 echo "  --loglevel LEVEL  set the log level"
     >&2 echo "  --timing          print timing information"
-    >&2 echo "  --pca_n1 N        (PCA) number of columns in W_pca to use"
-    >&2 echo "  --lda_n1 N        (LDA) number of columns in W_pca to use"
-    >&2 echo "  --lda_n2 N        (LDA) number of columns in W_fld to use"
+    >&2 echo
+    >&2 echo "  [see face-rec help for hyperparameter options]"
     exit 1
 fi
 
@@ -101,9 +82,7 @@ if [ $RUN_C = 1 ]; then
     echo "Building..."
     echo
 
-    make
-
-    echo
+    make > /dev/null
 fi
 
 # determine the number of observations in each class
