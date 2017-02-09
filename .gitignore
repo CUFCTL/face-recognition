@@ -6,7 +6,11 @@ face-rec
 test-image
 test-matrix
 
+# folders
+datasets
+
 # image files
+*.gif
 *.jpg
 *.jpeg
 *.pgm
