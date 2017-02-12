@@ -2,6 +2,7 @@
 *.o
 
 # executables
+*.exe
 face-rec
 test-image
 test-matrix

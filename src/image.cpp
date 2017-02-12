@@ -121,10 +121,10 @@ void image_write(image_t *image, const char *path)
 
 	// write image header
 	if ( image->channels == 1 ) {
-		fprintf(out, "P5");
+		fprintf(out, "P5\n");
 	}
 	else if ( image->channels == 3 ) {
-		fprintf(out, "P6");
+		fprintf(out, "P6\n");
 	}
 	else {
 		fprintf(stderr, "error: cannot write image \'%s\'\n", path);

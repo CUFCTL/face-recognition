@@ -12,13 +12,13 @@ logger_level_t LOGLEVEL = LL_INFO;
 
 int main(int argc, char **argv)
 {
-	if ( argc != 2 ) {
-		fprintf(stderr, "usage: ./test-image [image-file]\n");
+	if ( argc != 3 ) {
+		fprintf(stderr, "usage: ./test-image [infile] [outfile]\n");
 		return 1;
 	}
 
 	const char *FILENAME_IN = argv[1];
-	const char *FILENAME_OUT = "wahaha.ppm";
+	const char *FILENAME_OUT = argv[2];
 
 	// map an image to a column vector
 	image_t *image = image_construct();
