@@ -20,8 +20,11 @@ TEST_PATH = "test_images"
 if os.path.isdir(TEMP_PATH):
 	os.rmdir(TEMP_PATH)
 
-shutil.rmtree(TRAIN_PATH)
-shutil.rmtree(TEST_PATH)
+if os.path.isdir(TRAIN_PATH):
+	shutil.rmtree(TRAIN_PATH)
+
+if os.path.isdir(TEST_PATH):
+	shutil.rmtree(TEST_PATH)
 
 shutil.copytree(args.PATH, TEMP_PATH)
 
