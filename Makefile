@@ -24,8 +24,8 @@ NVCCFLAGS = -I$(CUDADIR)/include \
             -I$(OPENBLASDIR)/include
 
 ifeq ($(DEBUG), 1)
-CXXFLAGS  += -pg -Wall
-NVCCFLAGS += -pg -Xcompiler -Wall
+CXXFLAGS  += -g -pg -Wall
+NVCCFLAGS += -g -pg -Xcompiler -Wall
 else
 CXXFLAGS  += -O3
 NVCCFLAGS += -O3
