@@ -5,16 +5,12 @@
  */
 #include <stdlib.h>
 #include "database.h"
+#include "math_helper.h"
 
 typedef struct {
 	image_label_t *label;
 	precision_t dist;
 } neighbor_t;
-
-typedef struct {
-	image_label_t *label;
-	int count;
-} label_count_t;
 
 /**
  * Comparison function for the kNN classifier.
@@ -28,6 +24,18 @@ int kNN_compare(const void *a, const void *b)
 	neighbor_t *n2 = (neighbor_t *)b;
 
 	return (int)(n1->dist - n2->dist);
+}
+
+/**
+ * Identification function for the kNN classifier.
+ *
+ * @param a
+ */
+void * kNN_identify(const void *a)
+{
+	neighbor_t *n = (neighbor_t *)a;
+
+	return n->label;
 }
 
 /**
@@ -56,27 +64,9 @@ image_label_t * kNN(matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, int 
 	qsort(neighbors, X->cols, sizeof(neighbor_t), kNN_compare);
 
 	// determine the mode of the k nearest labels
-	// TODO: maybe replace with mode function
-	label_count_t *counts = (label_count_t *)calloc(k, sizeof(label_count_t));
+	image_label_t *nearest = (image_label_t *)mode(neighbors, k, sizeof(neighbor_t), kNN_identify);
 
-	for ( j = 0; j < k; j++ ) {
-		int n = 0;
-		while ( counts[n].label != NULL && counts[n].label != neighbors[j].label ) {
-			n++;
-		}
+	free(neighbors);
 
-		counts[n].label = neighbors[j].label;
-		counts[n].count++;
-	}
-
-	label_count_t *max = NULL;
-
-	for ( j = 0; counts[j].label != NULL; j++ ) {
-		if ( max == NULL || max->count < counts[j].count ) {
-			max = &counts[j];
-		}
-	}
-
-	return max->label;
+	return nearest;
 }
-
