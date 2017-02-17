@@ -68,4 +68,3 @@ test-matrix: math_helper.o matrix.o test_matrix.o
 
 clean:
 	rm -f *.o $(BINS)
-	rm -rf test_images train_images

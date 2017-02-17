@@ -36,7 +36,7 @@ logger_level_t LOGLEVEL = LL_INFO;
  */
 int is_equal (precision_t a, precision_t b)
 {
-	static precision_t EPSILON = 10e-4;
+	static precision_t EPSILON = 1e-4;
 
 	return fabsf(a - b) < EPSILON;
 }

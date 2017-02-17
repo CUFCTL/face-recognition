@@ -20,6 +20,8 @@
 #include "math_helper.h"
 #include "matrix.h"
 
+const precision_t EPSILON = 1e-16;
+
 /**
  * Allocate memory on the GPU.
  *
@@ -190,7 +192,7 @@ matrix_t * m_identity (const char *name, int rows)
  * @param cols
  * @return pointer to a new ones matrix
  */
-matrix_t * m_ones(const char *name, int rows, int cols)
+matrix_t * m_ones (const char *name, int rows, int cols)
 {
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
@@ -709,8 +711,6 @@ void m_eigen (const char *V_name, const char *D_name, matrix_t *M, matrix_t **p_
 
 	assert(M->rows == M->cols);
 
-	static precision_t EPSILON = 1e-8;
-
 	matrix_t *V_temp1 = m_copy(V_name, M);
 	matrix_t *D_temp1 = m_initialize(D_name, M->rows, 1);
 
@@ -814,9 +814,10 @@ void m_eigen2 (const char *V_name, const char *D_name, matrix_t *A, matrix_t *B,
 	int info;
 
 	magma_ssygvd(1, MagmaVec, MagmaUpper,
-		n, V->data, A->rows, B->data, B->rows,  // input matrices (eigenvectors)
-		D_temp1->data,                          // eigenvalues
-		work, lwork,                            // workspace
+		n, V->data, A->rows,  // left input matrix (eigenvectors)
+		B->data, B->rows,     // right input matrix
+		D_temp1->data,        // eigenvalues
+		work, lwork,          // workspace
 		iwork, liwork,
 		&info);
 	assert(info == 0);
@@ -972,7 +973,7 @@ matrix_t * m_mean_row (const char *name, matrix_t *M)
  * @param v
  * @return 2-norm of v
  */
-precision_t m_norm(matrix_t *v)
+precision_t m_norm (matrix_t *v)
 {
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
