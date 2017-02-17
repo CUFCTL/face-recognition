@@ -389,8 +389,11 @@ void test_m_distance()
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, a);
-
 		m_fprint(stdout, b);
+
+		printf("d_COS(%s, %s) = %g\n", a->name, b->name, dist_COS);
+		printf("d_L1(%s, %s) = %g\n", a->name, b->name, dist_L1);
+		printf("d_L2(%s, %s) = %g\n", a->name, b->name, dist_L2);
 	}
 
 	assert_equal(dist_COS, 0, "d_COS(a, b)");
@@ -603,6 +606,8 @@ void test_m_norm()
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, v);
+
+		printf("norm(%s) = %g\n", v->name, n);
 	}
 
 	assert_equal(n, 3.7417, "norm(v)");
