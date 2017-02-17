@@ -45,8 +45,14 @@ matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 		? X->cols - 1
 		: n_opt1;
 
-	matrix_t *W_pca = m_product("W_pca", X, V);
-	matrix_t *W_pca2 = m_copy_columns("W_pca", W_pca, W_pca->cols - n_opt1, W_pca->cols);
+	// temporary bounds check for n_opt1
+	if ( D->cols < n_opt1 ) {
+		printf("warning: L has only %d eigenvalues, thresholding pca_n1\n", D->cols);
+		n_opt1 = D->cols;
+	}
+
+	matrix_t *W_pca_temp1 = m_product("W_pca", X, V);
+	matrix_t *W_pca = m_copy_columns("W_pca", W_pca_temp1, W_pca_temp1->cols - n_opt1, W_pca_temp1->cols);
 
 	timer_pop();
 
@@ -58,9 +64,9 @@ matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 	// cleanup
 	m_free(L);
 	m_free(V);
-	m_free(W_pca);
+	m_free(W_pca_temp1);
 
-	return W_pca2;
+	return W_pca;
 }
 
 /**
