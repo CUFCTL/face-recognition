@@ -322,8 +322,6 @@ void test_m_covariance()
 	matrix_t *A = m_initialize_data("A", 3, 4, A_data);
 	matrix_t *C = m_covariance("C", A);
 
-	m_gpu_read(C);
-
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
 
@@ -481,8 +479,6 @@ void test_m_eigen2()
 
 	m_eigen2("V", "D", A, B, &V, &D);
 
-	m_gpu_read(V);
-
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
 
@@ -548,8 +544,6 @@ void test_m_mean_column()
 	matrix_t *A = m_initialize_data("A", 2, 3, A_data);
 	matrix_t *m = m_mean_column("m", A);
 
-	m_gpu_read(m);
-
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
 
@@ -578,8 +572,6 @@ void test_m_mean_row()
 	};
 	matrix_t *A = m_initialize_data("A", 4, 3, A_data);
 	matrix_t *m = m_mean_row("m", A);
-
-	m_gpu_read(m);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -645,9 +637,6 @@ void test_m_product()
 	matrix_t *C1 = m_product("C1", A1, B1);
 	matrix_t *C2 = m_product("C2", B1, A1);
 
-	m_gpu_read(C1);
-	m_gpu_read(C2);
-
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A1);
 
@@ -683,8 +672,6 @@ void test_m_product()
 	matrix_t *A2 = m_initialize_data("A2", 2, 3, A2_data);
 	matrix_t *B2 = m_initialize_data("B2", 3, 3, B2_data);
 	matrix_t *C3 = m_product("C3", A2, B2);
-
-	m_gpu_read(C3);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A2);
@@ -722,8 +709,6 @@ void test_m_sqrtm()
 	};
 	matrix_t *A = m_initialize_data("A", 5, 5, A_data);
 	matrix_t *X = m_sqrtm("X", A);
-
-	m_gpu_read(X);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -796,7 +781,6 @@ void test_m_add()
 	}
 
 	m_add(A, B);
-	m_gpu_read(A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -948,7 +932,6 @@ void test_m_elem_mult()
 	}
 
 	m_elem_mult(A, c);
-	m_gpu_read(A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -1016,7 +999,6 @@ void test_m_subtract()
 	}
 
 	m_subtract(A, B);
-	m_gpu_read(A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);

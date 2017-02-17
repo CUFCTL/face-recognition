@@ -305,6 +305,8 @@ matrix_t * m_copy_columns (const char *name, matrix_t *M, int i, int j)
 
 	memcpy(C->data, &elem(M, 0, i), C->rows * C->cols * sizeof(precision_t));
 
+	m_gpu_write(C);
+
 	return C;
 }
 
@@ -333,6 +335,8 @@ matrix_t * m_copy_rows (const char *name, matrix_t *M, int i, int j)
 	for ( k = 0; k < M->cols; k++ ) {
 		memcpy(&elem(C, 0, k), &elem(M, i, k), (j - i) * sizeof(precision_t));
 	}
+
+	m_gpu_write(C);
 
 	return C;
 }
@@ -561,6 +565,8 @@ matrix_t * m_diagonalize (const char *name, matrix_t *v)
         elem(D, i, i) = v->data[i];
     }
 
+	m_gpu_write(D);
+
     return D;
 }
 
@@ -721,8 +727,6 @@ void m_eigen (const char *V_name, const char *D_name, matrix_t *M, matrix_t **p_
 	int *iwork = (int *)malloc(liwork * sizeof(int));
 	int info;
 
-	m_gpu_write(V_temp1);
-
 	magma_ssyevd_gpu(MagmaVec, MagmaUpper,
 		n, V_temp1->data_gpu, M->rows,  // input matrix (eigenvectors)
 		D_temp1->data,                  // eigenvalues
@@ -800,7 +804,25 @@ void m_eigen2 (const char *V_name, const char *D_name, matrix_t *A, matrix_t *B,
 
 	// solve A * x = lambda * B * x
 #ifdef __NVCC__
-	// TODO: stub
+	int n = A->cols;
+	int nb = magma_get_ssytrd_nb(n);
+
+	int lwork = max(2*n + n*nb, 1 + 6*n + 2*n*n);
+	int liwork = 3 + 5*n;
+	precision_t *work = (precision_t *)malloc(lwork * sizeof(precision_t));
+	int *iwork = (int *)malloc(liwork * sizeof(int));
+	int info;
+
+	magma_ssygvd(1, MagmaVec, MagmaUpper,
+		n, V->data, A->rows, B->data, B->rows,  // input matrices (eigenvectors)
+		D_temp1->data,                          // eigenvalues
+		work, lwork,                            // workspace
+		iwork, liwork,
+		&info);
+	assert(info == 0);
+
+	free(work);
+	free(iwork);
 #else
 	matrix_t *B_work = m_copy("B", B);
 
@@ -850,8 +872,6 @@ matrix_t * m_inverse (const char *name, matrix_t *M)
 	int *ipiv = (int *)malloc(n * sizeof(int));
 	precision_t *dwork = (precision_t *)gpu_malloc(lwork * sizeof(precision_t));
 	int info;
-
-	m_gpu_write(M_inv);
 
 	magma_sgetrf_gpu(M->rows, n, M_inv->data_gpu, M->rows,
 		ipiv, &info);
@@ -1022,6 +1042,8 @@ matrix_t * m_product (const char *name, matrix_t *A, matrix_t *B, bool transA, b
 		alpha, A->data_gpu, A->rows, B->data_gpu, B->rows,
 		beta, C->data_gpu, C->rows,
 		queue);
+
+	m_gpu_read(C);
 #else
 	CBLAS_TRANSPOSE TransA = transA ? CblasTrans : CblasNoTrans;
 	CBLAS_TRANSPOSE TransB = transB ? CblasTrans : CblasNoTrans;
@@ -1062,7 +1084,6 @@ matrix_t * m_sqrtm (const char *name, matrix_t *M)
 
 	// compute B = V * sqrt(D)
 	m_elem_apply(D, sqrtf);
-	m_gpu_write(D);
 
 	matrix_t *B = m_product("B", V, D);
 
@@ -1104,6 +1125,8 @@ matrix_t * m_transpose (const char *name, matrix_t *M)
 		}
 	}
 
+	m_gpu_write(T);
+
 	return T;
 }
 
@@ -1130,6 +1153,8 @@ void m_add (matrix_t *A, matrix_t *B)
 
 #ifdef __NVCC__
 	helper_axpy(N, alpha, B->data_gpu, A->data_gpu);
+
+	m_gpu_read(A);
 #else
 	helper_axpy(N, alpha, B->data, A->data);
 #endif
@@ -1157,6 +1182,8 @@ void m_assign_column (matrix_t * A, int i, matrix_t * B, int j)
     assert(0 <= j && j < B->cols);
 
     memcpy(&elem(A, 0, i), B->data, B->rows * sizeof(precision_t));
+
+	m_gpu_write(A);
 }
 
 /**
@@ -1184,6 +1211,8 @@ void m_assign_row (matrix_t * A, int i, matrix_t * B, int j)
     for ( k = 0; k < A->cols; k++ ) {
         elem(A, i, k) = elem(B, j, k);
     }
+
+	m_gpu_write(A);
 }
 
 /**
@@ -1208,6 +1237,8 @@ void m_elem_apply (matrix_t * M, elem_func_t f)
             elem(M, i, j) = f(elem(M, i, j));
         }
     }
+
+	m_gpu_write(M);
 }
 
 /**
@@ -1232,6 +1263,8 @@ void m_elem_mult (matrix_t *M, precision_t c)
 	magma_queue_t queue = magma_queue();
 
 	magma_sscal(N, c, M->data_gpu, incX, queue);
+
+	m_gpu_read(M);
 #else
 	cblas_sscal(N, c, M->data, incX);
 #endif
@@ -1267,6 +1300,8 @@ void m_shuffle_columns (matrix_t *M)
 	}
 
 	free(temp);
+
+	m_gpu_write(M);
 }
 
 /**
@@ -1292,6 +1327,8 @@ void m_subtract (matrix_t *A, matrix_t *B)
 
 #ifdef __NVCC__
 	helper_axpy(N, alpha, B->data_gpu, A->data_gpu);
+
+	m_gpu_read(A);
 #else
 	helper_axpy(N, alpha, B->data, A->data);
 #endif
@@ -1321,8 +1358,6 @@ void m_subtract_columns (matrix_t *M, matrix_t *a)
 	assert(M->rows == a->rows && a->cols == 1);
 
 	// TODO: implement with helper_axpy()
-	m_gpu_read(a);
-
 	int i, j;
 	for ( i = 0; i < M->cols; i++ ) {
 		for ( j = 0; j < M->rows; j++ ) {
@@ -1356,8 +1391,6 @@ void m_subtract_rows (matrix_t *M, matrix_t *a)
 	assert(M->cols == a->cols && a->rows == 1);
 
 	// TODO: implement with helper_axpy()
-	m_gpu_read(a);
-
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
 		for ( j = 0; j < M->cols; j++ ) {
