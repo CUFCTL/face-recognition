@@ -31,6 +31,7 @@ typedef precision_t (*elem_func_t)(precision_t);
 
 // constructor, destructor functions
 matrix_t * m_initialize (const char *name, int rows, int cols);
+matrix_t * m_initialize_data (const char *name, int rows, int cols, precision_t *data);
 matrix_t * m_identity (const char *name, int rows);
 matrix_t * m_ones (const char *name, int rows, int cols);
 matrix_t * m_random (const char *name, int rows, int cols);

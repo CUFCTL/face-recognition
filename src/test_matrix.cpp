@@ -28,30 +28,6 @@ typedef void (*test_func_t)(void);
 logger_level_t LOGLEVEL = LL_INFO;
 
 /**
- * Construct a matrix with arbitrary data.
- *
- * @param rows
- * @param cols
- * @param data
- * @return pointer to matrix
- */
-matrix_t * m_initialize_data (const char *name, int rows, int cols, precision_t *data)
-{
-	matrix_t *M = m_initialize(name, rows, cols);
-
-	int i, j;
-	for ( i = 0; i < M->rows; i++ ) {
-		for ( j = 0; j < M->cols; j++ ) {
-			elem(M, i, j) = data[i * cols + j];
-		}
-	}
-
-	m_gpu_write(M);
-
-	return M;
-}
-
-/**
  * Determine whether two floating point values are equal.
  *
  * @param a
