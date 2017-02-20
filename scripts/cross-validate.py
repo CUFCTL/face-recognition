@@ -88,7 +88,7 @@ for i in xrange(args.NUM_ITER):
 	print
 
 	# create the training set and test set
-	subprocess.call("./scripts/create-sets.py -d %s -t %s -r %s" % (args.DATASET, samples_train, samples_test), shell=True)
+	subprocess.call("python scripts/create-sets.py -d %s -t %s -r %s" % (args.DATASET, samples_train, samples_test), shell=True)
 
 	# run the algorithms
 	if args.RUN_MATLAB:
