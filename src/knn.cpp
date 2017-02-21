@@ -38,7 +38,14 @@ int kNN_compare(const void *a, const void *b)
 	neighbor_t *n1 = (neighbor_t *)a;
 	neighbor_t *n2 = (neighbor_t *)b;
 
-	return (int)(n1->dist - n2->dist);
+	if ( n1->dist < n2->dist ) {
+		return -1;
+	}
+	else if ( n1->dist > n2->dist ) {
+		return 1;
+	}
+
+	return 0;
 }
 
 /**
