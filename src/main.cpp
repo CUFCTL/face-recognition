@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 	db_params_t db_params = {
 		{ -1, m_dist_L2 },
 		{ -1, -1, m_dist_L2 },
-		{ -1, 1000, 0.0001f, m_dist_COS },
+		{ -1, 1000, 0.0001f, m_dist_L2 },
 		{ 1 }
 	};
 

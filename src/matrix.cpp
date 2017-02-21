@@ -575,8 +575,11 @@ matrix_t * m_diagonalize (const char *name, matrix_t *v)
 /**
  * Compute the COS distance between two column vectors.
  *
- * COS is the cosine angle:
- * d_cos(x, y) = -x * y / (||x|| * ||y||)
+ * Cosine similarity is the cosine of the angle between x and y:
+ * S_cos(x, y) = x * y / (||x|| * ||y||)
+ *
+ * Since S_cos is on [-1, 1], we transform S_cos to be on [0, 1000]:
+ * d_cos(x, y) = 500 * (1 - S_cos(x, y))
  *
  * @param A
  * @param i
@@ -594,6 +597,7 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
 	}
 
 	assert(A->rows == B->rows);
+	assert(0 <= i && i < A->cols && 0 <= j && j < B->cols);
 
 	// compute x * y
 	precision_t x_dot_y = 0;
@@ -612,10 +616,11 @@ precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j)
 		abs_y += elem(B, k, j) * elem(B, k, j);
 	}
 
-	// compute distance
-	precision_t dist = -x_dot_y / sqrtf(abs_x * abs_y);
+	// compute similarity
+	precision_t similarity = x_dot_y / sqrtf(abs_x * abs_y);
 
-	return dist;
+	// compute scaled distance
+	return 500 * (1 - similarity);
 }
 
 /**
@@ -640,6 +645,7 @@ precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j)
 	}
 
 	assert(A->rows == B->rows);
+	assert(0 <= i && i < A->cols && 0 <= j && j < B->cols);
 
 	precision_t dist = 0;
 
@@ -673,6 +679,7 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
 	}
 
 	assert(A->rows == B->rows);
+	assert(0 <= i && i < A->cols && 0 <= j && j < B->cols);
 
 	precision_t dist = 0;
 
