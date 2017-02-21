@@ -13,6 +13,21 @@ typedef struct {
 } neighbor_t;
 
 /**
+ * Print a list of neighbors.
+ *
+ * @param neighbors
+ * @param num
+ */
+void debug_print_neighbors(neighbor_t *neighbors, int num)
+{
+	int i;
+	for ( i = 0; i < num; i++) {
+		printf("%8s  %f\n", neighbors[i].label->name, neighbors[i].dist);
+	}
+	putchar('\n');
+}
+
+/**
  * Comparison function for the kNN classifier.
  *
  * @param a
@@ -52,16 +67,17 @@ void * kNN_identify(const void *a)
 image_label_t * kNN(matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, int k, dist_func_t dist_func)
 {
 	// compute distance between X_test_i and each observation in X
-	neighbor_t *neighbors = (neighbor_t *)malloc(X->cols * sizeof(neighbor_t));
+	int num_neighbors = X->cols;
+	neighbor_t *neighbors = (neighbor_t *)malloc(num_neighbors * sizeof(neighbor_t));
 
 	int j;
-	for ( j = 0; j < X->cols; j++ ) {
+	for ( j = 0; j < num_neighbors; j++ ) {
 		neighbors[j].label = Y[j].label;
 		neighbors[j].dist = dist_func(X_test, i, X, j);
 	}
 
 	// sort the neighbors by distance
-	qsort(neighbors, X->cols, sizeof(neighbor_t), kNN_compare);
+	qsort(neighbors, num_neighbors, sizeof(neighbor_t), kNN_compare);
 
 	// determine the mode of the k nearest labels
 	image_label_t *nearest = (image_label_t *)mode(neighbors, k, sizeof(neighbor_t), kNN_identify);

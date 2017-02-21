@@ -93,3 +93,33 @@ int get_directory(const char *path, image_entry_t **p_entries, int *p_num_labels
 
 	return num_entries;
 }
+
+/**
+ * Print a list of labels.
+ *
+ * @param labels
+ * @param num
+ */
+void debug_print_labels(image_label_t *labels, int num)
+{
+	int i;
+	for ( i = 0; i < num; i++) {
+		printf("%3d  %s\n", labels[i].id, labels[i].name);
+	}
+	putchar('\n');
+}
+
+/**
+ * Print a list of entries.
+ *
+ * @param entries
+ * @param num
+ */
+void debug_print_entries(image_entry_t *entries, int num)
+{
+	int i;
+	for ( i = 0; i < num; i++) {
+		printf("%8s  %s\n", entries[i].label->name, entries[i].name);
+	}
+	putchar('\n');
+}

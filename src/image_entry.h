@@ -21,4 +21,7 @@ typedef struct {
 
 int get_directory(const char *path, image_entry_t **p_entries, int *p_num_labels, image_label_t **p_labels);
 
+void debug_print_labels(image_label_t *labels, int num);
+void debug_print_entries(image_entry_t *entries, int num);
+
 #endif

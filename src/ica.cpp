@@ -134,7 +134,7 @@ matrix_t * ICA (matrix_t *X, int num_ic, int max_iterations, precision_t epsilon
  */
 precision_t pow3(precision_t x)
 {
-    return pow(x, 3);
+    return powf(x, 3);
 }
 
 /**
@@ -165,7 +165,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, pr
     int i;
     for ( i = 0; i < num_ic; i++ ) {
         if ( LOGGER(LL_VERBOSE) ) {
-            printf("round %d\n", i + 1);
+            printf("      round %d\n", i + 1);
         }
 
         // initialize w as a Gaussian random vector
@@ -208,13 +208,11 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, pr
             precision_t norm1 = m_norm(w_delta1);
             precision_t norm2 = m_norm(w_delta2);
 
-            int converged = (norm1 < epsilon) || (norm2 < epsilon);
-
             m_free(w_delta1);
             m_free(w_delta2);
 
             // terminate round if w converges
-            if ( converged ) {
+            if ( norm1 < epsilon || norm2 < epsilon ) {
                 // save B(:, i) = w
                 m_assign_column(B, i, w, 0);
 
@@ -252,7 +250,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, pr
         }
 
         if ( LOGGER(LL_VERBOSE) ) {
-            printf("iterations: %d\n", j);
+            printf("      iterations: %d\n", j);
         }
 
         m_free(w);
