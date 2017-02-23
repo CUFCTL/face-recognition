@@ -63,15 +63,16 @@ void * mode(const void *base, size_t nmemb, size_t size, void * (*identify)(cons
 	}
 
 	// find the item with the highest frequency
-	item_count_t *max = NULL;
+	void *max_id = NULL;
+	int max_count = 0;
 
-	for ( i = 0; counts[i].id != NULL; i++ ) {
-		if ( max == NULL || max->count < counts[i].count ) {
-			max = &counts[i];
+	for ( i = 0; i < nmemb && counts[i].id != NULL; i++ ) {
+		if ( max_id == NULL || max_count < counts[i].count ) {
+			max_id = counts[i].id;
+			max_count = counts[i].count;
 		}
 	}
 
-	void *max_id = max->id;
 	free(counts);
 
 	return max_id;
