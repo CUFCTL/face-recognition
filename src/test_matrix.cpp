@@ -477,7 +477,10 @@ void test_m_eigen2()
 	matrix_t *V;
 	matrix_t *D;
 
-	m_eigen2("V", "D", A, B, &V, &D);
+	matrix_t *B_inv = m_inverse("inv(B)", B);
+	matrix_t *J = m_product("J", B_inv, A);
+
+	m_eigen("V", "D", J, &V, &D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);
@@ -494,6 +497,8 @@ void test_m_eigen2()
 
 	m_free(A);
 	m_free(B);
+	m_free(B_inv);
+	m_free(J);
 	m_free(V);
 	m_free(D);
 }

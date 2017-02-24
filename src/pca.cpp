@@ -4,6 +4,7 @@
  * Implementation of PCA (Turk and Pentland, 1991).
  */
 #include "database.h"
+#include "math_helper.h"
 #include "timer.h"
 
 /**
@@ -14,12 +15,12 @@
  * The principal components of a matrix are the eigenvectors of
  * the covariance matrix.
  *
- * @param X       input matrix
- * @param n_opt1  number of columns in W_pca to use
- * @param p_D     pointer to save eigenvalues
+ * @param X    input matrix
+ * @param n1   number of columns to use in W_pca
+ * @param p_D  pointer to save eigenvalues
  * @return principal components of X in columns
  */
-matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
+matrix_t * PCA_cols(matrix_t *X, int n1, matrix_t **p_D)
 {
 	timer_push("  PCA");
 
@@ -40,19 +41,13 @@ matrix_t * PCA_cols(matrix_t *X, int n_opt1, matrix_t **p_D)
 
 	timer_push("    compute PCA projection matrix");
 
-	// if n_opt1 = -1, use N - 1
-	n_opt1 = (n_opt1 == -1)
-		? X->cols - 1
-		: n_opt1;
-
-	// temporary bounds check for n_opt1
-	if ( D->cols < n_opt1 ) {
-		printf("warning: L has only %d eigenvalues, thresholding pca_n1\n", D->cols);
-		n_opt1 = D->cols;
-	}
+	// if n1 = -1, use default value
+	n1 = (n1 == -1)
+		? min(D->cols, X->cols - 1)
+		: n1;
 
 	matrix_t *W_pca_temp1 = m_product("W_pca", X, V);
-	matrix_t *W_pca = m_copy_columns("W_pca", W_pca_temp1, W_pca_temp1->cols - n_opt1, W_pca_temp1->cols);
+	matrix_t *W_pca = m_copy_columns("W_pca", W_pca_temp1, W_pca_temp1->cols - n1, W_pca_temp1->cols);
 
 	timer_pop();
 

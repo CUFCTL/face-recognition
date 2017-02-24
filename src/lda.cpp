@@ -4,6 +4,7 @@
  * Implementation of LDA (Belhumeur et al., 1996; Zhao et al., 1998).
  */
 #include "database.h"
+#include "math_helper.h"
 #include "timer.h"
 #include <stdlib.h>
 
@@ -98,23 +99,23 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
  * @param X        image matrix
  * @param c        number of classes
  * @param entries  list of entries for each image
- * @param n_opt1   number of columns in W_pca to use
- * @param n_opt2   number of columns in W_fld to use
+ * @param n1       number of columns to use in W_pca
+ * @param n2       number of columns to use in W_fld
  * @return projection matrix W_lda
  */
-matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n_opt1, int n_opt2)
+matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n1, int n2)
 {
     timer_push("  LDA");
 
     timer_push("    truncate eigenfaces and projected images");
 
-    // if n_opt1 = -1, use N - c
-    n_opt1 = (n_opt1 == -1)
-        ? X->cols - c
-        : n_opt1;
+    // if n1 = -1, use default value
+    n1 = (n1 == -1)
+        ? min(c, X->cols - c)
+        : n1;
 
-    // use only the last n_opt1 columns in W_pca
-    matrix_t *W_pca2 = m_copy_columns("W_pca", W_pca, W_pca->cols - n_opt1, W_pca->cols);
+    // use only the last n1 columns in W_pca
+    matrix_t *W_pca2 = m_copy_columns("W_pca", W_pca, W_pca->cols - n1, W_pca->cols);
     matrix_t *P_pca = m_product("P_pca", W_pca2, X, true, false);
 
     timer_pop();
@@ -139,28 +140,19 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     m_eigen("J_evec", "J_eval", J, &J_evec, &J_eval);
 
-    // TODO: compare results, see if this will work
-    // m_eigen2("J_evec", "J_eval", S_b, S_w, &J_evec, &J_eval);
+    // if n2 = -1, use default value
+    n2 = (n2 == -1)
+        ? min(J_eval->cols, c - 1)
+        : n2;
 
-    // if n_opt2 = -1, use c - 1
-    n_opt2 = (n_opt2 == -1)
-        ? c - 1
-        : n_opt2;
-
-    // temporary bounds check for n_opt2
-    if ( J_eval->cols < n_opt2 ) {
-        printf("warning: J has only %d eigenvalues, thresholding lda_n2\n", J_eval->cols);
-        n_opt2 = J_eval->cols;
-    }
-
-    // take only the last n_opt2 columns in J_evec
-    matrix_t *W_fld = m_copy_columns("W_fld", J_evec, J_evec->cols - n_opt2, J_evec->cols);
+    // take only the last n2 columns in J_evec
+    matrix_t *W_fld = m_copy_columns("W_fld", J_evec, J_evec->cols - n2, J_evec->cols);
 
     timer_pop();
 
     timer_push("    compute LDA projection matrix");
 
-    // compute W_lda = (W_fld' * W_pca2')' = W_pca2 * W_fld
+    // compute W_lda = W_pca2 * W_fld
     matrix_t *W_lda = m_product("W_lda", W_pca2, W_fld);
 
     timer_pop();
