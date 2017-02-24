@@ -72,7 +72,6 @@ void m_assign_column (matrix_t * A, int i, matrix_t * B, int j);
 void m_assign_row (matrix_t * A, int i, matrix_t * B, int j);
 void m_elem_apply (matrix_t * M, elem_func_t f);
 void m_elem_mult (matrix_t *M, precision_t c);
-void m_shuffle_columns (matrix_t *M);
 void m_subtract (matrix_t *A, matrix_t *B);
 void m_subtract_columns (matrix_t *M, matrix_t *a);
 void m_subtract_rows (matrix_t *M, matrix_t *a);

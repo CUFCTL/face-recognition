@@ -1202,40 +1202,6 @@ void m_elem_mult (matrix_t *M, precision_t c)
 }
 
 /**
- * Shuffle the columns of a matrix.
- *
- * @param M
- */
-void m_shuffle_columns (matrix_t *M)
-{
-	// print debug information
-	if ( LOGGER(LL_DEBUG) ) {
-		printf("debug: %s [%d,%d] <- %s(:, randperm(size(%s, 2))) [%d,%d]\n",
-		       M->name, M->rows, M->cols,
-		       M->name, M->name, M->rows, M->cols);
-	}
-
-	precision_t *temp = (precision_t *)malloc(M->rows * sizeof(precision_t));
-
-	int i, j;
-	for ( i = 0; i < M->cols - 1; i++ ) {
-		// generate j such that i <= j < M->cols
-		j = rand() % (M->cols - i) + i;
-
-		// swap columns i and j
-		if ( i != j ) {
-			memcpy(temp, &elem(M, 0, i), M->rows * sizeof(precision_t));
-			memcpy(&elem(M, 0, i), &elem(M, 0, j), M->rows * sizeof(precision_t));
-			memcpy(&elem(M, 0, j), temp, M->rows * sizeof(precision_t));
-		}
-	}
-
-	free(temp);
-
-	m_gpu_write(M);
-}
-
-/**
  * Subtract a matrix from another matrix.
  *
  * @param A

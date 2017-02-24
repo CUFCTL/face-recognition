@@ -394,7 +394,7 @@ void test_m_distance()
 		printf("d_L2(%s, %s) = %g\n", a->name, b->name, dist_L2);
 	}
 
-	assert_equal(dist_COS, 0, "d_COS(a, b)");
+	assert_equal(dist_COS, 1, "d_COS(a, b)");
 	assert_equal(dist_L1, 2, "d_L1(a, b)");
 	assert_equal(dist_L2, 1.4142, "d_L2(a, b)");
 
@@ -948,36 +948,6 @@ void test_m_elem_mult()
 }
 
 /**
- * Test matrix column shuffling.
- */
-void test_m_shuffle_columns()
-{
-	precision_t A_data1[] = {
-		1, 2, 3, 4,
-		5, 6, 7, 8
-	};
-	precision_t A_data2[] = {
-		4, 3, 1, 2,
-		8, 7, 5, 6
-	};
-	matrix_t *A = m_initialize_data("A", 2, 4, A_data1);
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-	}
-
-	m_shuffle_columns(A);
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-	}
-
-	assert_matrix_value(A, A_data2, "A(:, randperm(size(A, 2)))");
-
-	m_free(A);
-}
-
-/**
  * Test matrix subtraction.
  */
 void test_m_subtract()
@@ -1157,7 +1127,6 @@ int main (int argc, char **argv)
 		test_m_assign_row,
 		test_m_elem_apply,
 		test_m_elem_mult,
-		test_m_shuffle_columns,
 		test_m_subtract_columns,
 		test_m_subtract_rows
 	};
