@@ -151,6 +151,10 @@ void db_train(database_t *db, const char *path)
 	// get entries, labels
 	db->num_entries = get_directory(path, &db->entries, &db->num_labels, &db->labels);
 
+	if ( LOGGER(LL_VERBOSE) ) {
+		printf("  Training set: %d samples, %d classes\n", db->num_entries, db->num_labels);
+	}
+
 	// get image matrix X
 	matrix_t *X = get_image_matrix(db->entries, db->num_entries);
 
@@ -316,6 +320,10 @@ void db_recognize(database_t *db, const char *path)
 
 	image_entry_t *entries;
 	int num_entries = get_directory(path, &entries, &num_labels, &labels);
+
+	if ( LOGGER(LL_VERBOSE) ) {
+		printf("  Test set: %d samples, %d classes\n", num_entries, num_labels);
+	}
 
 	// get image matrix X_test
 	matrix_t *X_test = get_image_matrix(entries, num_entries);

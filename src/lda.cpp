@@ -111,8 +111,13 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     // if n1 = -1, use default value
     n1 = (n1 == -1)
-        ? min(c, X->cols - c)
+        ? X->cols - c
         : n1;
+
+    if ( n1 <= 0 ) {
+        fprintf(stderr, "error: training set is too small for LDA");
+        exit(1);
+    }
 
     // use only the last n1 columns in W_pca
     matrix_t *W_pca2 = m_copy_columns("W_pca", W_pca, W_pca->cols - n1, W_pca->cols);
