@@ -1,4 +1,4 @@
-function [newVectors, meanValue] = remmean(vectors);
+function [newVectors, meanValue] = remmean(vectors)
 %REMMEAN - remove the mean from vectors
 %
 % [newVectors, meanValue] = remmean(vectors);
