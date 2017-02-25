@@ -12,12 +12,12 @@ import sys
 
 # parse command-line arguments
 parser = argparse.ArgumentParser(epilog="Arguments for C code should be separated by a '--'.")
+parser.add_argument("--run-matlab", action="store_true", help="run MATLAB code", dest="RUN_MATLAB")
+parser.add_argument("--run-c", action="store_true", help="run C code", dest="RUN_C")
 parser.add_argument("-d", "--dataset", choices=["mnist", "orl", "yale"], required=True, help="name of dataset", dest="DATASET")
 parser.add_argument("-t", "--num-train", type=int, help="number of samples per class in training set", metavar="N", dest="NUM_TRAIN")
 parser.add_argument("-r", "--num-test", type=int, help="number of samples per class in test set", metavar="N", dest="NUM_TEST")
 parser.add_argument("-i", "--num-iter", type=int, required=True, help="number of iterations", metavar="N", dest="NUM_ITER")
-parser.add_argument("--run-matlab", action="store_true", help="run MATLAB code", dest="RUN_MATLAB")
-parser.add_argument("--run-c", action="store_true", help="run C code", dest="RUN_C")
 parser.add_argument("--pca", action="store_true", help="run PCA", dest="PCA")
 parser.add_argument("--lda", action="store_true", help="run LDA", dest="LDA")
 parser.add_argument("--ica", action="store_true", help="run ICA", dest="ICA")

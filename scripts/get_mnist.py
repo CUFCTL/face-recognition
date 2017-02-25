@@ -65,7 +65,7 @@ for f in files:
 
 # extract archives
 for f in files:
-	subprocess.call("gzip -dk %s.gz" % (f), shell=True)
+	subprocess.call("gzip -d %s.gz" % (f), shell=True)
 
 # transform IDX files into directory tree
 DB_PATH = "mnist"
