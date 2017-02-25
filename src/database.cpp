@@ -166,7 +166,7 @@ void db_train(database_t *db, const char *path)
 	matrix_t *D;
 
 	if ( db->pca.train ) {
-		db->pca.W = PCA_cols(X, db->params.pca.n1, &D);
+		db->pca.W = PCA(X, db->params.pca.n1, &D);
 		db->pca.P = m_product("P_pca", db->pca.W, X, true, false);
 	}
 

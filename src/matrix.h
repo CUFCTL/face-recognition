@@ -52,7 +52,6 @@ void m_image_read (matrix_t *M, int col, image_t *image);
 void m_image_write (matrix_t *M, int col, image_t *image);
 
 // getter functions
-matrix_t * m_covariance (const char *name, matrix_t *M);
 matrix_t * m_diagonalize (const char *name, matrix_t *v);
 precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j);

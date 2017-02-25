@@ -496,51 +496,6 @@ void m_image_write (matrix_t *M, int i, image_t *image)
 }
 
 /**
- * Compute the covariance matrix of a matrix M, whose
- * columns are random variables and whose rows are
- * observations.
- *
- * If the columns of M are observations and the rows
- * of M are random variables, the covariance is:
- *
- *   C = 1/(N - 1) (M - mu * 1_N') (M - mu * 1_N')', N = M->cols
- *
- * If the columns of M are random variables and the
- * rows of M are observations, the covariance is:
- *
- *   C = 1/(N - 1) (M - 1_N * mu)' (M - 1_N * mu), N = M->rows
- *
- * @param M
- * @return pointer to covariance matrix of M
- */
-matrix_t * m_covariance (const char *name, matrix_t *M)
-{
-	// print debug information
-	if ( LOGGER(LL_DEBUG) ) {
-		printf("debug: %s [%d,%d] <- cov(%s [%d,%d])\n",
-		       name, M->cols, M->cols,
-		       M->name, M->rows, M->cols);
-	}
-
-	// compute A = M - 1_N * mu
-	matrix_t *A = m_copy("A", M);
-	matrix_t *mu = m_mean_row("mu", A);
-
-	m_subtract_rows(A, mu);
-
-	// compute C = 1/(N - 1) * A' * A
-	matrix_t *C = m_product(name, A, A, true, false);
-
-	m_elem_mult(C, 1.0f / max(M->rows - 1, 1));
-
-	// cleanup
-	m_free(A);
-	m_free(mu);
-
-	return C;
-}
-
-/**
  * Compute the diagonal matrix of a vector.
  *
  * @param v
@@ -989,7 +944,7 @@ matrix_t * m_product (const char *name, matrix_t *A, matrix_t *B, bool transA, b
 }
 
 /**
- * Compute the principal square root of a symmetric matrix. That
+ * Compute the principal square root of a symmetric matrix M. That
  * is, compute X such that X * X = M and X is the unique square root
  * for which every eigenvalue has non-negative real part.
  *
@@ -1013,12 +968,10 @@ matrix_t * m_sqrtm (const char *name, matrix_t *M)
 
 	m_eigen("V", "D", M, &V, &D);
 
-	// compute B = V * sqrt(D)
+	// compute X = V * sqrt(D) * V'
 	m_elem_apply(D, sqrtf);
 
 	matrix_t *B = m_product("B", V, D);
-
-	// compute X = B * V'
 	matrix_t *X = m_product(name, B, V, false, true);
 
 	// cleanup

@@ -16,24 +16,32 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, pr
  * Compute the whitening transformation for a matrix X.
  *
  * The whitening (sphering) matrix, when applied to X, transforms
- * X to have covariance equal to the identity matrix. X is assumed
- * to have mean equal to 0.
+ * X to have zero mean and unit covariance.
  *
- * @param X  input matrix
- * @param E  matrix of eigenvectors in columns
- * @param D  diagonal matrix of eigenvalues
+ * @param X
  * @return whitening matrix W_z
  */
-matrix_t * m_whiten (matrix_t *X, matrix_t *E, matrix_t *D)
+matrix_t * m_whiten (matrix_t *X)
 {
-    // compute whitening matrix W_z = inv(sqrt(D)) * E'
+    // compute covariance matrix C = X' * X
+    matrix_t *C = m_product("C", X, X, true, false);
+
+    // compute [V, D] = eig(C)
+    matrix_t *V;
+    matrix_t *D;
+
+    m_eigen("V", "D", C, &V, &D);
+
+    // compute whitening matrix W_z = inv(sqrt(D)) * V'
     matrix_t *D_temp1 = m_copy("sqrt(D)", D);
     m_elem_apply(D_temp1, sqrtf);
 
     matrix_t *D_temp2 = m_inverse("inv(sqrt(D))", D_temp1);
-    matrix_t *W_z = m_product("W_z", D_temp2, E, false, true);
+    matrix_t *W_z = m_product("W_z", D_temp2, V, false, true);
 
     // cleanup
+    m_free(V);
+    m_free(D);
     m_free(D_temp1);
     m_free(D_temp2);
 
@@ -69,39 +77,31 @@ matrix_t * ICA (matrix_t *X, int num_ic, int max_iterations, precision_t epsilon
 
     timer_pop();
 
-    timer_push("    compute principal components of input matrix");
-
-    // compute principal components
-    matrix_t *D;
-    matrix_t *E = PCA_rows(X, &D);
-
-    timer_pop();
-
     timer_push("    compute whitening matrix and whitened input matrix");
 
-    // compute whitening matrix, whitened input
-    matrix_t *W_z = m_whiten(mixedsig, E, D);
-    matrix_t *whitesig = m_product("whitesig", W_z, mixedsig);
+    // compute whitened input U = W_z * X
+    matrix_t *W_z = m_whiten(X);
+    matrix_t *U = m_product("U", W_z, mixedsig);
 
     timer_pop();
 
     timer_push("    compute mixing matrix");
 
     // compute mixing matrix
-    matrix_t *W = fpica(whitesig, W_z, num_ic, max_iterations, epsilon);
+    matrix_t *W = fpica(U, W_z, num_ic, max_iterations, epsilon);
 
     timer_pop();
 
     timer_push("    compute ICA projection matrix");
 
     // compute independent components
-    // icasig = W * mixedsig + (W * mixedmean) * ones(1, mixedsig->cols)
-    matrix_t *icasig = m_product("icasig", W, mixedsig);
-    matrix_t *icasig_temp1 = m_product("icasig_temp1", W, mixedmean);
-    matrix_t *icasig_temp2 = m_ones("icasig_temp2", 1, mixedsig->cols);
-    matrix_t *icasig_temp3 = m_product("icasig_temp3", icasig_temp1, icasig_temp2);
+    // icasig = W * (mixedsig + mixedmean * ones(1, mixedsig->cols))
+    matrix_t *ones = m_ones("ones", 1, mixedsig->cols);
+    matrix_t *icasig_temp1 = m_product("icasig_temp1", mixedmean, ones);
 
-    m_add(icasig, icasig_temp3);
+    m_add(icasig_temp1, mixedsig);
+
+    matrix_t *icasig = m_product("icasig", W, icasig_temp1);
 
     // compute W_ica = icasig'
     matrix_t *W_ica = m_transpose("W_ica", icasig);
@@ -113,14 +113,11 @@ matrix_t * ICA (matrix_t *X, int num_ic, int max_iterations, precision_t epsilon
     // cleanup
     m_free(mixedsig);
     m_free(mixedmean);
-    m_free(E);
-    m_free(D);
     m_free(W_z);
-    m_free(whitesig);
+    m_free(U);
     m_free(W);
+    m_free(ones);
     m_free(icasig_temp1);
-    m_free(icasig_temp2);
-    m_free(icasig_temp3);
     m_free(icasig);
 
     return W_ica;
@@ -130,7 +127,7 @@ matrix_t * ICA (matrix_t *X, int num_ic, int max_iterations, precision_t epsilon
  * Compute the third power (cube) of a number.
  *
  * @param x
- * @return x ^ 3
+ * @return x^3
  */
 precision_t pow3(precision_t x)
 {
@@ -168,7 +165,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, pr
             printf("      round %d\n", i + 1);
         }
 
-        // initialize w as a Gaussian random vector
+        // initialize w as a Gaussian (0, 1) random vector
         matrix_t *w = m_random("w", vectorSize, 1);
 
         // compute w = (w - B * B' * w), normalize w

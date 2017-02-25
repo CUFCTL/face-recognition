@@ -304,37 +304,6 @@ void test_m_copy_rows()
 }
 
 /**
- * Test the matrix convariance.
- */
-void test_m_covariance()
-{
-	precision_t A_data[] = {
-		5,  0,  3,  7,
-		1, -5,  7,  3,
-		4,  9,  8, 10
-	};
-	precision_t C_data[] = {
-		 4.3333,  8.8333, -3.0000,  5.6667,
-		 8.8333, 50.3333,  6.5000, 24.1667,
-		-3.0000,  6.5000,  7.0000,  1.0000,
-		 5.6667, 24.1667,  1.0000, 12.3333
-	};
-	matrix_t *A = m_initialize_data("A", 3, 4, A_data);
-	matrix_t *C = m_covariance("C", A);
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, C);
-	}
-
-	assert_matrix_value(C, C_data, "cov(A)");
-
-	m_free(A);
-	m_free(C);
-}
-
-/**
  * Test the diagonal matrix.
  */
 void test_m_diagonalize()
@@ -1109,7 +1078,6 @@ int main (int argc, char **argv)
 		test_m_copy,
 		test_m_copy_columns,
 		test_m_copy_rows,
-		test_m_covariance,
 		test_m_diagonalize,
 		test_m_distance,
 		test_m_eigen,

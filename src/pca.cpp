@@ -20,7 +20,7 @@
  * @param p_D  pointer to save eigenvalues
  * @return principal components of X in columns
  */
-matrix_t * PCA_cols(matrix_t *X, int n1, matrix_t **p_D)
+matrix_t * PCA(matrix_t *X, int n1, matrix_t **p_D)
 {
 	timer_push("  PCA");
 
@@ -62,36 +62,4 @@ matrix_t * PCA_cols(matrix_t *X, int n1, matrix_t **p_D)
 	m_free(W_pca_temp1);
 
 	return W_pca;
-}
-
-/**
- * Compute the principal components of a matrix X, which
- * consists of observations in rows. The observations
- * should also be mean-subtracted.
- *
- * The principal components of a matrix are the eigenvectors of
- * the covariance matrix.
- *
- * @param X    input matrix
- * @param p_D  pointer to save eigenvalues
- * @return principal components of X in columns
- */
-matrix_t * PCA_rows(matrix_t *X, matrix_t **p_D)
-{
-    // compute the covariance of X
-    matrix_t *C = m_covariance("C", X);
-
-    // compute the eigenvalues, eigenvectors of the covariance
-    matrix_t *E;
-    matrix_t *D;
-
-    m_eigen("E", "D", C, &E, &D);
-
-    // save outputs
-    *p_D = D;
-
-    // cleanup
-    m_free(C);
-
-    return E;
 }
