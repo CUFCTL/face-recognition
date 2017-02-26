@@ -907,7 +907,7 @@ matrix_t * m_product (const char *name, matrix_t *A, matrix_t *B, bool transA, b
 		printf("debug: %s [%d,%d] <- %s%s [%d,%d] * %s%s [%d,%d]\n",
 		       name, M, N,
 		       A->name, transA ? "'" : "", M, K,
-		       B->name, transB ? "'" : "", K, N);
+		       B->name, transB ? "'" : "", K2, N);
 	}
 
 	assert(K == K2);

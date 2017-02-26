@@ -23,8 +23,8 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, pr
  */
 matrix_t * m_whiten (matrix_t *X)
 {
-    // compute covariance matrix C = X' * X
-    matrix_t *C = m_product("C", X, X, true, false);
+    // compute covariance matrix C = X * X'
+    matrix_t *C = m_product("C", X, X, false, true);
 
     // compute [V, D] = eig(C)
     matrix_t *V;
@@ -79,8 +79,8 @@ matrix_t * ICA (matrix_t *X, int num_ic, int max_iterations, precision_t epsilon
 
     timer_push("    compute whitening matrix and whitened input matrix");
 
-    // compute whitened input U = W_z * X
-    matrix_t *W_z = m_whiten(X);
+    // compute whitened input U = W_z * mixedsig
+    matrix_t *W_z = m_whiten(mixedsig);
     matrix_t *U = m_product("U", W_z, mixedsig);
 
     timer_pop();
