@@ -115,7 +115,7 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
         : n1;
 
     if ( n1 <= 0 ) {
-        fprintf(stderr, "error: training set is too small for LDA");
+        fprintf(stderr, "error: training set is too small for LDA\n");
         exit(1);
     }
 

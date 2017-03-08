@@ -20,6 +20,7 @@ typedef enum {
 	OPTION_TIMING,
 	OPTION_TRAIN,
 	OPTION_TEST,
+	OPTION_STREAM,
 	OPTION_PCA,
 	OPTION_LDA,
 	OPTION_ICA,
@@ -47,6 +48,7 @@ void print_usage()
 		"  --timing           print timing information\n"
 		"  --train DIRECTORY  train a database with a training set\n"
 		"  --test DIRECTORY   perform recognition on a test set\n"
+		"  --stream           perform recognition on an input stream\n"
 		"  --pca              run PCA\n"
 		"  --lda              run LDA\n"
 		"  --ica              run ICA\n"
@@ -93,6 +95,7 @@ int main(int argc, char **argv)
 
 	bool arg_train = false;
 	bool arg_test = false;
+	bool arg_stream = false;
 	bool arg_pca = false;
 	bool arg_lda = false;
 	bool arg_ica = false;
@@ -112,6 +115,7 @@ int main(int argc, char **argv)
 		{ "timing", no_argument, 0, OPTION_TIMING },
 		{ "train", required_argument, 0, OPTION_TRAIN },
 		{ "test", required_argument, 0, OPTION_TEST },
+		{ "stream", no_argument, 0, OPTION_STREAM },
 		{ "pca", no_argument, 0, OPTION_PCA },
 		{ "lda", no_argument, 0, OPTION_LDA },
 		{ "ica", no_argument, 0, OPTION_ICA },
@@ -146,6 +150,9 @@ int main(int argc, char **argv)
 		case OPTION_TEST:
 			arg_test = true;
 			path_test_set = optarg;
+			break;
+		case OPTION_STREAM:
+			arg_stream = true;
 			break;
 		case OPTION_PCA:
 			arg_pca = true;
@@ -218,7 +225,22 @@ int main(int argc, char **argv)
 		db_load(db, DB_DATA);
 	}
 
-	if ( arg_test ) {
+	if ( arg_test && arg_stream ) {
+		char END = '0';
+		char READ = '1';
+
+		while ( 1 ) {
+			char c = getchar();
+
+			if ( c == END ) {
+				break;
+			}
+			else if ( c == READ ) {
+				db_recognize(db, path_test_set);
+			}
+		}
+	}
+	else if ( arg_test ) {
 		db_recognize(db, path_test_set);
 	}
 	else {
