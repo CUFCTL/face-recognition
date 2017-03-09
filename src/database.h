@@ -26,7 +26,6 @@ typedef struct {
 	const char *name;
 	matrix_t *W;
 	matrix_t *P;
-	dist_func_t dist_func;
 } db_algorithm_t;
 
 typedef struct {

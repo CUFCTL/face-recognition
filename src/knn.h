@@ -11,8 +11,9 @@
 
 typedef struct {
 	int k;
+	dist_func_t dist;
 } knn_params_t;
 
-image_label_t * kNN(knn_params_t *params, matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, dist_func_t dist_func);
+image_label_t * kNN(knn_params_t *params, matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i);
 
 #endif

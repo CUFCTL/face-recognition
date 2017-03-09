@@ -25,7 +25,7 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z);
  */
 matrix_t * m_whiten (matrix_t *X, int n1)
 {
-    pca_params_t pca_params = { n1, NULL };
+    pca_params_t pca_params = { n1 };
 
     // compute [V, D] = eig(C)
     matrix_t *D;

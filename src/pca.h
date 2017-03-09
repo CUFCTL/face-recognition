@@ -10,7 +10,6 @@
 
 typedef struct {
 	int n1;
-	dist_func_t dist;
 } pca_params_t;
 
 matrix_t * PCA(pca_params_t *params, matrix_t *X, matrix_t **p_D);

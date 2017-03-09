@@ -68,10 +68,9 @@ void * kNN_identify(const void *a)
  * @param Y
  * @param X_test
  * @param i
- * @param dist_func
  * @return predicted label of the test observation
  */
-image_label_t * kNN(knn_params_t *params, matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, dist_func_t dist_func)
+image_label_t * kNN(knn_params_t *params, matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i)
 {
 	// compute distance between X_test_i and each observation in X
 	int num_neighbors = X->cols;
@@ -80,7 +79,7 @@ image_label_t * kNN(knn_params_t *params, matrix_t *X, image_entry_t *Y, matrix_
 	int j;
 	for ( j = 0; j < num_neighbors; j++ ) {
 		neighbors[j].label = Y[j].label;
-		neighbors[j].dist = dist_func(X_test, i, X, j);
+		neighbors[j].dist = params->dist(X_test, i, X, j);
 	}
 
 	// sort the neighbors by distance

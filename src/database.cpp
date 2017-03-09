@@ -63,20 +63,17 @@ database_t * db_construct(bool pca, bool lda, bool ica, db_params_t params)
 	db->pca = (db_algorithm_t) {
 		pca || lda, pca,
 		"PCA",
-		NULL, NULL,
-		db->params.pca.dist
+		NULL, NULL
 	};
 	db->lda = (db_algorithm_t) {
 		lda, lda,
 		"LDA",
-		NULL, NULL,
-		db->params.lda.dist
+		NULL, NULL
 	};
 	db->ica = (db_algorithm_t) {
 		ica, ica,
 		"ICA",
-		NULL, NULL,
-		db->params.ica.dist
+		NULL, NULL
 	};
 
 	if ( LOGGER(LL_VERBOSE) ) {
@@ -348,7 +345,7 @@ void db_recognize(database_t *db, const char *path)
 
 			int j;
 			for ( j = 0; j < num_entries; j++ ) {
-				rec_labels[j] = kNN(&db->params.knn, algo->P, db->entries, P_test, j, algo->dist_func);
+				rec_labels[j] = kNN(&db->params.knn, algo->P, db->entries, P_test, j);
 			}
 
 			// compute accuracy

@@ -24,18 +24,15 @@ typedef enum {
 	OPTION_PCA,
 	OPTION_LDA,
 	OPTION_ICA,
-	OPTION_ALL,
 	OPTION_PCA_N1,
-	OPTION_PCA_DIST,
 	OPTION_LDA_N1,
 	OPTION_LDA_N2,
-	OPTION_LDA_DIST,
 	OPTION_ICA_N1,
 	OPTION_ICA_N2,
 	OPTION_ICA_MAX_ITERATIONS,
 	OPTION_ICA_EPSILON,
-	OPTION_ICA_DIST,
 	OPTION_KNN_K,
+	OPTION_KNN_DIST,
 	OPTION_UNKNOWN = '?'
 } optarg_t;
 
@@ -53,20 +50,17 @@ void print_usage()
 		"  --pca              run PCA\n"
 		"  --lda              run LDA\n"
 		"  --ica              run ICA\n"
-		"  --all              run all algorithms (PCA, LDA, ICA)\n"
 		"\n"
 		"Hyperparameters:\n"
 		"  --pca_n1 N              (PCA) number of principal components to compute\n"
-		"  --pca_dist COS|L1|L2    (PCA) distance function to use\n"
 		"  --lda_n1 N              (LDA) number of principal components to compute\n"
 		"  --lda_n2 N              (LDA) number of Fisherfaces to compute\n"
-		"  --lda_dist COS|L1|L2    (LDA) distance function to use\n"
 		"  --ica_n1 N              (ICA) number of principal components to compute\n"
 		"  --ica_n2 N              (ICA) number of independent components to estimate\n"
 		"  --ica_max_iterations N  (ICA) maximum iterations\n"
 		"  --ica_epsilon X         (ICA) convergence threshold for w\n"
-		"  --ica_dist COS|L1|L2    (ICA) distance function to use\n"
 		"  --knn_k N               (kNN) number of nearest neighbors to use\n"
+		"  --knn_dist COS|L1|L2    (kNN) distance function to use\n"
 	);
 }
 
@@ -103,10 +97,10 @@ int main(int argc, char **argv)
 	bool arg_ica = false;
 
 	db_params_t db_params = {
-		{ -1, m_dist_L2 },
-		{ -1, -1, m_dist_L2 },
-		{ -1, -1, 1000, 0.0001f, m_dist_L2 },
-		{ 1 }
+		{ -1 },
+		{ -1, -1 },
+		{ -1, -1, 1000, 0.0001f },
+		{ 1, m_dist_L2 }
 	};
 
 	char *path_train_set = NULL;
@@ -121,18 +115,15 @@ int main(int argc, char **argv)
 		{ "pca", no_argument, 0, OPTION_PCA },
 		{ "lda", no_argument, 0, OPTION_LDA },
 		{ "ica", no_argument, 0, OPTION_ICA },
-		{ "all", no_argument, 0, OPTION_ALL },
 		{ "pca_n1", required_argument, 0, OPTION_PCA_N1 },
-		{ "pca_dist", required_argument, 0, OPTION_PCA_DIST },
 		{ "lda_n1", required_argument, 0, OPTION_LDA_N1 },
 		{ "lda_n2", required_argument, 0, OPTION_LDA_N2 },
-		{ "lda_dist", required_argument, 0, OPTION_LDA_DIST },
 		{ "ica_n1", required_argument, 0, OPTION_ICA_N1 },
 		{ "ica_n2", required_argument, 0, OPTION_ICA_N2 },
 		{ "ica_max_iterations", required_argument, 0, OPTION_ICA_MAX_ITERATIONS },
 		{ "ica_epsilon", required_argument, 0, OPTION_ICA_EPSILON },
-		{ "ica_dist", required_argument, 0, OPTION_ICA_DIST },
 		{ "knn_k", required_argument, 0, OPTION_KNN_K },
+		{ "knn_dist", required_argument, 0, OPTION_KNN_DIST },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -166,25 +157,14 @@ int main(int argc, char **argv)
 		case OPTION_ICA:
 			arg_ica = true;
 			break;
-		case OPTION_ALL:
-			arg_pca = true;
-			arg_lda = true;
-			arg_ica = true;
-			break;
 		case OPTION_PCA_N1:
 			db_params.pca.n1 = atoi(optarg);
-			break;
-		case OPTION_PCA_DIST:
-			db_params.pca.dist = parse_dist_func(optarg);
 			break;
 		case OPTION_LDA_N1:
 			db_params.lda.n1 = atoi(optarg);
 			break;
 		case OPTION_LDA_N2:
 			db_params.lda.n2 = atoi(optarg);
-			break;
-		case OPTION_LDA_DIST:
-			db_params.lda.dist = parse_dist_func(optarg);
 			break;
 		case OPTION_ICA_N1:
 			db_params.ica.n1 = atoi(optarg);
@@ -198,11 +178,11 @@ int main(int argc, char **argv)
 		case OPTION_ICA_EPSILON:
 			db_params.ica.epsilon = atof(optarg);
 			break;
-		case OPTION_ICA_DIST:
-			db_params.ica.dist = parse_dist_func(optarg);
-			break;
 		case OPTION_KNN_K:
 			db_params.knn.k = atoi(optarg);
+			break;
+		case OPTION_KNN_DIST:
+			db_params.knn.dist = parse_dist_func(optarg);
 			break;
 		case OPTION_UNKNOWN:
 			print_usage();
@@ -216,7 +196,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	if ( db_params.pca.dist == NULL || db_params.lda.dist == NULL || db_params.ica.dist == NULL ) {
+	if ( db_params.knn.dist == NULL ) {
 		fprintf(stderr, "error: dist function must be L1 | L2 | COS\n");
 		exit(1);
 	}
