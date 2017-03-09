@@ -60,7 +60,7 @@ database_t * db_construct(bool pca, bool lda, bool ica, db_params_t params)
 	db->params = params;
 
 	db->pca = (db_algorithm_t) {
-		pca || lda || ica, pca,
+		pca || lda, pca,
 		"PCA",
 		NULL, NULL,
 		db->params.pca.dist
@@ -163,10 +163,8 @@ void db_train(database_t *db, const char *path)
 	m_subtract_columns(X, db->mean_face);
 
 	// compute PCA representation
-	matrix_t *D;
-
 	if ( db->pca.train ) {
-		db->pca.W = PCA(X, db->params.pca.n1, &D);
+		db->pca.W = PCA(X, db->params.pca.n1, NULL);
 		db->pca.P = m_product("P_pca", db->pca.W, X, true, false);
 	}
 
@@ -178,7 +176,7 @@ void db_train(database_t *db, const char *path)
 
 	// compute ICA representation
 	if ( db->ica.train ) {
-		db->ica.W = ICA(X, db->params.ica.num_ic, db->params.ica.max_iterations, db->params.ica.epsilon); // W_pca, D
+		db->ica.W = ICA(X, db->params.ica.num_ic, db->params.ica.max_iterations, db->params.ica.epsilon);
 		db->ica.P = m_product("P_ica", db->ica.W, X, true, false);
 	}
 
@@ -186,7 +184,6 @@ void db_train(database_t *db, const char *path)
 
 	// cleanup
 	m_free(X);
-	m_free(D);
 }
 
 /**

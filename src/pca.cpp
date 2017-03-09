@@ -4,7 +4,6 @@
  * Implementation of PCA (Turk and Pentland, 1991).
  */
 #include "database.h"
-#include "math_helper.h"
 #include "timer.h"
 
 /**
@@ -22,44 +21,80 @@
  */
 matrix_t * PCA(matrix_t *X, int n1, matrix_t **p_D)
 {
-	timer_push("  PCA");
-
-	timer_push("    compute surrogate of covariance matrix L");
-
-	matrix_t *L = m_product("L", X, X, true, false);
-
-	timer_pop();
-
-	timer_push("    compute eigenvectors of L");
-
-	matrix_t *V;
+	matrix_t *W_pca;
 	matrix_t *D;
 
-	m_eigen("V", "D", L, &V, &D);
+	timer_push("  PCA");
 
-	timer_pop();
+	if ( X->rows > X->cols ) {
+		timer_push("    compute surrogate of covariance matrix L");
 
-	timer_push("    compute PCA projection matrix");
+		matrix_t *L = m_product("L", X, X, true, false);
 
-	// if n1 = -1, use default value
-	n1 = (n1 == -1)
-		? min(D->cols, X->cols - 1)
-		: n1;
+		timer_pop();
 
-	matrix_t *W_pca_temp1 = m_product("W_pca", X, V);
-	matrix_t *W_pca = m_copy_columns("W_pca", W_pca_temp1, W_pca_temp1->cols - n1, W_pca_temp1->cols);
+		timer_push("    compute eigenvectors of L");
 
-	timer_pop();
+		matrix_t *V;
+		m_eigen("V", "D", L, &V, &D);
+
+		timer_pop();
+
+		timer_push("    compute PCA projection matrix");
+
+		// if n1 = -1, use default value
+		n1 = (n1 == -1)
+			? D->cols
+			: n1;
+
+		matrix_t *W_pca_temp1 = m_product("W_pca", X, V);
+		W_pca = m_copy_columns("W_pca", W_pca_temp1, W_pca_temp1->cols - n1, W_pca_temp1->cols);
+
+		timer_pop();
+
+		// cleanup
+		m_free(L);
+		m_free(V);
+		m_free(W_pca_temp1);
+	}
+	else {
+		timer_push("    compute covariance matrix C");
+
+		matrix_t *C = m_product("C", X, X, false, true);
+
+		timer_pop();
+
+		timer_push("    compute eigendecomposition of C");
+
+		matrix_t *V;
+		m_eigen("V", "D", C, &V, &D);
+
+		timer_pop();
+
+		timer_push("    compute PCA projection matrix");
+
+		// if n1 = -1, use default value
+		n1 = (n1 == -1)
+			? D->cols
+			: n1;
+
+		W_pca = m_copy_columns("W_pca", V, V->cols - n1, V->cols);
+
+		timer_pop();
+
+		// cleanup
+		m_free(V);
+	}
 
 	timer_pop();
 
 	// save outputs
-	*p_D = D;
-
-	// cleanup
-	m_free(L);
-	m_free(V);
-	m_free(W_pca_temp1);
+	if ( p_D != NULL ) {
+		*p_D = D;
+	}
+	else {
+		m_free(D);
+	}
 
 	return W_pca;
 }

@@ -23,14 +23,9 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, pr
  */
 matrix_t * m_whiten (matrix_t *X)
 {
-    // compute covariance matrix C = X * X'
-    matrix_t *C = m_product("C", X, X, false, true);
-
     // compute [V, D] = eig(C)
-    matrix_t *V;
     matrix_t *D;
-
-    m_eigen("V", "D", C, &V, &D);
+    matrix_t *V = PCA(X, -1, &D);
 
     // compute whitening matrix W_z = inv(sqrt(D)) * V'
     matrix_t *D_temp1 = m_copy("sqrt(D)", D);
