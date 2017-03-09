@@ -3,8 +3,8 @@
  *
  * Implementation of PCA (Turk and Pentland, 1991).
  */
-#include "database.h"
 #include "math_helper.h"
+#include "pca.h"
 #include "timer.h"
 
 /**
@@ -15,20 +15,20 @@
  * The principal components of a matrix are the eigenvectors of
  * the covariance matrix.
  *
- * @param X    input matrix
- * @param n1   number of principal components to compute
- * @param p_D  pointer to save eigenvalues
+ * @param params
+ * @param X
+ * @param p_D
  * @return principal components of X in columns
  */
-matrix_t * PCA(matrix_t *X, int n1, matrix_t **p_D)
+matrix_t * PCA(pca_params_t *params, matrix_t *X, matrix_t **p_D)
 {
 	matrix_t *W_pca;
 	matrix_t *D;
 
 	// if n1 = -1, use default value
-	n1 = (n1 == -1)
+	int n1 = (params->n1 == -1)
 		? min(X->rows, X->cols)
-		: n1;
+		: params->n1;
 
 	timer_push("  PCA");
 

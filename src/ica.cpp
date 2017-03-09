@@ -3,14 +3,15 @@
  *
  * Implementation of ICA (Hyvarinen, 1999).
  */
-#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "database.h"
+#include "ica.h"
+#include "logger.h"
+#include "pca.h"
 #include "timer.h"
 
-matrix_t * fpica (matrix_t *X, matrix_t *W_z, int n2, int max_iterations, precision_t epsilon);
+matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z);
 
 /**
  * Compute the whitening transformation for a matrix X.
@@ -24,9 +25,11 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int n2, int max_iterations, precis
  */
 matrix_t * m_whiten (matrix_t *X, int n1)
 {
+    pca_params_t pca_params = { n1, NULL };
+
     // compute [V, D] = eig(C)
     matrix_t *D;
-    matrix_t *V = PCA(X, n1, &D);
+    matrix_t *V = PCA(&pca_params, X, &D);
 
     // compute whitening matrix W_z = inv(sqrt(D)) * V'
     matrix_t *D_temp1 = m_copy("sqrt(D)", D);
@@ -53,14 +56,11 @@ matrix_t * m_whiten (matrix_t *X, int n1)
  * and an extra PCA calculation. We should try to refactor ICA to use
  * X in its original form to eliminate these redundancies.
  *
+ * @param params
  * @param X
- * @param n1
- * @param n2
- * @param max_iterations
- * @param epsilon
  * @return independent components of X in columns
  */
-matrix_t * ICA (matrix_t *X, int n1, int n2, int max_iterations, precision_t epsilon)
+matrix_t * ICA (ica_params_t *params, matrix_t *X)
 {
     timer_push("  ICA");
 
@@ -77,7 +77,7 @@ matrix_t * ICA (matrix_t *X, int n1, int n2, int max_iterations, precision_t eps
     timer_push("    compute whitening matrix and whitened input matrix");
 
     // compute whitened input U = W_z * mixedsig
-    matrix_t *W_z = m_whiten(mixedsig, n1);
+    matrix_t *W_z = m_whiten(mixedsig, params->n1);
     matrix_t *U = m_product("U", W_z, mixedsig);
 
     timer_pop();
@@ -85,7 +85,7 @@ matrix_t * ICA (matrix_t *X, int n1, int n2, int max_iterations, precision_t eps
     timer_push("    compute mixing matrix");
 
     // compute mixing matrix
-    matrix_t *W = fpica(U, W_z, n2, max_iterations, epsilon);
+    matrix_t *W = fpica(params, U, W_z);
 
     timer_pop();
 
@@ -136,22 +136,20 @@ precision_t pow3(precision_t x)
  * approach and the nonlinearity functions pow3. The input matrix should
  * already be whitened.
  *
+ * @param params
  * @param X
  * @param W_z
- * @param n2
- * @param max_iterations
- * @param epsilon
  * @return mixing matrix W
  */
-matrix_t * fpica (matrix_t *X, matrix_t *W_z, int n2, int max_iterations, precision_t epsilon)
+matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
 {
     int vectorSize = X->rows;
     int numSamples = X->cols;
 
     // if n2 is -1, use default value
-    n2 = (n2 == -1)
+    int n2 = (params->n2 == -1)
         ? vectorSize
-        : n2;
+        : params->n2;
 
     matrix_t *B = m_zeros("B", vectorSize, vectorSize);
     matrix_t *W = m_zeros("W", n2, W_z->cols);
@@ -179,7 +177,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int n2, int max_iterations, precis
         matrix_t *w0 = m_zeros("w0", w->rows, w->cols);
 
         int j;
-        for ( j = 0; j < max_iterations; j++ ) {
+        for ( j = 0; j < params->max_iterations; j++ ) {
             // compute w = (w - B * B' * w), normalize w
             w_temp1 = m_product("w_temp1", B, B, false, true);
             w_temp2 = m_product("w_temp2", w_temp1, w);
@@ -206,7 +204,7 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int n2, int max_iterations, precis
             m_free(w_delta2);
 
             // terminate round if w converges
-            if ( norm1 < epsilon || norm2 < epsilon ) {
+            if ( norm1 < params->epsilon || norm2 < params->epsilon ) {
                 // save B(:, i) = w
                 m_assign_column(B, i, w, 0);
 

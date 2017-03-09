@@ -4,7 +4,6 @@
  * Library of helpful math functions.
  */
 #include <math.h>
-#include <stdlib.h>
 #include "math_helper.h"
 
 typedef struct {

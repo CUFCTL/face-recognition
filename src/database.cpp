@@ -9,6 +9,7 @@
 #include <string.h>
 #include "database.h"
 #include "image.h"
+#include "logger.h"
 #include "timer.h"
 
 /**
@@ -165,19 +166,19 @@ void db_train(database_t *db, const char *path)
 
 	// compute PCA representation
 	if ( db->pca.train ) {
-		db->pca.W = PCA(X, db->params.pca.n1, NULL);
+		db->pca.W = PCA(&db->params.pca, X, NULL);
 		db->pca.P = m_product("P_pca", db->pca.W, X, true, false);
 	}
 
 	// compute LDA representation
 	if ( db->lda.train ) {
-		db->lda.W = LDA(db->pca.W, X, db->num_labels, db->entries, db->params.lda.n1, db->params.lda.n2);
+		db->lda.W = LDA(&db->params.lda, db->pca.W, X, db->num_labels, db->entries);
 		db->lda.P = m_product("P_lda", db->lda.W, X, true, false);
 	}
 
 	// compute ICA representation
 	if ( db->ica.train ) {
-		db->ica.W = ICA(X, db->params.ica.n1, db->params.ica.n2, db->params.ica.max_iterations, db->params.ica.epsilon);
+		db->ica.W = ICA(&db->params.ica, X);
 		db->ica.P = m_product("P_ica", db->ica.W, X, true, false);
 	}
 
@@ -347,7 +348,7 @@ void db_recognize(database_t *db, const char *path)
 
 			int j;
 			for ( j = 0; j < num_entries; j++ ) {
-				rec_labels[j] = kNN(algo->P, db->entries, P_test, j, db->params.knn.k, algo->dist_func);
+				rec_labels[j] = kNN(&db->params.knn, algo->P, db->entries, P_test, j, algo->dist_func);
 			}
 
 			// compute accuracy

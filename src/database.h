@@ -6,34 +6,12 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+#include "ica.h"
 #include "image_entry.h"
-#include "logger.h"
+#include "lda.h"
+#include "knn.h"
 #include "matrix.h"
-
-typedef precision_t (*dist_func_t)(matrix_t *, int, matrix_t *, int);
-
-typedef struct {
-	int n1;
-	dist_func_t dist;
-} pca_params_t;
-
-typedef struct {
-	int n1;
-	int n2;
-	dist_func_t dist;
-} lda_params_t;
-
-typedef struct {
-	int n1;
-	int n2;
-	int max_iterations;
-	precision_t epsilon;
-	dist_func_t dist;
-} ica_params_t;
-
-typedef struct {
-	int k;
-} knn_params_t;
+#include "pca.h"
 
 typedef struct {
 	pca_params_t pca;
@@ -75,13 +53,5 @@ void db_train(database_t *db, const char *path);
 void db_save(database_t *db, const char *path);
 void db_load(database_t *db, const char *path);
 void db_recognize(database_t *db, const char *path);
-
-// feature extraction algorithms
-matrix_t * PCA(matrix_t *X, int n1, matrix_t **p_D);
-matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n1, int n2);
-matrix_t * ICA(matrix_t *X, int n1, int n2, int max_iterations, precision_t epsilon);
-
-// classification algorithms
-image_label_t * kNN(matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, int k, dist_func_t dist_func);
 
 #endif

@@ -4,7 +4,7 @@
  * Implementation of the k-nearest neighbors classifier.
  */
 #include <stdlib.h>
-#include "database.h"
+#include "knn.h"
 #include "math_helper.h"
 
 typedef struct {
@@ -63,15 +63,15 @@ void * kNN_identify(const void *a)
 /**
  * Classify an observation using k-nearest neighbors.
  *
+ * @param params
  * @param X
  * @param Y
  * @param X_test
  * @param i
- * @param k
  * @param dist_func
  * @return predicted label of the test observation
  */
-image_label_t * kNN(matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, int k, dist_func_t dist_func)
+image_label_t * kNN(knn_params_t *params, matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, dist_func_t dist_func)
 {
 	// compute distance between X_test_i and each observation in X
 	int num_neighbors = X->cols;
@@ -87,7 +87,7 @@ image_label_t * kNN(matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, int 
 	qsort(neighbors, num_neighbors, sizeof(neighbor_t), kNN_compare);
 
 	// determine the mode of the k nearest labels
-	image_label_t *nearest = (image_label_t *)mode(neighbors, k, sizeof(neighbor_t), kNN_identify);
+	image_label_t *nearest = (image_label_t *)mode(neighbors, params->k, sizeof(neighbor_t), kNN_identify);
 
 	free(neighbors);
 

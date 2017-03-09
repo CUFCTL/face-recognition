@@ -25,6 +25,7 @@ typedef struct {
 	precision_t *data_gpu;
 } matrix_t;
 
+typedef precision_t (*dist_func_t)(matrix_t *, int, matrix_t *, int);
 typedef precision_t (*elem_func_t)(precision_t);
 
 #define elem(M, i, j) (M)->data[(j) * (M)->rows + (i)]

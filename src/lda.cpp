@@ -3,7 +3,7 @@
  *
  * Implementation of LDA (Belhumeur et al., 1996; Zhao et al., 1998).
  */
-#include "database.h"
+#include "lda.h"
 #include "math_helper.h"
 #include "timer.h"
 #include <stdlib.h>
@@ -95,25 +95,24 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
 /**
  * Compute the projection matrix of a training set with LDA.
  *
- * @param W_pca    PCA projection matrix
- * @param X        image matrix
- * @param c        number of classes
- * @param entries  list of entries for each image
- * @param n1       number of principal components to compute
- * @param n2       number of Fisherfaces to compute
+ * @param params
+ * @param W_pca
+ * @param X
+ * @param c
+ * @param entries
  * @return projection matrix W_lda
  */
-matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n1, int n2)
+matrix_t * LDA(lda_params_t *params, matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries)
 {
     // if n1 = -1, use default value
-    n1 = (n1 == -1)
+    int n1 = (params->n1 == -1)
         ? X->cols - c
-        : n1;
+        : params->n1;
 
     // if n2 = -1, use default value
-    n2 = (n2 == -1)
+    int n2 = (params->n2 == -1)
         ? c - 1
-        : n2;
+        : params->n2;
 
     timer_push("  LDA");
 
