@@ -24,7 +24,8 @@ typedef struct {
 } lda_params_t;
 
 typedef struct {
-	int num_ic;
+	int n1;
+	int n2;
 	int max_iterations;
 	precision_t epsilon;
 	dist_func_t dist;
@@ -78,7 +79,7 @@ void db_recognize(database_t *db, const char *path);
 // feature extraction algorithms
 matrix_t * PCA(matrix_t *X, int n1, matrix_t **p_D);
 matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n1, int n2);
-matrix_t * ICA(matrix_t *X, int num_ic, int max_iterations, precision_t epsilon);
+matrix_t * ICA(matrix_t *X, int n1, int n2, int max_iterations, precision_t epsilon);
 
 // classification algorithms
 image_label_t * kNN(matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i, int k, dist_func_t dist_func);

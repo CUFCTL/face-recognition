@@ -10,7 +10,7 @@
 #include "database.h"
 #include "timer.h"
 
-matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, precision_t epsilon);
+matrix_t * fpica (matrix_t *X, matrix_t *W_z, int n2, int max_iterations, precision_t epsilon);
 
 /**
  * Compute the whitening transformation for a matrix X.
@@ -19,13 +19,14 @@ matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, pr
  * X to have zero mean and unit covariance.
  *
  * @param X
+ * @param n1
  * @return whitening matrix W_z
  */
-matrix_t * m_whiten (matrix_t *X)
+matrix_t * m_whiten (matrix_t *X, int n1)
 {
     // compute [V, D] = eig(C)
     matrix_t *D;
-    matrix_t *V = PCA(X, -1, &D);
+    matrix_t *V = PCA(X, n1, &D);
 
     // compute whitening matrix W_z = inv(sqrt(D)) * V'
     matrix_t *D_temp1 = m_copy("sqrt(D)", D);
@@ -53,12 +54,13 @@ matrix_t * m_whiten (matrix_t *X)
  * X in its original form to eliminate these redundancies.
  *
  * @param X
- * @param num_ic
+ * @param n1
+ * @param n2
  * @param max_iterations
  * @param epsilon
  * @return independent components of X in columns
  */
-matrix_t * ICA (matrix_t *X, int num_ic, int max_iterations, precision_t epsilon)
+matrix_t * ICA (matrix_t *X, int n1, int n2, int max_iterations, precision_t epsilon)
 {
     timer_push("  ICA");
 
@@ -75,7 +77,7 @@ matrix_t * ICA (matrix_t *X, int num_ic, int max_iterations, precision_t epsilon
     timer_push("    compute whitening matrix and whitened input matrix");
 
     // compute whitened input U = W_z * mixedsig
-    matrix_t *W_z = m_whiten(mixedsig);
+    matrix_t *W_z = m_whiten(mixedsig, n1);
     matrix_t *U = m_product("U", W_z, mixedsig);
 
     timer_pop();
@@ -83,7 +85,7 @@ matrix_t * ICA (matrix_t *X, int num_ic, int max_iterations, precision_t epsilon
     timer_push("    compute mixing matrix");
 
     // compute mixing matrix
-    matrix_t *W = fpica(U, W_z, num_ic, max_iterations, epsilon);
+    matrix_t *W = fpica(U, W_z, n2, max_iterations, epsilon);
 
     timer_pop();
 
@@ -136,26 +138,26 @@ precision_t pow3(precision_t x)
  *
  * @param X
  * @param W_z
- * @param num_ic
+ * @param n2
  * @param max_iterations
  * @param epsilon
  * @return mixing matrix W
  */
-matrix_t * fpica (matrix_t *X, matrix_t *W_z, int num_ic, int max_iterations, precision_t epsilon)
+matrix_t * fpica (matrix_t *X, matrix_t *W_z, int n2, int max_iterations, precision_t epsilon)
 {
     int vectorSize = X->rows;
     int numSamples = X->cols;
 
-    // if num_ic is -1, use vectorSize
-    num_ic = (num_ic == -1)
+    // if n2 is -1, use default value
+    n2 = (n2 == -1)
         ? vectorSize
-        : num_ic;
+        : n2;
 
     matrix_t *B = m_zeros("B", vectorSize, vectorSize);
-    matrix_t *W = m_zeros("W", num_ic, W_z->cols);
+    matrix_t *W = m_zeros("W", n2, W_z->cols);
 
     int i;
-    for ( i = 0; i < num_ic; i++ ) {
+    for ( i = 0; i < n2; i++ ) {
         if ( LOGGER(LL_VERBOSE) ) {
             printf("      round %d\n", i + 1);
         }

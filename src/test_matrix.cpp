@@ -398,7 +398,7 @@ void test_m_eigen()
 	matrix_t *V;
 	matrix_t *D;
 
-	m_eigen("V", "D", M, &V, &D);
+	m_eigen("V", "D", M, M->rows, &V, &D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, M);
@@ -449,7 +449,7 @@ void test_m_eigen2()
 	matrix_t *B_inv = m_inverse("inv(B)", B);
 	matrix_t *J = m_product("J", B_inv, A);
 
-	m_eigen("V", "D", J, &V, &D);
+	m_eigen("V", "D", J, J->rows, &V, &D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		m_fprint(stdout, A);

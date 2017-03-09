@@ -56,7 +56,7 @@ matrix_t * m_diagonalize (const char *name, matrix_t *v);
 precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j);
 precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j);
-void m_eigen (const char *V_name, const char *D_name, matrix_t *M, matrix_t **p_V, matrix_t **p_D);
+void m_eigen (const char *V_name, const char *D_name, matrix_t *M, int n1, matrix_t **p_V, matrix_t **p_D);
 matrix_t * m_inverse (const char *name, matrix_t *M);
 matrix_t * m_mean_column (const char *name, matrix_t *M);
 matrix_t * m_mean_row (const char *name, matrix_t *M);

@@ -658,23 +658,24 @@ precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j)
  * are returned in ascending order.
  *
  * @param M
+ * @param n1
  * @param p_V
  * @param p_D
  */
-void m_eigen (const char *V_name, const char *D_name, matrix_t *M, matrix_t **p_V, matrix_t **p_D)
+void m_eigen (const char *V_name, const char *D_name, matrix_t *M, int n1, matrix_t **p_V, matrix_t **p_D)
 {
 	// print debug information
 	if ( LOGGER(LL_DEBUG) ) {
-		printf("debug: %s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d])\n",
-		       V_name, M->rows, M->cols,
-		       D_name, M->rows, 1,
-		       M->name, M->rows, M->cols);
+		printf("debug: %s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d], %d)\n",
+		       V_name, M->rows, n1,
+		       D_name, n1, n1,
+		       M->name, M->rows, M->cols, n1);
 	}
 
 	assert(M->rows == M->cols);
 
 	matrix_t *V_temp1 = m_copy(V_name, M);
-	matrix_t *D_temp1 = m_initialize(D_name, M->rows, 1);
+	matrix_t *D_temp1 = m_initialize(D_name, M->cols, 1);
 
 	// solve A * x = lambda * x
 #ifdef __NVCC__
@@ -710,11 +711,14 @@ void m_eigen (const char *V_name, const char *D_name, matrix_t *M, matrix_t **p_
 	assert(info == 0);
 #endif
 
-	// remove eigenvalues <= 0
+	// take only positive eigenvalues
 	int i = 0;
 	while ( i < D_temp1->rows && elem(D_temp1, i, 0) < EPSILON ) {
 		i++;
 	}
+
+	// take only the n1 largest eigenvalues
+	i = max(i, D_temp1->rows - n1);
 
 	matrix_t *V = m_copy_columns(V_name, V_temp1, i, V_temp1->cols);
 	matrix_t *D_temp2 = m_copy_rows(D_name, D_temp1, i, D_temp1->rows);
@@ -966,7 +970,7 @@ matrix_t * m_sqrtm (const char *name, matrix_t *M)
 	matrix_t *V;
 	matrix_t *D;
 
-	m_eigen("V", "D", M, &V, &D);
+	m_eigen("V", "D", M, M->rows, &V, &D);
 
 	// compute X = V * sqrt(D) * V'
 	m_elem_apply(D, sqrtf);

@@ -30,7 +30,8 @@ typedef enum {
 	OPTION_LDA_N1,
 	OPTION_LDA_N2,
 	OPTION_LDA_DIST,
-	OPTION_ICA_NUM_IC,
+	OPTION_ICA_N1,
+	OPTION_ICA_N2,
 	OPTION_ICA_MAX_ITERATIONS,
 	OPTION_ICA_EPSILON,
 	OPTION_ICA_DIST,
@@ -55,12 +56,13 @@ void print_usage()
 		"  --all              run all algorithms (PCA, LDA, ICA)\n"
 		"\n"
 		"Hyperparameters:\n"
-		"  --pca_n1 N              (PCA) number of columns in W_pca to use\n"
+		"  --pca_n1 N              (PCA) number of principal components to compute\n"
 		"  --pca_dist COS|L1|L2    (PCA) distance function to use\n"
-		"  --lda_n1 N              (LDA) number of columns in W_pca to use\n"
-		"  --lda_n2 N              (LDA) number of columns in W_fld to use\n"
+		"  --lda_n1 N              (LDA) number of principal components to compute\n"
+		"  --lda_n2 N              (LDA) number of Fisherfaces to compute\n"
 		"  --lda_dist COS|L1|L2    (LDA) distance function to use\n"
-		"  --ica_num_ic N          (ICA) number of independent components to estimate\n"
+		"  --ica_n1 N              (ICA) number of principal components to compute\n"
+		"  --ica_n2 N              (ICA) number of independent components to estimate\n"
 		"  --ica_max_iterations N  (ICA) maximum iterations\n"
 		"  --ica_epsilon X         (ICA) convergence threshold for w\n"
 		"  --ica_dist COS|L1|L2    (ICA) distance function to use\n"
@@ -103,7 +105,7 @@ int main(int argc, char **argv)
 	db_params_t db_params = {
 		{ -1, m_dist_L2 },
 		{ -1, -1, m_dist_L2 },
-		{ -1, 1000, 0.0001f, m_dist_L2 },
+		{ -1, -1, 1000, 0.0001f, m_dist_L2 },
 		{ 1 }
 	};
 
@@ -125,7 +127,8 @@ int main(int argc, char **argv)
 		{ "lda_n1", required_argument, 0, OPTION_LDA_N1 },
 		{ "lda_n2", required_argument, 0, OPTION_LDA_N2 },
 		{ "lda_dist", required_argument, 0, OPTION_LDA_DIST },
-		{ "ica_num_ic", required_argument, 0, OPTION_ICA_NUM_IC },
+		{ "ica_n1", required_argument, 0, OPTION_ICA_N1 },
+		{ "ica_n2", required_argument, 0, OPTION_ICA_N2 },
 		{ "ica_max_iterations", required_argument, 0, OPTION_ICA_MAX_ITERATIONS },
 		{ "ica_epsilon", required_argument, 0, OPTION_ICA_EPSILON },
 		{ "ica_dist", required_argument, 0, OPTION_ICA_DIST },
@@ -183,8 +186,11 @@ int main(int argc, char **argv)
 		case OPTION_LDA_DIST:
 			db_params.lda.dist = parse_dist_func(optarg);
 			break;
-		case OPTION_ICA_NUM_IC:
-			db_params.ica.num_ic = atoi(optarg);
+		case OPTION_ICA_N1:
+			db_params.ica.n1 = atoi(optarg);
+			break;
+		case OPTION_ICA_N2:
+			db_params.ica.n2 = atoi(optarg);
 			break;
 		case OPTION_ICA_MAX_ITERATIONS:
 			db_params.ica.max_iterations = atoi(optarg);

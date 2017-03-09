@@ -88,7 +88,8 @@ database_t * db_construct(bool pca, bool lda, bool ica, db_params_t params)
 		printf("  %-*s  %10d\n", len, "n1", db->params.lda.n1);
 		printf("  %-*s  %10d\n", len, "n2", db->params.lda.n2);
 		printf("ICA\n");
-		printf("  %-*s  %10d\n", len, "num_ic", db->params.ica.num_ic);
+		printf("  %-*s  %10d\n", len, "n1", db->params.ica.n1);
+		printf("  %-*s  %10d\n", len, "n2", db->params.ica.n2);
 		printf("  %-*s  %10d\n", len, "max_iterations", db->params.ica.max_iterations);
 		printf("  %-*s  %10f\n", len, "epsilon", db->params.ica.epsilon);
 		printf("kNN\n");
@@ -176,7 +177,7 @@ void db_train(database_t *db, const char *path)
 
 	// compute ICA representation
 	if ( db->ica.train ) {
-		db->ica.W = ICA(X, db->params.ica.num_ic, db->params.ica.max_iterations, db->params.ica.epsilon);
+		db->ica.W = ICA(X, db->params.ica.n1, db->params.ica.n2, db->params.ica.max_iterations, db->params.ica.epsilon);
 		db->ica.P = m_product("P_ica", db->ica.W, X, true, false);
 	}
 

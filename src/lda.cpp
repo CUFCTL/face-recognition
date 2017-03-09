@@ -99,20 +99,25 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
  * @param X        image matrix
  * @param c        number of classes
  * @param entries  list of entries for each image
- * @param n1       number of columns to use in W_pca
- * @param n2       number of columns to use in W_fld
+ * @param n1       number of principal components to compute
+ * @param n2       number of Fisherfaces to compute
  * @return projection matrix W_lda
  */
 matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int n1, int n2)
 {
-    timer_push("  LDA");
-
-    timer_push("    truncate eigenfaces and projected images");
-
     // if n1 = -1, use default value
     n1 = (n1 == -1)
         ? X->cols - c
         : n1;
+
+    // if n2 = -1, use default value
+    n2 = (n2 == -1)
+        ? c - 1
+        : n2;
+
+    timer_push("  LDA");
+
+    timer_push("    truncate eigenfaces and projected images");
 
     if ( n1 <= 0 ) {
         fprintf(stderr, "error: training set is too small for LDA\n");
@@ -125,39 +130,27 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
 
     timer_pop();
 
-    timer_push("    compute scatter matrices");
+    timer_push("    compute scatter matrices S_b and S_w");
 
-    // compute scatter matrices S_b and S_w
     matrix_t *S_b;
     matrix_t *S_w;
-
     m_scatter(P_pca, c, entries, &S_b, &S_w);
 
     timer_pop();
 
-    timer_push("    compute eigenvectors of scatter matrices");
+    timer_push("    compute eigendecomposition of S_b and S_w");
 
-    // compute W_fld = eigenvectors of S_w^-1 * S_b
     matrix_t *S_w_inv = m_inverse("inv(S_w)", S_w);
     matrix_t *J = m_product("J", S_w_inv, S_b);
-    matrix_t *J_evec;
+
+    matrix_t *W_fld;
     matrix_t *J_eval;
-
-    m_eigen("J_evec", "J_eval", J, &J_evec, &J_eval);
-
-    // if n2 = -1, use default value
-    n2 = (n2 == -1)
-        ? min(J_eval->cols, c - 1)
-        : n2;
-
-    // take only the last n2 columns in J_evec
-    matrix_t *W_fld = m_copy_columns("W_fld", J_evec, J_evec->cols - n2, J_evec->cols);
+    m_eigen("W_fld", "J_eval", J, n2, &W_fld, &J_eval);
 
     timer_pop();
 
-    timer_push("    compute LDA projection matrix");
+    timer_push("    compute Fisherfaces");
 
-    // compute W_lda = W_pca2 * W_fld
     matrix_t *W_lda = m_product("W_lda", W_pca2, W_fld);
 
     timer_pop();
@@ -171,9 +164,8 @@ matrix_t * LDA(matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries, int 
     m_free(S_w);
     m_free(S_w_inv);
     m_free(J);
-    m_free(J_eval);
-    m_free(J_evec);
     m_free(W_fld);
+    m_free(J_eval);
 
     return W_lda;
 }

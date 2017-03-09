@@ -4,18 +4,19 @@
  * Implementation of PCA (Turk and Pentland, 1991).
  */
 #include "database.h"
+#include "math_helper.h"
 #include "timer.h"
 
 /**
  * Compute the principal components of a matrix X, which
- * consists of observations in columns. The observations
+ * consists of observations in rows or columns. The observations
  * should also be mean-subtracted.
  *
  * The principal components of a matrix are the eigenvectors of
  * the covariance matrix.
  *
  * @param X    input matrix
- * @param n1   number of columns to use in W_pca
+ * @param n1   number of principal components to compute
  * @param p_D  pointer to save eigenvalues
  * @return principal components of X in columns
  */
@@ -23,6 +24,11 @@ matrix_t * PCA(matrix_t *X, int n1, matrix_t **p_D)
 {
 	matrix_t *W_pca;
 	matrix_t *D;
+
+	// if n1 = -1, use default value
+	n1 = (n1 == -1)
+		? min(X->rows, X->cols)
+		: n1;
 
 	timer_push("  PCA");
 
@@ -36,26 +42,19 @@ matrix_t * PCA(matrix_t *X, int n1, matrix_t **p_D)
 		timer_push("    compute eigenvectors of L");
 
 		matrix_t *V;
-		m_eigen("V", "D", L, &V, &D);
+		m_eigen("V", "D", L, n1, &V, &D);
 
 		timer_pop();
 
-		timer_push("    compute PCA projection matrix");
+		timer_push("    compute principal components");
 
-		// if n1 = -1, use default value
-		n1 = (n1 == -1)
-			? D->cols
-			: n1;
-
-		matrix_t *W_pca_temp1 = m_product("W_pca", X, V);
-		W_pca = m_copy_columns("W_pca", W_pca_temp1, W_pca_temp1->cols - n1, W_pca_temp1->cols);
+		W_pca = m_product("W_pca", X, V);
 
 		timer_pop();
 
 		// cleanup
 		m_free(L);
 		m_free(V);
-		m_free(W_pca_temp1);
 	}
 	else {
 		timer_push("    compute covariance matrix C");
@@ -66,24 +65,12 @@ matrix_t * PCA(matrix_t *X, int n1, matrix_t **p_D)
 
 		timer_push("    compute eigendecomposition of C");
 
-		matrix_t *V;
-		m_eigen("V", "D", C, &V, &D);
-
-		timer_pop();
-
-		timer_push("    compute PCA projection matrix");
-
-		// if n1 = -1, use default value
-		n1 = (n1 == -1)
-			? D->cols
-			: n1;
-
-		W_pca = m_copy_columns("W_pca", V, V->cols - n1, V->cols);
+		m_eigen("W_pca", "D", C, n1, &W_pca, &D);
 
 		timer_pop();
 
 		// cleanup
-		m_free(V);
+		m_free(C);
 	}
 
 	timer_pop();
