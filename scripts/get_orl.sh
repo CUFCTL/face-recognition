@@ -1,5 +1,5 @@
 #!/bin/bash
-# Download and extract the ORL face database.
+# Download and extract the ORL face dataset.
 
 mkdir -p datasets
 cd datasets

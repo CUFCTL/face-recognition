@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "database.h"
 #include "logger.h"
+#include "model.h"
 #include "timer.h"
 
 logger_level_t LOGLEVEL = LL_INFO;
@@ -44,7 +44,7 @@ void print_usage()
 		"Options:\n"
 		"  --loglevel LEVEL   set the log level ([1]=info, 2=verbose, 3=debug)\n"
 		"  --timing           print timing information\n"
-		"  --train DIRECTORY  train a database with a training set\n"
+		"  --train DIRECTORY  train a model with a training set\n"
 		"  --test DIRECTORY   perform recognition on a test set\n"
 		"  --stream           perform recognition on an input stream\n"
 		"  --pca              run PCA\n"
@@ -87,7 +87,7 @@ dist_func_t parse_dist_func(const char *name)
 
 int main(int argc, char **argv)
 {
-	const char *DB_DATA = "./database.dat";
+	const char *MODEL_FNAME = "./model.dat";
 
 	bool arg_train = false;
 	bool arg_test = false;
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 	bool arg_lda = false;
 	bool arg_ica = false;
 
-	db_params_t db_params = {
+	model_params_t model_params = {
 		{ -1 },
 		{ -1, -1 },
 		{ -1, -1, 1000, 0.0001f },
@@ -158,31 +158,31 @@ int main(int argc, char **argv)
 			arg_ica = true;
 			break;
 		case OPTION_PCA_N1:
-			db_params.pca.n1 = atoi(optarg);
+			model_params.pca.n1 = atoi(optarg);
 			break;
 		case OPTION_LDA_N1:
-			db_params.lda.n1 = atoi(optarg);
+			model_params.lda.n1 = atoi(optarg);
 			break;
 		case OPTION_LDA_N2:
-			db_params.lda.n2 = atoi(optarg);
+			model_params.lda.n2 = atoi(optarg);
 			break;
 		case OPTION_ICA_N1:
-			db_params.ica.n1 = atoi(optarg);
+			model_params.ica.n1 = atoi(optarg);
 			break;
 		case OPTION_ICA_N2:
-			db_params.ica.n2 = atoi(optarg);
+			model_params.ica.n2 = atoi(optarg);
 			break;
 		case OPTION_ICA_MAX_ITERATIONS:
-			db_params.ica.max_iterations = atoi(optarg);
+			model_params.ica.max_iterations = atoi(optarg);
 			break;
 		case OPTION_ICA_EPSILON:
-			db_params.ica.epsilon = atof(optarg);
+			model_params.ica.epsilon = atof(optarg);
 			break;
 		case OPTION_KNN_K:
-			db_params.knn.k = atoi(optarg);
+			model_params.knn.k = atoi(optarg);
 			break;
 		case OPTION_KNN_DIST:
-			db_params.knn.dist = parse_dist_func(optarg);
+			model_params.knn.dist = parse_dist_func(optarg);
 			break;
 		case OPTION_UNKNOWN:
 			print_usage();
@@ -196,19 +196,19 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	if ( db_params.knn.dist == NULL ) {
+	if ( model_params.knn.dist == NULL ) {
 		fprintf(stderr, "error: dist function must be L1 | L2 | COS\n");
 		exit(1);
 	}
 
 	// run the face recognition system
-	database_t *db = db_construct(arg_pca, arg_lda, arg_ica, db_params);
+	model_t *model = model_construct(arg_pca, arg_lda, arg_ica, model_params);
 
 	if ( arg_train ) {
-		db_train(db, path_train_set);
+		model_train(model, path_train_set);
 	}
 	else {
-		db_load(db, DB_DATA);
+		model_load(model, MODEL_FNAME);
 	}
 
 	if ( arg_test && arg_stream ) {
@@ -222,18 +222,18 @@ int main(int argc, char **argv)
 				break;
 			}
 			else if ( c == READ ) {
-				db_recognize(db, path_test_set);
+				model_predict(model, path_test_set);
 			}
 		}
 	}
 	else if ( arg_test ) {
-		db_recognize(db, path_test_set);
+		model_predict(model, path_test_set);
 	}
 	else {
-		db_save(db, DB_DATA);
+		model_save(model, MODEL_FNAME);
 	}
 
-	db_destruct(db);
+	model_destruct(model);
 
 	// print timing information
 	timer_print();

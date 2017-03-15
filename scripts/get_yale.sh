@@ -1,5 +1,5 @@
 #!/bin/bash
-# Download and extract the Yale face database.
+# Download and extract the Yale face dataset.
 
 mkdir -p datasets
 cd datasets

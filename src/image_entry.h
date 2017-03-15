@@ -3,7 +3,7 @@
  *
  * Interface definitions for the image entry type.
  *
- * The image entry module is the interface between the database
+ * The image entry module is the interface between the model
  * and the filesystem.
  */
 #ifndef IMAGE_ENTRY_H

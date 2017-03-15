@@ -57,7 +57,7 @@ echo:
 %.o: src/%.cpp
 	$(NVCC) $(NVCCFLAGS) -c -o $@ $<
 
-face-rec: database.o ica.o image_entry.o image.o knn.o lda.o math_helper.o main.o matrix.o pca.o timer.o
+face-rec: ica.o image_entry.o image.o knn.o lda.o math_helper.o main.o matrix.o model.o pca.o timer.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 test-image: image.o math_helper.o matrix.o test_image.o

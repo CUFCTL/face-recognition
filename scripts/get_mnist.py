@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Download and extract the MNIST database.
+# Download and extract the MNIST dataset.
 import os
 import shutil
 import struct

@@ -1,15 +1,15 @@
 /**
- * @file database.cpp
+ * @file model.cpp
  *
- * Implementation of the database type.
+ * Implementation of the model type.
  */
 #include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "database.h"
 #include "image.h"
 #include "logger.h"
+#include "model.h"
 #include "timer.h"
 
 /**
@@ -47,30 +47,30 @@ matrix_t * get_image_matrix(image_entry_t *entries, int num_entries)
 }
 
 /**
- * Construct a database.
+ * Construct a model.
  *
  * @param pca
  * @param lda
  * @param ica
  * @param params
- * @return pointer to new database
+ * @return pointer to new model
  */
-database_t * db_construct(bool pca, bool lda, bool ica, db_params_t params)
+model_t * model_construct(bool pca, bool lda, bool ica, model_params_t params)
 {
-	database_t *db = (database_t *)calloc(1, sizeof(database_t));
-	db->params = params;
+	model_t *model = (model_t *)calloc(1, sizeof(model_t));
+	model->params = params;
 
-	db->pca = (db_algorithm_t) {
+	model->pca = (model_algorithm_t) {
 		pca || lda, pca,
 		"PCA",
 		NULL, NULL
 	};
-	db->lda = (db_algorithm_t) {
+	model->lda = (model_algorithm_t) {
 		lda, lda,
 		"LDA",
 		NULL, NULL
 	};
-	db->ica = (db_algorithm_t) {
+	model->ica = (model_algorithm_t) {
 		ica, ica,
 		"ICA",
 		NULL, NULL
@@ -81,52 +81,52 @@ database_t * db_construct(bool pca, bool lda, bool ica, db_params_t params)
 
 		printf("Hyperparameters\n");
 		printf("PCA\n");
-		printf("  %-*s  %10d\n", len, "n1", db->params.pca.n1);
+		printf("  %-*s  %10d\n", len, "n1", model->params.pca.n1);
 		printf("LDA\n");
-		printf("  %-*s  %10d\n", len, "n1", db->params.lda.n1);
-		printf("  %-*s  %10d\n", len, "n2", db->params.lda.n2);
+		printf("  %-*s  %10d\n", len, "n1", model->params.lda.n1);
+		printf("  %-*s  %10d\n", len, "n2", model->params.lda.n2);
 		printf("ICA\n");
-		printf("  %-*s  %10d\n", len, "n1", db->params.ica.n1);
-		printf("  %-*s  %10d\n", len, "n2", db->params.ica.n2);
-		printf("  %-*s  %10d\n", len, "max_iterations", db->params.ica.max_iterations);
-		printf("  %-*s  %10f\n", len, "epsilon", db->params.ica.epsilon);
+		printf("  %-*s  %10d\n", len, "n1", model->params.ica.n1);
+		printf("  %-*s  %10d\n", len, "n2", model->params.ica.n2);
+		printf("  %-*s  %10d\n", len, "max_iterations", model->params.ica.max_iterations);
+		printf("  %-*s  %10f\n", len, "epsilon", model->params.ica.epsilon);
 		printf("kNN\n");
-		printf("  %-*s  %10d\n", len, "k", db->params.knn.k);
+		printf("  %-*s  %10d\n", len, "k", model->params.knn.k);
 		putchar('\n');
 	}
 
-	return db;
+	return model;
 }
 
 /**
- * Destruct a database.
+ * Destruct a model.
  *
- * @param db
+ * @param model
  */
-void db_destruct(database_t *db)
+void model_destruct(model_t *model)
 {
 	// free entries
 	int i;
-	for ( i = 0; i < db->num_entries; i++ ) {
-		free(db->entries[i].name);
+	for ( i = 0; i < model->num_entries; i++ ) {
+		free(model->entries[i].name);
 	}
-	free(db->entries);
+	free(model->entries);
 
 	// free labels
-	for ( i = 0; i < db->num_labels; i++ ) {
-		free(db->labels[i].name);
+	for ( i = 0; i < model->num_labels; i++ ) {
+		free(model->labels[i].name);
 	}
-	free(db->labels);
+	free(model->labels);
 
 	// free mean face
-	m_free(db->mean_face);
+	m_free(model->mean_face);
 
 	// free algorithm data
-	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
-	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
+	model_algorithm_t *algorithms[] = { &model->pca, &model->lda, &model->ica };
+	int num_algorithms = sizeof(algorithms) / sizeof(model_algorithm_t *);
 
 	for ( i = 0; i < num_algorithms; i++ ) {
-		db_algorithm_t *algo = algorithms[i];
+		model_algorithm_t *algo = algorithms[i];
 
 		if ( algo->train ) {
 			m_free(algo->W);
@@ -134,49 +134,49 @@ void db_destruct(database_t *db)
 		}
 	}
 
-	free(db);
+	free(model);
 }
 
 /**
  * Perform training on a training set.
  *
- * @param db
+ * @param model
  * @param path
  */
-void db_train(database_t *db, const char *path)
+void model_train(model_t *model, const char *path)
 {
 	timer_push("Training");
 
 	// get entries, labels
-	db->num_entries = get_directory(path, &db->entries, &db->num_labels, &db->labels);
+	model->num_entries = get_directory(path, &model->entries, &model->num_labels, &model->labels);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("  Training set: %d samples, %d classes\n", db->num_entries, db->num_labels);
+		printf("  Training set: %d samples, %d classes\n", model->num_entries, model->num_labels);
 	}
 
 	// get image matrix X
-	matrix_t *X = get_image_matrix(db->entries, db->num_entries);
+	matrix_t *X = get_image_matrix(model->entries, model->num_entries);
 
 	// subtract mean from X
-	db->mean_face = m_mean_column("m", X);
-	m_subtract_columns(X, db->mean_face);
+	model->mean_face = m_mean_column("m", X);
+	m_subtract_columns(X, model->mean_face);
 
 	// compute PCA representation
-	if ( db->pca.train ) {
-		db->pca.W = PCA(&db->params.pca, X, NULL);
-		db->pca.P = m_product("P_pca", db->pca.W, X, true, false);
+	if ( model->pca.train ) {
+		model->pca.W = PCA(&model->params.pca, X, NULL);
+		model->pca.P = m_product("P_pca", model->pca.W, X, true, false);
 	}
 
 	// compute LDA representation
-	if ( db->lda.train ) {
-		db->lda.W = LDA(&db->params.lda, db->pca.W, X, db->num_labels, db->entries);
-		db->lda.P = m_product("P_lda", db->lda.W, X, true, false);
+	if ( model->lda.train ) {
+		model->lda.W = LDA(&model->params.lda, model->pca.W, X, model->num_labels, model->entries);
+		model->lda.P = m_product("P_lda", model->lda.W, X, true, false);
 	}
 
 	// compute ICA representation
-	if ( db->ica.train ) {
-		db->ica.W = ICA(&db->params.ica, X);
-		db->ica.P = m_product("P_ica", db->ica.W, X, true, false);
+	if ( model->ica.train ) {
+		model->ica.W = ICA(&model->params.ica, X);
+		model->ica.P = m_product("P_ica", model->ica.W, X, true, false);
 	}
 
 	timer_pop();
@@ -186,47 +186,47 @@ void db_train(database_t *db, const char *path)
 }
 
 /**
- * Save a database to a data file.
+ * Save a model to a data file.
  *
- * @param db
+ * @param model
  * @param path
  */
-void db_save(database_t *db, const char *path)
+void model_save(model_t *model, const char *path)
 {
 	FILE *file = fopen(path, "w");
 
 	// save labels
-	fwrite(&db->num_labels, sizeof(int), 1, file);
+	fwrite(&model->num_labels, sizeof(int), 1, file);
 
 	int i;
-	for ( i = 0; i < db->num_labels; i++ ) {
-		fwrite(&db->labels[i].id, sizeof(int), 1, file);
+	for ( i = 0; i < model->num_labels; i++ ) {
+		fwrite(&model->labels[i].id, sizeof(int), 1, file);
 
-		int num = strlen(db->labels[i].name) + 1;
+		int num = strlen(model->labels[i].name) + 1;
 		fwrite(&num, sizeof(int), 1, file);
-		fwrite(db->labels[i].name, sizeof(char), num, file);
+		fwrite(model->labels[i].name, sizeof(char), num, file);
 	}
 
 	// save entries
-	fwrite(&db->num_entries, sizeof(int), 1, file);
+	fwrite(&model->num_entries, sizeof(int), 1, file);
 
-	for ( i = 0; i < db->num_entries; i++ ) {
-		fwrite(&db->entries[i].label->id, sizeof(int), 1, file);
+	for ( i = 0; i < model->num_entries; i++ ) {
+		fwrite(&model->entries[i].label->id, sizeof(int), 1, file);
 
-		int num = strlen(db->entries[i].name) + 1;
+		int num = strlen(model->entries[i].name) + 1;
 		fwrite(&num, sizeof(int), 1, file);
-		fwrite(db->entries[i].name, sizeof(char), num, file);
+		fwrite(model->entries[i].name, sizeof(char), num, file);
 	}
 
 	// save mean face
-	m_fwrite(file, db->mean_face);
+	m_fwrite(file, model->mean_face);
 
 	// save algorithm data
-	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
-	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
+	model_algorithm_t *algorithms[] = { &model->pca, &model->lda, &model->ica };
+	int num_algorithms = sizeof(algorithms) / sizeof(model_algorithm_t *);
 
 	for ( i = 0; i < num_algorithms; i++ ) {
-		db_algorithm_t *algo = algorithms[i];
+		model_algorithm_t *algo = algorithms[i];
 
 		if ( algo->train ) {
 			m_fwrite(file, algo->W);
@@ -238,58 +238,58 @@ void db_save(database_t *db, const char *path)
 }
 
 /**
- * Load a database from a file.
+ * Load a model from a file.
  *
- * @param db
+ * @param model
  * @param path
  */
-void db_load(database_t *db, const char *path)
+void model_load(model_t *model, const char *path)
 {
 	FILE *file = fopen(path, "r");
 
 	// read labels
-	fread(&db->num_labels, sizeof(int), 1, file);
+	fread(&model->num_labels, sizeof(int), 1, file);
 
-	db->labels = (image_label_t *)malloc(db->num_labels * sizeof(image_label_t));
+	model->labels = (image_label_t *)malloc(model->num_labels * sizeof(image_label_t));
 
 	int i;
-	for ( i = 0; i < db->num_labels; i++ ) {
-		fread(&db->labels[i].id, sizeof(int), 1, file);
+	for ( i = 0; i < model->num_labels; i++ ) {
+		fread(&model->labels[i].id, sizeof(int), 1, file);
 
 		int num;
 		fread(&num, sizeof(int), 1, file);
 
-		db->labels[i].name = (char *)malloc(num * sizeof(char));
-		fread(db->labels[i].name, sizeof(char), num, file);
+		model->labels[i].name = (char *)malloc(num * sizeof(char));
+		fread(model->labels[i].name, sizeof(char), num, file);
 	}
 
 	// read entries
-	fread(&db->num_entries, sizeof(int), 1, file);
+	fread(&model->num_entries, sizeof(int), 1, file);
 
-	db->entries = (image_entry_t *)malloc(db->num_entries * sizeof(image_entry_t));
+	model->entries = (image_entry_t *)malloc(model->num_entries * sizeof(image_entry_t));
 
-	for ( i = 0; i < db->num_entries; i++ ) {
+	for ( i = 0; i < model->num_entries; i++ ) {
 		int label_id;
 		fread(&label_id, sizeof(int), 1, file);
 
-		db->entries[i].label = &db->labels[label_id];
+		model->entries[i].label = &model->labels[label_id];
 
 		int num;
 		fread(&num, sizeof(int), 1, file);
 
-		db->entries[i].name = (char *)malloc(num * sizeof(char));
-		fread(db->entries[i].name, sizeof(char), num, file);
+		model->entries[i].name = (char *)malloc(num * sizeof(char));
+		fread(model->entries[i].name, sizeof(char), num, file);
 	}
 
 	// read mean face
-	db->mean_face = m_fread(file);
+	model->mean_face = m_fread(file);
 
 	// read algorithm data
-	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
-	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
+	model_algorithm_t *algorithms[] = { &model->pca, &model->lda, &model->ica };
+	int num_algorithms = sizeof(algorithms) / sizeof(model_algorithm_t *);
 
 	for ( i = 0; i < num_algorithms; i++ ) {
-		db_algorithm_t *algo = algorithms[i];
+		model_algorithm_t *algo = algorithms[i];
 
 		if ( algo->train ) {
 			algo->W = m_fread(file);
@@ -303,10 +303,10 @@ void db_load(database_t *db, const char *path)
 /**
  * Perform recognition on a test set.
  *
- * @param db
+ * @param model
  * @param path
  */
-void db_recognize(database_t *db, const char *path)
+void model_predict(model_t *model, const char *path)
 {
 	timer_push("Recognition");
 
@@ -324,17 +324,17 @@ void db_recognize(database_t *db, const char *path)
 	// get image matrix X_test
 	matrix_t *X_test = get_image_matrix(entries, num_entries);
 
-	// subtract database mean from X_test
-	m_subtract_columns(X_test, db->mean_face);
+	// subtract training set mean from X_test
+	m_subtract_columns(X_test, model->mean_face);
 
 	// initialize list of recognition algorithms
-	db_algorithm_t *algorithms[] = { &db->pca, &db->lda, &db->ica };
-	int num_algorithms = sizeof(algorithms) / sizeof(db_algorithm_t *);
+	model_algorithm_t *algorithms[] = { &model->pca, &model->lda, &model->ica };
+	int num_algorithms = sizeof(algorithms) / sizeof(model_algorithm_t *);
 
 	// perform recognition for each algorithm
 	int i;
 	for ( i = 0; i < num_algorithms; i++ ) {
-		db_algorithm_t *algo = algorithms[i];
+		model_algorithm_t *algo = algorithms[i];
 
 		if ( algo->rec ) {
 			// compute projected test images
@@ -345,7 +345,7 @@ void db_recognize(database_t *db, const char *path)
 
 			int j;
 			for ( j = 0; j < num_entries; j++ ) {
-				rec_labels[j] = kNN(&db->params.knn, algo->P, db->entries, P_test, j);
+				rec_labels[j] = kNN(&model->params.knn, algo->P, model->entries, P_test, j);
 			}
 
 			// compute accuracy
