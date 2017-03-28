@@ -12,6 +12,7 @@
 #include "knn.h"
 #include "matrix.h"
 #include "pca.h"
+#include "bayes.h"
 
 typedef struct {
 	pca_params_t pca;
