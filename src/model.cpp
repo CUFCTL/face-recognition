@@ -350,7 +350,7 @@ void model_predict(model_t *model, const char *path)
 			}
 
 			// debugging bayesian classifier
-			bayes_rec_labels = bayesian(algo->P, P_test, model->num_entries, model->num_labels);
+			// bayes_rec_labels = bayesian(algo->P, P_test, model->num_entries, model->num_labels);
 
 			// compute accuracy
 			int num_correct = 0;
