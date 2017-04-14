@@ -32,12 +32,14 @@ if [ ! -d colorferet ]; then
 fi
 
 # extract images from archive
+echo "Extracting images from archive (SIZE=$SIZE)"
+
 rm -rf feret
 mkdir feret
 
-cp colorferet/dvd1/data/$SIZE/**/*.ppm.bz2 feret
-cp colorferet/dvd2/data/$SIZE/**/*.ppm.bz2 feret
+cp -r colorferet/dvd1/data/$SIZE/* feret
+cp -r colorferet/dvd2/data/$SIZE/* feret
 
-bunzip2 feret/*.ppm.bz2
+chmod 755 -R feret
 
-chmod 644 feret/*.ppm
+bunzip2 feret/**/*.ppm.bz2
