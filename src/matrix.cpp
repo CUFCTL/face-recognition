@@ -88,28 +88,6 @@ magma_queue_t magma_queue()
 #endif
 
 /**
- * Helper function for scaled vector addition.
- *
- * @param N
- * @param alpha
- * @param dx
- * @param dy
- */
-void helper_axpy (int N, precision_t alpha, precision_t *dx, precision_t *dy)
-{
-	int incX = 1;
-	int incY = 1;
-
-#ifdef __NVCC__
-	magma_queue_t queue = magma_queue();
-
-	magma_saxpy(N, alpha, dx, incX, dy, incY, queue);
-#else
-	cblas_saxpy(N, alpha, dx, incX, dy, incY);
-#endif
-}
-
-/**
  * Construct a matrix.
  *
  * @param rows
@@ -811,7 +789,6 @@ matrix_t * m_mean_column (const char *name, matrix_t *M)
 
 	matrix_t *a = m_zeros(name, M->rows, 1);
 
-	// TODO: implement with helper_axpy()
 	int i, j;
 	for ( i = 0; i < M->cols; i++ ) {
 		for ( j = 0; j < M->rows; j++ ) {
@@ -842,7 +819,6 @@ matrix_t * m_mean_row (const char *name, matrix_t *M)
 
 	matrix_t *a = m_zeros(name, 1, M->cols);
 
-	// TODO: implement with helper_axpy()
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
 		for ( j = 0; j < M->cols; j++ ) {
@@ -1038,13 +1014,17 @@ void m_add (matrix_t *A, matrix_t *B)
 
 	int N = A->rows * A->cols;
 	precision_t alpha = 1.0f;
+	int incX = 1;
+	int incY = 1;
 
 #ifdef __NVCC__
-	helper_axpy(N, alpha, B->data_gpu, A->data_gpu);
+	magma_queue_t queue = magma_queue();
+
+	magma_saxpy(N, alpha, B->data_gpu, incX, A->data_gpu, incY, queue);
 
 	m_gpu_read(A);
 #else
-	helper_axpy(N, alpha, B->data, A->data);
+	cblas_saxpy(N, alpha, B->data, incX, A->data, incY);
 #endif
 }
 
@@ -1119,7 +1099,6 @@ void m_elem_apply (matrix_t * M, elem_func_t f)
 	}
 
 	int i, j;
-
 	for ( i = 0; i < M->rows; i++ ) {
 		for ( j = 0; j < M->cols; j++ ) {
 			elem(M, i, j) = f(elem(M, i, j));
@@ -1178,13 +1157,17 @@ void m_subtract (matrix_t *A, matrix_t *B)
 
 	int N = A->rows * A->cols;
 	precision_t alpha = -1.0f;
+	int incX = 1;
+	int incY = 1;
 
 #ifdef __NVCC__
-	helper_axpy(N, alpha, B->data_gpu, A->data_gpu);
+	magma_queue_t queue = magma_queue();
+
+	magma_saxpy(N, alpha, B->data_gpu, incX, A->data_gpu, incY, queue);
 
 	m_gpu_read(A);
 #else
-	helper_axpy(N, alpha, B->data, A->data);
+	cblas_saxpy(N, alpha, B->data, incX, A->data, incY);
 #endif
 }
 
@@ -1211,7 +1194,6 @@ void m_subtract_columns (matrix_t *M, matrix_t *a)
 
 	assert(M->rows == a->rows && a->cols == 1);
 
-	// TODO: implement with helper_axpy()
 	int i, j;
 	for ( i = 0; i < M->cols; i++ ) {
 		for ( j = 0; j < M->rows; j++ ) {
@@ -1244,7 +1226,6 @@ void m_subtract_rows (matrix_t *M, matrix_t *a)
 
 	assert(M->cols == a->cols && a->rows == 1);
 
-	// TODO: implement with helper_axpy()
 	int i, j;
 	for ( i = 0; i < M->rows; i++ ) {
 		for ( j = 0; j < M->cols; j++ ) {
