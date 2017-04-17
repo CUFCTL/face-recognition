@@ -201,18 +201,18 @@ matrix_t * m_ones (const char *name, int rows, int cols)
 		       rows, cols);
 	}
 
-    matrix_t *M = m_initialize(name, rows, cols);
+	matrix_t *M = m_initialize(name, rows, cols);
 
-    int i, j;
-    for ( i = 0; i < rows; i++ ) {
-        for ( j = 0; j < cols; j++ ) {
-            elem(M, i, j) = 1;
-        }
-    }
+	int i, j;
+	for ( i = 0; i < rows; i++ ) {
+		for ( j = 0; j < cols; j++ ) {
+			elem(M, i, j) = 1;
+		}
+	}
 
 	m_gpu_write(M);
 
-    return M;
+	return M;
 }
 
 /**
@@ -231,18 +231,18 @@ matrix_t * m_random (const char *name, int rows, int cols)
 		       rows, cols);
 	}
 
-    matrix_t *M = m_initialize(name, rows, cols);
+	matrix_t *M = m_initialize(name, rows, cols);
 
-    int i, j;
-    for ( i = 0; i < rows; i++ ) {
-        for ( j = 0; j < cols; j++ ) {
-            elem(M, i, j) = rand_normal(0, 1);
-        }
-    }
+	int i, j;
+	for ( i = 0; i < rows; i++ ) {
+		for ( j = 0; j < cols; j++ ) {
+			elem(M, i, j) = rand_normal(0, 1);
+		}
+	}
 
 	m_gpu_write(M);
 
-    return M;
+	return M;
 }
 
 /**
@@ -515,16 +515,16 @@ matrix_t * m_diagonalize (const char *name, matrix_t *v)
 	int n = (v->rows == 1)
 		? v->cols
 		: v->rows;
-    matrix_t *D = m_zeros(name, n, n);
+	matrix_t *D = m_zeros(name, n, n);
 
-    int i;
-    for ( i = 0; i < n; i++ ) {
-        elem(D, i, i) = v->data[i];
-    }
+	int i;
+	for ( i = 0; i < n; i++ ) {
+		elem(D, i, i) = v->data[i];
+	}
 
 	m_gpu_write(D);
 
-    return D;
+	return D;
 }
 
 /**
@@ -1065,11 +1065,11 @@ void m_assign_column (matrix_t * A, int i, matrix_t * B, int j)
 		       B->name, j + 1, B->rows, 1);
 	}
 
-    assert(A->rows == B->rows);
-    assert(0 <= i && i < A->cols);
-    assert(0 <= j && j < B->cols);
+	assert(A->rows == B->rows);
+	assert(0 <= i && i < A->cols);
+	assert(0 <= j && j < B->cols);
 
-    memcpy(&elem(A, 0, i), B->data, B->rows * sizeof(precision_t));
+	memcpy(&elem(A, 0, i), B->data, B->rows * sizeof(precision_t));
 
 	m_gpu_write(A);
 }
@@ -1091,14 +1091,14 @@ void m_assign_row (matrix_t * A, int i, matrix_t * B, int j)
 		       B->name, j + 1, 1, B->cols);
 	}
 
-    assert(A->cols == B->cols);
-    assert(0 <= i && i < A->rows);
-    assert(0 <= j && j < B->rows);
+	assert(A->cols == B->cols);
+	assert(0 <= i && i < A->rows);
+	assert(0 <= j && j < B->rows);
 
-    int k;
-    for ( k = 0; k < A->cols; k++ ) {
-        elem(A, i, k) = elem(B, j, k);
-    }
+	int k;
+	for ( k = 0; k < A->cols; k++ ) {
+		elem(A, i, k) = elem(B, j, k);
+	}
 
 	m_gpu_write(A);
 }
@@ -1118,13 +1118,13 @@ void m_elem_apply (matrix_t * M, elem_func_t f)
 		       M->name, M->rows, M->cols);
 	}
 
-    int i, j;
+	int i, j;
 
-    for ( i = 0; i < M->rows; i++ ) {
-        for ( j = 0; j < M->cols; j++ ) {
-            elem(M, i, j) = f(elem(M, i, j));
-        }
-    }
+	for ( i = 0; i < M->rows; i++ ) {
+		for ( j = 0; j < M->cols; j++ ) {
+			elem(M, i, j) = f(elem(M, i, j));
+		}
+	}
 
 	m_gpu_write(M);
 }
