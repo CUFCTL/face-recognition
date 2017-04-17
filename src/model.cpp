@@ -342,7 +342,6 @@ void model_predict(model_t *model, const char *path)
 
 			// compute labels for each test image
 			image_label_t **rec_labels = (image_label_t **)malloc(num_entries * sizeof(image_label_t *));
-			image_label_t **bayes_rec_labels = NULL;
 
 			int j;
 			for ( j = 0; j < num_entries; j++ ) {
@@ -350,7 +349,7 @@ void model_predict(model_t *model, const char *path)
 			}
 
 			// debugging bayesian classifier
-			// bayes_rec_labels = bayesian(algo->P, P_test, model->num_entries, model->num_labels);
+			// image_label_t **bayes_rec_labels = bayesian(algo->P, P_test, model->num_entries, model->num_labels);
 
 			// compute accuracy
 			int num_correct = 0;
