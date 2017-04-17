@@ -61,17 +61,17 @@ model_t * model_construct(bool pca, bool lda, bool ica, model_params_t params)
 	model->params = params;
 
 	model->pca = (model_algorithm_t) {
-		pca || lda, pca,
+		pca,
 		"PCA",
 		NULL, NULL
 	};
 	model->lda = (model_algorithm_t) {
-		lda, lda,
+		lda,
 		"LDA",
 		NULL, NULL
 	};
 	model->ica = (model_algorithm_t) {
-		ica, ica,
+		ica,
 		"ICA",
 		NULL, NULL
 	};
@@ -128,7 +128,7 @@ void model_destruct(model_t *model)
 	for ( i = 0; i < num_algorithms; i++ ) {
 		model_algorithm_t *algo = algorithms[i];
 
-		if ( algo->train ) {
+		if ( algo->enabled ) {
 			m_free(algo->W);
 			m_free(algo->P);
 		}
@@ -162,19 +162,19 @@ void model_train(model_t *model, const char *path)
 	m_subtract_columns(X, model->mean_face);
 
 	// compute PCA representation
-	if ( model->pca.train ) {
+	if ( model->pca.enabled ) {
 		model->pca.W = PCA(&model->params.pca, X, NULL);
 		model->pca.P = m_product("P_pca", model->pca.W, X, true, false);
 	}
 
 	// compute LDA representation
-	if ( model->lda.train ) {
-		model->lda.W = LDA(&model->params.lda, model->pca.W, X, model->num_labels, model->entries);
+	if ( model->lda.enabled ) {
+		model->lda.W = LDA(&model->params.lda, X, model->num_labels, model->entries);
 		model->lda.P = m_product("P_lda", model->lda.W, X, true, false);
 	}
 
 	// compute ICA representation
-	if ( model->ica.train ) {
+	if ( model->ica.enabled ) {
 		model->ica.W = ICA(&model->params.ica, X);
 		model->ica.P = m_product("P_ica", model->ica.W, X, true, false);
 	}
@@ -228,7 +228,7 @@ void model_save(model_t *model, const char *path)
 	for ( i = 0; i < num_algorithms; i++ ) {
 		model_algorithm_t *algo = algorithms[i];
 
-		if ( algo->train ) {
+		if ( algo->enabled ) {
 			m_fwrite(file, algo->W);
 			m_fwrite(file, algo->P);
 		}
@@ -291,7 +291,7 @@ void model_load(model_t *model, const char *path)
 	for ( i = 0; i < num_algorithms; i++ ) {
 		model_algorithm_t *algo = algorithms[i];
 
-		if ( algo->train ) {
+		if ( algo->enabled ) {
 			algo->W = m_fread(file);
 			algo->P = m_fread(file);
 		}
@@ -336,7 +336,7 @@ void model_predict(model_t *model, const char *path)
 	for ( i = 0; i < num_algorithms; i++ ) {
 		model_algorithm_t *algo = algorithms[i];
 
-		if ( algo->rec ) {
+		if ( algo->enabled ) {
 			// compute projected test images
 			matrix_t *P_test = m_product("P_test", algo->W, X_test, true, false);
 

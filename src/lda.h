@@ -14,6 +14,6 @@ typedef struct {
 	int n2;
 } lda_params_t;
 
-matrix_t * LDA(lda_params_t *params, matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries);
+matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, image_entry_t *entries);
 
 #endif

@@ -22,8 +22,7 @@ typedef struct {
 } model_params_t;
 
 typedef struct {
-	bool train;
-	bool rec;
+	bool enabled;
 	const char *name;
 	matrix_t *W;
 	matrix_t *P;

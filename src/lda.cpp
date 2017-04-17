@@ -5,6 +5,7 @@
  */
 #include "lda.h"
 #include "math_helper.h"
+#include "pca.h"
 #include "timer.h"
 #include <stdlib.h>
 
@@ -96,13 +97,12 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
  * Compute the projection matrix of a training set with LDA.
  *
  * @param params
- * @param W_pca
  * @param X
  * @param c
  * @param entries
  * @return projection matrix W_lda
  */
-matrix_t * LDA(lda_params_t *params, matrix_t *W_pca, matrix_t *X, int c, image_entry_t *entries)
+matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, image_entry_t *entries)
 {
     // if n1 = -1, use default value
     int n1 = (params->n1 == -1)
@@ -114,18 +114,19 @@ matrix_t * LDA(lda_params_t *params, matrix_t *W_pca, matrix_t *X, int c, image_
         ? c - 1
         : params->n2;
 
-    timer_push("  LDA");
-
-    timer_push("    truncate eigenfaces and projected images");
-
     if ( n1 <= 0 ) {
         fprintf(stderr, "error: training set is too small for LDA\n");
         exit(1);
     }
 
-    // use only the last n1 columns in W_pca
-    matrix_t *W_pca2 = m_copy_columns("W_pca", W_pca, W_pca->cols - n1, W_pca->cols);
-    matrix_t *P_pca = m_product("P_pca", W_pca2, X, true, false);
+    timer_push("  LDA");
+
+    timer_push("    compute eigenfaces");
+
+    pca_params_t pca_params = { n1 };
+
+    matrix_t *W_pca = PCA(&pca_params, X, NULL);
+    matrix_t *P_pca = m_product("P_pca", W_pca, X, true, false);
 
     timer_pop();
 
@@ -150,14 +151,14 @@ matrix_t * LDA(lda_params_t *params, matrix_t *W_pca, matrix_t *X, int c, image_
 
     timer_push("    compute Fisherfaces");
 
-    matrix_t *W_lda = m_product("W_lda", W_pca2, W_fld);
+    matrix_t *W_lda = m_product("W_lda", W_pca, W_fld);
 
     timer_pop();
 
     timer_pop();
 
     // cleanup
-    m_free(W_pca2);
+    m_free(W_pca);
     m_free(P_pca);
     m_free(S_b);
     m_free(S_w);

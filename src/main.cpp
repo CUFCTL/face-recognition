@@ -103,8 +103,8 @@ int main(int argc, char **argv)
 		{ 1, m_dist_L2 }
 	};
 
-	char *path_train_set = NULL;
-	char *path_test_set = NULL;
+	char *path_train = NULL;
+	char *path_test = NULL;
 
 	struct option long_options[] = {
 		{ "loglevel", required_argument, 0, OPTION_LOGLEVEL },
@@ -139,11 +139,11 @@ int main(int argc, char **argv)
 			break;
 		case OPTION_TRAIN:
 			arg_train = true;
-			path_train_set = optarg;
+			path_train = optarg;
 			break;
 		case OPTION_TEST:
 			arg_test = true;
-			path_test_set = optarg;
+			path_test = optarg;
 			break;
 		case OPTION_STREAM:
 			arg_stream = true;
@@ -205,7 +205,7 @@ int main(int argc, char **argv)
 	model_t *model = model_construct(arg_pca, arg_lda, arg_ica, model_params);
 
 	if ( arg_train ) {
-		model_train(model, path_train_set);
+		model_train(model, path_train);
 	}
 	else {
 		model_load(model, MODEL_FNAME);
@@ -222,12 +222,12 @@ int main(int argc, char **argv)
 				break;
 			}
 			else if ( c == READ ) {
-				model_predict(model, path_test_set);
+				model_predict(model, path_test);
 			}
 		}
 	}
 	else if ( arg_test ) {
-		model_predict(model, path_test_set);
+		model_predict(model, path_test);
 	}
 	else {
 		model_save(model, MODEL_FNAME);
