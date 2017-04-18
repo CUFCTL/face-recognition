@@ -135,7 +135,7 @@ void model_destruct(model_t *model)
 	free(model->labels);
 
 	// free mean face
-	m_free(model->mean_face);
+	m_free(model->mean);
 
 	// free feature layer
 	m_free(model->feature_layer.W);
@@ -165,8 +165,8 @@ void model_train(model_t *model, const char *path)
 	matrix_t *X = get_image_matrix(model->entries, model->num_entries);
 
 	// subtract mean from X
-	model->mean_face = m_mean_column("m", X);
-	m_subtract_columns(X, model->mean_face);
+	model->mean = m_mean_column("m", X);
+	m_subtract_columns(X, model->mean);
 
 	// perform feature extraction
 	if ( model->feature_layer.type == FEATURE_PCA ) {
@@ -222,7 +222,7 @@ void model_save(model_t *model, const char *path)
 	}
 
 	// save mean face
-	m_fwrite(file, model->mean_face);
+	m_fwrite(file, model->mean);
 
 	// save feature layer
 	fwrite(&model->feature_layer.type, sizeof(feature_type_t), 1, file);
@@ -277,7 +277,7 @@ void model_load(model_t *model, const char *path)
 	}
 
 	// read mean face
-	model->mean_face = m_fread(file);
+	model->mean = m_fread(file);
 
 	// read feature layer
 	feature_type_t feature_type;
@@ -320,7 +320,7 @@ void model_predict(model_t *model, const char *path)
 	matrix_t *X_test = get_image_matrix(entries, num_entries);
 
 	// subtract training set mean from X_test
-	m_subtract_columns(X_test, model->mean_face);
+	m_subtract_columns(X_test, model->mean);
 
 	// compute projected test images
 	matrix_t *P_test = m_product("P_test", model->feature_layer.W, X_test, true, false);

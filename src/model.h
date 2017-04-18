@@ -47,7 +47,7 @@ typedef struct {
 	image_entry_t *entries;
 	int num_labels;
 	image_label_t *labels;
-	matrix_t *mean_face;
+	matrix_t *mean;
 } model_t;
 
 model_t * model_construct(feature_type_t feature_type, model_params_t params);
