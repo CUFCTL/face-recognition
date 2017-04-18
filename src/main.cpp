@@ -92,10 +92,8 @@ int main(int argc, char **argv)
 	bool arg_train = false;
 	bool arg_test = false;
 	bool arg_stream = false;
-	bool arg_pca = false;
-	bool arg_lda = false;
-	bool arg_ica = false;
 
+	feature_type_t feature_type = FEATURE_NONE;
 	model_params_t model_params = {
 		{ -1 },
 		{ -1, -1 },
@@ -149,13 +147,13 @@ int main(int argc, char **argv)
 			arg_stream = true;
 			break;
 		case OPTION_PCA:
-			arg_pca = true;
+			feature_type = FEATURE_PCA;
 			break;
 		case OPTION_LDA:
-			arg_lda = true;
+			feature_type = FEATURE_LDA;
 			break;
 		case OPTION_ICA:
-			arg_ica = true;
+			feature_type = FEATURE_ICA;
 			break;
 		case OPTION_PCA_N1:
 			model_params.pca.n1 = atoi(optarg);
@@ -202,7 +200,7 @@ int main(int argc, char **argv)
 	}
 
 	// run the face recognition system
-	model_t *model = model_construct(arg_pca, arg_lda, arg_ica, model_params);
+	model_t *model = model_construct(feature_type, model_params);
 
 	if ( arg_train ) {
 		model_train(model, path_train);

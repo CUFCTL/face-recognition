@@ -14,6 +14,20 @@
 #include "pca.h"
 #include "bayes.h"
 
+typedef enum {
+	FEATURE_NONE,
+	FEATURE_PCA,
+	FEATURE_LDA,
+	FEATURE_ICA
+} feature_type_t;
+
+typedef struct {
+	feature_type_t type;
+	const char *name;
+	matrix_t *W;
+	matrix_t *P;
+} feature_layer_t;
+
 typedef struct {
 	pca_params_t pca;
 	lda_params_t lda;
@@ -22,15 +36,11 @@ typedef struct {
 } model_params_t;
 
 typedef struct {
-	bool enabled;
-	const char *name;
-	matrix_t *W;
-	matrix_t *P;
-} model_algorithm_t;
-
-typedef struct {
 	// hyperparameters
 	model_params_t params;
+
+	// feature layer
+	feature_layer_t feature_layer;
 
 	// input
 	int num_entries;
@@ -38,14 +48,9 @@ typedef struct {
 	int num_labels;
 	image_label_t *labels;
 	matrix_t *mean_face;
-
-	// algorithms
-	model_algorithm_t pca;
-	model_algorithm_t lda;
-	model_algorithm_t ica;
 } model_t;
 
-model_t * model_construct(bool pca, bool lda, bool ica, model_params_t params);
+model_t * model_construct(feature_type_t feature_type, model_params_t params);
 void model_destruct(model_t *model);
 
 void model_train(model_t *model, const char *path);
