@@ -94,6 +94,7 @@ int main(int argc, char **argv)
 	bool arg_stream = false;
 
 	feature_type_t feature_type = FEATURE_NONE;
+	classifier_type_t classifier_type = CLASSIFIER_KNN;
 	model_params_t model_params = {
 		{ -1 },
 		{ -1, -1 },
@@ -200,7 +201,7 @@ int main(int argc, char **argv)
 	}
 
 	// run the face recognition system
-	model_t *model = model_construct(feature_type, model_params);
+	model_t *model = model_construct(feature_type, classifier_type, model_params);
 
 	if ( arg_train ) {
 		model_train(model, path_train);

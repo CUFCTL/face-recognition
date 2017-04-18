@@ -69,14 +69,16 @@ matrix_t * get_image_matrix(image_entry_t *entries, int num_entries)
  * Construct a model.
  *
  * @param feature_type
+ * @param classifier_type
  * @param params
  * @return pointer to new model
  */
-model_t * model_construct(feature_type_t feature_type, model_params_t params)
+model_t * model_construct(feature_type_t feature_type, classifier_type_t classifier_type, model_params_t params)
 {
 	model_t *model = (model_t *)calloc(1, sizeof(model_t));
 	model->params = params;
 
+	// initialize feature layer
 	int i;
 	for ( i = 0; i < NUM_FEATURES; i++ ) {
 		if ( FEATURES[i].type == feature_type ) {
@@ -84,6 +86,10 @@ model_t * model_construct(feature_type_t feature_type, model_params_t params)
 		}
 	}
 
+	// initialize classifier layer
+	model->classifier_type = classifier_type;
+
+	// print hyperparameters
 	if ( LOGGER(LL_VERBOSE) ) {
 		int len = 20;
 
@@ -225,7 +231,6 @@ void model_save(model_t *model, const char *path)
 	m_fwrite(file, model->mean);
 
 	// save feature layer
-	fwrite(&model->feature_layer.type, sizeof(feature_type_t), 1, file);
 	m_fwrite(file, model->feature_layer.W);
 	m_fwrite(file, model->feature_layer.P);
 
@@ -280,15 +285,6 @@ void model_load(model_t *model, const char *path)
 	model->mean = m_fread(file);
 
 	// read feature layer
-	feature_type_t feature_type;
-	fread(&feature_type, sizeof(feature_type_t), 1, file);
-
-	for ( i = 0; i < NUM_FEATURES; i++ ) {
-		if ( FEATURES[i].type == feature_type ) {
-			model->feature_layer = FEATURES[i];
-		}
-	}
-
 	model->feature_layer.W = m_fread(file);
 	model->feature_layer.P = m_fread(file);
 
@@ -326,12 +322,16 @@ image_label_t **model_predict(model_t *model, const char *path)
 	image_label_t **pred_labels = (image_label_t **)malloc(num_entries * sizeof(image_label_t *));
 
 	int i;
-	for ( i = 0; i < P_test->cols; i++ ) {
-		pred_labels[i] = kNN(&model->params.knn, model->feature_layer.P, model->entries, P_test, i);
-	}
 
-	// debugging bayesian classifier
-	// image_label_t **bayes_rec_labels = bayesian(algo->P, P_test, model->num_entries, model->num_labels);
+	if ( model->classifier_type == CLASSIFIER_KNN ) {
+		for ( i = 0; i < P_test->cols; i++ ) {
+			pred_labels[i] = kNN(&model->params.knn, model->feature_layer.P, model->entries, P_test, i);
+		}
+	}
+	else if ( model->classifier_type == CLASSIFIER_BAYES ) {
+		fprintf(stderr, "error: Bayes classifier not implemented yet.\n");
+		exit(-1);
+	}
 
 	timer_pop();
 

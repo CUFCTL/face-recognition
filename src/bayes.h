@@ -1,7 +1,7 @@
 /**
- * @file knn.h
+ * @file bayes.h
  *
- * Interface definitions for the kNN layer.
+ * Interface definitions for the Bayes classifier.
  */
 #ifndef BAYES_H
 #define BAYES_H

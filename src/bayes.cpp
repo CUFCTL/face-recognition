@@ -1,17 +1,11 @@
 /**
  * @file bayes.cpp
  *
- * Implementation of the k-nearest neighbors classifier.
+ * Implementation of the Bayes classifier.
  */
 #include <stdlib.h>
 #include <string.h>
 #include "bayes.h"
-
- typedef struct {
-	image_label_t *label;
-	precision_t dist;
-} neighbor_t;
-
 
 image_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_samples, int num_classes)
 {
@@ -38,10 +32,6 @@ image_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_samples, int nu
 
 		m_free(test_vec);
 	}
-
-	// clean up
-	//delete probs;
-	//delete param_list;
 
 	return NULL;
 }

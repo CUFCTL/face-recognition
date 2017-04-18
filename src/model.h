@@ -6,13 +6,13 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include "bayes.h"
 #include "ica.h"
 #include "image_entry.h"
 #include "lda.h"
 #include "knn.h"
 #include "matrix.h"
 #include "pca.h"
-#include "bayes.h"
 
 typedef enum {
 	FEATURE_NONE,
@@ -20,6 +20,12 @@ typedef enum {
 	FEATURE_LDA,
 	FEATURE_ICA
 } feature_type_t;
+
+typedef enum {
+	CLASSIFIER_NONE,
+	CLASSIFIER_KNN,
+	CLASSIFIER_BAYES
+} classifier_type_t;
 
 typedef struct {
 	feature_type_t type;
@@ -42,6 +48,9 @@ typedef struct {
 	// feature layer
 	feature_layer_t feature_layer;
 
+	// classifier layer
+	classifier_type_t classifier_type;
+
 	// input
 	int num_entries;
 	image_entry_t *entries;
@@ -50,7 +59,7 @@ typedef struct {
 	matrix_t *mean;
 } model_t;
 
-model_t * model_construct(feature_type_t feature_type, model_params_t params);
+model_t * model_construct(feature_type_t feature_type, classifier_type_t classifier_type, model_params_t params);
 void model_destruct(model_t *model);
 
 void model_train(model_t *model, const char *path);
