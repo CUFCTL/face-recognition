@@ -225,7 +225,11 @@ int main(int argc, char **argv)
 		}
 	}
 	else if ( arg_test ) {
-		model_predict(model, path_test);
+		image_label_t **pred_labels = model_predict(model, path_test);
+
+		model_validate(model, path_test, pred_labels);
+
+		free(pred_labels);
 	}
 	else {
 		model_save(model, MODEL_FNAME);

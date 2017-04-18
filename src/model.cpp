@@ -301,7 +301,7 @@ void model_load(model_t *model, const char *path)
  * @param model
  * @param path
  */
-void model_predict(model_t *model, const char *path)
+image_label_t **model_predict(model_t *model, const char *path)
 {
 	timer_push("Recognition");
 
@@ -316,59 +316,22 @@ void model_predict(model_t *model, const char *path)
 		printf("  Test set: %d samples, %d classes\n", num_entries, num_labels);
 	}
 
-	// get image matrix X_test
+	// compute projected test images
 	matrix_t *X_test = get_image_matrix(entries, num_entries);
-
-	// subtract training set mean from X_test
 	m_subtract_columns(X_test, model->mean);
 
-	// compute projected test images
 	matrix_t *P_test = m_product("P_test", model->feature_layer.W, X_test, true, false);
 
-	// compute labels for each test image
-	image_label_t **rec_labels = (image_label_t **)malloc(num_entries * sizeof(image_label_t *));
+	// compute predicted labels
+	image_label_t **pred_labels = (image_label_t **)malloc(num_entries * sizeof(image_label_t *));
 
 	int i;
-	for ( i = 0; i < num_entries; i++ ) {
-		rec_labels[i] = kNN(&model->params.knn, model->feature_layer.P, model->entries, P_test, i);
+	for ( i = 0; i < P_test->cols; i++ ) {
+		pred_labels[i] = kNN(&model->params.knn, model->feature_layer.P, model->entries, P_test, i);
 	}
 
 	// debugging bayesian classifier
 	// image_label_t **bayes_rec_labels = bayesian(algo->P, P_test, model->num_entries, model->num_labels);
-
-	// compute accuracy
-	int num_correct = 0;
-
-	for ( i = 0; i < num_entries; i++ ) {
-		if ( strcmp(rec_labels[i]->name, entries[i].label->name) == 0 ) {
-			num_correct++;
-		}
-	}
-
-	float accuracy = 100.0f * num_correct / num_entries;
-
-	// print results
-	if ( LOGGER(LL_VERBOSE) ) {
-		printf("  %s\n", model->feature_layer.name);
-
-		for ( i = 0; i < num_entries; i++ ) {
-			const char *s = (strcmp(rec_labels[i]->name, entries[i].label->name) != 0)
-				? "(!)"
-				: "";
-
-			printf("    %-10s -> %-4s %s\n", basename(entries[i].name), rec_labels[i]->name, s);
-		}
-
-		printf("    %d / %d matched, %.2f%%\n", num_correct, num_entries, accuracy);
-		putchar('\n');
-	}
-	else {
-		printf("%.2f\n", accuracy);
-	}
-
-	// cleanup
-	m_free(P_test);
-	free(rec_labels);
 
 	timer_pop();
 
@@ -384,4 +347,67 @@ void model_predict(model_t *model, const char *path)
 	free(labels);
 
 	m_free(X_test);
+	m_free(P_test);
+
+	return pred_labels;
+}
+
+/**
+ * Validate a set of predicted labels against the
+ * ground truth.
+ *
+ * @param model
+ * @param path
+ * @param pred_labels
+ */
+void model_validate(model_t *model, const char *path, image_label_t **pred_labels)
+{
+	// get entries, labels
+	image_label_t *labels;
+	int num_labels;
+
+	image_entry_t *entries;
+	int num_entries = get_directory(path, &entries, &num_labels, &labels);
+
+	// compute accuracy
+	int num_correct = 0;
+
+	int i;
+	for ( i = 0; i < num_entries; i++ ) {
+		if ( strcmp(pred_labels[i]->name, entries[i].label->name) == 0 ) {
+			num_correct++;
+		}
+	}
+
+	float accuracy = 100.0f * num_correct / num_entries;
+
+	// print results
+	if ( LOGGER(LL_VERBOSE) ) {
+		printf("  %s\n", model->feature_layer.name);
+
+		for ( i = 0; i < num_entries; i++ ) {
+			const char *s = (strcmp(pred_labels[i]->name, entries[i].label->name) != 0)
+				? "(!)"
+				: "";
+
+			printf("    %-10s -> %-4s %s\n", basename(entries[i].name), pred_labels[i]->name, s);
+		}
+
+		printf("    %d / %d matched, %.2f%%\n", num_correct, num_entries, accuracy);
+		putchar('\n');
+	}
+	else {
+		printf("%.2f\n", accuracy);
+	}
+
+	// cleanup
+	for ( i = 0; i < num_entries; i++ ) {
+		free(entries[i].name);
+	}
+	free(entries);
+
+	for ( i = 0; i < num_labels; i++ ) {
+		free(labels[i].name);
+	}
+	free(labels);
 }

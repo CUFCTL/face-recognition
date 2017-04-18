@@ -56,6 +56,7 @@ void model_destruct(model_t *model);
 void model_train(model_t *model, const char *path);
 void model_save(model_t *model, const char *path);
 void model_load(model_t *model, const char *path);
-void model_predict(model_t *model, const char *path);
+image_label_t ** model_predict(model_t *model, const char *path);
+void model_validate(model_t *model, const char *path, image_label_t **pred_labels);
 
 #endif
