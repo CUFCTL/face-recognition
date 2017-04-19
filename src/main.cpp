@@ -13,6 +13,10 @@
 #include "model.h"
 #include "timer.h"
 
+#ifdef __NVCC__
+	#include "magma_v2.h"
+#endif
+
 typedef enum {
 	OPTION_LOGLEVEL,
 	OPTION_TRAIN,
@@ -193,6 +197,11 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
+#ifdef __NVCC__
+	magma_int_t stat = magma_init();
+	assert(stat == MAGMA_SUCCESS);
+#endif
+
 	// run the face recognition system
 	model_t *model = model_construct(feature_type, classifier_type, model_params);
 
@@ -242,6 +251,11 @@ int main(int argc, char **argv)
 	model_print_stats(model);
 
 	model_destruct(model);
+
+#ifdef __NVCC__
+	stat = magma_finalize();
+	assert(stat == MAGMA_SUCCESS);
+#endif
 
 	return 0;
 }
