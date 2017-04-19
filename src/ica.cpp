@@ -62,9 +62,9 @@ matrix_t * m_whiten (matrix_t *X, int n1)
  */
 matrix_t * ICA (ica_params_t *params, matrix_t *X)
 {
-    timer_push("  ICA");
+    timer_push("ICA");
 
-    timer_push("    subtract mean from input matrix");
+    timer_push("subtract mean from input matrix");
 
     // compute mixedsig = X', subtract mean column
     matrix_t *mixedsig = m_transpose("mixedsig", X);
@@ -74,7 +74,7 @@ matrix_t * ICA (ica_params_t *params, matrix_t *X)
 
     timer_pop();
 
-    timer_push("    compute whitening matrix and whitened input matrix");
+    timer_push("compute whitening matrix and whitened input matrix");
 
     // compute whitened input U = W_z * mixedsig
     matrix_t *W_z = m_whiten(mixedsig, params->n1);
@@ -82,14 +82,14 @@ matrix_t * ICA (ica_params_t *params, matrix_t *X)
 
     timer_pop();
 
-    timer_push("    compute mixing matrix");
+    timer_push("compute mixing matrix");
 
     // compute mixing matrix
     matrix_t *W = fpica(params, U, W_z);
 
     timer_pop();
 
-    timer_push("    compute ICA projection matrix");
+    timer_push("compute ICA projection matrix");
 
     // compute independent components
     // icasig = W * (mixedsig + mixedmean * ones(1, mixedsig->cols))

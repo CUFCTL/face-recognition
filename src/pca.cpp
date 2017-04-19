@@ -30,23 +30,23 @@ matrix_t * PCA(pca_params_t *params, matrix_t *X, matrix_t **p_D)
 		? min(X->rows, X->cols)
 		: params->n1;
 
-	timer_push("  PCA");
+	timer_push("PCA");
 
 	if ( X->rows > X->cols ) {
-		timer_push("    compute surrogate of covariance matrix L");
+		timer_push("compute surrogate of covariance matrix L");
 
 		matrix_t *L = m_product("L", X, X, true, false);
 
 		timer_pop();
 
-		timer_push("    compute eigenvectors of L");
+		timer_push("compute eigenvectors of L");
 
 		matrix_t *V;
 		m_eigen("V", "D", L, n1, &V, &D);
 
 		timer_pop();
 
-		timer_push("    compute principal components");
+		timer_push("compute principal components");
 
 		W_pca = m_product("W_pca", X, V);
 
@@ -57,13 +57,13 @@ matrix_t * PCA(pca_params_t *params, matrix_t *X, matrix_t **p_D)
 		m_free(V);
 	}
 	else {
-		timer_push("    compute covariance matrix C");
+		timer_push("compute covariance matrix C");
 
 		matrix_t *C = m_product("C", X, X, false, true);
 
 		timer_pop();
 
-		timer_push("    compute eigendecomposition of C");
+		timer_push("compute eigendecomposition of C");
 
 		m_eigen("W_pca", "D", C, n1, &W_pca, &D);
 

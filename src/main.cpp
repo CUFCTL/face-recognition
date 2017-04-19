@@ -13,8 +13,6 @@
 #include "model.h"
 #include "timer.h"
 
-int TIMING = 0;
-
 typedef enum {
 	OPTION_LOGLEVEL,
 	OPTION_TIMING,
@@ -89,6 +87,7 @@ int main(int argc, char **argv)
 {
 	const char *MODEL_FNAME = "./model.dat";
 
+	bool arg_timing = false;
 	bool arg_train = false;
 	bool arg_test = false;
 	bool arg_stream = false;
@@ -134,7 +133,7 @@ int main(int argc, char **argv)
 			LOGLEVEL = (logger_level_t) atoi(optarg);
 			break;
 		case OPTION_TIMING:
-			TIMING = 1;
+			arg_timing = true;
 			break;
 		case OPTION_TRAIN:
 			arg_train = true;
@@ -248,7 +247,9 @@ int main(int argc, char **argv)
 	model_destruct(model);
 
 	// print timing information
-	timer_print();
+	if ( arg_timing ) {
+		timer_print();
+	}
 
 	return 0;
 }

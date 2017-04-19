@@ -119,9 +119,9 @@ matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, data_entry_t *entries)
         exit(1);
     }
 
-    timer_push("  LDA");
+    timer_push("LDA");
 
-    timer_push("    compute eigenfaces");
+    timer_push("compute eigenfaces");
 
     pca_params_t pca_params = { n1 };
 
@@ -130,7 +130,7 @@ matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, data_entry_t *entries)
 
     timer_pop();
 
-    timer_push("    compute scatter matrices S_b and S_w");
+    timer_push("compute scatter matrices S_b and S_w");
 
     matrix_t *S_b;
     matrix_t *S_w;
@@ -138,7 +138,7 @@ matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, data_entry_t *entries)
 
     timer_pop();
 
-    timer_push("    compute eigendecomposition of S_b and S_w");
+    timer_push("compute eigendecomposition of S_b and S_w");
 
     matrix_t *S_w_inv = m_inverse("inv(S_w)", S_w);
     matrix_t *J = m_product("J", S_w_inv, S_b);
@@ -149,7 +149,7 @@ matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, data_entry_t *entries)
 
     timer_pop();
 
-    timer_push("    compute Fisherfaces");
+    timer_push("compute Fisherfaces");
 
     matrix_t *W_lda = m_product("W_lda", W_pca, W_fld);
 

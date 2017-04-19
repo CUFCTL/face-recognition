@@ -8,14 +8,18 @@
 
 #include <time.h>
 
-extern int TIMING;
-
 typedef struct {
 	const char *name;
+	int level;
 	clock_t start;
 	clock_t end;
-	double duration;
+	float duration;
 } timer_item_t;
+
+typedef struct {
+	std::vector<timer_item_t> items;
+	int level;
+} timekeeper_t;
 
 void timer_push(const char *);
 void timer_pop(void);
