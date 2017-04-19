@@ -15,7 +15,6 @@
 
 typedef enum {
 	OPTION_LOGLEVEL,
-	OPTION_TIMING,
 	OPTION_TRAIN,
 	OPTION_TEST,
 	OPTION_STREAM,
@@ -41,7 +40,6 @@ void print_usage()
 		"\n"
 		"Options:\n"
 		"  --loglevel LEVEL   set the log level ([1]=info, 2=verbose, 3=debug)\n"
-		"  --timing           print timing information\n"
 		"  --train DIRECTORY  train a model with a training set\n"
 		"  --test DIRECTORY   perform recognition on a test set\n"
 		"  --stream           perform recognition on an input stream\n"
@@ -87,7 +85,6 @@ int main(int argc, char **argv)
 {
 	const char *MODEL_FNAME = "./model.dat";
 
-	bool arg_timing = false;
 	bool arg_train = false;
 	bool arg_test = false;
 	bool arg_stream = false;
@@ -106,7 +103,6 @@ int main(int argc, char **argv)
 
 	struct option long_options[] = {
 		{ "loglevel", required_argument, 0, OPTION_LOGLEVEL },
-		{ "timing", no_argument, 0, OPTION_TIMING },
 		{ "train", required_argument, 0, OPTION_TRAIN },
 		{ "test", required_argument, 0, OPTION_TEST },
 		{ "stream", no_argument, 0, OPTION_STREAM },
@@ -131,9 +127,6 @@ int main(int argc, char **argv)
 		switch ( opt ) {
 		case OPTION_LOGLEVEL:
 			LOGLEVEL = (logger_level_t) atoi(optarg);
-			break;
-		case OPTION_TIMING:
-			arg_timing = true;
 			break;
 		case OPTION_TRAIN:
 			arg_train = true;
@@ -244,12 +237,11 @@ int main(int argc, char **argv)
 		model_save(model, MODEL_FNAME);
 	}
 
-	model_destruct(model);
+	timer_print();
 
-	// print timing information
-	if ( arg_timing ) {
-		timer_print();
-	}
+	model_print_stats(model);
+
+	model_destruct(model);
 
 	return 0;
 }

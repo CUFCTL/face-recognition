@@ -36,8 +36,10 @@ void timer_push(const char *name)
 
 /**
  * Stop the most recent timer item which is still running.
+ *
+ * @return duration of the timer item
  */
-void timer_pop(void)
+float timer_pop(void)
 {
 	std::vector<timer_item_t>::reverse_iterator iter;
 
@@ -53,6 +55,8 @@ void timer_pop(void)
 	iter->duration = (float)(iter->end - iter->start) / CLOCKS_PER_SEC;
 
 	timer.level--;
+
+	return iter->duration;
 }
 
 /**
@@ -74,7 +78,6 @@ void timer_print(void)
 	}
 
 	// print timer items
-	log(LL_VERBOSE, "\n");
 	log(LL_VERBOSE, "Timing\n");
 	log(LL_VERBOSE, "%-*s  %s\n", max_len, "Name", "Duration (s)");
 	log(LL_VERBOSE, "%-*s  %s\n", max_len, "----", "------------");

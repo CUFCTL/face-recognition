@@ -30,7 +30,7 @@ void log(logger_level_t level, const char *format, ...)
 		time_t t = time(NULL);
 		struct tm *tm = localtime(&t);
 
-		fprintf(stream, "%04d-%02d-%02d %02d:%02d:%02d ",
+		fprintf(stream, "[%04d-%02d-%02d %02d:%02d:%02d] ",
 			1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday,
 			tm->tm_hour, tm->tm_min, tm->tm_sec);
 

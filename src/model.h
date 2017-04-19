@@ -35,6 +35,12 @@ typedef struct {
 } model_params_t;
 
 typedef struct {
+	float accuracy;
+	float train_time;
+	float test_time;
+} model_stats_t;
+
+typedef struct {
 	// hyperparameters
 	model_params_t params;
 
@@ -49,6 +55,9 @@ typedef struct {
 	// input data
 	dataset_t *dataset;
 	matrix_t *mean;
+
+	// performance, accuracy stats
+	model_stats_t stats;
 } model_t;
 
 model_t * model_construct(feature_type_t feature, classifier_type_t classifier, model_params_t params);
@@ -59,5 +68,6 @@ void model_save(model_t *model, const char *path);
 void model_load(model_t *model, const char *path);
 data_label_t ** model_predict(model_t *model, dataset_t *test_set);
 void model_validate(model_t *model, dataset_t *test_set, data_label_t **pred_labels);
+void model_print_stats(model_t *model);
 
 #endif

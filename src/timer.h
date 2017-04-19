@@ -22,7 +22,7 @@ typedef struct {
 } timekeeper_t;
 
 void timer_push(const char *);
-void timer_pop(void);
+float timer_pop(void);
 void timer_print(void);
 
 #endif

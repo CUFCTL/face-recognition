@@ -89,7 +89,7 @@ void model_train(model_t *model, dataset_t *train_set)
 
 	model->dataset = train_set;
 
-	log(LL_VERBOSE, "  Training set: %d samples, %d classes\n",
+	log(LL_VERBOSE, "Training set: %d samples, %d classes\n",
 		train_set->num_entries,
 		train_set->num_labels);
 
@@ -114,7 +114,9 @@ void model_train(model_t *model, dataset_t *train_set)
 		model->P = m_product("P_ica", model->W, X, true, false);
 	}
 
-	timer_pop();
+	model->stats.train_time = timer_pop();
+
+	log(LL_VERBOSE, "\n");
 
 	// cleanup
 	m_free(X);
@@ -170,7 +172,7 @@ data_label_t **model_predict(model_t *model, dataset_t *test_set)
 {
 	timer_push("Recognition");
 
-	log(LL_VERBOSE, "  Test set: %d samples, %d classes\n",
+	log(LL_VERBOSE, "Test set: %d samples, %d classes\n",
 		test_set->num_entries,
 		test_set->num_labels);
 
@@ -194,7 +196,9 @@ data_label_t **model_predict(model_t *model, dataset_t *test_set)
 		exit(1);
 	}
 
-	timer_pop();
+	model->stats.test_time = timer_pop();
+
+	log(LL_VERBOSE, "\n");
 
 	// cleanup
 	m_free(X_test);
@@ -222,10 +226,10 @@ void model_validate(model_t *model, dataset_t *test_set, data_label_t **pred_lab
 		}
 	}
 
-	float accuracy = 100.0f * num_correct / test_set->num_entries;
+	model->stats.accuracy = 100.0f * num_correct / test_set->num_entries;
 
 	// print results
-	log(LL_VERBOSE, "  Results\n");
+	log(LL_VERBOSE, "Results\n");
 
 	for ( i = 0; i < test_set->num_entries; i++ ) {
 		data_label_t *pred_label = pred_labels[i];
@@ -235,11 +239,27 @@ void model_validate(model_t *model, dataset_t *test_set, data_label_t **pred_lab
 			? "(!)"
 			: "";
 
-		log(LL_VERBOSE, "    %-10s -> %-4s %s\n", basename(entry->name), pred_label->name, s);
+		log(LL_VERBOSE, "%-10s -> %-4s %s\n",
+			basename(entry->name),
+			pred_label->name, s);
 	}
 
-	log(LL_VERBOSE, "    %d / %d matched, %.2f%%\n", num_correct, test_set->num_entries, accuracy);
+	log(LL_VERBOSE, "%d / %d matched, %.2f%%\n",
+		num_correct,
+		test_set->num_entries,
+		model->stats.accuracy);
 	log(LL_VERBOSE, "\n");
+}
 
-	log(LL_INFO, "%.2f\n", accuracy);
+/**
+ * Print a model's performance / accuracy stats.
+ *
+ * @param model
+ */
+void model_print_stats(model_t *model)
+{
+	printf("%10.2f  %10.3f  %10.3f\n",
+		model->stats.accuracy,
+		model->stats.train_time,
+		model->stats.test_time);
 }
