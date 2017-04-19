@@ -18,7 +18,7 @@
  * @param p_S_b    pointer to store between-scatter matrix
  * @param p_S_w    pointer to store within-scatter matrix
  */
-void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, matrix_t **p_S_w)
+void m_scatter(matrix_t *X, int c, data_entry_t *entries, matrix_t **p_S_b, matrix_t **p_S_w)
 {
     matrix_t **X_classes = (matrix_t **)malloc(c * sizeof(matrix_t *));
     matrix_t **U = (matrix_t **)malloc(c * sizeof(matrix_t *));
@@ -102,7 +102,7 @@ void m_scatter(matrix_t *X, int c, image_entry_t *entries, matrix_t **p_S_b, mat
  * @param entries
  * @return projection matrix W_lda
  */
-matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, image_entry_t *entries)
+matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, data_entry_t *entries)
 {
     // if n1 = -1, use default value
     int n1 = (params->n1 == -1)

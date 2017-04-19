@@ -12,82 +12,23 @@
 #include "model.h"
 #include "timer.h"
 
-const feature_layer_t FEATURES[] = {
-	{
-		FEATURE_PCA,
-		"PCA",
-		NULL, NULL
-	},
-	{
-		FEATURE_LDA,
-		"LDA",
-		NULL, NULL
-	},
-	{
-		FEATURE_ICA,
-		"ICA",
-		NULL, NULL
-	}
-};
-const int NUM_FEATURES = sizeof(FEATURES) / sizeof(feature_layer_t);
-
-/**
- * Map a collection of images to column vectors.
- *
- * The image matrix has size m x n, where m is the number of
- * pixels in each image and n is the number of images. The
- * images must all have the same size.
- *
- * @param entries
- * @param num_entries
- * @return pointer to image matrix
- */
-matrix_t * get_image_matrix(image_entry_t *entries, int num_entries)
-{
-	// get the image size from the first image
-	image_t *image = image_construct();
-	image_read(image, entries[0].name);
-
-	// construct image matrix
-	matrix_t *X = m_initialize("X", image->channels * image->height * image->width, num_entries);
-
-	// map each image to a column vector
-	m_image_read(X, 0, image);
-
-	int i;
-	for ( i = 1; i < num_entries; i++ ) {
-		image_read(image, entries[i].name);
-		m_image_read(X, i, image);
-	}
-
-	image_destruct(image);
-
-	return X;
-}
-
 /**
  * Construct a model.
  *
- * @param feature_type
- * @param classifier_type
+ * @param feature
+ * @param classifier
  * @param params
  * @return pointer to new model
  */
-model_t * model_construct(feature_type_t feature_type, classifier_type_t classifier_type, model_params_t params)
+model_t * model_construct(feature_type_t feature, classifier_type_t classifier, model_params_t params)
 {
-	model_t *model = (model_t *)calloc(1, sizeof(model_t));
+	model_t *model = (model_t *)malloc(sizeof(model_t));
 	model->params = params;
-
-	// initialize feature layer
-	int i;
-	for ( i = 0; i < NUM_FEATURES; i++ ) {
-		if ( FEATURES[i].type == feature_type ) {
-			model->feature_layer = FEATURES[i];
-		}
-	}
-
-	// initialize classifier layer
-	model->classifier_type = classifier_type;
+	model->feature = feature;
+	model->W = NULL;
+	model->P = NULL;
+	model->classifier = classifier;
+	model->dataset = NULL;
 
 	// print hyperparameters
 	if ( LOGGER(LL_VERBOSE) ) {
@@ -95,16 +36,16 @@ model_t * model_construct(feature_type_t feature_type, classifier_type_t classif
 
 		printf("Hyperparameters\n");
 
-		if ( model->feature_layer.type == FEATURE_PCA ) {
+		if ( model->feature == FEATURE_PCA ) {
 			printf("PCA\n");
 			printf("  %-*s  %10d\n", len, "n1", model->params.pca.n1);
 		}
-		else if ( model->feature_layer.type == FEATURE_LDA ) {
+		else if ( model->feature == FEATURE_LDA ) {
 			printf("LDA\n");
 			printf("  %-*s  %10d\n", len, "n1", model->params.lda.n1);
 			printf("  %-*s  %10d\n", len, "n2", model->params.lda.n2);
 		}
-		else if ( model->feature_layer.type == FEATURE_ICA ) {
+		else if ( model->feature == FEATURE_ICA ) {
 			printf("ICA\n");
 			printf("  %-*s  %10d\n", len, "n1", model->params.ica.n1);
 			printf("  %-*s  %10d\n", len, "n2", model->params.ica.n2);
@@ -127,25 +68,12 @@ model_t * model_construct(feature_type_t feature_type, classifier_type_t classif
  */
 void model_destruct(model_t *model)
 {
-	// free entries
-	int i;
-	for ( i = 0; i < model->num_entries; i++ ) {
-		free(model->entries[i].name);
-	}
-	free(model->entries);
+	dataset_destruct(model->dataset);
 
-	// free labels
-	for ( i = 0; i < model->num_labels; i++ ) {
-		free(model->labels[i].name);
-	}
-	free(model->labels);
-
-	// free mean face
 	m_free(model->mean);
 
-	// free feature layer
-	m_free(model->feature_layer.W);
-	m_free(model->feature_layer.P);
+	m_free(model->W);
+	m_free(model->P);
 
 	free(model);
 }
@@ -154,38 +82,39 @@ void model_destruct(model_t *model)
  * Perform training on a training set.
  *
  * @param model
- * @param path
+ * @param train_set
  */
-void model_train(model_t *model, const char *path)
+void model_train(model_t *model, dataset_t *train_set)
 {
 	timer_push("Training");
 
-	// get entries, labels
-	model->num_entries = get_directory(path, &model->entries, &model->num_labels, &model->labels);
+	model->dataset = train_set;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("  Training set: %d samples, %d classes\n", model->num_entries, model->num_labels);
+		printf("  Training set: %d samples, %d classes\n",
+			train_set->num_entries,
+			train_set->num_labels);
 	}
 
-	// get image matrix X
-	matrix_t *X = get_image_matrix(model->entries, model->num_entries);
+	// get data matrix X
+	matrix_t *X = dataset_load(train_set);
 
 	// subtract mean from X
 	model->mean = m_mean_column("m", X);
 	m_subtract_columns(X, model->mean);
 
-	// perform feature extraction
-	if ( model->feature_layer.type == FEATURE_PCA ) {
-		model->feature_layer.W = PCA(&model->params.pca, X, NULL);
-		model->feature_layer.P = m_product("P_pca", model->feature_layer.W, X, true, false);
+	// compute features from X
+	if ( model->feature == FEATURE_PCA ) {
+		model->W = PCA(&model->params.pca, X, NULL);
+		model->P = m_product("P_pca", model->W, X, true, false);
 	}
-	else if ( model->feature_layer.type == FEATURE_LDA ) {
-		model->feature_layer.W = LDA(&model->params.lda, X, model->num_labels, model->entries);
-		model->feature_layer.P = m_product("P_lda", model->feature_layer.W, X, true, false);
+	else if ( model->feature == FEATURE_LDA ) {
+		model->W = LDA(&model->params.lda, X, train_set->num_labels, train_set->entries);
+		model->P = m_product("P_lda", model->W, X, true, false);
 	}
-	else if ( model->feature_layer.type == FEATURE_ICA ) {
-		model->feature_layer.W = ICA(&model->params.ica, X);
-		model->feature_layer.P = m_product("P_ica", model->feature_layer.W, X, true, false);
+	else if ( model->feature == FEATURE_ICA ) {
+		model->W = ICA(&model->params.ica, X);
+		model->P = m_product("P_ica", model->W, X, true, false);
 	}
 
 	timer_pop();
@@ -195,7 +124,7 @@ void model_train(model_t *model, const char *path)
 }
 
 /**
- * Save a model to a data file.
+ * Save a model to a file.
  *
  * @param model
  * @param path
@@ -204,35 +133,12 @@ void model_save(model_t *model, const char *path)
 {
 	FILE *file = fopen(path, "w");
 
-	// save labels
-	fwrite(&model->num_labels, sizeof(int), 1, file);
+	dataset_fwrite(model->dataset, file);
 
-	int i;
-	for ( i = 0; i < model->num_labels; i++ ) {
-		fwrite(&model->labels[i].id, sizeof(int), 1, file);
-
-		int num = strlen(model->labels[i].name) + 1;
-		fwrite(&num, sizeof(int), 1, file);
-		fwrite(model->labels[i].name, sizeof(char), num, file);
-	}
-
-	// save entries
-	fwrite(&model->num_entries, sizeof(int), 1, file);
-
-	for ( i = 0; i < model->num_entries; i++ ) {
-		fwrite(&model->entries[i].label->id, sizeof(int), 1, file);
-
-		int num = strlen(model->entries[i].name) + 1;
-		fwrite(&num, sizeof(int), 1, file);
-		fwrite(model->entries[i].name, sizeof(char), num, file);
-	}
-
-	// save mean face
 	m_fwrite(file, model->mean);
 
-	// save feature layer
-	m_fwrite(file, model->feature_layer.W);
-	m_fwrite(file, model->feature_layer.P);
+	m_fwrite(file, model->W);
+	m_fwrite(file, model->P);
 
 	fclose(file);
 }
@@ -247,46 +153,12 @@ void model_load(model_t *model, const char *path)
 {
 	FILE *file = fopen(path, "r");
 
-	// read labels
-	fread(&model->num_labels, sizeof(int), 1, file);
+	model->dataset = dataset_fread(file);
 
-	model->labels = (image_label_t *)malloc(model->num_labels * sizeof(image_label_t));
-
-	int i;
-	for ( i = 0; i < model->num_labels; i++ ) {
-		fread(&model->labels[i].id, sizeof(int), 1, file);
-
-		int num;
-		fread(&num, sizeof(int), 1, file);
-
-		model->labels[i].name = (char *)malloc(num * sizeof(char));
-		fread(model->labels[i].name, sizeof(char), num, file);
-	}
-
-	// read entries
-	fread(&model->num_entries, sizeof(int), 1, file);
-
-	model->entries = (image_entry_t *)malloc(model->num_entries * sizeof(image_entry_t));
-
-	for ( i = 0; i < model->num_entries; i++ ) {
-		int label_id;
-		fread(&label_id, sizeof(int), 1, file);
-
-		model->entries[i].label = &model->labels[label_id];
-
-		int num;
-		fread(&num, sizeof(int), 1, file);
-
-		model->entries[i].name = (char *)malloc(num * sizeof(char));
-		fread(model->entries[i].name, sizeof(char), num, file);
-	}
-
-	// read mean face
 	model->mean = m_fread(file);
 
-	// read feature layer
-	model->feature_layer.W = m_fread(file);
-	model->feature_layer.P = m_fread(file);
+	model->W = m_fread(file);
+	model->P = m_fread(file);
 
 	fclose(file);
 }
@@ -295,57 +167,41 @@ void model_load(model_t *model, const char *path)
  * Perform recognition on a test set.
  *
  * @param model
- * @param path
+ * @param test_set
  */
-image_label_t **model_predict(model_t *model, const char *path)
+data_label_t **model_predict(model_t *model, dataset_t *test_set)
 {
 	timer_push("Recognition");
 
-	// get entries, labels
-	image_label_t *labels;
-	int num_labels;
-
-	image_entry_t *entries;
-	int num_entries = get_directory(path, &entries, &num_labels, &labels);
-
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("  Test set: %d samples, %d classes\n", num_entries, num_labels);
+		printf("  Test set: %d samples, %d classes\n",
+			test_set->num_entries,
+			test_set->num_labels);
 	}
 
 	// compute projected test images
-	matrix_t *X_test = get_image_matrix(entries, num_entries);
+	matrix_t *X_test = dataset_load(test_set);
 	m_subtract_columns(X_test, model->mean);
 
-	matrix_t *P_test = m_product("P_test", model->feature_layer.W, X_test, true, false);
+	matrix_t *P_test = m_product("P_test", model->W, X_test, true, false);
 
 	// compute predicted labels
-	image_label_t **pred_labels = (image_label_t **)malloc(num_entries * sizeof(image_label_t *));
+	data_label_t **pred_labels = (data_label_t **)malloc(test_set->num_entries * sizeof(data_label_t *));
 
-	int i;
-
-	if ( model->classifier_type == CLASSIFIER_KNN ) {
-		for ( i = 0; i < P_test->cols; i++ ) {
-			pred_labels[i] = kNN(&model->params.knn, model->feature_layer.P, model->entries, P_test, i);
+	if ( model->classifier == CLASSIFIER_KNN ) {
+		int i;
+		for ( i = 0; i < test_set->num_entries; i++ ) {
+			pred_labels[i] = kNN(&model->params.knn, model->P, model->dataset->entries, P_test, i);
 		}
 	}
-	else if ( model->classifier_type == CLASSIFIER_BAYES ) {
+	else if ( model->classifier == CLASSIFIER_BAYES ) {
 		fprintf(stderr, "error: Bayes classifier not implemented yet.\n");
-		exit(-1);
+		exit(1);
 	}
 
 	timer_pop();
 
 	// cleanup
-	for ( i = 0; i < num_entries; i++ ) {
-		free(entries[i].name);
-	}
-	free(entries);
-
-	for ( i = 0; i < num_labels; i++ ) {
-		free(labels[i].name);
-	}
-	free(labels);
-
 	m_free(X_test);
 	m_free(P_test);
 
@@ -353,61 +209,45 @@ image_label_t **model_predict(model_t *model, const char *path)
 }
 
 /**
- * Validate a set of predicted labels against the
- * ground truth.
+ * Validate a set of predicted labels against the ground truth.
  *
  * @param model
- * @param path
+ * @param test_set
  * @param pred_labels
  */
-void model_validate(model_t *model, const char *path, image_label_t **pred_labels)
+void model_validate(model_t *model, dataset_t *test_set, data_label_t **pred_labels)
 {
-	// get entries, labels
-	image_label_t *labels;
-	int num_labels;
-
-	image_entry_t *entries;
-	int num_entries = get_directory(path, &entries, &num_labels, &labels);
-
 	// compute accuracy
 	int num_correct = 0;
 
 	int i;
-	for ( i = 0; i < num_entries; i++ ) {
-		if ( strcmp(pred_labels[i]->name, entries[i].label->name) == 0 ) {
+	for ( i = 0; i < test_set->num_entries; i++ ) {
+		if ( strcmp(pred_labels[i]->name, test_set->entries[i].label->name) == 0 ) {
 			num_correct++;
 		}
 	}
 
-	float accuracy = 100.0f * num_correct / num_entries;
+	float accuracy = 100.0f * num_correct / test_set->num_entries;
 
 	// print results
 	if ( LOGGER(LL_VERBOSE) ) {
-		printf("  %s\n", model->feature_layer.name);
+		printf("  Results\n");
 
-		for ( i = 0; i < num_entries; i++ ) {
-			const char *s = (strcmp(pred_labels[i]->name, entries[i].label->name) != 0)
+		for ( i = 0; i < test_set->num_entries; i++ ) {
+			data_label_t *pred_label = pred_labels[i];
+			data_entry_t *entry = &test_set->entries[i];
+
+			const char *s = (strcmp(pred_label->name, entry->label->name) != 0)
 				? "(!)"
 				: "";
 
-			printf("    %-10s -> %-4s %s\n", basename(entries[i].name), pred_labels[i]->name, s);
+			printf("    %-10s -> %-4s %s\n", basename(entry->name), pred_label->name, s);
 		}
 
-		printf("    %d / %d matched, %.2f%%\n", num_correct, num_entries, accuracy);
+		printf("    %d / %d matched, %.2f%%\n", num_correct, test_set->num_entries, accuracy);
 		putchar('\n');
 	}
 	else {
 		printf("%.2f\n", accuracy);
 	}
-
-	// cleanup
-	for ( i = 0; i < num_entries; i++ ) {
-		free(entries[i].name);
-	}
-	free(entries);
-
-	for ( i = 0; i < num_labels; i++ ) {
-		free(labels[i].name);
-	}
-	free(labels);
 }

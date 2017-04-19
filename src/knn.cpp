@@ -8,7 +8,7 @@
 #include "math_helper.h"
 
 typedef struct {
-	image_label_t *label;
+	data_label_t *label;
 	precision_t dist;
 } neighbor_t;
 
@@ -70,7 +70,7 @@ void * kNN_identify(const void *a)
  * @param i
  * @return predicted label of the test observation
  */
-image_label_t * kNN(knn_params_t *params, matrix_t *X, image_entry_t *Y, matrix_t *X_test, int i)
+data_label_t * kNN(knn_params_t *params, matrix_t *X, data_entry_t *Y, matrix_t *X_test, int i)
 {
 	// compute distance between X_test_i and each observation in X
 	int num_neighbors = X->cols;
@@ -86,7 +86,7 @@ image_label_t * kNN(knn_params_t *params, matrix_t *X, image_entry_t *Y, matrix_
 	qsort(neighbors, num_neighbors, sizeof(neighbor_t), kNN_compare);
 
 	// determine the mode of the k nearest labels
-	image_label_t *nearest = (image_label_t *)mode(neighbors, params->k, sizeof(neighbor_t), kNN_identify);
+	data_label_t *nearest = (data_label_t *)mode(neighbors, params->k, sizeof(neighbor_t), kNN_identify);
 
 	free(neighbors);
 

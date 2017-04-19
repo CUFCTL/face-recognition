@@ -7,8 +7,8 @@
 #define MODEL_H
 
 #include "bayes.h"
+#include "dataset.h"
 #include "ica.h"
-#include "image_entry.h"
 #include "lda.h"
 #include "knn.h"
 #include "matrix.h"
@@ -28,13 +28,6 @@ typedef enum {
 } classifier_type_t;
 
 typedef struct {
-	feature_type_t type;
-	const char *name;
-	matrix_t *W;
-	matrix_t *P;
-} feature_layer_t;
-
-typedef struct {
 	pca_params_t pca;
 	lda_params_t lda;
 	ica_params_t ica;
@@ -46,26 +39,25 @@ typedef struct {
 	model_params_t params;
 
 	// feature layer
-	feature_layer_t feature_layer;
+	feature_type_t feature;
+	matrix_t *W;
+	matrix_t *P;
 
 	// classifier layer
-	classifier_type_t classifier_type;
+	classifier_type_t classifier;
 
-	// input
-	int num_entries;
-	image_entry_t *entries;
-	int num_labels;
-	image_label_t *labels;
+	// input data
+	dataset_t *dataset;
 	matrix_t *mean;
 } model_t;
 
-model_t * model_construct(feature_type_t feature_type, classifier_type_t classifier_type, model_params_t params);
+model_t * model_construct(feature_type_t feature, classifier_type_t classifier, model_params_t params);
 void model_destruct(model_t *model);
 
-void model_train(model_t *model, const char *path);
+void model_train(model_t *model, dataset_t *train_set);
 void model_save(model_t *model, const char *path);
 void model_load(model_t *model, const char *path);
-image_label_t ** model_predict(model_t *model, const char *path);
-void model_validate(model_t *model, const char *path, image_label_t **pred_labels);
+data_label_t ** model_predict(model_t *model, dataset_t *test_set);
+void model_validate(model_t *model, dataset_t *test_set, data_label_t **pred_labels);
 
 #endif

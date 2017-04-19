@@ -7,7 +7,7 @@
 #include <string.h>
 #include "bayes.h"
 
-image_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_samples, int num_classes)
+data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_samples, int num_classes)
 {
 
 	unsigned int i, j;

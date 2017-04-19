@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "dataset.h"
 #include "logger.h"
 #include "model.h"
 #include "timer.h"
@@ -204,7 +205,9 @@ int main(int argc, char **argv)
 	model_t *model = model_construct(feature_type, classifier_type, model_params);
 
 	if ( arg_train ) {
-		model_train(model, path_train);
+		dataset_t *train_set = dataset_construct(path_train);
+
+		model_train(model, train_set);
 	}
 	else {
 		model_load(model, MODEL_FNAME);
@@ -221,15 +224,21 @@ int main(int argc, char **argv)
 				break;
 			}
 			else if ( c == READ ) {
-				model_predict(model, path_test);
+				dataset_t *test_set = dataset_construct(path_test);
+
+				model_predict(model, test_set);
+
+				dataset_destruct(test_set);
 			}
 		}
 	}
 	else if ( arg_test ) {
-		image_label_t **pred_labels = model_predict(model, path_test);
+		dataset_t *test_set = dataset_construct(path_test);
 
-		model_validate(model, path_test, pred_labels);
+		data_label_t **pred_labels = model_predict(model, test_set);
+		model_validate(model, test_set, pred_labels);
 
+		dataset_destruct(test_set);
 		free(pred_labels);
 	}
 	else {

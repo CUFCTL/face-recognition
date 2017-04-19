@@ -6,7 +6,7 @@
 #ifndef LDA_H
 #define LDA_H
 
-#include "image_entry.h"
+#include "dataset.h"
 #include "matrix.h"
 
 typedef struct {
@@ -14,6 +14,6 @@ typedef struct {
 	int n2;
 } lda_params_t;
 
-matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, image_entry_t *entries);
+matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, data_entry_t *entries);
 
 #endif
