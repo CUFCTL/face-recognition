@@ -7,6 +7,7 @@
 #define TIMER_H
 
 #include <time.h>
+#include <vector>
 
 typedef struct {
 	const char *name;
