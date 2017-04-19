@@ -55,6 +55,7 @@ model_t * model_construct(feature_type_t feature, classifier_type_t classifier, 
 
 		printf("kNN\n");
 		printf("  %-*s  %10d\n", len, "k", model->params.knn.k);
+		printf("  %-*s  %10s\n", len, "dist", model->params.knn.dist_name);
 		putchar('\n');
 	}
 

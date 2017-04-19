@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 		{ -1 },
 		{ -1, -1 },
 		{ -1, -1, 1000, 0.0001f },
-		{ 1, m_dist_L2 }
+		{ 1, m_dist_L2, "L2" }
 	};
 
 	char *path_train = NULL;
@@ -183,6 +183,7 @@ int main(int argc, char **argv)
 			break;
 		case OPTION_KNN_DIST:
 			model_params.knn.dist = parse_dist_func(optarg);
+			model_params.knn.dist_name = optarg;
 			break;
 		case OPTION_UNKNOWN:
 			print_usage();
