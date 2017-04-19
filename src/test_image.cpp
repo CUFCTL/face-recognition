@@ -5,10 +5,7 @@
  */
 #include <stdio.h>
 #include "image.h"
-#include "logger.h"
 #include "matrix.h"
-
-logger_level_t LOGLEVEL = LL_INFO;
 
 int main(int argc, char **argv)
 {

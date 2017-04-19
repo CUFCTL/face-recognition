@@ -4,10 +4,10 @@
  * Implementation of LDA (Belhumeur et al., 1996; Zhao et al., 1998).
  */
 #include "lda.h"
+#include "logger.h"
 #include "math_helper.h"
 #include "pca.h"
 #include "timer.h"
-#include <stdlib.h>
 
 /**
  * Compute the scatter matrices S_b and S_w for a matrix X.
@@ -115,7 +115,7 @@ matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, data_entry_t *entries)
         : params->n2;
 
     if ( n1 <= 0 ) {
-        fprintf(stderr, "error: training set is too small for LDA\n");
+        log(LL_ERROR, "error: training set is too small for LDA\n");
         exit(1);
     }
 

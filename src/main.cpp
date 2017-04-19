@@ -13,7 +13,6 @@
 #include "model.h"
 #include "timer.h"
 
-logger_level_t LOGLEVEL = LL_INFO;
 int TIMING = 0;
 
 typedef enum {

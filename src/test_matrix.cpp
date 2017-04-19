@@ -25,8 +25,6 @@
 
 typedef void (*test_func_t)(void);
 
-logger_level_t LOGLEVEL = LL_INFO;
-
 /**
  * Determine whether two floating point values are equal.
  *

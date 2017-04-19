@@ -30,34 +30,32 @@ model_t * model_construct(feature_type_t feature, classifier_type_t classifier, 
 	model->classifier = classifier;
 	model->dataset = NULL;
 
-	// print hyperparameters
-	if ( LOGGER(LL_VERBOSE) ) {
-		int len = 20;
+	// log hyperparameters
+	int len = 20;
 
-		printf("Hyperparameters\n");
+	log(LL_VERBOSE, "Hyperparameters\n");
 
-		if ( model->feature == FEATURE_PCA ) {
-			printf("PCA\n");
-			printf("  %-*s  %10d\n", len, "n1", model->params.pca.n1);
-		}
-		else if ( model->feature == FEATURE_LDA ) {
-			printf("LDA\n");
-			printf("  %-*s  %10d\n", len, "n1", model->params.lda.n1);
-			printf("  %-*s  %10d\n", len, "n2", model->params.lda.n2);
-		}
-		else if ( model->feature == FEATURE_ICA ) {
-			printf("ICA\n");
-			printf("  %-*s  %10d\n", len, "n1", model->params.ica.n1);
-			printf("  %-*s  %10d\n", len, "n2", model->params.ica.n2);
-			printf("  %-*s  %10d\n", len, "max_iterations", model->params.ica.max_iterations);
-			printf("  %-*s  %10f\n", len, "epsilon", model->params.ica.epsilon);
-		}
-
-		printf("kNN\n");
-		printf("  %-*s  %10d\n", len, "k", model->params.knn.k);
-		printf("  %-*s  %10s\n", len, "dist", model->params.knn.dist_name);
-		putchar('\n');
+	if ( model->feature == FEATURE_PCA ) {
+		log(LL_VERBOSE, "PCA\n");
+		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n1", model->params.pca.n1);
 	}
+	else if ( model->feature == FEATURE_LDA ) {
+		log(LL_VERBOSE, "LDA\n");
+		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n1", model->params.lda.n1);
+		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n2", model->params.lda.n2);
+	}
+	else if ( model->feature == FEATURE_ICA ) {
+		log(LL_VERBOSE, "ICA\n");
+		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n1", model->params.ica.n1);
+		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n2", model->params.ica.n2);
+		log(LL_VERBOSE, "  %-*s  %10d\n", len, "max_iterations", model->params.ica.max_iterations);
+		log(LL_VERBOSE, "  %-*s  %10f\n", len, "epsilon", model->params.ica.epsilon);
+	}
+
+	log(LL_VERBOSE, "kNN\n");
+	log(LL_VERBOSE, "  %-*s  %10d\n", len, "k", model->params.knn.k);
+	log(LL_VERBOSE, "  %-*s  %10s\n", len, "dist", model->params.knn.dist_name);
+	log(LL_VERBOSE, "\n");
 
 	return model;
 }
@@ -91,11 +89,9 @@ void model_train(model_t *model, dataset_t *train_set)
 
 	model->dataset = train_set;
 
-	if ( LOGGER(LL_VERBOSE) ) {
-		printf("  Training set: %d samples, %d classes\n",
-			train_set->num_entries,
-			train_set->num_labels);
-	}
+	log(LL_VERBOSE, "  Training set: %d samples, %d classes\n",
+		train_set->num_entries,
+		train_set->num_labels);
 
 	// get data matrix X
 	matrix_t *X = dataset_load(train_set);
@@ -174,11 +170,9 @@ data_label_t **model_predict(model_t *model, dataset_t *test_set)
 {
 	timer_push("Recognition");
 
-	if ( LOGGER(LL_VERBOSE) ) {
-		printf("  Test set: %d samples, %d classes\n",
-			test_set->num_entries,
-			test_set->num_labels);
-	}
+	log(LL_VERBOSE, "  Test set: %d samples, %d classes\n",
+		test_set->num_entries,
+		test_set->num_labels);
 
 	// compute projected test images
 	matrix_t *X_test = dataset_load(test_set);
@@ -196,7 +190,7 @@ data_label_t **model_predict(model_t *model, dataset_t *test_set)
 		}
 	}
 	else if ( model->classifier == CLASSIFIER_BAYES ) {
-		fprintf(stderr, "error: Bayes classifier not implemented yet.\n");
+		log(LL_ERROR, "error: Bayes classifier not implemented yet.\n");
 		exit(1);
 	}
 
@@ -231,24 +225,21 @@ void model_validate(model_t *model, dataset_t *test_set, data_label_t **pred_lab
 	float accuracy = 100.0f * num_correct / test_set->num_entries;
 
 	// print results
-	if ( LOGGER(LL_VERBOSE) ) {
-		printf("  Results\n");
+	log(LL_VERBOSE, "  Results\n");
 
-		for ( i = 0; i < test_set->num_entries; i++ ) {
-			data_label_t *pred_label = pred_labels[i];
-			data_entry_t *entry = &test_set->entries[i];
+	for ( i = 0; i < test_set->num_entries; i++ ) {
+		data_label_t *pred_label = pred_labels[i];
+		data_entry_t *entry = &test_set->entries[i];
 
-			const char *s = (strcmp(pred_label->name, entry->label->name) != 0)
-				? "(!)"
-				: "";
+		const char *s = (strcmp(pred_label->name, entry->label->name) != 0)
+			? "(!)"
+			: "";
 
-			printf("    %-10s -> %-4s %s\n", basename(entry->name), pred_label->name, s);
-		}
-
-		printf("    %d / %d matched, %.2f%%\n", num_correct, test_set->num_entries, accuracy);
-		putchar('\n');
+		log(LL_VERBOSE, "    %-10s -> %-4s %s\n", basename(entry->name), pred_label->name, s);
 	}
-	else {
-		printf("%.2f\n", accuracy);
-	}
+
+	log(LL_VERBOSE, "    %d / %d matched, %.2f%%\n", num_correct, test_set->num_entries, accuracy);
+	log(LL_VERBOSE, "\n");
+
+	log(LL_INFO, "%.2f\n", accuracy);
 }

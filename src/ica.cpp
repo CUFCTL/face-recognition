@@ -156,9 +156,7 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
 
     int i;
     for ( i = 0; i < n2; i++ ) {
-        if ( LOGGER(LL_VERBOSE) ) {
-            printf("      round %d\n", i + 1);
-        }
+        log(LL_VERBOSE, "      round %d\n", i + 1);
 
         // initialize w as a Gaussian (0, 1) random vector
         matrix_t *w = m_random("w", vectorSize, 1);
@@ -241,9 +239,7 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
             m_free(w_temp2);
         }
 
-        if ( LOGGER(LL_VERBOSE) ) {
-            printf("      iterations: %d\n", j);
-        }
+        log(LL_VERBOSE, "      iterations: %d\n", j);
 
         m_free(w);
         m_free(w0);

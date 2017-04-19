@@ -29,9 +29,7 @@ void timer_push(const char *name)
 		items.push_back(item);
 	}
 
-	if ( LOGGER(LL_VERBOSE) ) {
-		printf("%s\n", name);
-	}
+	log(LL_VERBOSE, "%s\n", name);
 }
 
 /**
@@ -77,15 +75,15 @@ void timer_print(void)
 		}
 
 		// print timer items
-		putchar('\n');
-		printf("Timing Statistics\n");
-		putchar('\n');
-		printf("%-*s  %s\n", max_length, "Name", "Duration (s)");
-		printf("%-*s  %s\n", max_length, "----", "------------");
+		log(LL_VERBOSE, "\n");
+		log(LL_VERBOSE, "Timing Statistics\n");
+		log(LL_VERBOSE, "\n");
+		log(LL_VERBOSE, "%-*s  %s\n", max_length, "Name", "Duration (s)");
+		log(LL_VERBOSE, "%-*s  %s\n", max_length, "----", "------------");
 
 		for ( iter = items.begin(); iter != items.end(); iter++ ) {
-			printf("%-*s  % 12.3lf\n", max_length, iter->name, iter->duration);
+			log(LL_VERBOSE, "%-*s  % 12.3lf\n", max_length, iter->name, iter->duration);
 		}
-		putchar('\n');
+		log(LL_VERBOSE, "\n");
 	}
 }
