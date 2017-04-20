@@ -106,7 +106,7 @@ void model_train(model_t *model, dataset_t *train_set)
 		model->P = m_product("P_pca", model->W, X, true, false);
 	}
 	else if ( model->feature == FEATURE_LDA ) {
-		model->W = LDA(&model->params.lda, X, train_set->num_labels, train_set->entries);
+		model->W = LDA(&model->params.lda, X, train_set->entries, train_set->num_labels);
 		model->P = m_product("P_lda", model->W, X, true, false);
 	}
 	else if ( model->feature == FEATURE_ICA ) {

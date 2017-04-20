@@ -27,7 +27,8 @@ int is_file(const struct dirent *entry)
  * "<class>_<...>"
  *
  * This format is used to determine the label of each
- * file without separate label data.
+ * file without separate label data, and to order the
+ * entries by class.
  *
  * @param path
  * @return pointer to dataset

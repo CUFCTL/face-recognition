@@ -14,6 +14,11 @@ typedef struct {
 	int n2;
 } lda_params_t;
 
-matrix_t * LDA(lda_params_t *params, matrix_t *X, int c, data_entry_t *entries);
+matrix_t ** m_copy_classes(matrix_t *X, data_entry_t *y, int c);
+matrix_t ** m_class_means(matrix_t **X_c, int c);
+matrix_t * m_scatter_between(matrix_t **X_c, matrix_t **U, int c);
+matrix_t * m_scatter_within(matrix_t **X_c, matrix_t **U, int c);
+
+matrix_t * LDA(lda_params_t *params, matrix_t *X, data_entry_t *y, int c);
 
 #endif
