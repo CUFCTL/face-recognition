@@ -15,13 +15,15 @@ TEST_START=10
 TEST_END=100
 TEST_INC=10
 
-module purge
-module add cuda-toolkit/7.5.18
-module add gcc/4.8.1
-module add git
-module add python/2.7.6
+if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
+	module purge
+	module add cuda-toolkit/7.5.18
+	module add gcc/4.8.1
+	module add git
+	module add python/2.7.6
 
-cd /scratch2/$USER/face-recognition
+	cd /scratch2/$USER/face-recognition
+fi
 
 make clean && make DEBUG=0 GPU=0
 
