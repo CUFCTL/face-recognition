@@ -1,4 +1,4 @@
-#PBS -N orl-pca-knn_k
+#PBS -N orl-pca-knn-k
 #PBS -l select=1:ncpus=8:ngpus=1:mem=8gb,walltime=00:10:00
 
 # Accuracy of PCA for several values of knn_k on the
@@ -7,6 +7,9 @@ DATASET=orl
 TRAIN=70
 TEST=30
 NUM_ITER=3
+
+ALGO=pca
+PARAM=knn_k
 
 TEST_START=1
 TEST_END=10
@@ -20,7 +23,9 @@ module add python/2.7.6
 
 cd /scratch2/$USER/face-recognition
 
+make clean && make DEBUG=0 GPU=0
+
 for (( N = $TEST_START; N <= $TEST_END; N += $TEST_INC )); do
-	echo "Testing with knn_k = $N"
-	python ./scripts/cross-validate.py --run-c -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --pca -- --knn_k $N
+	echo "Testing with $ALGO = $N"
+	python ./scripts/cross-validate.py --run-c -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$ALGO -- --$PARAM $N
 done

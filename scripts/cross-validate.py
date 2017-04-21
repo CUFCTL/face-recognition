@@ -62,11 +62,10 @@ if args.ICA:
 
 args.ARGS = " ".join(args.ARGS)
 
-# build face-rec executable
-if args.RUN_C:
-	print "Building..."
-	print
-	subprocess.call("make > /dev/null", shell=True)
+# check for face-rec executable
+if args.RUN_C and not os.path.isfile("./face-rec"):
+	print "error: ./face-rec not found"
+	sys.exit(1)
 
 # perform repeated random testing
 for i in xrange(args.NUM_ITER):
