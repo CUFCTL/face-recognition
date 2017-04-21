@@ -25,6 +25,8 @@ typedef enum {
 	OPTION_PCA,
 	OPTION_LDA,
 	OPTION_ICA,
+	OPTION_KNN,
+	OPTION_BAYES,
 	OPTION_PCA_N1,
 	OPTION_LDA_N1,
 	OPTION_LDA_N2,
@@ -47,9 +49,11 @@ void print_usage()
 		"  --train DIRECTORY  train a model with a training set\n"
 		"  --test DIRECTORY   perform recognition on a test set\n"
 		"  --stream           perform recognition on an input stream\n"
-		"  --pca              run PCA\n"
-		"  --lda              run LDA\n"
-		"  --ica              run ICA\n"
+		"  --pca              use PCA for feature extraction\n"
+		"  --lda              use LDA for feature extraction\n"
+		"  --ica              use ICA for feature extraction\n"
+		"  --knn              use the kNN classifier (default)\n"
+		"  --bayes            use the Bayes classifier\n"
 		"\n"
 		"Hyperparameters:\n"
 		"  --pca_n1 N              (PCA) number of principal components to compute\n"
@@ -113,6 +117,8 @@ int main(int argc, char **argv)
 		{ "pca", no_argument, 0, OPTION_PCA },
 		{ "lda", no_argument, 0, OPTION_LDA },
 		{ "ica", no_argument, 0, OPTION_ICA },
+		{ "knn", no_argument, 0, OPTION_KNN },
+		{ "bayes", no_argument, 0, OPTION_BAYES },
 		{ "pca_n1", required_argument, 0, OPTION_PCA_N1 },
 		{ "lda_n1", required_argument, 0, OPTION_LDA_N1 },
 		{ "lda_n2", required_argument, 0, OPTION_LDA_N2 },
@@ -151,6 +157,12 @@ int main(int argc, char **argv)
 			break;
 		case OPTION_ICA:
 			feature_type = FEATURE_ICA;
+			break;
+		case OPTION_KNN:
+			classifier_type = CLASSIFIER_KNN;
+			break;
+		case OPTION_BAYES:
+			classifier_type = CLASSIFIER_BAYES;
 			break;
 		case OPTION_PCA_N1:
 			model_params.pca.n1 = atoi(optarg);

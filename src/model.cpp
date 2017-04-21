@@ -52,9 +52,15 @@ model_t * model_construct(feature_type_t feature, classifier_type_t classifier, 
 		log(LL_VERBOSE, "  %-*s  %10f\n", len, "epsilon", model->params.ica.epsilon);
 	}
 
-	log(LL_VERBOSE, "kNN\n");
-	log(LL_VERBOSE, "  %-*s  %10d\n", len, "k", model->params.knn.k);
-	log(LL_VERBOSE, "  %-*s  %10s\n", len, "dist", model->params.knn.dist_name);
+	if ( model->classifier == CLASSIFIER_KNN ) {
+		log(LL_VERBOSE, "kNN\n");
+		log(LL_VERBOSE, "  %-*s  %10d\n", len, "k", model->params.knn.k);
+		log(LL_VERBOSE, "  %-*s  %10s\n", len, "dist", model->params.knn.dist_name);
+	}
+	else if ( model->classifier == CLASSIFIER_BAYES ) {
+		log(LL_VERBOSE, "Bayes\n");
+	}
+
 	log(LL_VERBOSE, "\n");
 
 	return model;
