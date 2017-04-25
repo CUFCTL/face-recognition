@@ -28,13 +28,13 @@ data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_entry_t *Y, int num
 	{
 		matrix_t *test_vec = m_copy_columns(X_test->name, X_test, i, i + 1);
 
-		for (j = 0; j < num_classes; j++)
+		for (j = 0; j < (unsigned int) num_classes; j++)
 		{
 			probs[j] = calc_bayes_prob(test_vec, X_u[j], X_cov);
 		}
-		char str[5];
+		labels[i]->name = (char *)malloc(4 * sizeof(char));
 		labels[i]->id   = argmax(probs, num_classes);
-		labels[i]->name = sprintf(str, "s%d", labels[i]->id);
+		sprintf(labels[i]->name, "s%d", labels[i]->id);
 
 		m_free(test_vec);
 	}
