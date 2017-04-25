@@ -34,7 +34,7 @@ data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_entry_t *Y, int num
 		}
 		char str[5];
 		labels[i]->id   = argmax(probs, num_classes);
-		labels[i]->name = sprintf(str, "s%d", labels[i].id);
+		labels[i]->name = sprintf(str, "s%d", labels[i]->id);
 
 		m_free(test_vec);
 	}
