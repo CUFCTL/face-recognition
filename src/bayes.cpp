@@ -8,18 +8,18 @@
 #include "lda.h"
 #include "bayes.h"
 
-data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_classes)
+data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_entry_t *Y, int num_classes)
 {
 	unsigned int i, j, id;
 	float probs[num_classes];
 
-	matrix_t **X_c  = m_copy_classes(X, y, num_classes);
+	matrix_t **X_c  = m_copy_classes(X, Y, num_classes);
 	matrix_t **X_u  = m_class_means(X_c, num_classes);
 	matrix_t *X_cov = m_scatter_between(X_c, X_u, num_classes);
 
 	// allocate space for labels to be returned
 	data_label_t **labels = (data_label_t **)malloc(X_test->cols * sizeof(data_label_t *));
-	for (i = 0; i < X_test->cols; i++)
+	for (i = 0; i < (unsigned int) X_test->cols; i++)
 	{
 		labels[i] = (data_label_t *)malloc(sizeof(data_label_t));
 	}
@@ -33,8 +33,8 @@ data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_classes)
 			probs[j] = calc_bayes_prob(test_vec, X_u[j], X_cov);
 		}
 		char str[5];
-		labels[i].id   = argmax(probs, num_classes);
-		labels[i].name = sprintf(str, "s%d", labels[i].id);
+		labels[i]->id   = argmax(probs, num_classes);
+		labels[i]->name = sprintf(str, "s%d", labels[i].id);
 
 		m_free(test_vec);
 	}
