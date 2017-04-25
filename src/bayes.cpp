@@ -5,30 +5,36 @@
  */
 #include <stdlib.h>
 #include <string.h>
+#include "lda.h"
 #include "bayes.h"
 
-data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_samples, int num_classes)
+data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_classes)
 {
+	unsigned int i, j, id;
+	float probs[num_classes];
 
-	unsigned int i, j;
-	std::vector<float> probs(num_classes);
+	matrix_t **X_c  = m_copy_classes(X, y, num_classes);
+	matrix_t **X_u  = m_class_means(X_c, num_classes);
+	matrix_t *X_cov = m_scatter_between(X_c, X_u, num_classes);
 
-	std::vector<bayes_params_t> param_list = separate_data(X, num_samples, num_classes);
-
-	for (i = 0; i < param_list.size(); i++)
+	// allocate space for labels to be returned
+	data_label_t **labels = (data_label_t **)malloc(X_test->cols * sizeof(data_label_t *));
+	for (i = 0; i < X_test->cols; i++)
 	{
-		param_list[i].mu = class_mean(param_list[i].entries);
-		param_list[i].sigma = class_covariance(param_list[i].entries);
+		labels[i] = (data_label_t *)malloc(sizeof(data_label_t));
 	}
 
 	for (i = 0; i < (unsigned int) X_test->cols; i++)
 	{
 		matrix_t *test_vec = m_copy_columns(X_test->name, X_test, i, i + 1);
 
-		for (j = 0; j < param_list.size(); j++)
+		for (j = 0; j < num_classes; j++)
 		{
-			probs[j] = calc_bayes_prob(test_vec, param_list[j]);
+			probs[j] = calc_bayes_prob(test_vec, X_u[j], X_cov);
 		}
+		char str[5];
+		labels[i].id   = argmax(probs, num_classes);
+		labels[i].name = sprintf(str, "s%d", labels[i].id);
 
 		m_free(test_vec);
 	}
@@ -39,17 +45,17 @@ data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_samples, int num
 
 // calculate the probability using the Bayesian discriminant function
 // prob = -0.5 * (v_test - mu) * inv(sigma) * (v_test - mu)'
-float calc_bayes_prob(matrix_t *v_test, bayes_params_t param)
+float calc_bayes_prob(matrix_t *v_test, matrix_t *X_u, matrix_t *X_cov)
 {
-	float prob = -999.999;
+	float prob = -9999999;
 
-	m_subtract_columns(v_test, param.mu);
+	m_subtract_columns(v_test, X_u);
 	m_elem_mult(v_test, -0.5);
-	
-	matrix_t * sigma_inv = m_inverse(param.sigma->name, param.sigma);
-	
+
+	matrix_t * sigma_inv = m_inverse(X_cov->name, X_cov);
+
 	matrix_t * v_mult_sig_inv = m_product(v_test->name, v_test, sigma_inv, true, false);
-	
+
 	matrix_t * final = m_product("prob_m", v_mult_sig_inv, v_test, false, false);
 
 	prob = final->data[0];
@@ -62,38 +68,19 @@ float calc_bayes_prob(matrix_t *v_test, bayes_params_t param)
 	return prob;
 }
 
-
-// separates train data by class
-std::vector<bayes_params_t> separate_data(matrix_t *X, int num_samples, int num_classes)
+int argmax(float *X, int size)
 {
-	int i = 0;
+	int i, idx = 0;
+	float max = X[idx];
 
-	// user a vector to collect the params of each class
-	std::vector<bayes_params_t> params(num_classes);
-
-	for (i = 0; i < num_classes; i++)
+	for (i = 0; i < size; i++)
 	{
-		char *name = (char *)malloc(10*sizeof(char));
-		sprintf(name, "class_%d", i + 1);
-
-		//params.push_back(bayes_params_t());
-		params[i].id = i + 1;
-		params[i].entries = m_copy_columns(name, X, (i * (num_samples/num_classes)), (i + 1) * (num_samples/num_classes));
+		if (X[i] > max)
+		{
+			max = X[i];
+			idx = i;
+		}
 	}
 
-	return params;
-}
-
-
-// calculate mean vector of each class
-matrix_t * class_mean(matrix_t *X)
-{
-	return m_mean_column(X->name, X);
-}
-
-
-// calculate the covariance matrix of each class
-matrix_t * class_covariance(matrix_t *X)
-{
-	return m_product(X->name, X, X, false, true);
+	return idx;
 }

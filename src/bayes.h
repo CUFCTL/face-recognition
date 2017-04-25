@@ -18,10 +18,8 @@ typedef struct {
 } bayes_params_t;
 
 // function decs
-data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_samples, int num_classes);
-float calc_bayes_prob(matrix_t *v_test, bayes_params_t param);
-std::vector<bayes_params_t> separate_data(matrix_t *X, int num_samples, int num_classes);
-matrix_t * class_mean(matrix_t *X);
-matrix_t * class_covariance(matrix_t *X);
+data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, int num_classes);
+float calc_bayes_prob(matrix_t *v_test, matrix_t *X_u, matrix_t *X_cov);
+int argmax(float *X, int size);
 
 #endif

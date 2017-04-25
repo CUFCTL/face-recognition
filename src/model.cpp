@@ -198,7 +198,7 @@ data_label_t **model_predict(model_t *model, dataset_t *test_set)
 		}
 	}
 	else if ( model->classifier == CLASSIFIER_BAYES ) {
-		log(LL_ERROR, "error: Bayes classifier not implemented yet.\n");
+		pred_labels = bayesian(model->P, P_test, test_set->num_labels);
 		exit(1);
 	}
 
