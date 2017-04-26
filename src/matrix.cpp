@@ -912,6 +912,34 @@ matrix_t * m_sqrtm (const char *name, matrix_t *M)
 }
 
 /**
+ * Compute the sum of the elements of a vector.
+ *
+ * @param v
+ * @return sum of elements of v
+ */
+precision_t m_sum (matrix_t *v)
+{
+	log(LL_DEBUG, "debug: s = sum(%s [%d,%d])\n",
+		v->name, v->rows, v->cols);
+
+	assert(v->rows == 1 || v->cols == 1);
+
+	int N = (v->rows == 1)
+		? v->cols
+		: v->rows;
+	int incX = 1;
+
+	precision_t sum = 0.0f;
+
+	int i;
+	for ( i = 0; i < N; i++ ) {
+		sum += v->data[i];
+	}
+
+	return sum;
+}
+
+/**
  * Get the transpose of a matrix.
  *
  * NOTE: This function should not be necessary since

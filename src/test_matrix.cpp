@@ -695,6 +695,28 @@ void test_m_sqrtm()
 }
 
 /**
+ * Test vector sum.
+ */
+void test_m_sum()
+{
+	precision_t v_data[] = {
+		-2, 3, 1
+	};
+	matrix_t *v = m_initialize_data("v", 1, 3, v_data);
+	precision_t s = m_sum(v);
+
+	if ( LOGGER(LL_VERBOSE) ) {
+		m_fprint(stdout, v);
+
+		printf("sum(%s) = %g\n", v->name, s);
+	}
+
+	assert_equal(s, 2, "sum(v)");
+
+	m_free(v);
+}
+
+/**
  * Test matrix transpose.
  */
 void test_m_transpose()
@@ -1086,6 +1108,7 @@ int main (int argc, char **argv)
 		test_m_norm,
 		test_m_product,
 		test_m_sqrtm,
+		test_m_sum,
 		test_m_transpose,
 		test_m_add,
 		test_m_subtract,

@@ -78,6 +78,28 @@ void * mode(const void *base, size_t nmemb, size_t size, void * (*identify)(cons
 }
 
 /**
+ * Compute the second power (square) of a number.
+ *
+ * @param x
+ * @return x^2
+ */
+float pow2(float x)
+{
+    return powf(x, 2);
+}
+
+/**
+ * Compute the third power (cube) of a number.
+ *
+ * @param x
+ * @return x^3
+ */
+float pow3(float x)
+{
+    return powf(x, 3);
+}
+
+/**
  * Generate a normally-distributed (mu, sigma) random number
  * using the Box-Muller transform.
  *
@@ -111,4 +133,15 @@ float rand_normal(float mu, float sigma)
 	z1 = sqrtf(-2.0 * logf(u1)) * sinf(2.0 * M_PI * u2);
 
 	return z0 * sigma + mu;
+}
+
+/**
+ * Compute the hyperbolic secant of a number.
+ *
+ * @param x
+ * @return sech(x)
+ */
+float sechf(float x)
+{
+    return 1.0f / coshf(x);
 }

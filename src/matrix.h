@@ -61,9 +61,10 @@ void m_eigen (const char *V_name, const char *D_name, matrix_t *M, int n1, matri
 matrix_t * m_inverse (const char *name, matrix_t *M);
 matrix_t * m_mean_column (const char *name, matrix_t *M);
 matrix_t * m_mean_row (const char *name, matrix_t *M);
-precision_t m_norm(matrix_t *v);
+precision_t m_norm (matrix_t *v);
 matrix_t * m_product (const char *name, matrix_t *A, matrix_t *B, bool transA=false, bool transB=false);
 matrix_t * m_sqrtm (const char *name, matrix_t *M);
+precision_t m_sum (matrix_t *v);
 matrix_t * m_transpose (const char *name, matrix_t *M);
 
 // mutator functions

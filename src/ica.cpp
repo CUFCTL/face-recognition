@@ -8,6 +8,7 @@
 #include <string.h>
 #include "ica.h"
 #include "logger.h"
+#include "math_helper.h"
 #include "pca.h"
 #include "timer.h"
 
@@ -50,11 +51,6 @@ matrix_t * m_whiten (matrix_t *X, int n1)
 /**
  * Compute the independent components of a matrix X, which
  * consists of observations in columns.
- *
- * NOTE: Curently, X is transposed before it is processed, which
- * causes there to be two extra transposes, an extra mean subtraction,
- * and an extra PCA calculation. We should try to refactor ICA to use
- * X in its original form to eliminate these redundancies.
  *
  * @param params
  * @param X
@@ -121,20 +117,101 @@ matrix_t * ICA (ica_params_t *params, matrix_t *X)
 }
 
 /**
- * Compute the third power (cube) of a number.
+ * Compute the parameter update for fpica
+ * with the pow3 nonlinearity:
  *
- * @param x
- * @return x^3
+ * g(u) = u^3
+ * g'(u) = 3 * u^2
+ *
+ * which gives:
+ *
+ * w+ = X * ((X' * w) .^ 3) / X->cols - 3 * w
+ * w* = w+ / ||w+||
+ *
+ * @param w0
+ * @param X
+ * @return w*
  */
-precision_t pow3(precision_t x)
+matrix_t * fpica_pow3 (matrix_t *w0, matrix_t *X)
 {
-    return powf(x, 3);
+    // compute w+
+    matrix_t *w_temp1 = m_product("w_temp1", X, w0, true, false);
+    m_elem_apply(w_temp1, pow3);
+
+    matrix_t *w_temp2 = m_copy("w_temp2", w0);
+    m_elem_mult(w_temp2, 3);
+
+    matrix_t *w = m_product("w", X, w_temp1);
+    m_elem_mult(w, 1.0f / X->cols);
+    m_subtract(w, w_temp2);
+
+    // compute w*
+    m_elem_mult(w, 1 / m_norm(w));
+
+    // cleanup
+    m_free(w_temp1);
+    m_free(w_temp2);
+
+    return w;
 }
 
 /**
- * Compute the mixing matrix W for an input matrix X using the deflation
- * approach and the nonlinearity functions pow3. The input matrix should
- * already be whitened.
+ * Compute the parameter update for fpica
+ * with the tanh nonlinearity:
+ *
+ * g(u) = tanh(u)
+ * g'(u) = sech(u)^2 = 1 - tanh(u)^2
+ *
+ * which gives:
+ *
+ * w+ = (X * tanh(X' * w) - sum(sech(X' * w) .^ 2) * w) / X->cols
+ * w* = w+ / ||w+||
+ *
+ * @param w0
+ * @param X
+ * @return w*
+ */
+matrix_t * fpica_tanh (matrix_t *w0, matrix_t *X)
+{
+    // compute w+
+    matrix_t *w_temp1 = m_product("w_temp1", X, w0, true, false);
+    matrix_t *w_temp2 = m_copy("w_temp2", w_temp1);
+
+    m_elem_apply(w_temp1, tanhf);
+    m_elem_apply(w_temp2, sechf);
+    m_elem_apply(w_temp2, pow2);
+
+    matrix_t *w_temp3 = m_copy("w_temp3", w0);
+    m_elem_mult(w_temp3, m_sum(w_temp2));
+
+    matrix_t *w = m_product("w", X, w_temp1);
+    m_subtract(w, w_temp3);
+    m_elem_mult(w, 1.0f / X->cols);
+
+    // compute w*
+    m_elem_mult(w, 1 / m_norm(w));
+
+    // cleanup
+    m_free(w_temp1);
+    m_free(w_temp2);
+    m_free(w_temp3);
+
+    return w;
+}
+
+// TODO: fpica_gauss
+// TODO: fpica_skew
+// TODO: fpica_relu
+
+/**
+ * Compute the mixing matrix W for an input matrix X using
+ * the deflation approach. The input matrix should already
+ * be whitened.
+ *
+ * The fixed-point algorithm is defined as follows:
+ *
+ * w+ = E{X * g(X' * w)} - E{g'(X' * w)} * w
+ * w* = w+ / ||w+||
  *
  * @param params
  * @param X
@@ -220,23 +297,10 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
 
             // update w0
             m_assign_column(w0, 0, w, 0);
+            m_free(w);
 
-            // compute w = X * ((X' * w) .^ 3) / numSamples - 3 * w
-            w_temp1 = m_product("w_temp1", X, w, true, false);
-            m_elem_apply(w_temp1, pow3);
-
-            w_temp2 = m_copy("w_temp2", w);
-            m_elem_mult(w_temp2, 3);
-
-            w = m_product("w", X, w_temp1);
-            m_elem_mult(w, 1.0 / numSamples);
-            m_subtract(w, w_temp2);
-
-            // normalize w
-            m_elem_mult(w, 1 / m_norm(w));
-
-            m_free(w_temp1);
-            m_free(w_temp2);
+            // compute parameter update
+            w = fpica_pow3(w0, X);
         }
 
         log(LL_VERBOSE, "      iterations: %d\n", j);
