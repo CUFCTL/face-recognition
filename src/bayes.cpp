@@ -16,6 +16,7 @@ data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_label_t *C, data_en
 	matrix_t **X_c  = m_copy_classes(X, Y, num_classes);
 	matrix_t **X_u  = m_class_means(X_c, num_classes);
 	matrix_t *X_cov = m_scatter_between(X_c, X_u, num_classes);
+	matrix_t * sigma_inv = m_inverse(X_cov->name, X_cov);
 
 	// allocate space for labels to be returned
 	data_label_t **labels = (data_label_t **)malloc(X_test->cols * sizeof(data_label_t *));
@@ -30,7 +31,7 @@ data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_label_t *C, data_en
 
 		for (j = 0; j < (unsigned int) num_classes; j++)
 		{
-			probs[j] = calc_bayes_prob(test_vec, X_u[j], X_cov);
+			probs[j] = calc_bayes_prob(test_vec, X_u[j], sigma_inv);
 		}
 
 		int idx = argmax(probs, num_classes);
@@ -39,20 +40,20 @@ data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_label_t *C, data_en
 		m_free(test_vec);
 	}
 
+	m_free(sigma_inv);
 	return labels;
 }
 
 
 // calculate the probability using the Bayesian discriminant function
 // prob = -0.5 * (v_test - mu) * inv(sigma) * (v_test - mu)'
-float calc_bayes_prob(matrix_t *v_test, matrix_t *X_u, matrix_t *X_cov)
+float calc_bayes_prob(matrix_t *v_test, matrix_t *X_u, matrix_t *sigma_inv)
 {
 	float prob = -9999999;
 
 	m_subtract_columns(v_test, X_u);
 	m_elem_mult(v_test, -0.5);
 
-	matrix_t * sigma_inv = m_inverse(X_cov->name, X_cov);
 
 	matrix_t * v_mult_sig_inv = m_product(v_test->name, v_test, sigma_inv, true, false);
 
@@ -61,7 +62,6 @@ float calc_bayes_prob(matrix_t *v_test, matrix_t *X_u, matrix_t *X_cov)
 	prob = final->data[0];
 
 	// cleanup
-	m_free(sigma_inv);
 	m_free(v_mult_sig_inv);
 	m_free(final);
 

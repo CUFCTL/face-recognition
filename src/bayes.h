@@ -19,7 +19,7 @@ typedef struct {
 
 // function decs
 data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_label_t *C, data_entry_t *Y, int num_classes);
-float calc_bayes_prob(matrix_t *v_test, matrix_t *X_u, matrix_t *X_cov);
+float calc_bayes_prob(matrix_t *v_test, matrix_t *X_u, matrix_t *sigma_inv);
 int argmax(float *X, int size);
 
 #endif
