@@ -32,6 +32,7 @@ typedef enum {
 	OPTION_LDA_N2,
 	OPTION_ICA_N1,
 	OPTION_ICA_N2,
+	OPTION_ICA_NONL,
 	OPTION_ICA_MAX_ITERATIONS,
 	OPTION_ICA_EPSILON,
 	OPTION_KNN_K,
@@ -61,6 +62,7 @@ void print_usage()
 		"  --lda_n2 N              (LDA) number of Fisherfaces to compute\n"
 		"  --ica_n1 N              (ICA) number of principal components to compute\n"
 		"  --ica_n2 N              (ICA) number of independent components to estimate\n"
+		"  --ica_nonl pow3|tanh    (ICA) nonlinearity function to use\n"
 		"  --ica_max_iterations N  (ICA) maximum iterations\n"
 		"  --ica_epsilon X         (ICA) convergence threshold for w\n"
 		"  --knn_k N               (kNN) number of nearest neighbors to use\n"
@@ -89,6 +91,24 @@ dist_func_t parse_dist_func(const char *name)
 	return NULL;
 }
 
+/**
+ * Parse a nonlinearity function from a name.
+ *
+ * @param name
+ * @return pointer to corresponding nonlinearity function
+ */
+ica_nonl_t parse_nonl_func(const char *name)
+{
+	if ( strcmp(name, "pow3") == 0 ) {
+		return ICA_NONL_POW3;
+	}
+	else if ( strcmp(name, "tanh") == 0 ) {
+		return ICA_NONL_TANH;
+	}
+
+	return ICA_NONL_NONE;
+}
+
 int main(int argc, char **argv)
 {
 	const char *MODEL_FNAME = "./model.dat";
@@ -102,7 +122,7 @@ int main(int argc, char **argv)
 	model_params_t model_params = {
 		{ -1 },
 		{ -1, -1 },
-		{ -1, -1, 1000, 0.0001f },
+		{ -1, -1, ICA_NONL_POW3, "pow3", 1000, 0.0001f },
 		{ 1, m_dist_L2, "L2" }
 	};
 
@@ -124,6 +144,7 @@ int main(int argc, char **argv)
 		{ "lda_n2", required_argument, 0, OPTION_LDA_N2 },
 		{ "ica_n1", required_argument, 0, OPTION_ICA_N1 },
 		{ "ica_n2", required_argument, 0, OPTION_ICA_N2 },
+		{ "ica_nonl", required_argument, 0, OPTION_ICA_NONL },
 		{ "ica_max_iterations", required_argument, 0, OPTION_ICA_MAX_ITERATIONS },
 		{ "ica_epsilon", required_argument, 0, OPTION_ICA_EPSILON },
 		{ "knn_k", required_argument, 0, OPTION_KNN_K },
@@ -179,6 +200,10 @@ int main(int argc, char **argv)
 		case OPTION_ICA_N2:
 			model_params.ica.n2 = atoi(optarg);
 			break;
+		case OPTION_ICA_NONL:
+			model_params.ica.nonl = parse_nonl_func(optarg);
+			model_params.ica.nonl_name = optarg;
+			break;
 		case OPTION_ICA_MAX_ITERATIONS:
 			model_params.ica.max_iterations = atoi(optarg);
 			break;
@@ -205,7 +230,12 @@ int main(int argc, char **argv)
 	}
 
 	if ( model_params.knn.dist == NULL ) {
-		fprintf(stderr, "error: dist function must be L1 | L2 | COS\n");
+		fprintf(stderr, "error: --knn_dist must be L1 | L2 | COS\n");
+		exit(1);
+	}
+
+	if ( model_params.ica.nonl == ICA_NONL_NONE ) {
+		fprintf(stderr, "error: --ica_nonl must be pow3 | tanh\n");
 		exit(1);
 	}
 

@@ -228,6 +228,16 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
         ? vectorSize
         : params->n2;
 
+    // determine nonlinearity function
+    ica_nonl_func_t fpica_update = NULL;
+
+    if ( params->nonl == ICA_NONL_POW3 ) {
+        fpica_update = fpica_pow3;
+    }
+    else if ( params->nonl == ICA_NONL_TANH ) {
+        fpica_update = fpica_tanh;
+    }
+
     matrix_t *B = m_zeros("B", vectorSize, vectorSize);
     matrix_t *W = m_zeros("W", n2, W_z->cols);
 
@@ -300,7 +310,7 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
             m_free(w);
 
             // compute parameter update
-            w = fpica_pow3(w0, X);
+            w = fpica_update(w0, X);
         }
 
         log(LL_VERBOSE, "      iterations: %d\n", j);

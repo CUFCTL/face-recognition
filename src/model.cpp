@@ -48,6 +48,7 @@ model_t * model_construct(feature_type_t feature, classifier_type_t classifier, 
 		log(LL_VERBOSE, "ICA\n");
 		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n1", model->params.ica.n1);
 		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n2", model->params.ica.n2);
+		log(LL_VERBOSE, "  %-*s  %10s\n", len, "nonl", model->params.ica.nonl_name);
 		log(LL_VERBOSE, "  %-*s  %10d\n", len, "max_iterations", model->params.ica.max_iterations);
 		log(LL_VERBOSE, "  %-*s  %10f\n", len, "epsilon", model->params.ica.epsilon);
 	}
