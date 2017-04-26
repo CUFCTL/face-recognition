@@ -198,7 +198,7 @@ data_label_t **model_predict(model_t *model, dataset_t *test_set)
 		}
 	}
 	else if ( model->classifier == CLASSIFIER_BAYES ) {
-		pred_labels = bayesian(model->P, P_test, model->dataset->entries, test_set->num_labels);
+		pred_labels = bayesian(model->P, P_test, model->dataset->labels, model->dataset->entries, test_set->num_labels);
 		exit(1);
 	}
 

@@ -8,7 +8,7 @@
 #include "lda.h"
 #include "bayes.h"
 
-data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_entry_t *Y, int num_classes)
+data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_label_t *C, data_entry_t *Y, int num_classes)
 {
 	unsigned int i, j, id;
 	float probs[num_classes];
@@ -32,14 +32,14 @@ data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_entry_t *Y, int num
 		{
 			probs[j] = calc_bayes_prob(test_vec, X_u[j], X_cov);
 		}
-		labels[i]->name = (char *)malloc(4 * sizeof(char));
-		labels[i]->id   = argmax(probs, num_classes);
-		sprintf(labels[i]->name, "s%d", labels[i]->id);
+
+		int idx = argmax(probs, num_classes);
+		labels[i] = &C[idx];
 
 		m_free(test_vec);
 	}
 
-	return NULL;
+	return labels;
 }
 
 
