@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import os
+import shutil
 from crop import detect_face
 from crop import box_face
 from crop import crop_face
@@ -10,10 +11,12 @@ cascade_face = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 #cascade_eye = cv2.CascadeClassifier("haarcascade_eye_tree_eyeglasses.xml")
 
 FOLDER_OUT = "FOLDER_OUT"
+if os.path.exists(FOLDER_OUT):
+	shutil.rmtree(FOLDER_OUT)
 os.mkdir(FOLDER_OUT, 0775)
 
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 i = 0
 while(True):
