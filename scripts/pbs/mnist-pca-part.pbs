@@ -1,10 +1,9 @@
-#PBS -N orl-pca-part
+#PBS -N mnist-pca-part
 #PBS -l select=1:ncpus=8:ngpus=1:mem=8gb,walltime=00:10:00
 
-# Accuracy of Pca across several partitions on the
-# ORL dataset
+# Accuracy of mnist across several partitions on the ORL dataset
 
-DATASET=orl
+DATASET=mnist
 NUM_ITER=5
 
 TEST_START=10
@@ -30,10 +29,4 @@ do
         TRAIN=`expr 100 - $N`
         python ./scripts/cross-validate.py --run-c -d $DATASET -t $TRAIN -r $N -i $NUM_ITER --pca
 done
-
-
-
-~
-~
-~
 
