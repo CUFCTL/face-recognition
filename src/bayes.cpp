@@ -11,6 +11,34 @@
 #include "bayes.h"
 
 /**
+ * Compute the class covariance matrices for a matrix X,
+ * given by a list X_c of class submatrices.
+ *
+ * S_i = (X_c_i - U_i) * (X_c_i - U_i)'
+ *
+ * @param X_c
+ * @param U
+ * @param c
+ * @return list of class covariance matrices
+ */
+matrix_t ** m_class_cov(matrix_t **X_c, matrix_t **U, int c)
+{
+	matrix_t **S = (matrix_t **) malloc(c * sizeof(matrix_t *));
+
+	int i;
+	for ( i = 0; i < c; i++ ) {
+		matrix_t *X_c_i = m_copy("X_c_i", X_c[i]);
+		m_subtract_columns(X_c_i, U[i]);
+
+		S[i] = m_product("S_i", X_c_i, X_c_i, false, true);
+
+		m_free(X_c_i);
+	}
+
+	return S;
+}
+
+/**
  * Determine the index of the first
  * element that is the maximum value.
  *
@@ -44,7 +72,7 @@ int m_argmax(matrix_t *x)
  * feature vector using the Bayes discriminant
  * function:
  *
- * g_i'(x) = -1/2 * (x - mu_i) * S^-1 * (x - mu_i)'
+ * g_i'(x) = -1/2 * (x - mu_i)' * S_i^-1 * (x - mu_i)
  */
 precision_t bayes_prob(matrix_t *x, matrix_t *mu, matrix_t *S_inv)
 {
@@ -76,26 +104,27 @@ precision_t bayes_prob(matrix_t *x, matrix_t *mu, matrix_t *S_inv)
 data_label_t ** bayes(matrix_t *X, data_entry_t *Y, data_label_t *C, int num_classes, matrix_t *X_test)
 {
 	matrix_t **X_c = m_copy_classes(X, Y, num_classes);
-	matrix_t **X_u = m_class_means(X_c, num_classes);
-	matrix_t *S = m_scatter_between(X_c, X_u, num_classes);
-	matrix_t *S_inv = m_inverse("S_inv", S);
-	matrix_t *probs = m_initialize("probs", num_classes, 1);
+	matrix_t **U = m_class_means(X_c, num_classes);
+	matrix_t **S = m_class_cov(X_c, U, num_classes);
+
+	// compute inverses of each S_i
+	matrix_t **S_inv = (matrix_t **) malloc(num_classes * sizeof(matrix_t *));
 
 	int i, j;
 	for ( i = 0; i < num_classes; i++ ) {
-		m_fprint(stdout, X_u[i]);
+		S_inv[i] = m_inverse("S_i_inv", S[i]);
 	}
 
-	m_fprint(stdout, S);
-	m_fprint(stdout, S_inv);
-
+	// compute label for each test vector
 	data_label_t **Y_pred = (data_label_t **)malloc(X_test->cols * sizeof(data_label_t *));
 
 	for ( i = 0; i < X_test->cols; i++ ) {
+		matrix_t *probs = m_initialize("probs", num_classes, 1);
+
 		for ( j = 0; j < num_classes; j++ ) {
 			matrix_t *x_test = m_copy_columns("x_test", X_test, i, i + 1);
 
-			probs->data[j] = bayes_prob(x_test, X_u[j], S_inv);
+			probs->data[j] = bayes_prob(x_test, U[j], S_inv[j]);
 
 			m_free(x_test);
 
@@ -104,9 +133,21 @@ data_label_t ** bayes(matrix_t *X, data_entry_t *Y, data_label_t *C, int num_cla
 
 		int index = m_argmax(probs);
 		Y_pred[i] = &C[index];
+
+		m_free(probs);
 	}
 
-	m_free(S_inv);
+	// cleanup
+	for ( i = 0; i < num_classes; i++ ) {
+		m_free(X_c[i]);
+		m_free(U[i]);
+		m_free(S[i]);
+		m_free(S_inv[i]);
+	}
+	free(X_c);
+	free(U);
+	free(S);
+	free(S_inv);
 
 	return Y_pred;
 }
