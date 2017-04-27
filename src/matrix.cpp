@@ -223,10 +223,6 @@ matrix_t * m_random (const char *name, int rows, int cols)
  */
 matrix_t * m_zeros (const char *name, int rows, int cols)
 {
-	log(LL_DEBUG, "debug: %s [%d,%d] <- zeros(%d, %d)\n",
-		name, rows, cols,
-		rows, cols);
-
 	matrix_t *M = (matrix_t *)malloc(sizeof(matrix_t));
 	M->name = name;
 	M->rows = rows;
