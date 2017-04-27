@@ -108,7 +108,11 @@ void model_train(model_t *model, dataset_t *train_set)
 	m_subtract_columns(X, model->mean);
 
 	// compute features from X
-	if ( model->feature == FEATURE_PCA ) {
+	if ( model->feature == FEATURE_NONE ) {
+		model->W = m_identity("W", X->rows);
+		model->P = m_product("P", model->W, X, true, false);
+	}
+	else if ( model->feature == FEATURE_PCA ) {
 		model->W = PCA(&model->params.pca, X, NULL);
 		model->P = m_product("P_pca", model->W, X, true, false);
 	}
@@ -177,7 +181,7 @@ void model_load(model_t *model, const char *path)
  */
 data_label_t ** model_predict(model_t *model, dataset_t *test_set)
 {
-	timer_push("Recognition");
+	timer_push("Prediction");
 
 	log(LL_VERBOSE, "Test set: %d samples, %d classes\n",
 		test_set->num_entries,
