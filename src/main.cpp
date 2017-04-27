@@ -62,11 +62,11 @@ void print_usage()
 		"  --lda_n2 N              (LDA) number of Fisherfaces to compute\n"
 		"  --ica_n1 N              (ICA) number of principal components to compute\n"
 		"  --ica_n2 N              (ICA) number of independent components to estimate\n"
-		"  --ica_nonl pow3|tanh    (ICA) nonlinearity function to use\n"
+		"  --ica_nonl [nonl]       (ICA) nonlinearity function to use (pow3, tanh, gauss)\n"
 		"  --ica_max_iterations N  (ICA) maximum iterations\n"
 		"  --ica_epsilon X         (ICA) convergence threshold for w\n"
 		"  --knn_k N               (kNN) number of nearest neighbors to use\n"
-		"  --knn_dist COS|L1|L2    (kNN) distance function to use\n"
+		"  --knn_dist [dist]       (kNN) distance function to use (L1, L2, COS)\n"
 	);
 }
 
@@ -104,6 +104,9 @@ ica_nonl_t parse_nonl_func(const char *name)
 	}
 	else if ( strcmp(name, "tanh") == 0 ) {
 		return ICA_NONL_TANH;
+	}
+	else if ( strcmp(name, "gauss") == 0 ) {
+		return ICA_NONL_GAUSS;
 	}
 
 	return ICA_NONL_NONE;
@@ -235,7 +238,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( model_params.ica.nonl == ICA_NONL_NONE ) {
-		fprintf(stderr, "error: --ica_nonl must be pow3 | tanh\n");
+		fprintf(stderr, "error: --ica_nonl must be pow3 | tanh | gauss\n");
 		exit(1);
 	}
 

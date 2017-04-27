@@ -164,7 +164,7 @@ matrix_t * fpica_pow3 (matrix_t *w0, matrix_t *X)
  *
  * which gives:
  *
- * w+ = (X * tanh(X' * w) - sum(sech(X' * w) .^ 2) * w) / X->cols
+ * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X->cols
  * w* = w+ / ||w+||
  *
  * @param w0
@@ -199,19 +199,72 @@ matrix_t * fpica_tanh (matrix_t *w0, matrix_t *X)
     return w;
 }
 
-// TODO: fpica_gauss
-// TODO: fpica_skew
-// TODO: fpica_relu
+/**
+ * Gaussian distribution function.
+ *
+ * @param x
+ */
+precision_t gauss (precision_t x)
+{
+    return x * expf(-(x * x) / 2.0f);
+}
+
+/**
+ * Derivative of the aussian distribution function.
+ *
+ * @param x
+ */
+precision_t dgauss (precision_t x)
+{
+    return (1 - x * x) * expf(-(x * x) / 2.0f);
+}
+
+/**
+ * Compute the parameter update for fpica
+ * with the Gaussian nonlinearity:
+ *
+ * g(u) = u * exp(-u^2 / 2)
+ * g'(u) = (1 - u^2) * exp(-u^2 / 2)
+ *
+ * which gives:
+ *
+ * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X->cols
+ * w* = w+ / ||w+||
+ *
+ * @param w0
+ * @param X
+ * @return w*
+ */
+matrix_t * fpica_gauss (matrix_t *w0, matrix_t *X)
+{
+    // compute w+
+    matrix_t *w_temp1 = m_product("w_temp1", X, w0, true, false);
+    matrix_t *w_temp2 = m_copy("w_temp2", w_temp1);
+
+    m_elem_apply(w_temp1, gauss);
+    m_elem_apply(w_temp2, dgauss);
+
+    matrix_t *w_temp3 = m_copy("w_temp3", w0);
+    m_elem_mult(w_temp3, m_sum(w_temp2));
+
+    matrix_t *w = m_product("w", X, w_temp1);
+    m_subtract(w, w_temp3);
+    m_elem_mult(w, 1.0f / X->cols);
+
+    // compute w*
+    m_elem_mult(w, 1 / m_norm(w));
+
+    // cleanup
+    m_free(w_temp1);
+    m_free(w_temp2);
+
+    return w;
+}
 
 /**
  * Compute the mixing matrix W for an input matrix X using
  * the deflation approach. The input matrix should already
  * be whitened.
- *
- * The fixed-point algorithm is defined as follows:
- *
- * w+ = E{X * g(X' * w)} - E{g'(X' * w)} * w
- * w* = w+ / ||w+||
  *
  * @param params
  * @param X
@@ -236,6 +289,9 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
     }
     else if ( params->nonl == ICA_NONL_TANH ) {
         fpica_update = fpica_tanh;
+    }
+    else if ( params->nonl == ICA_NONL_GAUSS ) {
+        fpica_update = fpica_gauss;
     }
 
     matrix_t *B = m_zeros("B", vectorSize, vectorSize);

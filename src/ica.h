@@ -11,7 +11,8 @@
 typedef enum {
 	ICA_NONL_NONE,
 	ICA_NONL_POW3,
-	ICA_NONL_TANH
+	ICA_NONL_TANH,
+	ICA_NONL_GAUSS
 } ica_nonl_t;
 
 typedef matrix_t * (*ica_nonl_func_t)(matrix_t *, matrix_t *);
