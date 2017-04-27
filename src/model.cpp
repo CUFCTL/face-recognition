@@ -175,7 +175,7 @@ void model_load(model_t *model, const char *path)
  * @param model
  * @param test_set
  */
-data_label_t **model_predict(model_t *model, dataset_t *test_set)
+data_label_t ** model_predict(model_t *model, dataset_t *test_set)
 {
 	timer_push("Recognition");
 
@@ -190,16 +190,16 @@ data_label_t **model_predict(model_t *model, dataset_t *test_set)
 	matrix_t *P_test = m_product("P_test", model->W, X_test, true, false);
 
 	// compute predicted labels
-	data_label_t **pred_labels = (data_label_t **)malloc(test_set->num_entries * sizeof(data_label_t *));
+	data_label_t **Y_pred = (data_label_t **)malloc(test_set->num_entries * sizeof(data_label_t *));
 
 	if ( model->classifier == CLASSIFIER_KNN ) {
 		int i;
 		for ( i = 0; i < test_set->num_entries; i++ ) {
-			pred_labels[i] = kNN(&model->params.knn, model->P, model->dataset->entries, P_test, i);
+			Y_pred[i] = kNN(&model->params.knn, model->P, model->dataset->entries, P_test, i);
 		}
 	}
 	else if ( model->classifier == CLASSIFIER_BAYES ) {
-		pred_labels = bayesian(model->P, P_test, model->dataset->labels, model->dataset->entries, test_set->num_labels);
+		Y_pred = bayes(model->P, model->dataset->entries, model->dataset->labels, test_set->num_labels, P_test);
 	}
 
 	model->stats.test_time = timer_pop();
@@ -210,7 +210,7 @@ data_label_t **model_predict(model_t *model, dataset_t *test_set)
 	m_free(X_test);
 	m_free(P_test);
 
-	return pred_labels;
+	return Y_pred;
 }
 
 /**

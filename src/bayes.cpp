@@ -1,86 +1,112 @@
 /**
  * @file bayes.cpp
  *
- * Implementation of the Bayes classifier.
+ * Implementation of the naive Bayes classifier.
  */
+#include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "lda.h"
 #include "bayes.h"
 
-data_label_t ** bayesian(matrix_t *X, matrix_t *X_test, data_label_t *C, data_entry_t *Y, int num_classes)
+/**
+ * Determine the index of the first
+ * element that is the maximum value.
+ *
+ * @param x
+ * @return index
+ */
+int m_argmax(matrix_t *x)
 {
-	unsigned int i, j, id;
-	float probs[num_classes];
+	assert(x->rows == 1 || x->cols == 1);
 
-	matrix_t **X_c  = m_copy_classes(X, Y, num_classes);
-	matrix_t **X_u  = m_class_means(X_c, num_classes);
-	matrix_t *X_cov = m_scatter_between(X_c, X_u, num_classes);
-	matrix_t * sigma_inv = m_inverse(X_cov->name, X_cov);
+	int N = (x->rows == 1)
+		? x->cols
+		: x->rows;
 
-	// allocate space for labels to be returned
-	data_label_t **labels = (data_label_t **)malloc(X_test->cols * sizeof(data_label_t *));
-	for (i = 0; i < (unsigned int) X_test->cols; i++)
-	{
-		labels[i] = (data_label_t *)malloc(sizeof(data_label_t));
-	}
+	int index = 0;
+	precision_t max = x->data[0];
 
-	for (i = 0; i < (unsigned int) X_test->cols; i++)
-	{
-		matrix_t *test_vec = m_copy_columns(X_test->name, X_test, i, i + 1);
-
-		for (j = 0; j < (unsigned int) num_classes; j++)
-		{
-			probs[j] = calc_bayes_prob(test_vec, X_u[j], sigma_inv);
+	int i;
+	for ( i = 1; i < N; i++ ) {
+		if ( max < x->data[i] ) {
+			max = x->data[i];
+			index = i;
 		}
-
-		int idx = argmax(probs, num_classes);
-		labels[i] = &C[idx];
-
-		m_free(test_vec);
 	}
 
-	m_free(sigma_inv);
-	return labels;
+	return index;
 }
 
-
-// calculate the probability using the Bayesian discriminant function
-// prob = -0.5 * (v_test - mu) * inv(sigma) * (v_test - mu)'
-float calc_bayes_prob(matrix_t *v_test, matrix_t *X_u, matrix_t *sigma_inv)
+/**
+ * Compute the probability of a class for a
+ * feature vector using the Bayes discriminant
+ * function:
+ *
+ * g_i'(x) = -1/2 * (x - mu_i) * S^-1 * (x - mu_i)'
+ */
+precision_t bayes_prob(matrix_t *x, matrix_t *mu, matrix_t *S_inv)
 {
-	float prob = -9999999;
+	m_subtract_columns(x, mu);
 
-	m_subtract_columns(v_test, X_u);
-	m_elem_mult(v_test, -0.5);
+	matrix_t *p_temp1 = m_product("p_temp1", x, S_inv, true, false);
+	matrix_t *p_temp2 = m_product("p_temp2", p_temp1, x, false, false);
 
-
-	matrix_t * v_mult_sig_inv = m_product(v_test->name, v_test, sigma_inv, true, false);
-
-	matrix_t * final = m_product("prob_m", v_mult_sig_inv, v_test, false, false);
-
-	prob = final->data[0];
+	precision_t p = -0.5f * p_temp2->data[0];
 
 	// cleanup
-	m_free(v_mult_sig_inv);
-	m_free(final);
+	m_free(p_temp1);
+	m_free(p_temp2);
 
-	return prob;
+	return p;
 }
 
-int argmax(float *X, int size)
+/**
+ * Classify an observation using naive Bayes.
+ *
+ * @param params
+ * @param X
+ * @param Y
+ * @param C
+ * @param num_classes
+ * @param X_test
+ * @return predicted labels of the test observations
+ */
+data_label_t ** bayes(matrix_t *X, data_entry_t *Y, data_label_t *C, int num_classes, matrix_t *X_test)
 {
-	int i, idx = 0;
-	float max = X[idx];
+	matrix_t **X_c = m_copy_classes(X, Y, num_classes);
+	matrix_t **X_u = m_class_means(X_c, num_classes);
+	matrix_t *S = m_scatter_between(X_c, X_u, num_classes);
+	matrix_t *S_inv = m_inverse("S_inv", S);
+	matrix_t *probs = m_initialize("probs", num_classes, 1);
 
-	for (i = 0; i < size; i++)
-	{
-		if (X[i] > max)
-		{
-			max = X[i];
-			idx = i;
-		}
+	int i, j;
+	for ( i = 0; i < num_classes; i++ ) {
+		m_fprint(stdout, X_u[i]);
 	}
 
-	return idx;
+	m_fprint(stdout, S);
+	m_fprint(stdout, S_inv);
+
+	data_label_t **Y_pred = (data_label_t **)malloc(X_test->cols * sizeof(data_label_t *));
+
+	for ( i = 0; i < X_test->cols; i++ ) {
+		for ( j = 0; j < num_classes; j++ ) {
+			matrix_t *x_test = m_copy_columns("x_test", X_test, i, i + 1);
+
+			probs->data[j] = bayes_prob(x_test, X_u[j], S_inv);
+
+			m_free(x_test);
+
+			printf("%10.0f %s\n", probs->data[j], C[j].name);
+		}
+
+		int index = m_argmax(probs);
+		Y_pred[i] = &C[index];
+	}
+
+	m_free(S_inv);
+
+	return Y_pred;
 }
