@@ -7,7 +7,6 @@ DATASET=orl
 TRAIN=70
 TEST=30
 NUM_ITER=3
-
 ALGO=pca
 PARAM=pca_n1
 
@@ -25,7 +24,7 @@ if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	cd /scratch2/$USER/face-recognition
 fi
 
-make clean && make DEBUG=0 GPU=0
+make clean && make GPU=0
 
 for (( N = $TEST_START; N <= $TEST_END; N += $TEST_INC )); do
 	echo "Testing with $PARAM = $N"

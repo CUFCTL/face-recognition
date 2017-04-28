@@ -1,18 +1,18 @@
-#PBS -N orl-pca-knn-k
+#PBS -N orl-lda-n2
 #PBS -l select=1:ncpus=8:ngpus=1:mem=8gb,walltime=00:10:00
 
-# Accuracy of PCA for several values of knn_k on the
+# Accuracy of LDA across several values of lda_n2 on the
 # ORL dataset, 70/30 partition
 DATASET=orl
 TRAIN=70
 TEST=30
-NUM_ITER=3
-ALGO=pca
-PARAM=knn_k
+NUM_ITER=5
+ALGO=lda
+PARAM=lda_n2
 
-TEST_START=1
-TEST_END=10
-TEST_INC=1
+TEST_START=10
+TEST_END=100
+TEST_INC=10
 
 if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	module purge

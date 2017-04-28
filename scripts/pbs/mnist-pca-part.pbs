@@ -1,32 +1,31 @@
 #PBS -N mnist-pca-part
 #PBS -l select=1:ncpus=8:ngpus=1:mem=8gb,walltime=00:10:00
 
-# Accuracy of mnist across several partitions on the ORL dataset
-
+# Accuracy of PCA across several partitions on the
+# MNIST dataset, default hyperparameters
 DATASET=mnist
 NUM_ITER=5
+ALGO=pca
 
 TEST_START=10
 TEST_END=90
 TEST_INC=10
-TRAIN=0
 
 if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
-        module purge
-        module add cuda-toolkit/7.5.18
-        module add gcc/4.8.1
-        module add git
-        module add python/2.7.6
+	module purge
+	module add cuda-toolkit/7.5.18
+	module add gcc/4.8.1
+	module add git
+	module add python/2.7.6
 
-        cd /scratch2/$USER/face-recognition
+	cd /scratch2/$USER/face-recognition
 fi
 
-make clean && make DEBUG=0 GPU=0
+make clean && make GPU=0
 
-for((N = $TEST_START; N <= $TEST_END; N +=$TEST_INC ))
-do
-        echo "Removing $N"
-        TRAIN=`expr 100 - $N`
-        python ./scripts/cross-validate.py --run-c -d $DATASET -t $TRAIN -r $N -i $NUM_ITER --pca
+for (( N = $TEST_START; N <= $TEST_END; N += $TEST_INC )); do
+	TRAIN=`expr 100 - $N`
+
+	echo "Testing with $TRAIN/$N partition"
+	python ./scripts/cross-validate.py --run-c -d $DATASET -t $TRAIN -r $N -i $NUM_ITER --$ALGO
 done
-

@@ -2,8 +2,7 @@
 #PBS -l select=1:ncpus=8:ngpus=1:mem=8gb,walltime=00:10:00
 
 # Accuracy of PCA, LDA, and ICA on the ORL dataset,
-# 70/30 partition
-
+# 70/30 partition, default hyperparameters
 DATASET=orl
 TRAIN=70
 TEST=30
@@ -19,7 +18,7 @@ if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	cd /scratch2/$USER/face-recognition
 fi
 
-make clean && make DEBUG=0 GPU=0
+make clean && make GPU=0
 
 for A in "pca" "lda" "ica"; do
 	echo "Testing $A"
