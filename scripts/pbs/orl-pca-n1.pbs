@@ -3,17 +3,6 @@
 
 # Accuracy of PCA for several values of pca_n1 on the
 # ORL dataset, 70/30 partition
-DATASET=orl
-TRAIN=70
-TEST=30
-NUM_ITER=3
-ALGO=pca
-PARAM=pca_n1
-
-TEST_START=10
-TEST_END=100
-TEST_INC=10
-
 if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	module purge
 	module add cuda-toolkit/7.5.18
@@ -24,9 +13,4 @@ if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	cd /scratch2/$USER/face-recognition
 fi
 
-make clean && make GPU=0
-
-for (( N = $TEST_START; N <= $TEST_END; N += $TEST_INC )); do
-	echo "Testing with $PARAM = $N"
-	python ./scripts/cross-validate.py --run-c -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$ALGO -- --$PARAM $N
-done
+./scripts/pbs/hyperparameter.sh -d orl -a pca -p pca_n1
