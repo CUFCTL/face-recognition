@@ -18,7 +18,6 @@ while [[ $# -gt 0 ]]; do
 	case $key in
 	-g|--gpu)
 		GPU=1
-		shift
 		;;
 	-d|--dataset)
 		DATASET="$2"
