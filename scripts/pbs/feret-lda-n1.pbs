@@ -13,4 +13,4 @@ if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	cd /scratch2/$USER/face-recognition
 fi
 
-./hyperparameter.sh --gpu -d feret -a lda -p lda_n1
+./scripts/pbs/hyperparameter.sh --gpu -d feret -a lda -p lda_n1
