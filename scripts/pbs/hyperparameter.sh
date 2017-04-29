@@ -65,11 +65,22 @@ if [[ -z $DATASET || -z $ALGO || -z $PARAM ]]; then
 	exit 1
 fi
 
+# generate range of values
+if [ $PARAM = "ica_nonl" ]; then
+	VALUES="pow3 tanh gauss"
+elif [ $PARAM = "knn_dist" ]; then
+	VALUES="L1 L2 COS"
+else
+	for (( i = $TEST_START; i <= $TEST_END; i += $TEST_INC )); do
+		VALUES="$VALUES $i"
+	done
+fi
+
 # build executable
 make clean && make GPU=$GPU
 
 # run experiment
-for (( N = $TEST_START; N <= $TEST_END; N += $TEST_INC )); do
+for N in $VALUES; do
 	echo "Testing with $PARAM = $N"
 	python ./scripts/cross-validate.py --run-c -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$ALGO -- --$PARAM $N
 done
