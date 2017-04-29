@@ -43,6 +43,18 @@ while [[ $# -gt 0 ]]; do
 		PARAM="$2"
 		shift
 		;;
+	--start)
+		TEST_START="$2"
+		shift
+		;;
+	--end)
+		TEST_END="$2"
+		shift
+		;;
+	--inc)
+		TEST_INC="$2"
+		shift
+		;;
 	*)
 		# unknown option
 		;;
@@ -62,6 +74,9 @@ if [[ -z $DATASET || -z $ALGO || -z $PARAM ]]; then
 	>&2 echo "  -i, --num_iter  number of iterations"
 	>&2 echo "  -a, --algo      algorithm (pca, lda, ica)"
 	>&2 echo "  -p, --param     hyperparameter"
+	>&2 echo "  --start         hyperparameter start"
+	>&2 echo "  --end           hyperparameter stop"
+	>&2 echo "  --inc           hyperparameter increment"
 	exit 1
 fi
 
