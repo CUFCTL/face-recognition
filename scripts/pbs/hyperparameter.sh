@@ -56,7 +56,8 @@ while [[ $# -gt 0 ]]; do
 		shift
 		;;
 	*)
-		# unknown option
+		>&2 echo "error: unrecognized option '$1'"
+		exit 1
 		;;
 	esac
 
