@@ -127,8 +127,6 @@ data_label_t ** bayes(matrix_t *X, data_entry_t *Y, data_label_t *C, int num_cla
 			probs->data[j] = bayes_prob(x_test, U[j], S_inv[j]);
 
 			m_free(x_test);
-
-			printf("%10.0f %s\n", probs->data[j], C[j].name);
 		}
 
 		int index = m_argmax(probs);
