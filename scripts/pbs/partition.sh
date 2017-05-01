@@ -50,7 +50,7 @@ if [[ -z $DATASET || -z $ALGO ]]; then
 fi
 
 # build executable
-make clean && make GPU=$GPU
+make GPU=$GPU > /dev/null
 
 # run experiment
 for (( N = $TEST_START; N <= $TEST_END; N += $TEST_INC )); do

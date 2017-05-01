@@ -93,7 +93,7 @@ else
 fi
 
 # build executable
-make clean && make GPU=$GPU
+make GPU=$GPU > /dev/null
 
 # run experiment
 for N in $VALUES; do
