@@ -1,0 +1,23 @@
+#PBS -N feret-all
+#PBS -l select=1:ncpus=8:ngpus=1:mem=8gb,walltime=48:00:00
+
+# Measure the accuracy, train time, and inference time of each
+# hyperparameter over a range of values using the FERET dataset.
+if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
+	module purge
+	module add cuda-toolkit/7.5.18
+	module add gcc/4.8.1
+	module add git
+	module add python/2.7.6
+
+	cd /scratch2/$USER/face-recognition
+fi
+
+./scripts/pbs/hyperparameter.sh --gpu -d feret -a pca -p pca_n1 --start 100 --end 1000 --inc 100
+./scripts/pbs/hyperparameter.sh --gpu -d feret -a lda -p lda_n1 --start 100 --end 1000 --inc 100
+./scripts/pbs/hyperparameter.sh --gpu -d feret -a lda -p lda_n2 --start 100 --end 1000 --inc 100
+./scripts/pbs/hyperparameter.sh --gpu -d feret -a ica -p ica_n1 --start 100 --end 1000 --inc 100
+./scripts/pbs/hyperparameter.sh --gpu -d feret -a ica -p ica_n2 --start 100 --end 1000 --inc 100
+./scripts/pbs/hyperparameter.sh --gpu -d feret -a ica -p ica_nonl
+./scripts/pbs/hyperparameter.sh --gpu -d feret -a pca -p knn_k --start 1 --end 10 --inc 1
+./scripts/pbs/hyperparameter.sh --gpu -d feret -a pca -p knn_dist
