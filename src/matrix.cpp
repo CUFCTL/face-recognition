@@ -923,8 +923,6 @@ precision_t m_sum (matrix_t *v)
 	int N = (v->rows == 1)
 		? v->cols
 		: v->rows;
-	int incX = 1;
-
 	precision_t sum = 0.0f;
 
 	int i;

@@ -29,6 +29,9 @@ model_t * model_construct(feature_type_t feature, classifier_type_t classifier, 
 	model->P = NULL;
 	model->classifier = classifier;
 	model->dataset = NULL;
+	model->stats.accuracy = 0.0f;
+	model->stats.train_time = 0.0f;
+	model->stats.test_time = 0.0f;
 
 	// log hyperparameters
 	int len = 20;

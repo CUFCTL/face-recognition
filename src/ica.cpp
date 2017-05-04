@@ -273,12 +273,9 @@ matrix_t * fpica_gauss (matrix_t *w0, matrix_t *X)
  */
 matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
 {
-    int vectorSize = X->rows;
-    int numSamples = X->cols;
-
     // if n2 is -1, use default value
     int n2 = (params->n2 == -1)
-        ? vectorSize
+        ? X->rows
         : params->n2;
 
     // determine nonlinearity function
@@ -294,7 +291,7 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
         fpica_update = fpica_gauss;
     }
 
-    matrix_t *B = m_zeros("B", vectorSize, vectorSize);
+    matrix_t *B = m_zeros("B", X->rows, X->rows);
     matrix_t *W = m_zeros("W", n2, W_z->cols);
 
     int i;
@@ -302,7 +299,7 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
         log(LL_VERBOSE, "      round %d\n", i + 1);
 
         // initialize w as a Gaussian (0, 1) random vector
-        matrix_t *w = m_random("w", vectorSize, 1);
+        matrix_t *w = m_random("w", X->rows, 1);
 
         // compute w = (w - B * B' * w), normalize w
         matrix_t *w_temp1 = m_product("w_temp1", B, B, false, true);

@@ -121,6 +121,8 @@ void dataset_destruct(dataset_t *dataset)
 		free(dataset->labels[i].name);
 	}
 	free(dataset->labels);
+
+	free(dataset);
 }
 
 /**
