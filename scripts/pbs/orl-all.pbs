@@ -1,5 +1,5 @@
 #PBS -N orl-all
-#PBS -l select=1:ncpus=8:ngpus=1:mem=8gb,walltime=48:00:00
+#PBS -l select=1:ncpus=1:ngpus=1:mem=8gb,walltime=48:00:00
 
 # Measure the accuracy, train time, and inference time of each
 # hyperparameter over a range of values using the ORL dataset.
