@@ -138,6 +138,7 @@ matrix_t * m_scatter_within(matrix_t **X_c, matrix_t **U, int c)
 		m_add(S_w, S_w_i);
 
 		// cleanup
+		m_free(X_c_i);
 		m_free(S_w_i);
 	}
 
