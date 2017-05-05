@@ -99,6 +99,6 @@ make GPU=$GPU > /dev/null
 for N in $VALUES; do
 	echo "Testing with $PARAM = $N"
 
-	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$ALGO -- --$PARAM $N
+	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$ALGO -- --$PARAM $N || exit -1
 	echo
 done
