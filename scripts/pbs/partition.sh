@@ -57,5 +57,7 @@ for (( N = $TEST_START; N <= $TEST_END; N += $TEST_INC )); do
 	TRAIN=`expr 100 - $N`
 
 	echo "Testing with $TRAIN/$N partition"
-	python ./scripts/cross-validate.py --run-c -d $DATASET -t $TRAIN -r $N -i $NUM_ITER --$ALGO
+
+	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $N -i $NUM_ITER --$ALGO
+	echo
 done

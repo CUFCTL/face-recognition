@@ -22,5 +22,7 @@ make clean && make GPU=0
 
 for A in "pca" "lda" "ica"; do
 	echo "Testing $A"
-	python ./scripts/cross-validate.py --run-c -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$A
+
+	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$A
+	echo
 done 
