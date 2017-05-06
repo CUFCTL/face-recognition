@@ -1,5 +1,5 @@
 #PBS -N orl-partitions
-#PBS -l select=1:ncpus=8:ngpus=1:mem=8gb:gpu_model=k40,walltime=00:10:00
+#PBS -l select=1:ncpus=8:ngpus=1:mem=8gb:gpu_model=k40,walltime=00:30:00
 
 # Accuracy of PCA across several partitions on the
 # ORL dataset, default hyperparameters
