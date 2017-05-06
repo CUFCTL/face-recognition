@@ -16,9 +16,6 @@ parser.add_argument("-d", "--dataset", choices=["feret", "mnist", "orl"], requir
 parser.add_argument("-t", "--train", type=int, choices=range(1, 100), required=True, help="percentage of training set", metavar="N", dest="TRAIN")
 parser.add_argument("-r", "--test", type=int, choices=range(1, 100), required=True, help="percentage of test set", metavar="N", dest="TEST")
 parser.add_argument("-i", "--num-iter", type=int, required=True, help="number of iterations", metavar="N", dest="NUM_ITER")
-parser.add_argument("--pca", action="store_true", help="run PCA", dest="PCA")
-parser.add_argument("--lda", action="store_true", help="run LDA", dest="LDA")
-parser.add_argument("--ica", action="store_true", help="run ICA", dest="ICA")
 parser.add_argument("ARGS", nargs=argparse.REMAINDER, help="arguments for C code")
 
 args = parser.parse_args()
@@ -26,10 +23,6 @@ args = parser.parse_args()
 # perform some custom validation
 if args.TRAIN + args.TEST != 100:
 	print "error: --train and --test must sum to 100%"
-	sys.exit(1)
-
-if not args.PCA and not args.LDA and not args.ICA:
-	print "error: you must specify at least one algorithm (PCA, LDA, ICA)"
 	sys.exit(1)
 
 # check for face-rec executable
@@ -46,18 +39,7 @@ elif args.DATASET == "orl":
 	dataset = datasets.ORLDataset()
 
 # remove '--' from ARGS
-if len(args.ARGS) > 0:
-	args.ARGS.remove("--")
-
-# add algorithm arguments to ARGS
-if args.PCA:
-	args.ARGS.append("--pca")
-
-if args.LDA:
-	args.ARGS.append("--lda")
-
-if args.ICA:
-	args.ARGS.append("--ica")
+args.ARGS.remove("--")
 
 # construct subprocess args
 args_dataset = ["python", "scripts/create-sets.py", "-d", args.DATASET, "-t", str(args.TRAIN), "-r", str(args.TEST)]

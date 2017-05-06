@@ -63,7 +63,7 @@ for C in $CLASSIFIERS; do
 for F in $FEATURES; do
 	echo "Testing with $F and $C"
 
-	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$F -- --$C || exit -1
+	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER -- --$F --$C || exit -1
 	echo
 done
 done
