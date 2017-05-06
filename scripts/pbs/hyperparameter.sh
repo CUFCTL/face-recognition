@@ -65,7 +65,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z $DATASET || -z $ALGO || -z $PARAM ]]; then
-	>&2 echo "usage: ./scripts/pbs/hyperparameter.sh [options]"
+	>&2 echo "usage: ./hyperparameter.sh [options]"
 	>&2 echo
 	>&2 echo "options:"
 	>&2 echo "  -g, --gpu       whether to run on GPU"
@@ -92,6 +92,29 @@ else
 	done
 fi
 
+# default hyperparameters for FERET
+if [ $DATASET = "feret" ]; then
+	if [ $PARAM != "pca_n1" ]; then
+		ARGS="$ARGS --pca_n1 1000"
+	fi
+
+	if [ $PARAM != "lda_n1" ]; then
+		ARGS="$ARGS --lda_n1 1000"
+	fi
+
+	if [ $PARAM != "lda_n2" ]; then
+		ARGS="$ARGS --lda_n2 1000"
+	fi
+
+	if [ $PARAM != "ica_n1" ]; then
+		ARGS="$ARGS --ica_n1 1000"
+	fi
+
+	if [ $PARAM != "ica_n2" ]; then
+		ARGS="$ARGS --ica_n2 1000"
+	fi
+fi
+
 # build executable
 make GPU=$GPU > /dev/null
 
@@ -99,6 +122,6 @@ make GPU=$GPU > /dev/null
 for N in $VALUES; do
 	echo "Testing with $PARAM = $N"
 
-	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$ALGO -- --$PARAM $N || exit -1
+	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$ALGO -- --$PARAM $N $ARGS || exit -1
 	echo
 done
