@@ -25,4 +25,4 @@ for A in "pca" "lda" "ica"; do
 
 	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$A
 	echo
-done 
+done
