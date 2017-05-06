@@ -1,13 +1,8 @@
 #PBS -N orl-algorithms
-#PBS -l select=1:ncpus=8:ngpus=1:mem=8gb,walltime=00:10:00
+#PBS -l select=1:ncpus=8:ngpus=1:mem=8gb:gpu_model=k40,walltime=00:10:00
 
 # Accuracy of each feature algorithm on the ORL dataset,
 # 70/30 partition, default hyperparameters
-DATASET=orl
-TRAIN=70
-TEST=30
-NUM_ITER=3
-
 if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	module purge
 	module add cuda-toolkit/7.5.18
@@ -18,11 +13,4 @@ if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	cd /scratch2/$USER/face-recognition
 fi
 
-make clean && make GPU=0
-
-for A in "pca" "lda" "ica"; do
-	echo "Testing $A"
-
-	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$A
-	echo
-done
+./scripts/pbs/algorithm.sh --gpu -d orl

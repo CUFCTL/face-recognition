@@ -1,13 +1,14 @@
 #!/bin/sh
-# Run an experiment on the dataset partition.
+# Run an experiment on the feature-classifier algorithm.
 
 # define default settings
 GPU=0
+TRAIN=70
+TEST=30
 NUM_ITER=3
 
-TEST_START=10
-TEST_END=90
-TEST_INC=10
+FEATURES="pca lda ica"
+CLASSIFIERS="knn bayes"
 
 # parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -21,12 +22,16 @@ while [[ $# -gt 0 ]]; do
 		DATASET="$2"
 		shift
 		;;
-	-i|--num_iter)
-		NUM_ITER="$2"
+	-t|--train)
+		TRAIN="$2"
 		shift
 		;;
-	-a|--algo)
-		ALGO="$2"
+	-r|--test)
+		TEST="$2"
+		shift
+		;;
+	-i|--num_iter)
+		NUM_ITER="$2"
 		shift
 		;;
 	*)
@@ -38,14 +43,15 @@ while [[ $# -gt 0 ]]; do
 	shift
 done
 
-if [[ -z $DATASET || -z $ALGO ]]; then
-	>&2 echo "usage: ./partition.sh [options]"
+if [[ -z $DATASET ]]; then
+	>&2 echo "usage: ./algorithm.sh [options]"
 	>&2 echo
 	>&2 echo "options:"
 	>&2 echo "  -g, --gpu       whether to run on GPU"
 	>&2 echo "  -d, --dataset   dataset (feret, mnist, orl)"
+	>&2 echo "  -t, --train     training partition (0-100)"
+	>&2 echo "  -r, --test      testing partition (0-100)"
 	>&2 echo "  -i, --num_iter  number of iterations"
-	>&2 echo "  -a, --algo      algorithm (pca, lda, ica)"
 	exit 1
 fi
 
@@ -53,11 +59,11 @@ fi
 make GPU=$GPU > /dev/null
 
 # run experiment
-for (( N = $TEST_START; N <= $TEST_END; N += $TEST_INC )); do
-	TRAIN=`expr 100 - $N`
+for C in $CLASSIFIERS; do
+for F in $FEATURES; do
+	echo "Testing with $F and $C"
 
-	echo "Testing with $TRAIN/$N partition"
-
-	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $N -i $NUM_ITER --$ALGO || exit -1
+	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER --$F -- --$C || exit -1
 	echo
+done
 done
