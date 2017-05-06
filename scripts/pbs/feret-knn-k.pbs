@@ -1,4 +1,4 @@
-#PBS -N feret-pca-knn-k
+#PBS -N feret-knn-k
 #PBS -l select=1:ncpus=8:ngpus=1:mem=8gb:gpu_model=k40,walltime=2:00:00
 
 # Accuracy of PCA for several values of knn_k on the

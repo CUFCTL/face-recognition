@@ -1,8 +1,8 @@
-#PBS -N mnist-pca-part
-#PBS -l select=1:ncpus=8:ngpus=1:mem=8gb,walltime=00:10:00
+#PBS -N orl-partitions
+#PBS -l select=1:ncpus=8:ngpus=1:mem=8gb:gpu_model=k40,walltime=00:10:00
 
 # Accuracy of PCA across several partitions on the
-# MNIST dataset, default hyperparameters
+# ORL dataset, default hyperparameters
 if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	module purge
 	module add cuda-toolkit/7.5.18
@@ -13,4 +13,4 @@ if [ $PBS_ENVIRONMENT = "PBS_BATCH" ]; then
 	cd /scratch2/$USER/face-recognition
 fi
 
-./scripts/pbs/partition.sh -d mnist -a pca
+./scripts/pbs/partition.sh -d orl -a pca
