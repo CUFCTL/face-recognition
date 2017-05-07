@@ -83,9 +83,9 @@ fi
 
 # generate range of values
 if [ $PARAM = "ica_nonl" ]; then
-	VALUES="pow3 tanh gauss"
+	VALUES="tanh gauss pow3"
 elif [ $PARAM = "knn_dist" ]; then
-	VALUES="L1 L2 COS"
+	VALUES="COS L1 L2"
 else
 	for (( i = $TEST_START; i <= $TEST_END; i += $TEST_INC )); do
 		VALUES="$VALUES $i"
@@ -95,23 +95,23 @@ fi
 # default hyperparameters for FERET
 if [ $DATASET = "feret" ]; then
 	if [ $PARAM != "pca_n1" ]; then
-		ARGS="$ARGS --pca_n1 1000"
+		ARGS="$ARGS --pca_n1 100"
 	fi
 
 	if [ $PARAM != "lda_n1" ]; then
-		ARGS="$ARGS --lda_n1 1000"
+		ARGS="$ARGS --lda_n1 100"
 	fi
 
 	if [ $PARAM != "lda_n2" ]; then
-		ARGS="$ARGS --lda_n2 1000"
+		ARGS="$ARGS --lda_n2 100"
 	fi
 
 	if [ $PARAM != "ica_n1" ]; then
-		ARGS="$ARGS --ica_n1 1000"
+		ARGS="$ARGS --ica_n1 100"
 	fi
 
 	if [ $PARAM != "ica_n2" ]; then
-		ARGS="$ARGS --ica_n2 1000"
+		ARGS="$ARGS --ica_n2 100"
 	fi
 fi
 
