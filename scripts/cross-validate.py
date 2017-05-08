@@ -52,8 +52,6 @@ results = []
 
 # perform repeated random testing
 for i in xrange(args.NUM_ITER):
-	print "TEST %d" % (i + 1)
-
 	# create the training set and test set
 	subprocess.call(args_dataset)
 
@@ -72,5 +70,4 @@ for i in xrange(args.NUM_ITER):
 # average results
 results = [(r / args.NUM_ITER) for r in results]
 
-print
 print "".join(["{0:12.3f}".format(r) for r in results])

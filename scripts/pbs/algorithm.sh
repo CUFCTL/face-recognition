@@ -60,10 +60,9 @@ make GPU=$GPU > /dev/null
 
 # run experiment
 for C in $CLASSIFIERS; do
-for F in $FEATURES; do
-	echo "Testing with $F and $C"
+	for F in $FEATURES; do
+		RESULTS=$(python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER -- --$F --$C)
 
-	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER -- --$F --$C || exit -1
-	echo
-done
+		echo $F $C $RESULTS
+	done
 done

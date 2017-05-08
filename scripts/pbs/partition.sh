@@ -53,11 +53,9 @@ fi
 make GPU=$GPU > /dev/null
 
 # run experiment
-for (( N = $TEST_START; N <= $TEST_END; N += $TEST_INC )); do
-	TRAIN=`expr 100 - $N`
+for (( TEST = $TEST_START; TEST <= $TEST_END; TEST += $TEST_INC )); do
+	TRAIN=`expr 100 - $TEST`
+	RESULTS=$(python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER -- --$ALGO)
 
-	echo "Testing with $TRAIN/$N partition"
-
-	python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $N -i $NUM_ITER -- --$ALGO || exit -1
-	echo
+	echo $TRAIN/$TEST $RESULTS
 done
