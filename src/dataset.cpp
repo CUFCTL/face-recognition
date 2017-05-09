@@ -169,6 +169,13 @@ Dataset::Dataset(FILE *file)
 }
 
 /**
+ * Construct an empty dataset.
+ */
+Dataset::Dataset()
+{
+}
+
+/**
  * Save a dataset to a file.
  *
  * @param file

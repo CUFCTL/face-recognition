@@ -40,7 +40,8 @@ typedef struct {
 	float test_time;
 } model_stats_t;
 
-typedef struct {
+class Model {
+private:
 	// hyperparameters
 	model_params_t params;
 
@@ -58,16 +59,17 @@ typedef struct {
 
 	// performance, accuracy stats
 	model_stats_t stats;
-} model_t;
 
-model_t * model_construct(feature_type_t feature, classifier_type_t classifier, model_params_t params);
-void model_destruct(model_t *model);
+public:
+	Model(feature_type_t feature, classifier_type_t classifier, model_params_t params);
+	~Model();
 
-void model_train(model_t *model, const Dataset& train_set);
-void model_save(model_t *model, const char *path);
-void model_load(model_t *model, const char *path);
-char ** model_predict(model_t *model, const Dataset& test_set);
-void model_validate(model_t *model, const Dataset& test_set, char **pred_labels);
-void model_print_stats(model_t *model);
+	void train(const Dataset& train_set);
+	void save(const char *path);
+	void load(const char *path);
+	char ** predict(const Dataset& test_set);
+	void validate(const Dataset& test_set, char **pred_labels);
+	void print_stats();
+};
 
 #endif

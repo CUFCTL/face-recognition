@@ -248,15 +248,15 @@ int main(int argc, char **argv)
 #endif
 
 	// run the face recognition system
-	model_t *model = model_construct(feature_type, classifier_type, model_params);
+	Model model(feature_type, classifier_type, model_params);
 
 	if ( arg_train ) {
 		Dataset train_set(path_train);
 
-		model_train(model, train_set);
+		model.train(train_set);
 	}
 	else {
-		model_load(model, MODEL_FNAME);
+		model.load(MODEL_FNAME);
 	}
 
 	if ( arg_test && arg_stream ) {
@@ -272,27 +272,25 @@ int main(int argc, char **argv)
 			else if ( c == READ ) {
 				Dataset test_set(path_test);
 
-				model_predict(model, test_set);
+				model.predict(test_set);
 			}
 		}
 	}
 	else if ( arg_test ) {
 		Dataset test_set(path_test);
 
-		char **pred_labels = model_predict(model, test_set);
-		model_validate(model, test_set, pred_labels);
+		char **pred_labels = model.predict(test_set);
+		model.validate(test_set, pred_labels);
 
 		free(pred_labels);
 	}
 	else {
-		model_save(model, MODEL_FNAME);
+		model.save(MODEL_FNAME);
 	}
 
 	timer_print();
 
-	model_print_stats(model);
-
-	model_destruct(model);
+	model.print_stats();
 
 #ifdef __NVCC__
 	stat = magma_finalize();

@@ -27,6 +27,7 @@ public:
 
 	Dataset(const char *path);
 	Dataset(FILE *file);
+	Dataset();
 
 	void save(FILE *file);
 
