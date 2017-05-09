@@ -94,7 +94,7 @@ void model_train(model_t *model, const Dataset& train_set)
 {
 	timer_push("Training");
 
-	model->dataset = train_set;
+	model->train_set = train_set;
 
 	log(LL_VERBOSE, "Training set: %d samples, %d classes\n",
 		train_set.entries.size(),
@@ -143,7 +143,7 @@ void model_save(model_t *model, const char *path)
 {
 	FILE *file = fopen(path, "w");
 
-	model->dataset.save(file);
+	model->train_set.save(file);
 
 	m_fwrite(file, model->mean);
 
@@ -163,7 +163,7 @@ void model_load(model_t *model, const char *path)
 {
 	FILE *file = fopen(path, "r");
 
-	model->dataset = Dataset(file);
+	model->train_set = Dataset(file);
 
 	model->mean = m_fread(file);
 
@@ -201,11 +201,11 @@ char ** model_predict(model_t *model, const Dataset& test_set)
 
 		int i;
 		for ( i = 0; i < test_set.entries.size(); i++ ) {
-			Y_pred[i] = kNN(&model->params.knn, model->P, model->dataset.entries, P_test, i);
+			Y_pred[i] = kNN(&model->params.knn, model->P, model->train_set.entries, P_test, i);
 		}
 	}
 	else if ( model->classifier == CLASSIFIER_BAYES ) {
-		Y_pred = bayes(model->P, model->dataset.entries, model->dataset.labels, P_test);
+		Y_pred = bayes(model->P, model->train_set.entries, model->train_set.labels, P_test);
 	}
 
 	model->stats.test_time = timer_pop();

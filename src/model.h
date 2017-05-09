@@ -53,7 +53,7 @@ typedef struct {
 	classifier_type_t classifier;
 
 	// input data
-	Dataset dataset;
+	Dataset train_set;
 	matrix_t *mean;
 
 	// performance, accuracy stats
