@@ -9,6 +9,6 @@
 #include "dataset.h"
 #include "matrix.h"
 
-data_label_t ** bayes(matrix_t *X, data_entry_t *Y, data_label_t *C, int num_classes, matrix_t *X_test);
+char ** bayes(matrix_t *X, std::vector<data_entry_t>& Y, std::vector<data_label_t>& C, matrix_t *X_test);
 
 #endif

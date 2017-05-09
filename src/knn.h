@@ -15,6 +15,6 @@ typedef struct {
 	const char *dist_name;
 } knn_params_t;
 
-data_label_t * kNN(knn_params_t *params, matrix_t *X, data_entry_t *Y, matrix_t *X_test, int i);
+char * kNN(knn_params_t *params, matrix_t *X, const std::vector<data_entry_t>& Y, matrix_t *X_test, int i);
 
 #endif

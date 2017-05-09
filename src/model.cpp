@@ -28,7 +28,6 @@ model_t * model_construct(feature_type_t feature, classifier_type_t classifier, 
 	model->W = NULL;
 	model->P = NULL;
 	model->classifier = classifier;
-	model->dataset = NULL;
 	model->stats.accuracy = 0.0f;
 	model->stats.train_time = 0.0f;
 	model->stats.test_time = 0.0f;
@@ -77,8 +76,6 @@ model_t * model_construct(feature_type_t feature, classifier_type_t classifier, 
  */
 void model_destruct(model_t *model)
 {
-	dataset_destruct(model->dataset);
-
 	m_free(model->mean);
 
 	m_free(model->W);
@@ -93,18 +90,18 @@ void model_destruct(model_t *model)
  * @param model
  * @param train_set
  */
-void model_train(model_t *model, dataset_t *train_set)
+void model_train(model_t *model, const Dataset& train_set)
 {
 	timer_push("Training");
 
 	model->dataset = train_set;
 
 	log(LL_VERBOSE, "Training set: %d samples, %d classes\n",
-		train_set->num_entries,
-		train_set->num_labels);
+		train_set.entries.size(),
+		train_set.labels.size());
 
 	// get data matrix X
-	matrix_t *X = dataset_load(train_set);
+	matrix_t *X = train_set.load();
 
 	// subtract mean from X
 	model->mean = m_mean_column("m", X);
@@ -120,7 +117,7 @@ void model_train(model_t *model, dataset_t *train_set)
 		model->P = m_product("P_pca", model->W, X, true, false);
 	}
 	else if ( model->feature == FEATURE_LDA ) {
-		model->W = LDA(&model->params.lda, X, train_set->entries, train_set->num_labels);
+		model->W = LDA(&model->params.lda, X, train_set.entries, train_set.labels.size());
 		model->P = m_product("P_lda", model->W, X, true, false);
 	}
 	else if ( model->feature == FEATURE_ICA ) {
@@ -146,7 +143,7 @@ void model_save(model_t *model, const char *path)
 {
 	FILE *file = fopen(path, "w");
 
-	dataset_fwrite(model->dataset, file);
+	model->dataset.save(file);
 
 	m_fwrite(file, model->mean);
 
@@ -166,7 +163,7 @@ void model_load(model_t *model, const char *path)
 {
 	FILE *file = fopen(path, "r");
 
-	model->dataset = dataset_fread(file);
+	model->dataset = Dataset(file);
 
 	model->mean = m_fread(file);
 
@@ -182,31 +179,33 @@ void model_load(model_t *model, const char *path)
  * @param model
  * @param test_set
  */
-data_label_t ** model_predict(model_t *model, dataset_t *test_set)
+char ** model_predict(model_t *model, const Dataset& test_set)
 {
 	timer_push("Prediction");
 
 	log(LL_VERBOSE, "Test set: %d samples, %d classes\n",
-		test_set->num_entries,
-		test_set->num_labels);
+		test_set.entries.size(),
+		test_set.labels.size());
 
 	// compute projected test images
-	matrix_t *X_test = dataset_load(test_set);
+	matrix_t *X_test = test_set.load();
 	m_subtract_columns(X_test, model->mean);
 
 	matrix_t *P_test = m_product("P_test", model->W, X_test, true, false);
 
 	// compute predicted labels
-	data_label_t **Y_pred = (data_label_t **)malloc(test_set->num_entries * sizeof(data_label_t *));
+	char **Y_pred;
 
 	if ( model->classifier == CLASSIFIER_KNN ) {
+		Y_pred = (char **)malloc(test_set.entries.size() * sizeof(char *));
+
 		int i;
-		for ( i = 0; i < test_set->num_entries; i++ ) {
-			Y_pred[i] = kNN(&model->params.knn, model->P, model->dataset->entries, P_test, i);
+		for ( i = 0; i < test_set.entries.size(); i++ ) {
+			Y_pred[i] = kNN(&model->params.knn, model->P, model->dataset.entries, P_test, i);
 		}
 	}
 	else if ( model->classifier == CLASSIFIER_BAYES ) {
-		Y_pred = bayes(model->P, model->dataset->entries, model->dataset->labels, test_set->num_labels, P_test);
+		Y_pred = bayes(model->P, model->dataset.entries, model->dataset.labels, P_test);
 	}
 
 	model->stats.test_time = timer_pop();
@@ -227,39 +226,39 @@ data_label_t ** model_predict(model_t *model, dataset_t *test_set)
  * @param test_set
  * @param pred_labels
  */
-void model_validate(model_t *model, dataset_t *test_set, data_label_t **pred_labels)
+void model_validate(model_t *model, const Dataset& test_set, char **pred_labels)
 {
 	// compute accuracy
 	int num_correct = 0;
 
 	int i;
-	for ( i = 0; i < test_set->num_entries; i++ ) {
-		if ( strcmp(pred_labels[i]->name, test_set->entries[i].label->name) == 0 ) {
+	for ( i = 0; i < test_set.entries.size(); i++ ) {
+		if ( strcmp(pred_labels[i], test_set.entries[i].label) == 0 ) {
 			num_correct++;
 		}
 	}
 
-	model->stats.accuracy = 100.0f * num_correct / test_set->num_entries;
+	model->stats.accuracy = 100.0f * num_correct / test_set.entries.size();
 
 	// print results
 	log(LL_VERBOSE, "Results\n");
 
-	for ( i = 0; i < test_set->num_entries; i++ ) {
-		data_label_t *pred_label = pred_labels[i];
-		data_entry_t *entry = &test_set->entries[i];
+	for ( i = 0; i < test_set.entries.size(); i++ ) {
+		char *pred_label = pred_labels[i];
+		const data_entry_t& entry = test_set.entries[i];
 
-		const char *s = (strcmp(pred_label->name, entry->label->name) != 0)
+		const char *s = (strcmp(pred_label, entry.label) != 0)
 			? "(!)"
 			: "";
 
 		log(LL_VERBOSE, "%-10s -> %-4s %s\n",
-			basename(entry->name),
-			pred_label->name, s);
+			basename(entry.name),
+			pred_label, s);
 	}
 
 	log(LL_VERBOSE, "%d / %d matched, %.2f%%\n",
 		num_correct,
-		test_set->num_entries,
+		test_set.entries.size(),
 		model->stats.accuracy);
 	log(LL_VERBOSE, "\n");
 }

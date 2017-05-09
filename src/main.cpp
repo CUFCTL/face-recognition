@@ -251,7 +251,7 @@ int main(int argc, char **argv)
 	model_t *model = model_construct(feature_type, classifier_type, model_params);
 
 	if ( arg_train ) {
-		dataset_t *train_set = dataset_construct(path_train);
+		Dataset train_set(path_train);
 
 		model_train(model, train_set);
 	}
@@ -270,21 +270,18 @@ int main(int argc, char **argv)
 				break;
 			}
 			else if ( c == READ ) {
-				dataset_t *test_set = dataset_construct(path_test);
+				Dataset test_set(path_test);
 
 				model_predict(model, test_set);
-
-				dataset_destruct(test_set);
 			}
 		}
 	}
 	else if ( arg_test ) {
-		dataset_t *test_set = dataset_construct(path_test);
+		Dataset test_set(path_test);
 
-		data_label_t **pred_labels = model_predict(model, test_set);
+		char **pred_labels = model_predict(model, test_set);
 		model_validate(model, test_set, pred_labels);
 
-		dataset_destruct(test_set);
 		free(pred_labels);
 	}
 	else {

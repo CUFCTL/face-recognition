@@ -8,7 +8,7 @@
 #include "math_helper.h"
 
 typedef struct {
-	data_label_t *label;
+	char *label;
 	precision_t dist;
 } neighbor_t;
 
@@ -22,7 +22,7 @@ void debug_print_neighbors(neighbor_t *neighbors, int num)
 {
 	int i;
 	for ( i = 0; i < num; i++) {
-		printf("%8s  %f\n", neighbors[i].label->name, neighbors[i].dist);
+		printf("%8s  %f\n", neighbors[i].label, neighbors[i].dist);
 	}
 	putchar('\n');
 }
@@ -70,7 +70,7 @@ void * kNN_identify(const void *a)
  * @param i
  * @return predicted label of the test observation
  */
-data_label_t * kNN(knn_params_t *params, matrix_t *X, data_entry_t *Y, matrix_t *X_test, int i)
+char * kNN(knn_params_t *params, matrix_t *X, const std::vector<data_entry_t>& Y, matrix_t *X_test, int i)
 {
 	// compute distance between X_test_i and each observation in X
 	int num_neighbors = X->cols;
@@ -86,7 +86,7 @@ data_label_t * kNN(knn_params_t *params, matrix_t *X, data_entry_t *Y, matrix_t 
 	qsort(neighbors, num_neighbors, sizeof(neighbor_t), kNN_compare);
 
 	// determine the mode of the k nearest labels
-	data_label_t *nearest = (data_label_t *)mode(neighbors, params->k, sizeof(neighbor_t), kNN_identify);
+	char *nearest = (char *)mode(neighbors, params->k, sizeof(neighbor_t), kNN_identify);
 
 	free(neighbors);
 

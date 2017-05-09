@@ -53,7 +53,7 @@ typedef struct {
 	classifier_type_t classifier;
 
 	// input data
-	dataset_t *dataset;
+	Dataset dataset;
 	matrix_t *mean;
 
 	// performance, accuracy stats
@@ -63,11 +63,11 @@ typedef struct {
 model_t * model_construct(feature_type_t feature, classifier_type_t classifier, model_params_t params);
 void model_destruct(model_t *model);
 
-void model_train(model_t *model, dataset_t *train_set);
+void model_train(model_t *model, const Dataset& train_set);
 void model_save(model_t *model, const char *path);
 void model_load(model_t *model, const char *path);
-data_label_t ** model_predict(model_t *model, dataset_t *test_set);
-void model_validate(model_t *model, dataset_t *test_set, data_label_t **pred_labels);
+char ** model_predict(model_t *model, const Dataset& test_set);
+void model_validate(model_t *model, const Dataset& test_set, char **pred_labels);
 void model_print_stats(model_t *model);
 
 #endif

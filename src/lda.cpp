@@ -22,14 +22,14 @@
  * @param c
  * @return list of submatrices
  */
-matrix_t ** m_copy_classes(matrix_t *X, data_entry_t *y, int c)
+matrix_t ** m_copy_classes(matrix_t *X, const std::vector<data_entry_t>& y, int c)
 {
 	matrix_t **X_c = (matrix_t **)malloc(c * sizeof(matrix_t *));
 
 	int i, j;
 	for ( i = 0, j = 0; i < c; i++ ) {
 		int k = j;
-		while ( k < X->cols && y[k].label->id == y[j].label->id ) {
+		while ( k < X->cols && y[k].label == y[j].label ) {
 			k++;
 		}
 
@@ -154,7 +154,7 @@ matrix_t * m_scatter_within(matrix_t **X_c, matrix_t **U, int c)
  * @param c
  * @return projection matrix W_lda
  */
-matrix_t * LDA(lda_params_t *params, matrix_t *X, data_entry_t *y, int c)
+matrix_t * LDA(lda_params_t *params, matrix_t *X, const std::vector<data_entry_t>& y, int c)
 {
 	// if n1 = -1, use default value
 	int n1 = (params->n1 == -1)

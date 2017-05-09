@@ -97,12 +97,12 @@ precision_t bayes_prob(matrix_t *x, matrix_t *mu, matrix_t *S_inv)
  * @param X
  * @param Y
  * @param C
- * @param num_classes
  * @param X_test
  * @return predicted labels of the test observations
  */
-data_label_t ** bayes(matrix_t *X, data_entry_t *Y, data_label_t *C, int num_classes, matrix_t *X_test)
+char ** bayes(matrix_t *X, std::vector<data_entry_t>& Y, std::vector<data_label_t>& C, matrix_t *X_test)
 {
+	int num_classes = C.size();
 	matrix_t **X_c = m_copy_classes(X, Y, num_classes);
 	matrix_t **U = m_class_means(X_c, num_classes);
 	matrix_t **S = m_class_cov(X_c, U, num_classes);
@@ -116,7 +116,7 @@ data_label_t ** bayes(matrix_t *X, data_entry_t *Y, data_label_t *C, int num_cla
 	}
 
 	// compute label for each test vector
-	data_label_t **Y_pred = (data_label_t **)malloc(X_test->cols * sizeof(data_label_t *));
+	char **Y_pred = (char **)malloc(X_test->cols * sizeof(char *));
 
 	for ( i = 0; i < X_test->cols; i++ ) {
 		matrix_t *probs = m_initialize("probs", num_classes, 1);
@@ -130,7 +130,7 @@ data_label_t ** bayes(matrix_t *X, data_entry_t *Y, data_label_t *C, int num_cla
 		}
 
 		int index = m_argmax(probs);
-		Y_pred[i] = &C[index];
+		Y_pred[i] = C[index].name;
 
 		m_free(probs);
 	}
