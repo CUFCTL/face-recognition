@@ -3,9 +3,32 @@
  *
  * Implementation of PCA (Turk and Pentland, 1991).
  */
+#include "logger.h"
 #include "math_helper.h"
 #include "pca.h"
 #include "timer.h"
+
+/**
+ * Construct a PCA layer.
+ *
+ * @param n1
+ */
+PCALayer::PCALayer(int n1)
+{
+	this->n1 = n1;
+
+	this->W = NULL;
+	this->D = NULL;
+}
+
+/**
+ * Destruct a PCA layer.
+ */
+PCALayer::~PCALayer()
+{
+	m_free(this->W);
+	m_free(this->D);
+}
 
 /**
  * Compute the principal components of a matrix X, which
@@ -15,20 +38,17 @@
  * The principal components of a matrix are the eigenvectors of
  * the covariance matrix.
  *
- * @param params
  * @param X
- * @param p_D
+ * @param y
+ * @param c
  * @return principal components of X in columns
  */
-matrix_t * PCA(pca_params_t *params, matrix_t *X, matrix_t **p_D)
+matrix_t * PCALayer::compute(matrix_t *X, const std::vector<data_entry_t>& y, int c)
 {
-	matrix_t *W_pca;
-	matrix_t *D;
-
 	// if n1 = -1, use default value
-	int n1 = (params->n1 == -1)
+	int n1 = (this->n1 == -1)
 		? min(X->rows, X->cols)
-		: params->n1;
+		: this->n1;
 
 	timer_push("PCA");
 
@@ -39,16 +59,16 @@ matrix_t * PCA(pca_params_t *params, matrix_t *X, matrix_t **p_D)
 
 		timer_pop();
 
-		timer_push("compute eigenvectors of L");
+		timer_push("compute eigendecomposition of L");
 
 		matrix_t *V;
-		m_eigen("V", "D", L, n1, &V, &D);
+		m_eigen("V", "D", L, n1, &V, &this->D);
 
 		timer_pop();
 
 		timer_push("compute principal components");
 
-		W_pca = m_product("W_pca", X, V);
+		this->W = m_product("W_pca", X, V);
 
 		timer_pop();
 
@@ -65,7 +85,7 @@ matrix_t * PCA(pca_params_t *params, matrix_t *X, matrix_t **p_D)
 
 		timer_push("compute eigendecomposition of C");
 
-		m_eigen("W_pca", "D", C, n1, &W_pca, &D);
+		m_eigen("W_pca", "D", C, n1, &this->W, &this->D);
 
 		timer_pop();
 
@@ -75,13 +95,41 @@ matrix_t * PCA(pca_params_t *params, matrix_t *X, matrix_t **p_D)
 
 	timer_pop();
 
-	// save outputs
-	if ( p_D != NULL ) {
-		*p_D = D;
-	}
-	else {
-		m_free(D);
-	}
+	return this->W;
+}
 
-	return W_pca;
+/**
+ * Project a matrix X into the feature space of a PCA layer.
+ *
+ * @param X
+ * @return projected matrix
+ */
+matrix_t * PCALayer::project(matrix_t *X)
+{
+	return m_product("P", this->W, X, true, false);
+}
+
+/**
+ * Save a PCA layer to a file.
+ */
+void PCALayer::save(FILE *file)
+{
+	m_fwrite(file, this->W);
+}
+
+/**
+ * Load an PCA layer from a file.
+ */
+void PCALayer::load(FILE *file)
+{
+	this->W = m_fread(file);
+}
+
+/**
+ * Print information about a PCA layer.
+ */
+void PCALayer::print()
+{
+	log(LL_VERBOSE, "PCA\n");
+	log(LL_VERBOSE, "  %-20s  %10d\n", "n1", this->n1);
 }

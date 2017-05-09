@@ -6,9 +6,20 @@
 #ifndef BAYES_H
 #define BAYES_H
 
-#include "dataset.h"
-#include "matrix.h"
+#include "classifier.h"
 
-char ** bayes(matrix_t *X, std::vector<data_entry_t>& Y, std::vector<data_label_t>& C, matrix_t *X_test);
+class BayesLayer : public ClassifierLayer {
+public:
+	BayesLayer();
+
+	char ** predict(
+		matrix_t *X,
+		const std::vector<data_entry_t>& Y,
+		const std::vector<data_label_t>& C,
+		matrix_t *X_test
+	);
+
+	void print();
+};
 
 #endif

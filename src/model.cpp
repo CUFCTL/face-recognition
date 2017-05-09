@@ -17,50 +17,23 @@
  *
  * @param feature
  * @param classifier
- * @param params
  */
-Model::Model(feature_type_t feature, classifier_type_t classifier, model_params_t params)
+Model::Model(FeatureLayer *feature, ClassifierLayer *classifier)
 {
-	this->params = params;
+	// initialize layers
 	this->feature = feature;
-	this->W = NULL;
-	this->P = NULL;
 	this->classifier = classifier;
+
+	// initialize stats
 	this->stats.accuracy = 0.0f;
 	this->stats.train_time = 0.0f;
 	this->stats.test_time = 0.0f;
 
 	// log hyperparameters
-	int len = 20;
-
 	log(LL_VERBOSE, "Hyperparameters\n");
 
-	if ( this->feature == FEATURE_PCA ) {
-		log(LL_VERBOSE, "PCA\n");
-		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n1", this->params.pca.n1);
-	}
-	else if ( this->feature == FEATURE_LDA ) {
-		log(LL_VERBOSE, "LDA\n");
-		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n1", this->params.lda.n1);
-		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n2", this->params.lda.n2);
-	}
-	else if ( this->feature == FEATURE_ICA ) {
-		log(LL_VERBOSE, "ICA\n");
-		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n1", this->params.ica.n1);
-		log(LL_VERBOSE, "  %-*s  %10d\n", len, "n2", this->params.ica.n2);
-		log(LL_VERBOSE, "  %-*s  %10s\n", len, "nonl", this->params.ica.nonl_name);
-		log(LL_VERBOSE, "  %-*s  %10d\n", len, "max_iterations", this->params.ica.max_iterations);
-		log(LL_VERBOSE, "  %-*s  %10f\n", len, "epsilon", this->params.ica.epsilon);
-	}
-
-	if ( this->classifier == CLASSIFIER_KNN ) {
-		log(LL_VERBOSE, "kNN\n");
-		log(LL_VERBOSE, "  %-*s  %10d\n", len, "k", this->params.knn.k);
-		log(LL_VERBOSE, "  %-*s  %10s\n", len, "dist", this->params.knn.dist_name);
-	}
-	else if ( this->classifier == CLASSIFIER_BAYES ) {
-		log(LL_VERBOSE, "Bayes\n");
-	}
+	this->feature->print();
+	this->classifier->print();
 
 	log(LL_VERBOSE, "\n");
 }
@@ -72,8 +45,10 @@ Model::~Model()
 {
 	m_free(this->mean);
 
-	m_free(this->W);
+	delete this->feature;
 	m_free(this->P);
+
+	delete this->classifier;
 }
 
 /**
@@ -96,26 +71,14 @@ void Model::train(const Dataset& train_set)
 
 	// subtract mean from X
 	this->mean = m_mean_column("m", X);
+
 	m_subtract_columns(X, this->mean);
 
-	// compute features from X
-	if ( this->feature == FEATURE_NONE ) {
-		this->W = m_identity("W", X->rows);
-		this->P = m_product("P", this->W, X, true, false);
-	}
-	else if ( this->feature == FEATURE_PCA ) {
-		this->W = PCA(&this->params.pca, X, NULL);
-		this->P = m_product("P_pca", this->W, X, true, false);
-	}
-	else if ( this->feature == FEATURE_LDA ) {
-		this->W = LDA(&this->params.lda, X, train_set.entries, train_set.labels.size());
-		this->P = m_product("P_lda", this->W, X, true, false);
-	}
-	else if ( this->feature == FEATURE_ICA ) {
-		this->W = ICA(&this->params.ica, X);
-		this->P = m_product("P_ica", this->W, X, true, false);
-	}
+	// project X into feature space
+	this->feature->compute(X, this->train_set.entries, this->train_set.labels.size());
+	this->P = this->feature->project(X);
 
+	// record training time
 	this->stats.train_time = timer_pop();
 
 	log(LL_VERBOSE, "\n");
@@ -137,7 +100,7 @@ void Model::save(const char *path)
 
 	m_fwrite(file, this->mean);
 
-	m_fwrite(file, this->W);
+	this->feature->save(file);
 	m_fwrite(file, this->P);
 
 	fclose(file);
@@ -156,7 +119,7 @@ void Model::load(const char *path)
 
 	this->mean = m_fread(file);
 
-	this->W = m_fread(file);
+	this->feature->load(file);
 	this->P = m_fread(file);
 
 	fclose(file);
@@ -179,23 +142,16 @@ char ** Model::predict(const Dataset& test_set)
 	matrix_t *X_test = test_set.load();
 	m_subtract_columns(X_test, this->mean);
 
-	matrix_t *P_test = m_product("P_test", this->W, X_test, true, false);
+	matrix_t *P_test = this->feature->project(X_test);
 
 	// compute predicted labels
-	char **Y_pred;
+	char **Y_pred = this->classifier->predict(
+		this->P,
+		this->train_set.entries,
+		this->train_set.labels,
+		P_test);
 
-	if ( this->classifier == CLASSIFIER_KNN ) {
-		Y_pred = (char **)malloc(test_set.entries.size() * sizeof(char *));
-
-		int i;
-		for ( i = 0; i < test_set.entries.size(); i++ ) {
-			Y_pred[i] = kNN(&this->params.knn, this->P, this->train_set.entries, P_test, i);
-		}
-	}
-	else if ( this->classifier == CLASSIFIER_BAYES ) {
-		Y_pred = bayes(this->P, this->train_set.entries, this->train_set.labels, P_test);
-	}
-
+	// record predition time
 	this->stats.test_time = timer_pop();
 
 	log(LL_VERBOSE, "\n");

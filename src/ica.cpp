@@ -12,51 +12,46 @@
 #include "pca.h"
 #include "timer.h"
 
-matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z);
+typedef matrix_t * (*ica_nonl_func_t)(matrix_t *, matrix_t *);
 
 /**
- * Compute the whitening transformation for a matrix X.
+ * Construct an ICA layer.
  *
- * The whitening (sphering) matrix, when applied to X, transforms
- * X to have zero mean and unit covariance.
- *
- * @param X
  * @param n1
- * @return whitening matrix W_z
+ * @param n2
+ * @param nonl
+ * @param max_iter
+ * @param eps
  */
-matrix_t * m_whiten (matrix_t *X, int n1)
+ICALayer::ICALayer(int n1, int n2, ica_nonl_t nonl, int max_iter, precision_t eps)
 {
-    pca_params_t pca_params = { n1 };
+    this->n1 = n1;
+    this->n2 = n2;
+    this->nonl = nonl;
+    this->max_iter = max_iter;
+    this->eps = eps;
 
-    // compute [V, D] = eig(C)
-    matrix_t *D;
-    matrix_t *V = PCA(&pca_params, X, &D);
+    this->W = NULL;
+}
 
-    // compute whitening matrix W_z = inv(sqrt(D)) * V'
-    matrix_t *D_temp1 = m_copy("sqrt(D)", D);
-    m_elem_apply(D_temp1, sqrtf);
-
-    matrix_t *D_temp2 = m_inverse("inv(sqrt(D))", D_temp1);
-    matrix_t *W_z = m_product("W_z", D_temp2, V, false, true);
-
-    // cleanup
-    m_free(V);
-    m_free(D);
-    m_free(D_temp1);
-    m_free(D_temp2);
-
-    return W_z;
+/**
+ * Destruct an ICA layer.
+ */
+ICALayer::~ICALayer()
+{
+    m_free(this->W);
 }
 
 /**
  * Compute the independent components of a matrix X, which
  * consists of observations in columns.
  *
- * @param params
  * @param X
+ * @param y
+ * @param c
  * @return independent components of X in columns
  */
-matrix_t * ICA (ica_params_t *params, matrix_t *X)
+matrix_t * ICALayer::compute(matrix_t *X, const std::vector<data_entry_t>& y, int c)
 {
     timer_push("ICA");
 
@@ -72,8 +67,18 @@ matrix_t * ICA (ica_params_t *params, matrix_t *X)
 
     timer_push("compute whitening matrix and whitened input matrix");
 
+    // compute whitening matrix W_z = inv(sqrt(D)) * W_pca'
+    PCALayer pca(this->n1);
+
+    matrix_t *W_pca = pca.compute(mixedsig, y, c);
+
+    matrix_t *D_temp1 = m_copy("sqrt(D)", pca.D);
+    m_elem_apply(D_temp1, sqrtf);
+
+    matrix_t *D_temp2 = m_inverse("inv(sqrt(D))", D_temp1);
+    matrix_t *W_z = m_product("W_z", D_temp2, W_pca, false, true);
+
     // compute whitened input U = W_z * mixedsig
-    matrix_t *W_z = m_whiten(mixedsig, params->n1);
     matrix_t *U = m_product("U", W_z, mixedsig);
 
     timer_pop();
@@ -81,23 +86,23 @@ matrix_t * ICA (ica_params_t *params, matrix_t *X)
     timer_push("compute mixing matrix");
 
     // compute mixing matrix
-    matrix_t *W = fpica(params, U, W_z);
+    matrix_t *W_mix = this->fpica(U, W_z);
 
     timer_pop();
 
     timer_push("compute ICA projection matrix");
 
     // compute independent components
-    // icasig = W * (mixedsig + mixedmean * ones(1, mixedsig->cols))
+    // icasig = W_mix * (mixedsig + mixedmean * ones(1, mixedsig->cols))
     matrix_t *ones = m_ones("ones", 1, mixedsig->cols);
     matrix_t *icasig_temp1 = m_product("icasig_temp1", mixedmean, ones);
 
     m_add(icasig_temp1, mixedsig);
 
-    matrix_t *icasig = m_product("icasig", W, icasig_temp1);
+    matrix_t *icasig = m_product("icasig", W_mix, icasig_temp1);
 
     // compute W_ica = icasig'
-    matrix_t *W_ica = m_transpose("W_ica", icasig);
+    this->W = m_transpose("W_ica", icasig);
 
     timer_pop();
 
@@ -106,14 +111,68 @@ matrix_t * ICA (ica_params_t *params, matrix_t *X)
     // cleanup
     m_free(mixedsig);
     m_free(mixedmean);
+    m_free(D_temp1);
+    m_free(D_temp2);
     m_free(W_z);
     m_free(U);
-    m_free(W);
+    m_free(W_mix);
     m_free(ones);
     m_free(icasig_temp1);
     m_free(icasig);
 
-    return W_ica;
+    return this->W;
+}
+
+/**
+ * Project a matrix X into the feature space of an ICA layer.
+ *
+ * @param X
+ * @return projected matrix
+ */
+matrix_t * ICALayer::project(matrix_t *X)
+{
+    return m_product("P", this->W, X, true, false);
+}
+
+/**
+ * Save an ICA layer to a file.
+ */
+void ICALayer::save(FILE *file)
+{
+    m_fwrite(file, this->W);
+}
+
+/**
+ * Load an ICA layer from a file.
+ */
+void ICALayer::load(FILE *file)
+{
+    this->W = m_fread(file);
+}
+
+/**
+ * Print information about an ICA layer.
+ */
+void ICALayer::print()
+{
+    const char *nonl_name = "";
+
+    if ( this->nonl == ICA_NONL_POW3 ) {
+        nonl_name = "pow3";
+    }
+    else if ( this->nonl == ICA_NONL_TANH ) {
+        nonl_name = "tanh";
+    }
+    else if ( this->nonl == ICA_NONL_GAUSS ) {
+        nonl_name = "gauss";
+    }
+
+    log(LL_VERBOSE, "ICA\n");
+    log(LL_VERBOSE, "  %-20s  %10d\n", "n1", this->n1);
+    log(LL_VERBOSE, "  %-20s  %10d\n", "n2", this->n2);
+    log(LL_VERBOSE, "  %-20s  %10s\n", "nonl", nonl_name);
+    log(LL_VERBOSE, "  %-20s  %10d\n", "max_iter", this->max_iter);
+    log(LL_VERBOSE, "  %-20s  %10f\n", "eps", this->eps);
 }
 
 /**
@@ -262,37 +321,36 @@ matrix_t * fpica_gauss (matrix_t *w0, matrix_t *X)
 }
 
 /**
- * Compute the mixing matrix W for an input matrix X using
+ * Compute the mixing matrix W_mix for an input matrix X using
  * the deflation approach. The input matrix should already
  * be whitened.
  *
- * @param params
  * @param X
  * @param W_z
- * @return mixing matrix W
+ * @return mixing matrix W_mix
  */
-matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
+matrix_t * ICALayer::fpica(matrix_t *X, matrix_t *W_z)
 {
     // if n2 is -1, use default value
-    int n2 = (params->n2 == -1)
+    int n2 = (this->n2 == -1)
         ? X->rows
-        : min(X->rows, params->n2);
+        : min(X->rows, this->n2);
 
     // determine nonlinearity function
     ica_nonl_func_t fpica_update = NULL;
 
-    if ( params->nonl == ICA_NONL_POW3 ) {
+    if ( this->nonl == ICA_NONL_POW3 ) {
         fpica_update = fpica_pow3;
     }
-    else if ( params->nonl == ICA_NONL_TANH ) {
+    else if ( this->nonl == ICA_NONL_TANH ) {
         fpica_update = fpica_tanh;
     }
-    else if ( params->nonl == ICA_NONL_GAUSS ) {
+    else if ( this->nonl == ICA_NONL_GAUSS ) {
         fpica_update = fpica_gauss;
     }
 
     matrix_t *B = m_zeros("B", n2, n2);
-    matrix_t *W = m_zeros("W", n2, W_z->cols);
+    matrix_t *W_mix = m_zeros("W_mix", n2, W_z->cols);
 
     int i;
     for ( i = 0; i < n2; i++ ) {
@@ -315,7 +373,7 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
         matrix_t *w0 = m_zeros("w0", w->rows, w->cols);
 
         int j;
-        for ( j = 0; j < params->max_iterations; j++ ) {
+        for ( j = 0; j < this->max_iter; j++ ) {
             // compute w = (w - B * B' * w), normalize w
             w_temp1 = m_product("w_temp1", B, B, false, true);
             w_temp2 = m_product("w_temp2", w_temp1, w);
@@ -342,14 +400,14 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
             m_free(w_delta2);
 
             // terminate round if w converges
-            if ( norm1 < params->epsilon || norm2 < params->epsilon ) {
+            if ( norm1 < this->eps || norm2 < this->eps ) {
                 // save B(:, i) = w
                 m_assign_column(B, i, w, 0);
 
-                // save W(i, :) = w' * W_z
+                // save W_mix(i, :) = w' * W_z
                 matrix_t *W_temp1 = m_product("W_temp1", w, W_z, true, false);
 
-                m_assign_row(W, i, W_temp1, 0);
+                m_assign_row(W_mix, i, W_temp1, 0);
 
                 // cleanup
                 m_free(W_temp1);
@@ -374,5 +432,5 @@ matrix_t * fpica (ica_params_t *params, matrix_t *X, matrix_t *W_z)
 
     m_free(B);
 
-    return W;
+    return W_mix;
 }

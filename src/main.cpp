@@ -8,14 +8,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "bayes.h"
 #include "dataset.h"
+#include "ica.h"
+#include "identity.h"
+#include "knn.h"
+#include "lda.h"
 #include "logger.h"
 #include "model.h"
+#include "pca.h"
 #include "timer.h"
 
 #ifdef __NVCC__
 	#include "magma_v2.h"
 #endif
+
+typedef enum {
+	FEATURE_NONE,
+	FEATURE_PCA,
+	FEATURE_LDA,
+	FEATURE_ICA
+} feature_type_t;
+
+typedef enum {
+	CLASSIFIER_NONE,
+	CLASSIFIER_KNN,
+	CLASSIFIER_BAYES
+} classifier_type_t;
 
 typedef enum {
 	OPTION_LOGLEVEL,
@@ -38,6 +57,26 @@ typedef enum {
 	OPTION_KNN_K,
 	OPTION_KNN_DIST,
 	OPTION_UNKNOWN = '?'
+} option_t;
+
+typedef struct {
+	bool train;
+	bool test;
+	bool stream;
+	char *path_train;
+	char *path_test;
+	feature_type_t feature_type;
+	classifier_type_t classifier_type;
+	int pca_n1;
+	int lda_n1;
+	int lda_n2;
+	int ica_n1;
+	int ica_n2;
+	ica_nonl_t ica_nonl;
+	int ica_max_iter;
+	precision_t ica_eps;
+	int knn_k;
+	dist_func_t knn_dist;
 } optarg_t;
 
 void print_usage()
@@ -114,23 +153,26 @@ ica_nonl_t parse_nonl_func(const char *name)
 
 int main(int argc, char **argv)
 {
+#ifdef __NVCC__
+	magma_int_t stat = magma_init();
+	assert(stat == MAGMA_SUCCESS);
+#endif
+
 	const char *MODEL_FNAME = "./model.dat";
 
-	bool arg_train = false;
-	bool arg_test = false;
-	bool arg_stream = false;
-
-	feature_type_t feature_type = FEATURE_NONE;
-	classifier_type_t classifier_type = CLASSIFIER_KNN;
-	model_params_t model_params = {
-		{ -1 },
-		{ -1, -1 },
-		{ -1, -1, ICA_NONL_POW3, "pow3", 1000, 0.0001f },
-		{ 1, m_dist_L2, "L2" }
+	optarg_t args = {
+		false,
+		false,
+		false,
+		NULL,
+		NULL,
+		FEATURE_NONE,
+		CLASSIFIER_KNN,
+		-1,
+		-1, -1,
+		-1, -1, ICA_NONL_POW3, 1000, 0.0001f,
+		1, m_dist_L2
 	};
-
-	char *path_train = NULL;
-	char *path_test = NULL;
 
 	struct option long_options[] = {
 		{ "loglevel", required_argument, 0, OPTION_LOGLEVEL },
@@ -163,62 +205,60 @@ int main(int argc, char **argv)
 			LOGLEVEL = (logger_level_t) atoi(optarg);
 			break;
 		case OPTION_TRAIN:
-			arg_train = true;
-			path_train = optarg;
+			args.train = true;
+			args.path_train = optarg;
 			break;
 		case OPTION_TEST:
-			arg_test = true;
-			path_test = optarg;
+			args.test = true;
+			args.path_test = optarg;
 			break;
 		case OPTION_STREAM:
-			arg_stream = true;
+			args.stream = true;
 			break;
 		case OPTION_PCA:
-			feature_type = FEATURE_PCA;
+			args.feature_type = FEATURE_PCA;
 			break;
 		case OPTION_LDA:
-			feature_type = FEATURE_LDA;
+			args.feature_type = FEATURE_LDA;
 			break;
 		case OPTION_ICA:
-			feature_type = FEATURE_ICA;
+			args.feature_type = FEATURE_ICA;
 			break;
 		case OPTION_KNN:
-			classifier_type = CLASSIFIER_KNN;
+			args.classifier_type = CLASSIFIER_KNN;
 			break;
 		case OPTION_BAYES:
-			classifier_type = CLASSIFIER_BAYES;
+			args.classifier_type = CLASSIFIER_BAYES;
 			break;
 		case OPTION_PCA_N1:
-			model_params.pca.n1 = atoi(optarg);
+			args.pca_n1 = atoi(optarg);
 			break;
 		case OPTION_LDA_N1:
-			model_params.lda.n1 = atoi(optarg);
+			args.lda_n1 = atoi(optarg);
 			break;
 		case OPTION_LDA_N2:
-			model_params.lda.n2 = atoi(optarg);
+			args.lda_n2 = atoi(optarg);
 			break;
 		case OPTION_ICA_N1:
-			model_params.ica.n1 = atoi(optarg);
+			args.ica_n1 = atoi(optarg);
 			break;
 		case OPTION_ICA_N2:
-			model_params.ica.n2 = atoi(optarg);
+			args.ica_n2 = atoi(optarg);
 			break;
 		case OPTION_ICA_NONL:
-			model_params.ica.nonl = parse_nonl_func(optarg);
-			model_params.ica.nonl_name = optarg;
+			args.ica_nonl = parse_nonl_func(optarg);
 			break;
 		case OPTION_ICA_MAX_ITERATIONS:
-			model_params.ica.max_iterations = atoi(optarg);
+			args.ica_max_iter = atoi(optarg);
 			break;
 		case OPTION_ICA_EPSILON:
-			model_params.ica.epsilon = atof(optarg);
+			args.ica_eps = atof(optarg);
 			break;
 		case OPTION_KNN_K:
-			model_params.knn.k = atoi(optarg);
+			args.knn_k = atoi(optarg);
 			break;
 		case OPTION_KNN_DIST:
-			model_params.knn.dist = parse_dist_func(optarg);
-			model_params.knn.dist_name = optarg;
+			args.knn_dist = parse_dist_func(optarg);
 			break;
 		case OPTION_UNKNOWN:
 			print_usage();
@@ -227,31 +267,59 @@ int main(int argc, char **argv)
 	}
 
 	// validate arguments
-	if ( !arg_train && !arg_test ) {
+	if ( !args.train && !args.test ) {
 		print_usage();
 		exit(1);
 	}
 
-	if ( model_params.knn.dist == NULL ) {
+	if ( args.knn_dist == NULL ) {
 		fprintf(stderr, "error: --knn_dist must be L1 | L2 | COS\n");
 		exit(1);
 	}
 
-	if ( model_params.ica.nonl == ICA_NONL_NONE ) {
+	if ( args.ica_nonl == ICA_NONL_NONE ) {
 		fprintf(stderr, "error: --ica_nonl must be pow3 | tanh | gauss\n");
 		exit(1);
 	}
 
-#ifdef __NVCC__
-	magma_int_t stat = magma_init();
-	assert(stat == MAGMA_SUCCESS);
-#endif
+	// initialize feature layer
+	FeatureLayer *feature;
+
+	if ( args.feature_type == FEATURE_NONE ) {
+		feature = new IdentityLayer();
+	}
+	else if ( args.feature_type == FEATURE_PCA ) {
+		feature = new PCALayer(args.pca_n1);
+	}
+	else if ( args.feature_type == FEATURE_LDA ) {
+		feature = new LDALayer(args.lda_n1, args.lda_n2);
+	}
+	else if ( args.feature_type == FEATURE_ICA ) {
+		feature = new ICALayer(
+			args.ica_n1,
+			args.ica_n2,
+			args.ica_nonl,
+			args.ica_max_iter,
+			args.ica_eps
+		);
+	}
+
+	// initialize classifier layer
+	ClassifierLayer *classifier;
+
+	if ( args.classifier_type == CLASSIFIER_KNN ) {
+		classifier = new KNNLayer(args.knn_k, args.knn_dist);
+	}
+	else if ( args.classifier_type == CLASSIFIER_BAYES ) {
+		classifier = new BayesLayer();
+	}
+
+	// initialize model
+	Model model(feature, classifier);
 
 	// run the face recognition system
-	Model model(feature_type, classifier_type, model_params);
-
-	if ( arg_train ) {
-		Dataset train_set(path_train);
+	if ( args.train ) {
+		Dataset train_set(args.path_train);
 
 		model.train(train_set);
 	}
@@ -259,7 +327,7 @@ int main(int argc, char **argv)
 		model.load(MODEL_FNAME);
 	}
 
-	if ( arg_test && arg_stream ) {
+	if ( args.test && args.stream ) {
 		char END = '0';
 		char READ = '1';
 
@@ -270,14 +338,14 @@ int main(int argc, char **argv)
 				break;
 			}
 			else if ( c == READ ) {
-				Dataset test_set(path_test);
+				Dataset test_set(args.path_test);
 
 				model.predict(test_set);
 			}
 		}
 	}
-	else if ( arg_test ) {
-		Dataset test_set(path_test);
+	else if ( args.test ) {
+		Dataset test_set(args.path_test);
 
 		char **pred_labels = model.predict(test_set);
 		model.validate(test_set, pred_labels);

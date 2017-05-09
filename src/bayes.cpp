@@ -7,8 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lda.h"
 #include "bayes.h"
+#include "lda.h"
+#include "logger.h"
 
 /**
  * Compute the class covariance matrices for a matrix X,
@@ -68,6 +69,13 @@ int m_argmax(matrix_t *x)
 }
 
 /**
+ * Construct a Bayes classifier.
+ */
+BayesLayer::BayesLayer()
+{
+}
+
+/**
  * Compute the probability of a class for a
  * feature vector using the Bayes discriminant
  * function:
@@ -93,14 +101,13 @@ precision_t bayes_prob(matrix_t *x, matrix_t *mu, matrix_t *S_inv)
 /**
  * Classify an observation using naive Bayes.
  *
- * @param params
  * @param X
  * @param Y
  * @param C
  * @param X_test
  * @return predicted labels of the test observations
  */
-char ** bayes(matrix_t *X, std::vector<data_entry_t>& Y, std::vector<data_label_t>& C, matrix_t *X_test)
+char ** BayesLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, matrix_t *X_test)
 {
 	int num_classes = C.size();
 	matrix_t **X_c = m_copy_classes(X, Y, num_classes);
@@ -148,4 +155,12 @@ char ** bayes(matrix_t *X, std::vector<data_entry_t>& Y, std::vector<data_label_
 	free(S_inv);
 
 	return Y_pred;
+}
+
+/**
+ * Print information about a Bayes classifier.
+ */
+void BayesLayer::print()
+{
+	log(LL_VERBOSE, "Bayes\n");
 }

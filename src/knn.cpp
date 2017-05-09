@@ -5,6 +5,7 @@
  */
 #include <stdlib.h>
 #include "knn.h"
+#include "logger.h"
 #include "math_helper.h"
 
 typedef struct {
@@ -61,34 +62,73 @@ void * kNN_identify(const void *a)
 }
 
 /**
+ * Construct a kNN classifier.
+ *
+ * @param k
+ * @param dist
+ */
+KNNLayer::KNNLayer(int k, dist_func_t dist)
+{
+	this->k = k;
+	this->dist = dist;
+}
+
+/**
  * Classify an observation using k-nearest neighbors.
  *
- * @param params
  * @param X
  * @param Y
+ * @param C
  * @param X_test
- * @param i
- * @return predicted label of the test observation
+ * @return predicted labels of the test observations
  */
-char * kNN(knn_params_t *params, matrix_t *X, const std::vector<data_entry_t>& Y, matrix_t *X_test, int i)
+char ** KNNLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, matrix_t *X_test)
 {
-	// compute distance between X_test_i and each observation in X
-	int num_neighbors = X->cols;
-	neighbor_t *neighbors = (neighbor_t *)malloc(num_neighbors * sizeof(neighbor_t));
+	char **Y_pred = (char **)malloc(X_test->cols * sizeof(char *));
 
-	int j;
-	for ( j = 0; j < num_neighbors; j++ ) {
-		neighbors[j].label = Y[j].label;
-		neighbors[j].dist = params->dist(X_test, i, X, j);
+	int i;
+	for ( i = 0; i < X_test->cols; i++ ) {
+		// compute distance between X_test_i and each observation in X
+		int num_neighbors = X->cols;
+		neighbor_t *neighbors = (neighbor_t *)malloc(num_neighbors * sizeof(neighbor_t));
+
+		int j;
+		for ( j = 0; j < num_neighbors; j++ ) {
+			neighbors[j].label = Y[j].label;
+			neighbors[j].dist = this->dist(X_test, i, X, j);
+		}
+
+		// sort the neighbors by distance
+		qsort(neighbors, num_neighbors, sizeof(neighbor_t), kNN_compare);
+
+		// determine the mode of the k nearest labels
+		Y_pred[i] = (char *)mode(neighbors, this->k, sizeof(neighbor_t), kNN_identify);
+
+		// cleanup
+		free(neighbors);
 	}
 
-	// sort the neighbors by distance
-	qsort(neighbors, num_neighbors, sizeof(neighbor_t), kNN_compare);
+	return Y_pred;
+}
 
-	// determine the mode of the k nearest labels
-	char *nearest = (char *)mode(neighbors, params->k, sizeof(neighbor_t), kNN_identify);
+/**
+ * Print information about a kNN classifier.
+ */
+void KNNLayer::print()
+{
+	const char *dist_name = "";
 
-	free(neighbors);
+	if ( this->dist == m_dist_COS ) {
+		dist_name = "COS";
+	}
+	else if ( this->dist == m_dist_L1 ) {
+		dist_name = "L1";
+	}
+	else if ( this->dist == m_dist_L2 ) {
+		dist_name = "L2";
+	}
 
-	return nearest;
+	log(LL_VERBOSE, "kNN\n");
+	log(LL_VERBOSE, "  %-20s  %10d\n", "k", this->k);
+	log(LL_VERBOSE, "  %-20s  %10s\n", "dist", dist_name);
 }
