@@ -174,7 +174,7 @@ void Model::validate(const Dataset& test_set, char **pred_labels)
 	// compute accuracy
 	int num_correct = 0;
 
-	int i;
+	unsigned i;
 	for ( i = 0; i < test_set.entries.size(); i++ ) {
 		if ( strcmp(pred_labels[i], test_set.entries[i].label) == 0 ) {
 			num_correct++;

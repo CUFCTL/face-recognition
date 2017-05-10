@@ -92,7 +92,7 @@ Dataset::Dataset(const char *path)
 		char *label_name = strndup(filename, n);
 
 		// search labels for label name
-		int j = 0;
+		unsigned j = 0;
 		while ( j < labels.size() && strcmp(labels[j].name, label_name) != 0 ) {
 			j++;
 		}
@@ -241,7 +241,7 @@ matrix_t * Dataset::load() const
  */
 void Dataset::print_labels() const
 {
-	int i;
+	unsigned i;
 	for ( i = 0; i < this->labels.size(); i++ ) {
 		printf("%3d  %s\n", this->labels[i].id, this->labels[i].name);
 	}
@@ -253,7 +253,7 @@ void Dataset::print_labels() const
  */
 void Dataset::print_entries() const
 {
-	int i;
+	unsigned i;
 	for ( i = 0; i < this->entries.size(); i++ ) {
 		printf("%8s  %s\n", this->entries[i].label, this->entries[i].name);
 	}

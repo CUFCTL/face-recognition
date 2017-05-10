@@ -13,6 +13,8 @@
 
 class ClassifierLayer {
 public:
+	virtual ~ClassifierLayer() {};
+
 	virtual char ** predict(
 		matrix_t *X,
 		const std::vector<data_entry_t>& Y,
