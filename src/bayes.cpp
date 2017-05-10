@@ -3,41 +3,11 @@
  *
  * Implementation of the naive Bayes classifier.
  */
-#include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "bayes.h"
 #include "lda.h"
 #include "logger.h"
-
-/**
- * Compute the class covariance matrices for a matrix X,
- * given by a list X_c of class submatrices.
- *
- * S_i = (X_c_i - U_i) * (X_c_i - U_i)'
- *
- * @param X_c
- * @param U
- * @param c
- * @return list of class covariance matrices
- */
-matrix_t ** m_class_cov(matrix_t **X_c, matrix_t **U, int c)
-{
-	matrix_t **S = (matrix_t **) malloc(c * sizeof(matrix_t *));
-
-	int i;
-	for ( i = 0; i < c; i++ ) {
-		matrix_t *X_c_i = m_copy("X_c_i", X_c[i]);
-		m_subtract_columns(X_c_i, U[i]);
-
-		S[i] = m_product("S_i", X_c_i, X_c_i, false, true);
-
-		m_free(X_c_i);
-	}
-
-	return S;
-}
+#include "matrix_utils.h"
 
 /**
  * Construct a Bayes classifier.
@@ -83,7 +53,7 @@ char ** BayesLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, con
 	int num_classes = C.size();
 	matrix_t **X_c = m_copy_classes(X, Y, num_classes);
 	matrix_t **U = m_class_means(X_c, num_classes);
-	matrix_t **S = m_class_cov(X_c, U, num_classes);
+	matrix_t **S = m_class_scatters(X_c, U, num_classes);
 
 	// compute inverses of each S_i
 	matrix_t **S_inv = (matrix_t **) malloc(num_classes * sizeof(matrix_t *));

@@ -8,11 +8,6 @@
 
 #include "feature.h"
 
-matrix_t ** m_copy_classes(matrix_t *X, const std::vector<data_entry_t>& y, int c);
-matrix_t ** m_class_means(matrix_t **X_c, int c);
-matrix_t * m_scatter_between(matrix_t **X_c, matrix_t **U, int c);
-matrix_t * m_scatter_within(matrix_t **X_c, matrix_t **U, int c);
-
 class LDALayer : public FeatureLayer {
 private:
 	int n1;
