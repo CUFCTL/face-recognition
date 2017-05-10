@@ -3,15 +3,19 @@
  *
  * Implementation of the k-nearest neighbors classifier.
  */
-#include <stdlib.h>
+#include <algorithm>
 #include "knn.h"
 #include "logger.h"
-#include "math_utils.h"
 
 typedef struct {
-	char *label;
+	data_label_t label;
 	precision_t dist;
 } neighbor_t;
+
+typedef struct {
+	data_label_t id;
+	int count;
+} item_count_t;
 
 /**
  * Print a list of neighbors.
@@ -19,46 +23,67 @@ typedef struct {
  * @param neighbors
  * @param num
  */
-void debug_print_neighbors(neighbor_t *neighbors, int num)
+void debug_print_neighbors(const std::vector<neighbor_t>& neighbors)
 {
-	int i;
-	for ( i = 0; i < num; i++) {
-		printf("%8s  %f\n", neighbors[i].label, neighbors[i].dist);
+	size_t i;
+	for ( i = 0; i < neighbors.size(); i++) {
+		printf("%8s  %f\n", neighbors[i].label.c_str(), neighbors[i].dist);
 	}
 	putchar('\n');
 }
 
 /**
- * Comparison function for the kNN classifier.
+ * Comparison function for sorting neighbors.
  *
  * @param a
  * @param b
  */
-int kNN_compare(const void *a, const void *b)
+bool kNN_compare(const neighbor_t& a, const neighbor_t& b)
 {
-	neighbor_t *n1 = (neighbor_t *)a;
-	neighbor_t *n2 = (neighbor_t *)b;
-
-	if ( n1->dist < n2->dist ) {
-		return -1;
-	}
-	else if ( n1->dist > n2->dist ) {
-		return 1;
-	}
-
-	return 0;
+	return (a.dist < b.dist);
 }
 
 /**
- * Identification function for the kNN classifier.
+ * Determine the mode of a list of neighbors.
  *
- * @param a
+ * @param items
  */
-void * kNN_identify(const void *a)
+data_label_t kNN_mode(const std::vector<neighbor_t>& items)
 {
-	neighbor_t *n = (neighbor_t *)a;
+	std::vector<item_count_t> counts;
 
-	return n->label;
+	// compute the frequency of each item in the list
+	size_t i;
+	for ( i = 0; i < items.size(); i++ ) {
+		const data_label_t& id = items[i].label;
+
+		size_t j = 0;
+		while ( j < counts.size() && counts[j].id != id ) {
+			j++;
+		}
+
+		if ( j == counts.size() ) {
+			item_count_t count;
+			count.id = id;
+			count.count = 1;
+
+			counts.push_back(count);
+		}
+		else {
+			counts[j].count++;
+		}
+	}
+
+	// find the item with the highest frequency
+	item_count_t max = counts[0];
+
+	for ( i = 1; i < counts.size(); i++ ) {
+		if ( max.count < counts[i].count ) {
+			max = counts[i];
+		}
+	}
+
+	return max.id;
 }
 
 /**
@@ -82,30 +107,33 @@ KNNLayer::KNNLayer(int k, dist_func_t dist)
  * @param X_test
  * @return predicted labels of the test observations
  */
-char ** KNNLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, matrix_t *X_test)
+std::vector<data_label_t> KNNLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, matrix_t *X_test)
 {
-	char **Y_pred = (char **)malloc(X_test->cols * sizeof(char *));
+	std::vector<data_label_t> Y_pred;
 
 	int i;
 	for ( i = 0; i < X_test->cols; i++ ) {
-		// compute distance between X_test_i and each observation in X
-		int num_neighbors = X->cols;
-		neighbor_t *neighbors = (neighbor_t *)malloc(num_neighbors * sizeof(neighbor_t));
+		// compute distance between X_test_i and each X_i
+		std::vector<neighbor_t> neighbors;
 
 		int j;
-		for ( j = 0; j < num_neighbors; j++ ) {
-			neighbors[j].label = Y[j].label;
-			neighbors[j].dist = this->dist(X_test, i, X, j);
+		for ( j = 0; j < X->cols; j++ ) {
+			neighbor_t n;
+			n.label = Y[j].label;
+			n.dist = this->dist(X_test, i, X, j);
+
+			neighbors.push_back(n);
 		}
 
-		// sort the neighbors by distance
-		qsort(neighbors, num_neighbors, sizeof(neighbor_t), kNN_compare);
+		// determine the k nearest neighbors
+		std::sort(neighbors.begin(), neighbors.end(), kNN_compare);
+
+		neighbors.erase(neighbors.begin() + this->k, neighbors.end());
 
 		// determine the mode of the k nearest labels
-		Y_pred[i] = (char *)mode(neighbors, this->k, sizeof(neighbor_t), kNN_identify);
+		data_label_t y_pred = kNN_mode(neighbors);
 
-		// cleanup
-		free(neighbors);
+		Y_pred.push_back(y_pred);
 	}
 
 	return Y_pred;

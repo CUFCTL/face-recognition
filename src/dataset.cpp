@@ -62,55 +62,45 @@ void str_fwrite(const char *str, FILE *file)
  *
  * @param path
  */
-Dataset::Dataset(const char *path)
+Dataset::Dataset(const std::string& path)
 {
 	// get list of files
 	struct dirent **files;
-	int num_entries = scandir(path, &files, is_file, alphasort);
+	int num_entries = scandir(path.c_str(), &files, is_file, alphasort);
 
 	if ( num_entries <= 0 ) {
 		perror("scandir");
 		exit(1);
 	}
 
-	// construct entries and labels
-	std::vector<data_entry_t> entries;
+	// construct labels and entries
 	std::vector<data_label_t> labels;
+	std::vector<data_entry_t> entries;
 
 	int i;
 	for ( i = 0; i < num_entries; i++ ) {
-		data_entry_t entry;
-
-		// set entry name
-		char *filename = files[i]->d_name;
-
-		entry.name = (char *)malloc(strlen(path) + 1 + strlen(filename) + 1);
-		sprintf(entry.name, "%s/%s", path, filename);
+		// get filename
+		std::string filename(files[i]->d_name);
 
 		// construct label name
-		int n = strchr(filename, '_') - filename;
-		char *label_name = strndup(filename, n);
+		unsigned n = filename.find_first_of('_');
+		data_label_t label = filename.substr(0, n);
 
 		// search labels for label name
 		unsigned j = 0;
-		while ( j < labels.size() && strcmp(labels[j].name, label_name) != 0 ) {
+		while ( j < labels.size() && labels[j] != label ) {
 			j++;
 		}
 
 		// append label if not found
 		if ( j == labels.size() ) {
-			data_label_t label;
-			label.id = labels.size();
-			label.name = label_name;
-
 			labels.push_back(label);
 		}
-		else {
-			free(label_name);
-		}
 
-		// set entry label
-		entry.label = labels[j].name;
+		// append entry
+		data_entry_t entry;
+		entry.label = labels[j];
+		entry.name = path + "/" + filename;
 
 		entries.push_back(entry);
 	}
@@ -122,8 +112,8 @@ Dataset::Dataset(const char *path)
 	free(files);
 
 	// construct dataset
-	this->entries = entries;
 	this->labels = labels;
+	this->entries = entries;
 }
 
 /**
@@ -141,10 +131,7 @@ Dataset::Dataset(FILE *file)
 
 	int i;
 	for ( i = 0; i < num_labels; i++ ) {
-		data_label_t label;
-
-		fread(&label.id, sizeof(int), 1, file);
-		label.name = str_fread(file);
+		data_label_t label(str_fread(file));
 
 		labels.push_back(label);
 	}
@@ -157,15 +144,14 @@ Dataset::Dataset(FILE *file)
 
 	for ( i = 0; i < num_entries; i++ ) {
 		data_entry_t entry;
-
 		entry.label = str_fread(file);
 		entry.name = str_fread(file);
 
 		entries.push_back(entry);
 	}
 
-	this->entries = entries;
 	this->labels = labels;
+	this->entries = entries;
 }
 
 /**
@@ -188,9 +174,7 @@ void Dataset::save(FILE *file)
 
 	int i;
 	for ( i = 0; i < num_labels; i++ ) {
-		fwrite(&this->labels[i].id, sizeof(int), 1, file);
-
-		str_fwrite(this->labels[i].name, file);
+		str_fwrite(this->labels[i].c_str(), file);
 	}
 
 	// save entries
@@ -198,8 +182,8 @@ void Dataset::save(FILE *file)
 	fwrite(&num_entries, sizeof(int), 1, file);
 
 	for ( i = 0; i < num_entries; i++ ) {
-		str_fwrite(this->entries[i].label, file);
-		str_fwrite(this->entries[i].name, file);
+		str_fwrite(this->entries[i].label.c_str(), file);
+		str_fwrite(this->entries[i].name.c_str(), file);
 	}
 }
 
@@ -217,7 +201,7 @@ matrix_t * Dataset::load() const
 	// get the image size from the first image
 	Image image;
 
-	image.load(this->entries[0].name);
+	image.load(this->entries[0].name.c_str());
 
 	// construct image matrix
 	int m = image.channels * image.height * image.width;
@@ -229,7 +213,7 @@ matrix_t * Dataset::load() const
 
 	int i;
 	for ( i = 1; i < n; i++ ) {
-		image.load(this->entries[i].name);
+		image.load(this->entries[i].name.c_str());
 		m_image_read(X, i, image);
 	}
 
@@ -243,7 +227,7 @@ void Dataset::print_labels() const
 {
 	unsigned i;
 	for ( i = 0; i < this->labels.size(); i++ ) {
-		printf("%3d  %s\n", this->labels[i].id, this->labels[i].name);
+		printf("%3d  %s\n", i, this->labels[i].c_str());
 	}
 	putchar('\n');
 }
@@ -255,7 +239,7 @@ void Dataset::print_entries() const
 {
 	unsigned i;
 	for ( i = 0; i < this->entries.size(); i++ ) {
-		printf("%8s  %s\n", this->entries[i].label, this->entries[i].name);
+		printf("%8s  %s\n", this->entries[i].label.c_str(), this->entries[i].name.c_str());
 	}
 	putchar('\n');
 }

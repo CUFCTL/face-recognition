@@ -12,7 +12,7 @@ class BayesLayer : public ClassifierLayer {
 public:
 	BayesLayer();
 
-	char ** predict(
+	std::vector<data_label_t> predict(
 		matrix_t *X,
 		const std::vector<data_entry_t>& Y,
 		const std::vector<data_label_t>& C,

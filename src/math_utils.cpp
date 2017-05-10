@@ -4,12 +4,8 @@
  * Library of helpful math functions.
  */
 #include <math.h>
+#include <stdlib.h>
 #include "math_utils.h"
-
-typedef struct {
-	void *id;
-	int count;
-} item_count_t;
 
 /**
  * Determine the max of two integers.
@@ -31,50 +27,6 @@ int max(int x, int y)
 int min(int x, int y)
 {
 	return x < y ? x : y;
-}
-
-/**
- * Determine the most frequently occuring item in an
- * array of items based on an identification function.
- *
- * @param base
- * @param nmemb
- * @param size
- * @param identify
- */
-void * mode(const void *base, size_t nmemb, size_t size, void * (*identify)(const void *))
-{
-	item_count_t *counts = (item_count_t *)calloc(nmemb, sizeof(item_count_t));
-
-	// compute the frequency of each item in the list
-	size_t i;
-	for ( i = 0; i < nmemb; i++ ) {
-		void *item = (char *)base + i * size;
-		void *id = identify(item);
-
-		int n = 0;
-		while ( counts[n].id != NULL && counts[n].id != id ) {
-			n++;
-		}
-
-		counts[n].id = id;
-		counts[n].count++;
-	}
-
-	// find the item with the highest frequency
-	void *max_id = NULL;
-	int max_count = 0;
-
-	for ( i = 0; i < nmemb && counts[i].id != NULL; i++ ) {
-		if ( max_id == NULL || max_count < counts[i].count ) {
-			max_id = counts[i].id;
-			max_count = counts[i].count;
-		}
-	}
-
-	free(counts);
-
-	return max_id;
 }
 
 /**

@@ -340,17 +340,16 @@ int main(int argc, char **argv)
 			else if ( c == READ ) {
 				Dataset test_set(args.path_test);
 
-				model.predict(test_set);
+				std::vector<data_label_t> Y_pred = model.predict(test_set);
+				model.validate(test_set, Y_pred);
 			}
 		}
 	}
 	else if ( args.test ) {
 		Dataset test_set(args.path_test);
 
-		char **pred_labels = model.predict(test_set);
-		model.validate(test_set, pred_labels);
-
-		free(pred_labels);
+		std::vector<data_label_t> Y_pred = model.predict(test_set);
+		model.validate(test_set, Y_pred);
 	}
 	else {
 		model.save(MODEL_FNAME);

@@ -3,7 +3,6 @@
  *
  * Implementation of the model type.
  */
-#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -130,7 +129,7 @@ void Model::load(const char *path)
  *
  * @param test_set
  */
-char ** Model::predict(const Dataset& test_set)
+std::vector<data_label_t> Model::predict(const Dataset& test_set)
 {
 	timer_push("Prediction");
 
@@ -145,7 +144,7 @@ char ** Model::predict(const Dataset& test_set)
 	matrix_t *P_test = this->feature->project(X_test);
 
 	// compute predicted labels
-	char **Y_pred = this->classifier->predict(
+	std::vector<data_label_t> Y_pred = this->classifier->predict(
 		this->P,
 		this->train_set.entries,
 		this->train_set.labels,
@@ -167,16 +166,16 @@ char ** Model::predict(const Dataset& test_set)
  * Validate a set of predicted labels against the ground truth.
  *
  * @param test_set
- * @param pred_labels
+ * @param Y_pred
  */
-void Model::validate(const Dataset& test_set, char **pred_labels)
+void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y_pred)
 {
 	// compute accuracy
 	int num_correct = 0;
 
 	unsigned i;
 	for ( i = 0; i < test_set.entries.size(); i++ ) {
-		if ( strcmp(pred_labels[i], test_set.entries[i].label) == 0 ) {
+		if ( Y_pred[i] == test_set.entries[i].label ) {
 			num_correct++;
 		}
 	}
@@ -187,16 +186,16 @@ void Model::validate(const Dataset& test_set, char **pred_labels)
 	log(LL_VERBOSE, "Results\n");
 
 	for ( i = 0; i < test_set.entries.size(); i++ ) {
-		char *pred_label = pred_labels[i];
+		const data_label_t& y_pred = Y_pred[i];
 		const data_entry_t& entry = test_set.entries[i];
 
-		const char *s = (strcmp(pred_label, entry.label) != 0)
+		const char *s = (y_pred != entry.label)
 			? "(!)"
 			: "";
 
-		log(LL_VERBOSE, "%-10s -> %-4s %s\n",
-			basename(entry.name),
-			pred_label, s);
+		log(LL_VERBOSE, "%-12s -> %-4s %s\n",
+			basename(entry.name.c_str()),
+			y_pred.c_str(), s);
 	}
 
 	log(LL_VERBOSE, "%d / %d matched, %.2f%%\n",

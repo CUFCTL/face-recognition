@@ -7,17 +7,15 @@
 #define DATASET_H
 
 #include <stdio.h>
+#include <string>
 #include <vector>
 #include "matrix.h"
 
-typedef struct {
-	int id;
-	char *name;
-} data_label_t;
+typedef std::string data_label_t;
 
 typedef struct {
-	char *label;
-	char *name;
+	data_label_t label;
+	std::string name;
 } data_entry_t;
 
 class Dataset {
@@ -25,7 +23,7 @@ public:
 	std::vector<data_label_t> labels;
 	std::vector<data_entry_t> entries;
 
-	Dataset(const char *path);
+	Dataset(const std::string& path);
 	Dataset(FILE *file);
 	Dataset();
 

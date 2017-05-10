@@ -48,7 +48,7 @@ precision_t bayes_prob(matrix_t *x, matrix_t *mu, matrix_t *S_inv)
  * @param X_test
  * @return predicted labels of the test observations
  */
-char ** BayesLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, matrix_t *X_test)
+std::vector<data_label_t> BayesLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, matrix_t *X_test)
 {
 	int num_classes = C.size();
 	matrix_t **X_c = m_copy_classes(X, Y, num_classes);
@@ -64,7 +64,7 @@ char ** BayesLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, con
 	}
 
 	// compute label for each test vector
-	char **Y_pred = (char **)malloc(X_test->cols * sizeof(char *));
+	std::vector<data_label_t> Y_pred;
 
 	for ( i = 0; i < X_test->cols; i++ ) {
 		matrix_t *probs = m_initialize("probs", num_classes, 1);
@@ -78,7 +78,8 @@ char ** BayesLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, con
 		}
 
 		int index = m_argmax(probs);
-		Y_pred[i] = C[index].name;
+
+		Y_pred.push_back(C[index]);
 
 		m_free(probs);
 	}
