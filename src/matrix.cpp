@@ -452,6 +452,35 @@ void m_image_write (matrix_t *M, int i, image_t *image)
 }
 
 /**
+ * Determine the index of the first element
+ * in a vector that is the maximum value.
+ *
+ * @param v
+ * @return index
+ */
+int m_argmax(matrix_t *v)
+{
+	assert(v->rows == 1 || v->cols == 1);
+
+	int n = (v->rows == 1)
+		? v->cols
+		: v->rows;
+
+	int index = 0;
+	precision_t max = v->data[0];
+
+	int i;
+	for ( i = 1; i < n; i++ ) {
+		if ( max < v->data[i] ) {
+			max = v->data[i];
+			index = i;
+		}
+	}
+
+	return index;
+}
+
+/**
  * Compute the diagonal matrix of a vector.
  *
  * @param v

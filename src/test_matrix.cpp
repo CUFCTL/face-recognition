@@ -302,6 +302,27 @@ void test_m_copy_rows()
 }
 
 /**
+ * Test the argmax function.
+ */
+void test_m_argmax()
+{
+	precision_t v_data[] = {
+		23, 42, 37, 18, 52
+	};
+	matrix_t *v = m_initialize_data("v", 1, 5, v_data);
+
+	int index = m_argmax(v);
+
+	if ( LOGGER(LL_VERBOSE) ) {
+		m_fprint(stdout, v);
+
+		printf("argmax(%s) = %d\n", v->name, index);
+	}
+
+	assert_equal(index, 4, "argmax(v)");
+}
+
+/**
  * Test the diagonal matrix.
  */
 void test_m_diagonalize()
@@ -1064,7 +1085,7 @@ void print_usage()
 	);
 }
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
 	// parse command-line arguments
 	struct option long_options[] = {
@@ -1098,6 +1119,7 @@ int main (int argc, char **argv)
 		test_m_copy,
 		test_m_copy_columns,
 		test_m_copy_rows,
+		test_m_argmax,
 		test_m_diagonalize,
 		test_m_distance,
 		test_m_eigen,

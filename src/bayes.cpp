@@ -40,35 +40,6 @@ matrix_t ** m_class_cov(matrix_t **X_c, matrix_t **U, int c)
 }
 
 /**
- * Determine the index of the first
- * element that is the maximum value.
- *
- * @param x
- * @return index
- */
-int m_argmax(matrix_t *x)
-{
-	assert(x->rows == 1 || x->cols == 1);
-
-	int N = (x->rows == 1)
-		? x->cols
-		: x->rows;
-
-	int index = 0;
-	precision_t max = x->data[0];
-
-	int i;
-	for ( i = 1; i < N; i++ ) {
-		if ( max < x->data[i] ) {
-			max = x->data[i];
-			index = i;
-		}
-	}
-
-	return index;
-}
-
-/**
  * Construct a Bayes classifier.
  */
 BayesLayer::BayesLayer()
