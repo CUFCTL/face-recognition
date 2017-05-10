@@ -18,17 +18,16 @@ int main(int argc, char **argv)
 	const char *FILENAME_OUT = argv[2];
 
 	// map an image to a column vector
-	image_t *image = image_construct();
-	image_read(image, FILENAME_IN);
+	Image image;
+	image.load(FILENAME_IN);
 
-	matrix_t *x = m_initialize("x", image->channels * image->width * image->height, 1);
+	matrix_t *x = m_initialize("x", image.channels * image.width * image.height, 1);
 	m_image_read(x, 0, image);
 
 	// map a column vector to an image
 	m_image_write(x, 0, image);
-	image_write(image, FILENAME_OUT);
+	image.save(FILENAME_OUT);
 
-	image_destruct(image);
 	m_free(x);
 
 	return 0;

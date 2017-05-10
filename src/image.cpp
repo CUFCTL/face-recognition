@@ -14,31 +14,23 @@
 #include "image.h"
 
 /**
- * Construct a PPM image.
- *
- * @return pointer to empty PPM image
+ * Construct an image.
  */
-image_t * image_construct()
+Image::Image()
 {
-	image_t *image = (image_t *)malloc(sizeof(image_t));
-	image->channels = 0;
-	image->width = 0;
-	image->height = 0;
-	image->max_value = 0;
-	image->pixels = NULL;
-
-	return image;
+	this->channels = 0;
+	this->width = 0;
+	this->height = 0;
+	this->max_value = 0;
+	this->pixels = NULL;
 }
 
 /**
  * Destruct an image.
- *
- * @param image
  */
-void image_destruct(image_t *image)
+Image::~Image()
 {
-	free(image->pixels);
-	free(image);
+	free(this->pixels);
 }
 
 /**
@@ -64,23 +56,24 @@ void skip_to_next_value(FILE* in)
 }
 
 /**
- * Read an image from a PGM/PPM file.
+ * Load an image from a PGM/PPM file.
  *
- * @param image
  * @param path
  */
-void image_read(image_t *image, const char *path)
+void Image::load(const char *path)
 {
 	FILE *in = fopen(path, "r");
 
+	// read image header
 	char header[4];
+	int channels;
 
 	fscanf(in, "%s", header);
 	if ( strcmp(header, "P5") == 0 ) {
-		image->channels = 1;
+		channels = 1;
 	}
 	else if ( strcmp(header, "P6") == 0 ) {
-		image->channels = 3;
+		channels = 3;
 	}
 	else {
 		fprintf(stderr, "error: cannot read image \'%s\'\n", path);
@@ -89,41 +82,57 @@ void image_read(image_t *image, const char *path)
 
 	skip_to_next_value(in);
 
-	fscanf(in, "%d", &image->width);
+	// read image metadata
+	int width;
+	int height;
+	int max_value;
+
+	fscanf(in, "%d", &width);
 	skip_to_next_value(in);
 
-	fscanf(in, "%d", &image->height);
+	fscanf(in, "%d", &height);
 	skip_to_next_value(in);
 
-	fscanf(in, "%d", &image->max_value);
+	fscanf(in, "%d", &max_value);
 	fgetc(in);
 
-	int num = image->channels * image->width * image->height;
+	// verify that image sizes are equal (if reloading)
+	int num1 = channels * width * height;
+	int num2 = this->channels * this->width * this->height;
 
-	if ( image->pixels == NULL ) {
-		image->pixels = (unsigned char *)malloc(num * sizeof(unsigned char));
+	if ( this->pixels == NULL ) {
+		this->pixels = (unsigned char *)malloc(num1 * sizeof(unsigned char));
+	}
+	else if ( num1 != num2 ) {
+		fprintf(stderr, "error: unequal sizes on image reload\n");
+		exit(1);
 	}
 
-	fread(image->pixels, sizeof(unsigned char), num, in);
+	this->channels = channels;
+	this->width = width;
+	this->height = height;
+	this->max_value = max_value;
+
+	// read pixel data
+	fread(this->pixels, sizeof(unsigned char), num1, in);
 
 	fclose(in);
 }
 
 /**
- * Write an image to a PGM/PPM file.
+ * Save an image to a PGM/PPM file.
  *
- * @param image
  * @param path
  */
-void image_write(image_t *image, const char *path)
+void Image::save(const char *path)
 {
 	FILE *out = fopen(path, "w");
 
 	// write image header
-	if ( image->channels == 1 ) {
+	if ( this->channels == 1 ) {
 		fprintf(out, "P5\n");
 	}
-	else if ( image->channels == 3 ) {
+	else if ( this->channels == 3 ) {
 		fprintf(out, "P6\n");
 	}
 	else {
@@ -131,10 +140,13 @@ void image_write(image_t *image, const char *path)
 		exit(1);
 	}
 
-	fprintf(out, "%d %d %d\n", image->width, image->height, image->max_value);
+	// write image metadata
+	fprintf(out, "%d %d %d\n", this->width, this->height, this->max_value);
 
 	// write pixel data
-	fwrite(image->pixels, sizeof(unsigned char), image->channels * image->width * image->height, out);
+	int num = this->channels * this->width * this->height;
+
+	fwrite(this->pixels, sizeof(unsigned char), num, out);
 
 	fclose(out);
 }

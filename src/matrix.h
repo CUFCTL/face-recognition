@@ -49,8 +49,8 @@ matrix_t * m_fscan (FILE *stream);
 matrix_t * m_fread (FILE *stream);
 void m_gpu_read (matrix_t *M);
 void m_gpu_write (matrix_t *M);
-void m_image_read (matrix_t *M, int col, image_t *image);
-void m_image_write (matrix_t *M, int col, image_t *image);
+void m_image_read (matrix_t *M, int i, const Image& image);
+void m_image_write (matrix_t *M, int i, Image& image);
 
 // getter functions
 int m_argmax (matrix_t *v);

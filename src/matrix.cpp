@@ -424,13 +424,13 @@ void m_gpu_write (matrix_t *M)
  * @param i
  * @param image
  */
-void m_image_read (matrix_t *M, int i, image_t *image)
+void m_image_read (matrix_t *M, int i, const Image& image)
 {
-	assert(M->rows == image->channels * image->height * image->width);
+	assert(M->rows == image.channels * image.height * image.width);
 
 	int j;
 	for ( j = 0; j < M->rows; j++ ) {
-		elem(M, j, i) = (precision_t) image->pixels[j];
+		elem(M, j, i) = (precision_t) image.pixels[j];
 	}
 }
 
@@ -441,13 +441,13 @@ void m_image_read (matrix_t *M, int i, image_t *image)
  * @param i
  * @param image
  */
-void m_image_write (matrix_t *M, int i, image_t *image)
+void m_image_write (matrix_t *M, int i, Image& image)
 {
-	assert(M->rows == image->channels * image->height * image->width);
+	assert(M->rows == image.channels * image.height * image.width);
 
 	int j;
 	for ( j = 0; j < M->rows; j++ ) {
-		image->pixels[j] = (unsigned char) elem(M, j, i);
+		image.pixels[j] = (unsigned char) elem(M, j, i);
 	}
 }
 

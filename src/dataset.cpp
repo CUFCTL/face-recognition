@@ -215,11 +215,12 @@ void Dataset::save(FILE *file)
 matrix_t * Dataset::load() const
 {
 	// get the image size from the first image
-	image_t *image = image_construct();
-	image_read(image, this->entries[0].name);
+	Image image;
+
+	image.load(this->entries[0].name);
 
 	// construct image matrix
-	int m = image->channels * image->height * image->width;
+	int m = image.channels * image.height * image.width;
 	int n = this->entries.size();
 	matrix_t *X = m_initialize("X", m, n);
 
@@ -228,11 +229,9 @@ matrix_t * Dataset::load() const
 
 	int i;
 	for ( i = 1; i < n; i++ ) {
-		image_read(image, this->entries[i].name);
+		image.load(this->entries[i].name);
 		m_image_read(X, i, image);
 	}
-
-	image_destruct(image);
 
 	return X;
 }
