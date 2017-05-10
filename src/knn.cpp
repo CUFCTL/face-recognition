@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "knn.h"
 #include "logger.h"
-#include "math_helper.h"
+#include "math_utils.h"
 
 typedef struct {
 	char *label;

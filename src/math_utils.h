@@ -1,10 +1,10 @@
 /**
- * @file math_helper.h
+ * @file math_utils.h
  *
  * Library of helpful math functions.
  */
-#ifndef MATH_HELPER_H
-#define MATH_HELPER_H
+#ifndef MATH_UTILS_H
+#define MATH_UTILS_H
 
 #include <stdlib.h>
 

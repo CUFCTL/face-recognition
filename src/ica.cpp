@@ -8,7 +8,7 @@
 #include <string.h>
 #include "ica.h"
 #include "logger.h"
-#include "math_helper.h"
+#include "math_utils.h"
 #include "pca.h"
 #include "timer.h"
 

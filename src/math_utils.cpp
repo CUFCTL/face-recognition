@@ -1,10 +1,10 @@
 /**
- * @file math_helper.cpp
+ * @file math_utils.cpp
  *
  * Library of helpful math functions.
  */
 #include <math.h>
-#include "math_helper.h"
+#include "math_utils.h"
 
 typedef struct {
 	void *id;

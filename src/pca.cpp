@@ -4,7 +4,7 @@
  * Implementation of PCA (Turk and Pentland, 1991).
  */
 #include "logger.h"
-#include "math_helper.h"
+#include "math_utils.h"
 #include "pca.h"
 #include "timer.h"
 

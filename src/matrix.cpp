@@ -17,7 +17,7 @@
 #endif
 
 #include "logger.h"
-#include "math_helper.h"
+#include "math_utils.h"
 #include "matrix.h"
 
 const precision_t EPSILON = 1e-16;

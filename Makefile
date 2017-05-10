@@ -57,13 +57,13 @@ echo:
 %.o: src/%.cpp
 	$(NVCC) $(NVCCFLAGS) -c -o $@ $<
 
-face-rec: bayes.o dataset.o ica.o identity.o image.o knn.o lda.o logger.o math_helper.o main.o matrix.o model.o pca.o timer.o
+face-rec: bayes.o dataset.o ica.o identity.o image.o knn.o lda.o logger.o math_utils.o main.o matrix.o model.o pca.o timer.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
-test-image: image.o logger.o math_helper.o matrix.o test_image.o
+test-image: image.o logger.o math_utils.o matrix.o test_image.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
-test-matrix: logger.o math_helper.o matrix.o test_matrix.o
+test-matrix: logger.o math_utils.o matrix.o test_matrix.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 clean:
