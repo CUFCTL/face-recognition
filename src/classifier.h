@@ -16,10 +16,10 @@ public:
 	virtual ~ClassifierLayer() {};
 
 	virtual std::vector<data_label_t> predict(
-		matrix_t *X,
+		const Matrix& X,
 		const std::vector<data_entry_t>& Y,
 		const std::vector<data_label_t>& C,
-		matrix_t *X_test
+		const Matrix& X_test
 	) = 0;
 
 	virtual void print() = 0;

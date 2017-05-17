@@ -32,7 +32,7 @@ typedef void (*test_func_t)(void);
  * @param b
  * @return 1 if a = b, 0 otherwise
  */
-int is_equal (precision_t a, precision_t b)
+int is_equal(precision_t a, precision_t b)
 {
 	static precision_t EPSILON = 1e-4;
 
@@ -46,16 +46,16 @@ int is_equal (precision_t a, precision_t b)
  * @param B
  * @return 1 if A = B, 0 otherwise
  */
-int m_equal (matrix_t *A, matrix_t *B)
+int m_equal(const Matrix& A, const Matrix& B)
 {
-	if ( A->rows != B->rows || A->cols != B->cols ) {
+	if ( A.rows != B.rows || A.cols != B.cols ) {
 		return 0;
 	}
 
 	int i, j;
-	for ( i = 0; i < A->rows; i++ ) {
-		for ( j = 0; j < A->cols; j++ ) {
-			if ( !is_equal(elem(A, i, j), elem(B, i, j)) ) {
+	for ( i = 0; i < A.rows; i++ ) {
+		for ( j = 0; j < A.cols; j++ ) {
+			if ( !is_equal(ELEM(A, i, j), ELEM(B, i, j)) ) {
 				return 0;
 			}
 		}
@@ -71,7 +71,7 @@ int m_equal (matrix_t *A, matrix_t *B)
  * @param b
  * @param name
  */
-void assert_equal (precision_t a, precision_t b, const char *name)
+void assert_equal(precision_t a, precision_t b, const char *name)
 {
 	if ( is_equal(a, b) ) {
 		printf(ANSI_GREEN "PASSED: %s" ANSI_RESET "\n", name);
@@ -90,7 +90,7 @@ void assert_equal (precision_t a, precision_t b, const char *name)
  * @param B
  * @param name
  */
-void assert_equal_matrix (matrix_t *A, matrix_t *B, const char *name)
+void assert_equal_matrix(const Matrix& A, const Matrix& B, const char *name)
 {
 	if ( m_equal(A, B) ) {
 		printf(ANSI_GREEN "PASSED: %s" ANSI_RESET "\n", name);
@@ -109,19 +109,17 @@ void assert_equal_matrix (matrix_t *A, matrix_t *B, const char *name)
  * @param data
  * @param name
  */
-void assert_matrix_value (matrix_t *M, precision_t *data, const char *name)
+void assert_matrix_value(const Matrix& M, precision_t *data, const char *name)
 {
-	matrix_t *M_test = m_initialize_data("M_test", M->rows, M->cols, data);
+	Matrix M_test("M_test", M.rows, M.cols, data);
 
 	assert_equal_matrix(M, M_test, name);
-
-	m_free(M_test);
 }
 
 /**
  * Test identity matrix.
  */
-void test_m_identity()
+void test_identity()
 {
 	precision_t I_data[] = {
 		1, 0, 0, 0,
@@ -129,21 +127,19 @@ void test_m_identity()
 		0, 0, 1, 0,
 		0, 0, 0, 1
 	};
-	matrix_t *I = m_identity("I", 4);
+	Matrix I = Matrix::identity("I", 4);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, I);
+		I.print(stdout);
 	}
 
 	assert_matrix_value(I, I_data, "eye(N)");
-
-	m_free(I);
 }
 
 /**
  * Test ones matrix.
  */
-void test_m_ones()
+void test_ones()
 {
 	precision_t X_data[] = {
 		1, 1, 1, 1,
@@ -151,21 +147,19 @@ void test_m_ones()
 		1, 1, 1, 1,
 		1, 1, 1, 1
 	};
-	matrix_t *X = m_ones("X", 4, 4);
+	Matrix X = Matrix::ones("X", 4, 4);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, X);
+		X.print(stdout);
 	}
 
 	assert_matrix_value(X, X_data, "ones(M, N)");
-
-	m_free(X);
 }
 
 /**
  * Test random matrix.
  */
-void test_m_random()
+void test_random()
 {
 	precision_t X_data[] = {
 		-2.4191,  0.7112, -0.3091,  0.5153,  1.0677,
@@ -174,21 +168,19 @@ void test_m_random()
 		 0.2610,  0.2159,  1.0133,  0.4165,  0.5066,
 		 0.2370,  0.9451, -2.8396, -1.4088, -0.2007
 	};
-	matrix_t *X = m_random("X", 5, 5);
+	Matrix X = Matrix::random("X", 5, 5);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, X);
+		X.print(stdout);
 	}
 
 	assert_matrix_value(X, X_data, "randn(M, N)");
-
-	m_free(X);
 }
 
 /**
  * Test zero matrix.
  */
-void test_m_zeros()
+void test_zeros()
 {
 	precision_t X_data[] = {
 		0, 0, 0, 0,
@@ -196,21 +188,19 @@ void test_m_zeros()
 		0, 0, 0, 0,
 		0, 0, 0, 0
 	};
-	matrix_t *X = m_zeros("X", 4, 4);
+	Matrix X = Matrix::zeros("X", 4, 4);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, X);
+		X.print(stdout);
 	}
 
 	assert_matrix_value(X, X_data, "zeros(M, N)");
-
-	m_free(X);
 }
 
 /**
  * Test matrix copy.
  */
-void test_m_copy()
+void test_copy()
 {
 	precision_t A_data[] = {
 		16,  2,  3, 13,
@@ -218,25 +208,21 @@ void test_m_copy()
 		 9,  7,  6, 12,
 		 4, 14, 15,  1
 	};
-	matrix_t *A = m_initialize_data("A", 4, 4, A_data);
-	matrix_t *C = m_copy("C", A);
+	Matrix A("A", 4, 4, A_data);
+	Matrix C("C", A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, C);
+		A.print(stdout);
+		C.print(stdout);
 	}
 
 	assert_equal_matrix(A, C, "A(:, :)");
-
-	m_free(A);
-	m_free(C);
 }
 
 /**
  * Test matrix column copy.
  */
-void test_m_copy_columns()
+void test_copy_columns()
 {
 	precision_t A_data[] = {
 		16,  2,  3, 13,
@@ -250,73 +236,36 @@ void test_m_copy_columns()
 		 7,  6,
 		14, 15
 	};
-	matrix_t *A = m_initialize_data("A", 4, 4, A_data);
+	Matrix A("A", 4, 4, A_data);
 
 	int i = 1;
 	int j = 3;
-	matrix_t *C = m_copy_columns("C", A, i, j);
+	Matrix C("C", A, i, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, C);
+		A.print(stdout);
+		C.print(stdout);
 	}
 
 	assert_matrix_value(C, C_data, "A(:, i:j)");
-
-	m_free(A);
-	m_free(C);
-}
-
-/**
- * Test matrix row copy.
- */
-void test_m_copy_rows()
-{
-	precision_t A_data[] = {
-		16,  2,  3, 13,
-		 5, 11, 10,  8,
-		 9,  7,  6, 12,
-		 4, 14, 15,  1
-	};
-	precision_t C_data[] = {
-		 5, 11, 10,  8,
-		 9,  7,  6, 12
-	};
-	matrix_t *A = m_initialize_data("A", 4, 4, A_data);
-
-	int i = 1;
-	int j = 3;
-	matrix_t *C = m_copy_rows("C", A, i, j);
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, C);
-	}
-
-	assert_matrix_value(C, C_data, "A(i:j, :)");
-
-	m_free(A);
-	m_free(C);
 }
 
 /**
  * Test the argmax function.
  */
-void test_m_argmax()
+void test_argmax()
 {
 	precision_t v_data[] = {
 		23, 42, 37, 18, 52
 	};
-	matrix_t *v = m_initialize_data("v", 1, 5, v_data);
+	Matrix v("v", 1, 5, v_data);
 
-	int index = m_argmax(v);
+	int index = v.argmax();
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, v);
+		v.print(stdout);
 
-		printf("argmax(%s) = %d\n", v->name, index);
+		printf("argmax(%s) = %d\n", v.name, index);
 	}
 
 	assert_equal(index, 4, "argmax(v)");
@@ -325,7 +274,7 @@ void test_m_argmax()
 /**
  * Test the diagonal matrix.
  */
-void test_m_diagonalize()
+void test_diagonalize()
 {
 	precision_t v_data[] = {
 		2, 1, -1, -2, -5
@@ -337,63 +286,22 @@ void test_m_diagonalize()
 		0,  0,  0, -2,  0,
 		0,  0,  0,  0, -5
 	};
-	matrix_t *v = m_initialize_data("v", 1, 5, v_data);
-	matrix_t *D = m_diagonalize("D", v);
+	Matrix v("v", 1, 5, v_data);
+	Matrix D = v.diagonalize("D");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, v);
+		v.print(stdout);
 
-		m_fprint(stdout, D);
+		D.print(stdout);
 	}
 
 	assert_matrix_value(D, D_data, "diag(v)");
-
-	m_free(v);
-	m_free(D);
-}
-
-/**
- * Test the vector distance functions.
- */
-void test_m_distance()
-{
-	precision_t a_data[] = {
-		1,
-		0,
-		0
-	};
-	precision_t b_data[] = {
-		0,
-		1,
-		0
-	};
-	matrix_t *a = m_initialize_data("a", 3, 1, a_data);
-	matrix_t *b = m_initialize_data("b", 3, 1, b_data);
-	precision_t dist_COS = m_dist_COS(a, 0, b, 0);
-	precision_t dist_L1 = m_dist_L1(a, 0, b, 0);
-	precision_t dist_L2 = m_dist_L2(a, 0, b, 0);
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, a);
-		m_fprint(stdout, b);
-
-		printf("d_COS(%s, %s) = %g\n", a->name, b->name, dist_COS);
-		printf("d_L1(%s, %s) = %g\n", a->name, b->name, dist_L1);
-		printf("d_L2(%s, %s) = %g\n", a->name, b->name, dist_L2);
-	}
-
-	assert_equal(dist_COS, 1, "d_COS(a, b)");
-	assert_equal(dist_L1, 2, "d_L1(a, b)");
-	assert_equal(dist_L2, 1.4142, "d_L2(a, b)");
-
-	m_free(a);
-	m_free(b);
 }
 
 /**
  * Test eigenvalues, eigenvectors.
  */
-void test_m_eigen()
+void test_eigen()
 {
 	precision_t M_data[] = {
 		1.0000, 0.5000, 0.3333, 0.2500,
@@ -413,32 +321,26 @@ void test_m_eigen()
 		0.0000, 0.0000, 0.8482, 0.0000,
 		0.0000, 0.0000, 0.0000, 2.5362
 	};
-	matrix_t *M = m_initialize_data("M", 4, 4, M_data);
-	matrix_t *V;
-	matrix_t *D;
+	Matrix M("M", 4, 4, M_data);
+	Matrix V;
+	Matrix D;
 
-	m_eigen("V", "D", M, M->rows, &V, &D);
+	M.eigen("V", "D", M.rows, V, D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, M);
-
-		m_fprint(stdout, V);
-
-		m_fprint(stdout, D);
+		M.print(stdout);
+		V.print(stdout);
+		D.print(stdout);
 	}
 
 	assert_matrix_value(V, V_data, "eigenvectors of M");
 	assert_matrix_value(D, D_data, "eigenvalues of M");
-
-	m_free(M);
-	m_free(V);
-	m_free(D);
 }
 
 /**
  * Test generalized eigenvalues, eigenvectors for two matrices.
  */
-void test_m_eigen2()
+void test_eigen2()
 {
 	precision_t A_data[] = {
 		 0.5377,  0.8622, -0.4336,
@@ -460,41 +362,31 @@ void test_m_eigen2()
 		 0.0000,  1.0700,  0.0000,
 		 0.0000,  0.0000,  3.4864
 	};
-	matrix_t *A = m_initialize_data("A", 3, 3, A_data);
-	matrix_t *B = m_initialize_data("B", 3, 3, B_data);
-	matrix_t *V;
-	matrix_t *D;
+	Matrix A("A", 3, 3, A_data);
+	Matrix B("B", 3, 3, B_data);
+	Matrix V;
+	Matrix D;
 
-	matrix_t *B_inv = m_inverse("inv(B)", B);
-	matrix_t *J = m_product("J", B_inv, A);
+	Matrix B_inv = B.inverse("inv(B)");
+	Matrix J = B_inv.product("J", A);
 
-	m_eigen("V", "D", J, J->rows, &V, &D);
+	J.eigen("V", "D", J.rows, V, D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, B);
-
-		m_fprint(stdout, V);
-
-		m_fprint(stdout, D);
+		A.print(stdout);
+		B.print(stdout);
+		V.print(stdout);
+		D.print(stdout);
 	}
 
 	assert_matrix_value(V, V_data, "eigenvectors of A, B");
 	assert_matrix_value(D, D_data, "eigenvalues of A, B");
-
-	m_free(A);
-	m_free(B);
-	m_free(B_inv);
-	m_free(J);
-	m_free(V);
-	m_free(D);
 }
 
 /**
  * Test matrix inverse.
  */
-void test_m_inverse()
+void test_inverse()
 {
 	precision_t X_data[] = {
 		 1,  0,  2,
@@ -506,25 +398,21 @@ void test_m_inverse()
 		0.1765,  0.1765,  0.0392,
 		0.0588,  0.0588, -0.0980
 	};
-	matrix_t *X = m_initialize_data("X", 3, 3, X_data);
-	matrix_t *Y = m_inverse("Y", X);
+	Matrix X("X", 3, 3, X_data);
+	Matrix Y = X.inverse("Y");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, X);
-
-		m_fprint(stdout, Y);
+		X.print(stdout);
+		Y.print(stdout);
 	}
 
 	assert_matrix_value(Y, Y_data, "inv(X)");
-
-	m_free(X);
-	m_free(Y);
 }
 
 /**
  * Test matrix mean column.
  */
-void test_m_mean_column()
+void test_mean_column()
 {
 	precision_t A_data[] = {
 		0, 1, 1,
@@ -534,25 +422,21 @@ void test_m_mean_column()
 		0.6667,
 		2.3333
 	};
-	matrix_t *A = m_initialize_data("A", 2, 3, A_data);
-	matrix_t *m = m_mean_column("m", A);
+	Matrix A("A", 2, 3, A_data);
+	Matrix m = A.mean_column("m");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, m);
+		A.print(stdout);
+		m.print(stdout);
 	}
 
 	assert_matrix_value(m, m_data, "mean(A, 2)");
-
-	m_free(A);
-	m_free(m);
 }
 
 /**
  * Test matrix mean row.
  */
-void test_m_mean_row()
+void test_mean_row()
 {
 	precision_t A_data[] = {
 		0, 1, 1,
@@ -563,47 +447,41 @@ void test_m_mean_row()
 	precision_t m_data[] = {
 		1.7500, 2.2500, 1.7500
 	};
-	matrix_t *A = m_initialize_data("A", 4, 3, A_data);
-	matrix_t *m = m_mean_row("m", A);
+	Matrix A("A", 4, 3, A_data);
+	Matrix m = A.mean_row("m");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, m);
+		A.print(stdout);
+		m.print(stdout);
 	}
 
 	assert_matrix_value(m, m_data, "mean(A, 1)");
-
-	m_free(A);
-	m_free(m);
 }
 
 /**
  * Test vector norm.
  */
-void test_m_norm()
+void test_norm()
 {
 	precision_t v_data[] = {
 		-2, 3, 1
 	};
-	matrix_t *v = m_initialize_data("v", 1, 3, v_data);
-	precision_t n = m_norm(v);
+	Matrix v("v", 1, 3, v_data);
+	precision_t n = v.norm();
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, v);
+		v.print(stdout);
 
-		printf("norm(%s) = %g\n", v->name, n);
+		printf("norm(%s) = %g\n", v.name, n);
 	}
 
 	assert_equal(n, 3.7417, "norm(v)");
-
-	m_free(v);
 }
 
 /**
  * Test matrix product.
  */
-void test_m_product()
+void test_product()
 {
 	// multiply two vectors, A * B
 	// multiply two vectors, B * A
@@ -625,28 +503,20 @@ void test_m_product()
 		3, 3, 0, 0,
 		4, 4, 0, 0
 	};
-	matrix_t *A1 = m_initialize_data("A1", 1, 4, A1_data);
-	matrix_t *B1 = m_initialize_data("B1", 4, 1, B1_data);
-	matrix_t *C1 = m_product("C1", A1, B1);
-	matrix_t *C2 = m_product("C2", B1, A1);
+	Matrix A1("A1", 1, 4, A1_data);
+	Matrix B1("B1", 4, 1, B1_data);
+	Matrix C1 = A1.product("C1", B1);
+	Matrix C2 = B1.product("C2", A1);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A1);
-
-		m_fprint(stdout, B1);
-
-		m_fprint(stdout, C1);
-
-		m_fprint(stdout, C2);
+		A1.print(stdout);
+		B1.print(stdout);
+		C1.print(stdout);
+		C2.print(stdout);
 	}
 
 	assert_matrix_value(C1, C1_data, "A1 * B1");
 	assert_matrix_value(C2, C2_data, "B1 * A1");
-
-	m_free(A1);
-	m_free(B1);
-	m_free(C1);
-	m_free(C2);
 
 	// multiply two matrices
 	precision_t A2_data[] = {
@@ -662,85 +532,43 @@ void test_m_product()
 		24, 35, 114,
 		30, 52, 162
 	};
-	matrix_t *A2 = m_initialize_data("A2", 2, 3, A2_data);
-	matrix_t *B2 = m_initialize_data("B2", 3, 3, B2_data);
-	matrix_t *C3 = m_product("C3", A2, B2);
+	Matrix A2("A2", 2, 3, A2_data);
+	Matrix B2("B2", 3, 3, B2_data);
+	Matrix C3 = A2.product("C3", B2);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A2);
-
-		m_fprint(stdout, B2);
-
-		m_fprint(stdout, C3);
+		A2.print(stdout);
+		B2.print(stdout);
+		C3.print(stdout);
 	}
 
 	assert_matrix_value(C3, C3_data, "A2 * B2");
-
-	m_free(A2);
-	m_free(B2);
-	m_free(C3);
-}
-
-/**
- * Test matrix square root.
- */
-void test_m_sqrtm()
-{
-	precision_t A_data[] = {
-		 5, -4,  1,  0,  0,
-		-4,  6, -4,  1,  0,
-		 1, -4,  6, -4,  1,
-		 0,  1, -4,  6, -4,
-		 0,  0,  1, -4,  6
-	};
-	precision_t X_data[] = {
-		 2.0015, -0.9971,  0.0042,  0.0046,  0.0032,
-		-0.9971,  2.0062, -0.9904,  0.0118,  0.0094,
-		 0.0042, -0.9904,  2.0171, -0.9746,  0.0263,
-		 0.0046,  0.0118, -0.9746,  2.0503, -0.9200,
-		 0.0032,  0.0094,  0.0263, -0.9200,  2.2700
-	};
-	matrix_t *A = m_initialize_data("A", 5, 5, A_data);
-	matrix_t *X = m_sqrtm("X", A);
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, X);
-	}
-
-	assert_matrix_value(X, X_data, "sqrtm(A)");
-
-	m_free(A);
-	m_free(X);
 }
 
 /**
  * Test vector sum.
  */
-void test_m_sum()
+void test_sum()
 {
 	precision_t v_data[] = {
 		-2, 3, 1
 	};
-	matrix_t *v = m_initialize_data("v", 1, 3, v_data);
-	precision_t s = m_sum(v);
+	Matrix v("v", 1, 3, v_data);
+	precision_t s = v.sum();
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, v);
+		v.print(stdout);
 
-		printf("sum(%s) = %g\n", v->name, s);
+		printf("sum(%s) = %g\n", v.name, s);
 	}
 
 	assert_equal(s, 2, "sum(v)");
-
-	m_free(v);
 }
 
 /**
  * Test matrix transpose.
  */
-void test_m_transpose()
+void test_transpose()
 {
 	precision_t A_data[] = {
 		16,  2,  3, 13,
@@ -754,25 +582,21 @@ void test_m_transpose()
 		 3, 10,  6, 15,
 		13,  8, 12,  1
 	};
-	matrix_t *A = m_initialize_data("A", 4, 4, A_data);
-	matrix_t *B = m_transpose("B", A);
+	Matrix A("A", 4, 4, A_data);
+	Matrix B = A.transpose("B");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, B);
+		A.print(stdout);
+		B.print(stdout);
 	}
 
 	assert_matrix_value(B, B_data, "A'");
-
-	m_free(A);
-	m_free(B);
 }
 
 /**
  * Test matrix addition.
  */
-void test_m_add()
+void test_add()
 {
 	precision_t A_data1[] = {
 		1, 0,
@@ -786,31 +610,27 @@ void test_m_add()
 		5, 9,
 		2, 1
 	};
-	matrix_t *A = m_initialize_data("A", 2, 2, A_data1);
-	matrix_t *B = m_initialize_data("B", 2, 2, B_data);
+	Matrix A("A", 2, 2, A_data1);
+	Matrix B("B", 2, 2, B_data);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, B);
+		A.print(stdout);
+		B.print(stdout);
 	}
 
-	m_add(A, B);
+	A.add(B);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
+		A.print(stdout);
 	}
 
 	assert_matrix_value(A, A_data2, "A + B");
-
-	m_free(A);
-	m_free(B);
 }
 
 /**
  * Test matrix column assingment.
  */
-void test_m_assign_column()
+void test_assign_column()
 {
 	precision_t A_data1[] = {
 		16,  2,  3, 13,
@@ -830,33 +650,29 @@ void test_m_assign_column()
 		0,
 		0
 	};
-	matrix_t *A = m_initialize_data("A", 4, 4, A_data1);
-	matrix_t *B = m_initialize_data("B", 4, 1, B_data);
+	Matrix A("A", 4, 4, A_data1);
+	Matrix B("B", 4, 1, B_data);
 	int i = 2;
 	int j = 0;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, B);
+		A.print(stdout);
+		B.print(stdout);
 	}
 
-	m_assign_column(A, i, B, j);
+	A.assign_column(i, B, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
+		A.print(stdout);
 	}
 
 	assert_matrix_value(A, A_data2, "A(:, i) = B(:, j)");
-
-	m_free(A);
-	m_free(B);
 }
 
 /**
  * Test matrix row assingment.
  */
-void test_m_assign_row()
+void test_assign_row()
 {
 	precision_t A_data1[] = {
 		16,  2,  3, 13,
@@ -873,33 +689,29 @@ void test_m_assign_row()
 	precision_t B_data[] = {
 		0, 0, 0, 0
 	};
-	matrix_t *A = m_initialize_data("A", 4, 4, A_data1);
-	matrix_t *B = m_initialize_data("B", 1, 4, B_data);
+	Matrix A("A", 4, 4, A_data1);
+	Matrix B("B", 1, 4, B_data);
 	int i = 2;
 	int j = 0;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, B);
+		A.print(stdout);
+		B.print(stdout);
 	}
 
-	m_assign_row(A, i, B, j);
+	A.assign_row(i, B, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
+		A.print(stdout);
 	}
 
 	assert_matrix_value(A, A_data2, "A(i, :) = B(j, :)");
-
-	m_free(A);
-	m_free(B);
 }
 
 /**
  * Test matrix element-wise function application.
  */
-void test_m_elem_apply()
+void test_elem_apply()
 {
 	precision_t A_data1[] = {
 		1, 0, 2,
@@ -909,27 +721,25 @@ void test_m_elem_apply()
 		1.0000, 0.0000, 1.4142,
 		1.7321, 1.0000, 2.0000
 	};
-	matrix_t *A = m_initialize_data("A", 2, 3, A_data1);
+	Matrix A("A", 2, 3, A_data1);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
+		A.print(stdout);
 	}
 
-	m_elem_apply(A, sqrtf);
+	A.elem_apply(sqrtf);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
+		A.print(stdout);
 	}
 
 	assert_matrix_value(A, A_data2, "sqrt(A)");
-
-	m_free(A);
 }
 
 /**
  * Test matrix multiplication by scalar.
  */
-void test_m_elem_mult()
+void test_elem_mult()
 {
 	precision_t A_data1[] = {
 		1, 0, 2,
@@ -939,28 +749,26 @@ void test_m_elem_mult()
 		3, 0, 6,
 		9, 3, 12
 	};
-	matrix_t *A = m_initialize_data("A", 2, 3, A_data1);
+	Matrix A("A", 2, 3, A_data1);
 	precision_t c = 3;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
+		A.print(stdout);
 	}
 
-	m_elem_mult(A, c);
+	A.elem_mult(c);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
+		A.print(stdout);
 	}
 
 	assert_matrix_value(A, A_data2, "c * A");
-
-	m_free(A);
 }
 
 /**
  * Test matrix subtraction.
  */
-void test_m_subtract()
+void test_subtract()
 {
 	precision_t A_data1[] = {
 		1, 0,
@@ -974,31 +782,27 @@ void test_m_subtract()
 		5, 9,
 		2, 1
 	};
-	matrix_t *A = m_initialize_data("A", 2, 2, A_data1);
-	matrix_t *B = m_initialize_data("B", 2, 2, B_data);
+	Matrix A("A", 2, 2, A_data1);
+	Matrix B("B", 2, 2, B_data);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
-
-		m_fprint(stdout, B);
+		A.print(stdout);
+		B.print(stdout);
 	}
 
-	m_subtract(A, B);
+	A.subtract(B);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, A);
+		A.print(stdout);
 	}
 
 	assert_matrix_value(A, A_data2, "A - B");
-
-	m_free(A);
-	m_free(B);
 }
 
 /**
  * Test matrix column subtraction.
  */
-void test_m_subtract_columns()
+void test_subtract_columns()
 {
 	precision_t M_data1[] = {
 		0, 2, 1, 4,
@@ -1015,31 +819,27 @@ void test_m_subtract_columns()
 		1,
 		1
 	};
-	matrix_t *M = m_initialize_data("M", 3, 4, M_data1);
-	matrix_t *a = m_initialize_data("a", 3, 1, a_data);;
+	Matrix M("M", 3, 4, M_data1);
+	Matrix a("a", 3, 1, a_data);;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, M);
-
-		m_fprint(stdout, a);
+		M.print(stdout);
+		a.print(stdout);
 	}
 
-	m_subtract_columns(M, a);
+	M.subtract_columns(a);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, M);
+		M.print(stdout);
 	}
 
 	assert_matrix_value(M, M_data2, "M - a * 1_N'");
-
-	m_free(M);
-	m_free(a);
 }
 
 /**
  * Test matrix row subtraction.
  */
-void test_m_subtract_rows()
+void test_subtract_rows()
 {
 	precision_t M_data1[] = {
 		0, 2, 1, 4,
@@ -1054,25 +854,21 @@ void test_m_subtract_rows()
 	precision_t a_data[] = {
 		0, 2, 1, 4
 	};
-	matrix_t *M = m_initialize_data("M", 3, 4, M_data1);
-	matrix_t *a = m_initialize_data("a", 1, 4, a_data);
+	Matrix M("M", 3, 4, M_data1);
+	Matrix a("a", 1, 4, a_data);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, M);
-
-		m_fprint(stdout, a);
+		M.print(stdout);
+		a.print(stdout);
 	}
 
-	m_subtract_rows(M, a);
+	M.subtract_rows(a);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		m_fprint(stdout, M);
+		M.print(stdout);
 	}
 
 	assert_matrix_value(M, M_data2, "M - 1_N * a");
-
-	m_free(M);
-	m_free(a);
 }
 
 void print_usage()
@@ -1112,34 +908,31 @@ int main(int argc, char **argv)
 
 	// run tests
 	test_func_t tests[] = {
-		test_m_identity,
-		test_m_ones,
-		test_m_random,
-		test_m_zeros,
-		test_m_copy,
-		test_m_copy_columns,
-		test_m_copy_rows,
-		test_m_argmax,
-		test_m_diagonalize,
-		test_m_distance,
-		test_m_eigen,
-		test_m_eigen2,
-		test_m_inverse,
-		test_m_mean_column,
-		test_m_mean_row,
-		test_m_norm,
-		test_m_product,
-		test_m_sqrtm,
-		test_m_sum,
-		test_m_transpose,
-		test_m_add,
-		test_m_subtract,
-		test_m_assign_column,
-		test_m_assign_row,
-		test_m_elem_apply,
-		test_m_elem_mult,
-		test_m_subtract_columns,
-		test_m_subtract_rows
+		test_identity,
+		test_ones,
+		test_random,
+		test_zeros,
+		test_copy,
+		test_copy_columns,
+		test_argmax,
+		test_diagonalize,
+		test_eigen,
+		test_eigen2,
+		test_inverse,
+		test_mean_column,
+		test_mean_row,
+		test_norm,
+		test_product,
+		test_sum,
+		test_transpose,
+		test_add,
+		test_subtract,
+		test_assign_column,
+		test_assign_row,
+		test_elem_apply,
+		test_elem_mult,
+		test_subtract_columns,
+		test_subtract_rows
 	};
 	int num_tests = sizeof(tests) / sizeof(test_func_t);
 

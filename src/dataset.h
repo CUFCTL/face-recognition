@@ -29,7 +29,7 @@ public:
 
 	void save(FILE *file);
 
-	matrix_t *load() const;
+	Matrix load() const;
 
 	void print_labels() const;
 	void print_entries() const;

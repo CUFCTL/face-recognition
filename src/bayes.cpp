@@ -23,18 +23,14 @@ BayesLayer::BayesLayer()
  *
  * g_i'(x) = -1/2 * (x - mu_i)' * S_i^-1 * (x - mu_i)
  */
-precision_t bayes_prob(matrix_t *x, matrix_t *mu, matrix_t *S_inv)
+precision_t bayes_prob(Matrix& x, const Matrix& mu, const Matrix& S_inv)
 {
-	m_subtract_columns(x, mu);
+	x.subtract_columns(mu);
 
-	matrix_t *p_temp1 = m_product("p_temp1", x, S_inv, true, false);
-	matrix_t *p_temp2 = m_product("p_temp2", p_temp1, x, false, false);
+	Matrix p_temp1 = x.product("p_temp1", S_inv, true, false);
+	Matrix p_temp2 = p_temp1.product("p_temp2", x, false, false);
 
-	precision_t p = -0.5f * p_temp2->data[0];
-
-	// cleanup
-	m_free(p_temp1);
-	m_free(p_temp2);
+	precision_t p = -0.5f * ELEM(p_temp2, 0, 0);
 
 	return p;
 }
@@ -48,53 +44,36 @@ precision_t bayes_prob(matrix_t *x, matrix_t *mu, matrix_t *S_inv)
  * @param X_test
  * @return predicted labels of the test observations
  */
-std::vector<data_label_t> BayesLayer::predict(matrix_t *X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, matrix_t *X_test)
+std::vector<data_label_t> BayesLayer::predict(const Matrix& X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, const Matrix& X_test)
 {
-	int num_classes = C.size();
-	matrix_t **X_c = m_copy_classes(X, Y, num_classes);
-	matrix_t **U = m_class_means(X_c, num_classes);
-	matrix_t **S = m_class_scatters(X_c, U, num_classes);
+	std::vector<Matrix> X_c = m_copy_classes(X, Y, C.size());
+	std::vector<Matrix> U = m_class_means(X_c, C.size());
+	std::vector<Matrix> S = m_class_scatters(X_c, U, C.size());
 
 	// compute inverses of each S_i
-	matrix_t **S_inv = (matrix_t **) malloc(num_classes * sizeof(matrix_t *));
+	std::vector<Matrix> S_inv;
 
-	int i, j;
-	for ( i = 0; i < num_classes; i++ ) {
-		S_inv[i] = m_inverse("S_i_inv", S[i]);
+	unsigned i, j;
+	for ( i = 0; i < C.size(); i++ ) {
+		S_inv.push_back(S[i].inverse("S_i_inv"));
 	}
 
 	// compute label for each test vector
 	std::vector<data_label_t> Y_pred;
 
-	for ( i = 0; i < X_test->cols; i++ ) {
-		matrix_t *probs = m_initialize("probs", num_classes, 1);
+	for ( i = 0; i < X_test.cols; i++ ) {
+		Matrix probs("probs", C.size(), 1);
 
-		for ( j = 0; j < num_classes; j++ ) {
-			matrix_t *x_test = m_copy_columns("x_test", X_test, i, i + 1);
+		for ( j = 0; j < C.size(); j++ ) {
+			Matrix x_test("x_test", X_test, i, i + 1);
 
-			probs->data[j] = bayes_prob(x_test, U[j], S_inv[j]);
-
-			m_free(x_test);
+			probs.data[j] = bayes_prob(x_test, U[j], S_inv[j]);
 		}
 
-		int index = m_argmax(probs);
+		int index = probs.argmax();
 
 		Y_pred.push_back(C[index]);
-
-		m_free(probs);
 	}
-
-	// cleanup
-	for ( i = 0; i < num_classes; i++ ) {
-		m_free(X_c[i]);
-		m_free(U[i]);
-		m_free(S[i]);
-		m_free(S_inv[i]);
-	}
-	free(X_c);
-	free(U);
-	free(S);
-	free(S_inv);
 
 	return Y_pred;
 }

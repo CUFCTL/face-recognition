@@ -7,6 +7,7 @@
 #define KNN_H
 
 #include "classifier.h"
+#include "matrix_utils.h"
 
 class KNNLayer : public ClassifierLayer {
 private:
@@ -17,10 +18,10 @@ public:
 	KNNLayer(int k, dist_func_t dist);
 
 	std::vector<data_label_t> predict(
-		matrix_t *X,
+		const Matrix& X,
 		const std::vector<data_entry_t>& Y,
 		const std::vector<data_label_t>& C,
-		matrix_t *X_test
+		const Matrix& X_test
 	);
 
 	void print();

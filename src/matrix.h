@@ -1,7 +1,7 @@
 /**
  * @file matrix.h
  *
- * Interface definitions for the matrix library.
+ * Interface definitions for the matrix type.
  *
  * NOTE: Unlike C, which stores static arrays in row-major
  * order, this library stores matrices in column-major order.
@@ -15,67 +15,70 @@
 typedef float precision_t;
 
 #define M_ELEM_FPRINT  "% 10.4g"
-#define M_ELEM_FSCAN   "%f"
 
-typedef struct {
+#define ELEM(M, i, j) (M).data[(j) * (M).rows + (i)]
+
+typedef precision_t (*elem_func_t)(precision_t);
+
+class Matrix {
+public:
 	const char *name;
 	int rows;
 	int cols;
 	precision_t *data;
 	precision_t *data_gpu;
-} matrix_t;
 
-typedef precision_t (*dist_func_t)(matrix_t *, int, matrix_t *, int);
-typedef precision_t (*elem_func_t)(precision_t);
+	// constructor, destructor functions
+	Matrix(const char *name, int rows, int cols);
+	Matrix(const char *name, int rows, int cols, precision_t *data);
+	Matrix(const char *name, const Matrix& M);
+	Matrix(const char *name, const Matrix& M, int i, int j);
+	Matrix(const Matrix& M);
+	Matrix();
+	~Matrix();
 
-#define elem(M, i, j) (M)->data[(j) * (M)->rows + (i)]
+	static Matrix identity(const char *name, int rows);
+	static Matrix ones(const char *name, int rows, int cols);
+	static Matrix random(const char *name, int rows, int cols);
+	static Matrix zeros(const char *name, int rows, int cols);
 
-// constructor, destructor functions
-matrix_t * m_initialize (const char *name, int rows, int cols);
-matrix_t * m_initialize_data (const char *name, int rows, int cols, precision_t *data);
-matrix_t * m_identity (const char *name, int rows);
-matrix_t * m_ones (const char *name, int rows, int cols);
-matrix_t * m_random (const char *name, int rows, int cols);
-matrix_t * m_zeros (const char *name, int rows, int cols);
-matrix_t * m_copy (const char *name, matrix_t *M);
-matrix_t * m_copy_columns (const char *name, matrix_t *M, int i, int j);
-matrix_t * m_copy_rows (const char *name, matrix_t *M, int i, int j);
-void m_free (matrix_t *M);
+	// I/O functions
+	void print(FILE *file) const;
+	void save(FILE *file) const;
+	void load(FILE *file);
 
-// I/O functions
-void m_fprint (FILE *stream, matrix_t *M);
-void m_fwrite (FILE *stream, matrix_t *M);
-matrix_t * m_fscan (FILE *stream);
-matrix_t * m_fread (FILE *stream);
-void m_gpu_read (matrix_t *M);
-void m_gpu_write (matrix_t *M);
-void m_image_read (matrix_t *M, int i, const Image& image);
-void m_image_write (matrix_t *M, int i, Image& image);
+	void gpu_read();
+	void gpu_write();
 
-// getter functions
-int m_argmax (matrix_t *v);
-matrix_t * m_diagonalize (const char *name, matrix_t *v);
-precision_t m_dist_COS (matrix_t *A, int i, matrix_t *B, int j);
-precision_t m_dist_L1 (matrix_t *A, int i, matrix_t *B, int j);
-precision_t m_dist_L2 (matrix_t *A, int i, matrix_t *B, int j);
-void m_eigen (const char *V_name, const char *D_name, matrix_t *M, int n1, matrix_t **p_V, matrix_t **p_D);
-matrix_t * m_inverse (const char *name, matrix_t *M);
-matrix_t * m_mean_column (const char *name, matrix_t *M);
-matrix_t * m_mean_row (const char *name, matrix_t *M);
-precision_t m_norm (matrix_t *v);
-matrix_t * m_product (const char *name, matrix_t *A, matrix_t *B, bool transA=false, bool transB=false);
-matrix_t * m_sqrtm (const char *name, matrix_t *M);
-precision_t m_sum (matrix_t *v);
-matrix_t * m_transpose (const char *name, matrix_t *M);
+	void image_read(int i, const Image& image);
+	void image_write(int i, Image& image);
 
-// mutator functions
-void m_add (matrix_t *A, matrix_t *B);
-void m_assign_column (matrix_t * A, int i, matrix_t * B, int j);
-void m_assign_row (matrix_t * A, int i, matrix_t * B, int j);
-void m_elem_apply (matrix_t * M, elem_func_t f);
-void m_elem_mult (matrix_t *M, precision_t c);
-void m_subtract (matrix_t *A, matrix_t *B);
-void m_subtract_columns (matrix_t *M, matrix_t *a);
-void m_subtract_rows (matrix_t *M, matrix_t *a);
+	// getter functions
+	int argmax() const;
+	Matrix diagonalize(const char *name) const;
+	void eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Matrix& D) const;
+	Matrix inverse(const char *name) const;
+	Matrix mean_column(const char *name) const;
+	Matrix mean_row(const char *name) const;
+	precision_t norm() const;
+	Matrix product(const char *name, const Matrix& B, bool transA=false, bool transB=false) const;
+	precision_t sum() const;
+	Matrix transpose(const char *name) const;
+
+	// mutator functions
+	void add(const Matrix& B);
+	void assign_column(int i, const Matrix& B, int j);
+	void assign_row(int i, const Matrix& B, int j);
+	void elem_apply(elem_func_t f);
+	void elem_mult(precision_t c);
+	void subtract(const Matrix& B);
+	void subtract_columns(const Matrix& a);
+	void subtract_rows(const Matrix& a);
+
+	// operators
+	Matrix& operator=(Matrix B);
+
+	friend void swap(Matrix& A, Matrix& B);
+};
 
 #endif

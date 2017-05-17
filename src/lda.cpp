@@ -20,16 +20,6 @@ LDALayer::LDALayer(int n1, int n2)
 {
 	this->n1 = n1;
 	this->n2 = n2;
-
-	this->W = NULL;
-}
-
-/**
- * Destruct an LDA layer.
- */
-LDALayer::~LDALayer()
-{
-	m_free(this->W);
 }
 
 /**
@@ -38,13 +28,12 @@ LDALayer::~LDALayer()
  * @param X
  * @param y
  * @param c
- * @return projection matrix W_lda
  */
-matrix_t * LDALayer::compute(matrix_t *X, const std::vector<data_entry_t>& y, int c)
+void LDALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int c)
 {
 	// if n1 = -1, use default value
 	int n1 = (this->n1 == -1)
-		? X->cols - c
+		? X.cols - c
 		: this->n1;
 
 	// if n2 = -1, use default value
@@ -62,85 +51,68 @@ matrix_t * LDALayer::compute(matrix_t *X, const std::vector<data_entry_t>& y, in
 	timer_push("compute eigenfaces");
 
 	PCALayer pca(n1);
-	matrix_t *W_pca = pca.compute(X, y, c);
-	matrix_t *P_pca = pca.project(X);
+	pca.compute(X, y, c);
+	Matrix P_pca = pca.project(X);
 
 	timer_pop();
 
 	timer_push("compute scatter matrices S_b and S_w");
 
-	matrix_t **X_c = m_copy_classes(P_pca, y, c);
-	matrix_t **U = m_class_means(X_c, c);
-	matrix_t *S_b = m_scatter_between(X_c, U, c);
-	matrix_t *S_w = m_scatter_within(X_c, U, c);
+	std::vector<Matrix> X_c = m_copy_classes(P_pca, y, c);
+	std::vector<Matrix> U = m_class_means(X_c, c);
+	Matrix S_b = m_scatter_between(X_c, U, c);
+	Matrix S_w = m_scatter_within(X_c, U, c);
 
 	timer_pop();
 
 	timer_push("compute eigendecomposition of S_b and S_w");
 
-	matrix_t *S_w_inv = m_inverse("inv(S_w)", S_w);
-	matrix_t *J = m_product("J", S_w_inv, S_b);
+	Matrix S_w_inv = S_w.inverse("inv(S_w)");
+	Matrix J = S_w_inv.product("J", S_b);
 
-	matrix_t *W_fld;
-	matrix_t *J_eval;
-	m_eigen("W_fld", "J_eval", J, n2, &W_fld, &J_eval);
+	Matrix W_fld;
+	Matrix J_eval;
+	J.eigen("W_fld", "J_eval", n2, W_fld, J_eval);
 
 	timer_pop();
 
 	timer_push("compute Fisherfaces");
 
-	this->W = m_product("W_lda", W_pca, W_fld);
+	this->W = pca.W.product("W_lda", W_fld);
 
 	timer_pop();
 
 	timer_pop();
-
-	// cleanup
-	m_free(P_pca);
-
-	int i;
-	for ( i = 0; i < c; i++ ) {
-		m_free(X_c[i]);
-		m_free(U[i]);
-	}
-	free(X_c);
-	free(U);
-
-	m_free(S_b);
-	m_free(S_w);
-	m_free(S_w_inv);
-	m_free(J);
-	m_free(W_fld);
-	m_free(J_eval);
-
-	return this->W;
 }
 
 /**
  * Project a matrix X into the feature space of an LDA layer.
  *
  * @param X
- * @return projected matrix
  */
-matrix_t * LDALayer::project(matrix_t *X)
+Matrix LDALayer::project(const Matrix& X)
 {
-	return m_product("P", this->W, X, true, false);
+	return this->W.product("P", X, true, false);
 }
 
 /**
  * Save an LDA layer to a file.
+ *
+ * @param file
  */
 void LDALayer::save(FILE *file)
 {
-	m_fwrite(file, this->W);
+	this->W.save(file);
 }
 
 /**
  * Load an LDA layer from a file.
+ *
+ * @param file
  */
 void LDALayer::load(FILE *file)
 {
-	this->W = m_fread(file);
+	this->W.load(file);
 }
 
 /**

@@ -42,11 +42,7 @@ Model::Model(FeatureLayer *feature, ClassifierLayer *classifier)
  */
 Model::~Model()
 {
-	m_free(this->mean);
-
 	delete this->feature;
-	m_free(this->P);
-
 	delete this->classifier;
 }
 
@@ -66,12 +62,12 @@ void Model::train(const Dataset& train_set)
 		train_set.labels.size());
 
 	// get data matrix X
-	matrix_t *X = train_set.load();
+	Matrix X = train_set.load();
 
 	// subtract mean from X
-	this->mean = m_mean_column("m", X);
+	this->mean = X.mean_column("m");
 
-	m_subtract_columns(X, this->mean);
+	X.subtract_columns(this->mean);
 
 	// project X into feature space
 	this->feature->compute(X, this->train_set.entries, this->train_set.labels.size());
@@ -81,9 +77,6 @@ void Model::train(const Dataset& train_set)
 	this->stats.train_time = timer_pop();
 
 	log(LL_VERBOSE, "\n");
-
-	// cleanup
-	m_free(X);
 }
 
 /**
@@ -97,10 +90,10 @@ void Model::save(const char *path)
 
 	this->train_set.save(file);
 
-	m_fwrite(file, this->mean);
+	this->mean.save(file);
 
 	this->feature->save(file);
-	m_fwrite(file, this->P);
+	this->P.save(file);
 
 	fclose(file);
 }
@@ -116,10 +109,10 @@ void Model::load(const char *path)
 
 	this->train_set = Dataset(file);
 
-	this->mean = m_fread(file);
+	this->mean.load(file);
 
 	this->feature->load(file);
-	this->P = m_fread(file);
+	this->P.load(file);
 
 	fclose(file);
 }
@@ -138,10 +131,10 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 		test_set.labels.size());
 
 	// compute projected test images
-	matrix_t *X_test = test_set.load();
-	m_subtract_columns(X_test, this->mean);
+	Matrix X_test = test_set.load();
+	X_test.subtract_columns(this->mean);
 
-	matrix_t *P_test = this->feature->project(X_test);
+	Matrix P_test = this->feature->project(X_test);
 
 	// compute predicted labels
 	std::vector<data_label_t> Y_pred = this->classifier->predict(
@@ -154,10 +147,6 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 	this->stats.test_time = timer_pop();
 
 	log(LL_VERBOSE, "\n");
-
-	// cleanup
-	m_free(X_test);
-	m_free(P_test);
 
 	return Y_pred;
 }

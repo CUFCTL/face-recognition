@@ -14,13 +14,12 @@ private:
 	int n2;
 
 public:
-	matrix_t *W;
+	Matrix W;
 
 	LDALayer(int n1, int n2);
-	~LDALayer();
 
-	matrix_t * compute(matrix_t *X, const std::vector<data_entry_t>& y, int c);
-	matrix_t * project(matrix_t *X);
+	void compute(const Matrix& X, const std::vector<data_entry_t>& y, int c);
+	Matrix project(const Matrix& X);
 
 	void save(FILE *file);
 	void load(FILE *file);

@@ -21,14 +21,14 @@ class Model {
 private:
 	// feature layer
 	FeatureLayer *feature;
-	matrix_t *P;
+	Matrix P;
 
 	// classifier layer
 	ClassifierLayer *classifier;
 
 	// input data
 	Dataset train_set;
-	matrix_t *mean;
+	Matrix mean;
 
 	// performance, accuracy stats
 	model_stats_t stats;

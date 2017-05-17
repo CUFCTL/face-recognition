@@ -18,8 +18,10 @@ OPENBLASDIR ?= ../OpenBLAS-0.2.19
 
 # define compiler flags, libraries
 LIBS      = -lm
-CXXFLAGS  = -I$(OPENBLASDIR)/include
-NVCCFLAGS = -I$(CUDADIR)/include \
+CXXFLAGS  = -std=c++11 \
+            -I$(OPENBLASDIR)/include
+NVCCFLAGS = -std=c++11 \
+            -I$(CUDADIR)/include \
             -I$(MAGMADIR)/include \
             -I$(OPENBLASDIR)/include
 

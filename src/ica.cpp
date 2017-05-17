@@ -12,7 +12,7 @@
 #include "pca.h"
 #include "timer.h"
 
-typedef matrix_t * (*ica_nonl_func_t)(matrix_t *, matrix_t *);
+typedef Matrix (*ica_nonl_func_t)(const Matrix& , const Matrix& );
 
 /**
  * Construct an ICA layer.
@@ -30,16 +30,6 @@ ICALayer::ICALayer(int n1, int n2, ica_nonl_t nonl, int max_iter, precision_t ep
 	this->nonl = nonl;
 	this->max_iter = max_iter;
 	this->eps = eps;
-
-	this->W = NULL;
-}
-
-/**
- * Destruct an ICA layer.
- */
-ICALayer::~ICALayer()
-{
-	m_free(this->W);
 }
 
 /**
@@ -49,19 +39,18 @@ ICALayer::~ICALayer()
  * @param X
  * @param y
  * @param c
- * @return independent components of X in columns
  */
-matrix_t * ICALayer::compute(matrix_t *X, const std::vector<data_entry_t>& y, int c)
+void ICALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int c)
 {
 	timer_push("ICA");
 
 	timer_push("subtract mean from input matrix");
 
 	// compute mixedsig = X', subtract mean column
-	matrix_t *mixedsig = m_transpose("mixedsig", X);
-	matrix_t *mixedmean = m_mean_column("mixedmean", mixedsig);
+	Matrix mixedsig = X.transpose("mixedsig");
+	Matrix mixedmean = mixedsig.mean_column("mixedmean");
 
-	m_subtract_columns(mixedsig, mixedmean);
+	mixedsig.subtract_columns(mixedmean);
 
 	timer_pop();
 
@@ -70,84 +59,73 @@ matrix_t * ICALayer::compute(matrix_t *X, const std::vector<data_entry_t>& y, in
 	// compute whitening matrix W_z = inv(sqrt(D)) * W_pca'
 	PCALayer pca(this->n1);
 
-	matrix_t *W_pca = pca.compute(mixedsig, y, c);
+	pca.compute(mixedsig, y, c);
 
-	matrix_t *D_temp1 = m_copy("sqrt(D)", pca.D);
-	m_elem_apply(D_temp1, sqrtf);
+	Matrix D_temp1("sqrt(D)", pca.D);
+	D_temp1.elem_apply(sqrtf);
 
-	matrix_t *D_temp2 = m_inverse("inv(sqrt(D))", D_temp1);
-	matrix_t *W_z = m_product("W_z", D_temp2, W_pca, false, true);
+	Matrix D_temp2 = D_temp1.inverse("inv(sqrt(D))");
+	Matrix W_z = D_temp2.product("W_z", pca.W, false, true);
 
 	// compute whitened input U = W_z * mixedsig
-	matrix_t *U = m_product("U", W_z, mixedsig);
+	Matrix U = W_z.product("U", mixedsig);
 
 	timer_pop();
 
 	timer_push("compute mixing matrix");
 
 	// compute mixing matrix
-	matrix_t *W_mix = this->fpica(U, W_z);
+	Matrix W_mix = this->fpica(U, W_z);
 
 	timer_pop();
 
 	timer_push("compute ICA projection matrix");
 
 	// compute independent components
-	// icasig = W_mix * (mixedsig + mixedmean * ones(1, mixedsig->cols))
-	matrix_t *ones = m_ones("ones", 1, mixedsig->cols);
-	matrix_t *icasig_temp1 = m_product("icasig_temp1", mixedmean, ones);
+	// icasig = W_mix * (mixedsig + mixedmean * ones(1, mixedsig.cols))
+	Matrix ones = Matrix::ones("ones", 1, mixedsig.cols);
+	Matrix icasig_temp1 = mixedmean.product("icasig_temp1", ones);
 
-	m_add(icasig_temp1, mixedsig);
+	icasig_temp1.add(mixedsig);
 
-	matrix_t *icasig = m_product("icasig", W_mix, icasig_temp1);
+	Matrix icasig = W_mix.product("icasig", icasig_temp1);
 
 	// compute W_ica = icasig'
-	this->W = m_transpose("W_ica", icasig);
+	this->W = icasig.transpose("W_ica");
 
 	timer_pop();
 
 	timer_pop();
-
-	// cleanup
-	m_free(mixedsig);
-	m_free(mixedmean);
-	m_free(D_temp1);
-	m_free(D_temp2);
-	m_free(W_z);
-	m_free(U);
-	m_free(W_mix);
-	m_free(ones);
-	m_free(icasig_temp1);
-	m_free(icasig);
-
-	return this->W;
 }
 
 /**
  * Project a matrix X into the feature space of an ICA layer.
  *
  * @param X
- * @return projected matrix
  */
-matrix_t * ICALayer::project(matrix_t *X)
+Matrix ICALayer::project(const Matrix& X)
 {
-	return m_product("P", this->W, X, true, false);
+	return this->W.product("P", X, true, false);
 }
 
 /**
  * Save an ICA layer to a file.
+ *
+ * @param file
  */
 void ICALayer::save(FILE *file)
 {
-	m_fwrite(file, this->W);
+	this->W.save(file);
 }
 
 /**
  * Load an ICA layer from a file.
+ *
+ * @param file
  */
 void ICALayer::load(FILE *file)
 {
-	this->W = m_fread(file);
+	this->W.load(file);
 }
 
 /**
@@ -184,32 +162,24 @@ void ICALayer::print()
  *
  * which gives:
  *
- * w+ = X * ((X' * w) .^ 3) / X->cols - 3 * w
- * w* = w+ / ||w+||
+ * w+ = X * ((X' * w) .^ 3) / X.cols - 3 * w
  *
  * @param w0
  * @param X
  * @return w*
  */
-matrix_t * fpica_pow3 (matrix_t *w0, matrix_t *X)
+Matrix fpica_pow3 (const Matrix& w0, const Matrix& X)
 {
 	// compute w+
-	matrix_t *w_temp1 = m_product("w_temp1", X, w0, true, false);
-	m_elem_apply(w_temp1, pow3);
+	Matrix w_temp1 = X.product("w_temp1", w0, true, false);
+	w_temp1.elem_apply(pow3);
 
-	matrix_t *w_temp2 = m_copy("w_temp2", w0);
-	m_elem_mult(w_temp2, 3);
+	Matrix w_temp2("w_temp2", w0);
+	w_temp2.elem_mult(3.0f);
 
-	matrix_t *w = m_product("w", X, w_temp1);
-	m_elem_mult(w, 1.0f / X->cols);
-	m_subtract(w, w_temp2);
-
-	// compute w*
-	m_elem_mult(w, 1 / m_norm(w));
-
-	// cleanup
-	m_free(w_temp1);
-	m_free(w_temp2);
+	Matrix w = X.product("w", w_temp1);
+	w.elem_mult(1.0f / X.cols);
+	w.subtract(w_temp2);
 
 	return w;
 }
@@ -223,37 +193,28 @@ matrix_t * fpica_pow3 (matrix_t *w0, matrix_t *X)
  *
  * which gives:
  *
- * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X->cols
- * w* = w+ / ||w+||
+ * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X.cols
  *
  * @param w0
  * @param X
  * @return w*
  */
-matrix_t * fpica_tanh (matrix_t *w0, matrix_t *X)
+Matrix fpica_tanh (const Matrix& w0, const Matrix& X)
 {
 	// compute w+
-	matrix_t *w_temp1 = m_product("w_temp1", X, w0, true, false);
-	matrix_t *w_temp2 = m_copy("w_temp2", w_temp1);
+	Matrix w_temp1 = X.product("w_temp1", w0, true, false);
+	Matrix w_temp2("w_temp2", w_temp1);
 
-	m_elem_apply(w_temp1, tanhf);
-	m_elem_apply(w_temp2, sechf);
-	m_elem_apply(w_temp2, pow2);
+	w_temp1.elem_apply(tanhf);
+	w_temp2.elem_apply(sechf);
+	w_temp2.elem_apply(pow2);
 
-	matrix_t *w_temp3 = m_copy("w_temp3", w0);
-	m_elem_mult(w_temp3, m_sum(w_temp2));
+	Matrix w_temp3("w_temp3", w0);
+	w_temp3.elem_mult(w_temp2.sum());
 
-	matrix_t *w = m_product("w", X, w_temp1);
-	m_subtract(w, w_temp3);
-	m_elem_mult(w, 1.0f / X->cols);
-
-	// compute w*
-	m_elem_mult(w, 1 / m_norm(w));
-
-	// cleanup
-	m_free(w_temp1);
-	m_free(w_temp2);
-	m_free(w_temp3);
+	Matrix w = X.product("w", w_temp1);
+	w.subtract(w_temp3);
+	w.elem_mult(1.0f / X.cols);
 
 	return w;
 }
@@ -287,35 +248,27 @@ precision_t dgauss (precision_t x)
  *
  * which gives:
  *
- * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X->cols
- * w* = w+ / ||w+||
+ * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X.cols
  *
  * @param w0
  * @param X
  * @return w*
  */
-matrix_t * fpica_gauss (matrix_t *w0, matrix_t *X)
+Matrix fpica_gauss (const Matrix& w0, const Matrix& X)
 {
 	// compute w+
-	matrix_t *w_temp1 = m_product("w_temp1", X, w0, true, false);
-	matrix_t *w_temp2 = m_copy("w_temp2", w_temp1);
+	Matrix w_temp1 = X.product("w_temp1", w0, true, false);
+	Matrix w_temp2("w_temp2", w_temp1);
 
-	m_elem_apply(w_temp1, gauss);
-	m_elem_apply(w_temp2, dgauss);
+	w_temp1.elem_apply(gauss);
+	w_temp2.elem_apply(dgauss);
 
-	matrix_t *w_temp3 = m_copy("w_temp3", w0);
-	m_elem_mult(w_temp3, m_sum(w_temp2));
+	Matrix w_temp3("w_temp3", w0);
+	w_temp3.elem_mult(w_temp2.sum());
 
-	matrix_t *w = m_product("w", X, w_temp1);
-	m_subtract(w, w_temp3);
-	m_elem_mult(w, 1.0f / X->cols);
-
-	// compute w*
-	m_elem_mult(w, 1 / m_norm(w));
-
-	// cleanup
-	m_free(w_temp1);
-	m_free(w_temp2);
+	Matrix w = X.product("w", w_temp1);
+	w.subtract(w_temp3);
+	w.elem_mult(1.0f / X.cols);
 
 	return w;
 }
@@ -329,12 +282,12 @@ matrix_t * fpica_gauss (matrix_t *w0, matrix_t *X)
  * @param W_z
  * @return mixing matrix W_mix
  */
-matrix_t * ICALayer::fpica(matrix_t *X, matrix_t *W_z)
+Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 {
 	// if n2 is -1, use default value
 	int n2 = (this->n2 == -1)
-		? X->rows
-		: min(X->rows, this->n2);
+		? X.rows
+		: min(X.rows, this->n2);
 
 	// determine nonlinearity function
 	ica_nonl_func_t fpica_update = NULL;
@@ -349,88 +302,73 @@ matrix_t * ICALayer::fpica(matrix_t *X, matrix_t *W_z)
 		fpica_update = fpica_gauss;
 	}
 
-	matrix_t *B = m_zeros("B", n2, n2);
-	matrix_t *W_mix = m_zeros("W_mix", n2, W_z->cols);
+	Matrix B = Matrix::zeros("B", n2, n2);
+	Matrix W_mix = Matrix::zeros("W_mix", n2, W_z.cols);
 
 	int i;
 	for ( i = 0; i < n2; i++ ) {
 		log(LL_VERBOSE, "      round %d\n", i + 1);
 
 		// initialize w as a Gaussian (0, 1) random vector
-		matrix_t *w = m_random("w", n2, 1);
+		Matrix w = Matrix::random("w", n2, 1);
 
 		// compute w = (w - B * B' * w), normalize w
-		matrix_t *w_temp1 = m_product("w_temp1", B, B, false, true);
-		matrix_t *w_temp2 = m_product("w_temp2", w_temp1, w);
+		Matrix w_temp1 = B.product("w_temp1", B, false, true);
+		Matrix w_temp2 = w_temp1.product("w_temp2", w);
 
-		m_subtract(w, w_temp2);
-		m_elem_mult(w, 1 / m_norm(w));
-
-		m_free(w_temp1);
-		m_free(w_temp2);
+		w.subtract(w_temp2);
+		w.elem_mult(1.0f / w.norm());
 
 		// initialize w0
-		matrix_t *w0 = m_zeros("w0", w->rows, w->cols);
+		Matrix w0 = Matrix::zeros("w0", w.rows, w.cols);
 
 		int j;
 		for ( j = 0; j < this->max_iter; j++ ) {
 			// compute w = (w - B * B' * w), normalize w
-			w_temp1 = m_product("w_temp1", B, B, false, true);
-			w_temp2 = m_product("w_temp2", w_temp1, w);
+			w_temp1 = B.product("w_temp1", B, false, true);
+			w_temp2 = w_temp1.product("w_temp2", w);
 
-			m_subtract(w, w_temp2);
-			m_elem_mult(w, 1 / m_norm(w));
-
-			m_free(w_temp1);
-			m_free(w_temp2);
+			w.subtract(w_temp2);
+			w.elem_mult(1.0f / w.norm());
 
 			// compute w_delta1 = w - w0
-			matrix_t *w_delta1 = m_copy("w_delta1", w);
-			m_subtract(w_delta1, w0);
+			Matrix w_delta1("w_delta1", w);
+			w_delta1.subtract(w0);
 
 			// compute w_delta2 = w + w0
-			matrix_t *w_delta2 = m_copy("w_delta2", w);
-			m_add(w_delta2, w0);
+			Matrix w_delta2("w_delta2", w);
+			w_delta2.add(w0);
 
 			// determine whether the direction of w and w0 are equal
-			precision_t norm1 = m_norm(w_delta1);
-			precision_t norm2 = m_norm(w_delta2);
-
-			m_free(w_delta1);
-			m_free(w_delta2);
+			precision_t norm1 = w_delta1.norm();
+			precision_t norm2 = w_delta2.norm();
 
 			// terminate round if w converges
 			if ( norm1 < this->eps || norm2 < this->eps ) {
 				// save B(:, i) = w
-				m_assign_column(B, i, w, 0);
+				B.assign_column(i, w, 0);
 
 				// save W_mix(i, :) = w' * W_z
-				matrix_t *W_temp1 = m_product("W_temp1", w, W_z, true, false);
+				Matrix W_temp1 = w.product("W_temp1", W_z, true, false);
 
-				m_assign_row(W_mix, i, W_temp1, 0);
-
-				// cleanup
-				m_free(W_temp1);
+				W_mix.assign_row(i, W_temp1, 0);
 
 				// continue to the next round
 				break;
 			}
 
 			// update w0
-			m_assign_column(w0, 0, w, 0);
-			m_free(w);
+			w0.assign_column(0, w, 0);
 
-			// compute parameter update
+			// compute w+ based on non-linearity
 			w = fpica_update(w0, X);
+
+			// compute w* = w+ / ||w+||
+			w.elem_mult(1.0f / w.norm());
 		}
 
 		log(LL_VERBOSE, "      iterations: %d\n", j);
-
-		m_free(w);
-		m_free(w0);
 	}
-
-	m_free(B);
 
 	return W_mix;
 }

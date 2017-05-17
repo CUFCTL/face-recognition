@@ -16,11 +16,9 @@
  * @param X
  * @param y
  * @param c
- * @return identity matrix
  */
-matrix_t * IdentityLayer::compute(matrix_t *X, const std::vector<data_entry_t>& y, int c)
+void IdentityLayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int c)
 {
-	return NULL;
 }
 
 /**
@@ -28,15 +26,16 @@ matrix_t * IdentityLayer::compute(matrix_t *X, const std::vector<data_entry_t>& 
  * of the identity layer.
  *
  * @param X
- * @return input matrix
  */
-matrix_t * IdentityLayer::project(matrix_t *X)
+Matrix IdentityLayer::project(const Matrix& X)
 {
-	return m_copy("P", X);
+	return X;
 }
 
 /**
  * Save an identity layer to a file.
+ *
+ * @param file
  */
 void IdentityLayer::save(FILE *file)
 {
@@ -44,6 +43,8 @@ void IdentityLayer::save(FILE *file)
 
 /**
  * Load an identity layer from a file.
+ *
+ * @param file
  */
 void IdentityLayer::load(FILE *file)
 {

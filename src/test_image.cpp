@@ -21,14 +21,12 @@ int main(int argc, char **argv)
 	Image image;
 	image.load(FILENAME_IN);
 
-	matrix_t *x = m_initialize("x", image.channels * image.width * image.height, 1);
-	m_image_read(x, 0, image);
+	Matrix x("x", image.channels * image.width * image.height, 1);
+	x.image_read(0, image);
 
 	// map a column vector to an image
-	m_image_write(x, 0, image);
+	x.image_write(0, image);
 	image.save(FILENAME_OUT);
-
-	m_free(x);
 
 	return 0;
 }

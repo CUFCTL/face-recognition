@@ -10,8 +10,8 @@
 
 class IdentityLayer : public FeatureLayer {
 public:
-	matrix_t * compute(matrix_t *X, const std::vector<data_entry_t>& y, int c);
-	matrix_t * project(matrix_t *X);
+	void compute(const Matrix& X, const std::vector<data_entry_t>& y, int c);
+	Matrix project(const Matrix& X);
 
 	void save(FILE *file);
 	void load(FILE *file);

@@ -23,16 +23,15 @@ private:
 	int max_iter;
 	precision_t eps;
 
-	matrix_t * fpica(matrix_t *X, matrix_t *W_z);
+	Matrix fpica(const Matrix& X, const Matrix& W_z);
 
 public:
-	matrix_t *W;
+	Matrix W;
 
 	ICALayer(int n1, int n2, ica_nonl_t nonl, int max_iter, precision_t eps);
-	~ICALayer();
 
-	matrix_t * compute(matrix_t *X, const std::vector<data_entry_t>& y, int c);
-	matrix_t * project(matrix_t *X);
+	void compute(const Matrix& X, const std::vector<data_entry_t>& y, int c);
+	Matrix project(const Matrix& X);
 
 	void save(FILE *file);
 	void load(FILE *file);
