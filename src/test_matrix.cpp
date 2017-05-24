@@ -618,7 +618,7 @@ void test_add()
 		B.print(stdout);
 	}
 
-	A.add(B);
+	A += B;
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		A.print(stdout);
@@ -756,7 +756,7 @@ void test_elem_mult()
 		A.print(stdout);
 	}
 
-	A.elem_mult(c);
+	A *= c;
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		A.print(stdout);
@@ -790,7 +790,7 @@ void test_subtract()
 		B.print(stdout);
 	}
 
-	A.subtract(B);
+	A -= B;
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		A.print(stdout);

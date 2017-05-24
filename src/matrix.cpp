@@ -997,22 +997,6 @@ void Matrix::subtract_rows(const Matrix& a)
 }
 
 /**
- * Assignment operator for Matrix.
- *
- * @param B
- */
-Matrix& Matrix::operator=(Matrix B)
-{
-	log(LL_DEBUG, "debug: %s [%d,%d] <- %s [%d,%d]\n",
-		this->name, this->rows, this->cols,
-		B.name, B.rows, B.cols);
-
-	swap(*this, B);
-
-	return *this;
-}
-
-/**
  * Swap function for Matrix.
  *
  * @param A

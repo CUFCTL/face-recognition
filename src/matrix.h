@@ -76,9 +76,19 @@ public:
 	void subtract_rows(const Matrix& a);
 
 	// operators
-	Matrix& operator=(Matrix B);
+	inline Matrix& operator=(Matrix B) { swap(*this, B); return *this; };
+	inline Matrix& operator+=(const Matrix& B) { this->add(B); return *this; };
+	inline Matrix& operator-=(const Matrix& B) { this->subtract(B); return *this; };
+	inline Matrix& operator*=(precision_t c) { this->elem_mult(c); return *this; };
+	inline Matrix& operator/=(precision_t c) { this->elem_mult(1 / c); return *this; };
 
+	// friend functions
 	friend void swap(Matrix& A, Matrix& B);
 };
+
+inline Matrix& operator+(Matrix& A, const Matrix& B) { A += B; return A; }
+inline Matrix& operator-(Matrix& A, const Matrix& B) { A -= B; return A; }
+inline Matrix& operator*(Matrix& A, precision_t c) { A *= c; return A; }
+inline Matrix& operator/(Matrix& A, precision_t c) { A /= c; return A; }
 
 #endif
