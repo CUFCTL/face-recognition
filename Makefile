@@ -56,17 +56,20 @@ echo:
 	$(info CXXFLAGS  = $(CXXFLAGS))
 	$(info NVCCFLAGS = $(NVCCFLAGS))
 
-%.o: src/%.cpp
+obj:
+	mkdir -p obj
+
+obj/%.o: src/%.cpp | obj
 	$(NVCC) $(NVCCFLAGS) -c -o $@ $<
 
-face-rec: bayes.o dataset.o ica.o identity.o image.o knn.o lda.o logger.o main.o math_utils.o matrix.o matrix_utils.o model.o pca.o timer.o
+face-rec: obj/bayes.o obj/dataset.o obj/ica.o obj/identity.o obj/image.o obj/knn.o obj/lda.o obj/logger.o obj/main.o obj/math_utils.o obj/matrix.o obj/matrix_utils.o obj/model.o obj/pca.o obj/timer.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
-test-image: image.o logger.o math_utils.o matrix.o test_image.o
+test-image: obj/image.o obj/logger.o obj/math_utils.o obj/matrix.o obj/test_image.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
-test-matrix: logger.o math_utils.o matrix.o test_matrix.o
+test-matrix: obj/logger.o obj/math_utils.o obj/matrix.o obj/test_matrix.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 clean:
-	rm -f *.o $(BINS)
+	rm -rf obj $(BINS)
