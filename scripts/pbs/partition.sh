@@ -54,7 +54,7 @@ make GPU=$GPU > /dev/null
 
 # run experiment
 for (( TEST = $TEST_START; TEST <= $TEST_END; TEST += $TEST_INC )); do
-	TRAIN=`expr 100 - $TEST`
+	TRAIN=$((100 - TEST))
 	RESULTS=$(python ./scripts/cross-validate.py -d $DATASET -t $TRAIN -r $TEST -i $NUM_ITER -- --$ALGO)
 
 	echo $TRAIN/$TEST $RESULTS
