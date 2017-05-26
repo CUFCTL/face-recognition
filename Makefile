@@ -44,7 +44,28 @@ NVCCFLAGS = $(CXXFLAGS)
 endif
 
 # define binary targets
-BINS = face-rec test-image test-matrix
+OBJDIR = obj
+OBJS = $(addprefix $(OBJDIR)/, \
+	bayes.o \
+	dataset.o \
+	ica.o \
+	identity.o \
+	image.o \
+	knn.o \
+	lda.o \
+	logger.o \
+	main.o \
+	math_utils.o \
+	matrix.o \
+	matrix_utils.o \
+	model.o \
+	pca.o \
+	timer.o )
+
+BINS = \
+	face-rec \
+	test-image \
+	test-matrix
 
 all: echo $(BINS)
 
@@ -57,20 +78,23 @@ echo:
 	$(info CXXFLAGS  = $(CXXFLAGS))
 	$(info NVCCFLAGS = $(NVCCFLAGS))
 
-obj:
-	mkdir -p obj
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
 
-obj/%.o: src/%.cpp | obj
+$(OBJDIR)/%.o: src/%.cpp src/%.h | $(OBJDIR)
 	$(NVCC) $(NVCCFLAGS) -c -o $@ $<
 
-face-rec: obj/bayes.o obj/dataset.o obj/ica.o obj/identity.o obj/image.o obj/knn.o obj/lda.o obj/logger.o obj/main.o obj/math_utils.o obj/matrix.o obj/matrix_utils.o obj/model.o obj/pca.o obj/timer.o
+$(OBJDIR)/%.o: src/%.cpp | $(OBJDIR)
+	$(NVCC) $(NVCCFLAGS) -c -o $@ $<
+
+face-rec: $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
-test-image: obj/image.o obj/logger.o obj/math_utils.o obj/matrix.o obj/test_image.o
+test-image: $(addprefix $(OBJDIR)/, image.o logger.o math_utils.o matrix.o test_image.o)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
-test-matrix: obj/logger.o obj/math_utils.o obj/matrix.o obj/test_matrix.o
+test-matrix: $(addprefix $(OBJDIR)/, logger.o math_utils.o matrix.o test_matrix.o)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 clean:
-	rm -rf obj $(BINS)
+	rm -rf $(OBJDIR) $(BINS)
