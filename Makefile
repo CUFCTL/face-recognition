@@ -23,14 +23,15 @@ CXXFLAGS  = -std=c++11 \
 NVCCFLAGS = -std=c++11 \
             -I$(CUDADIR)/include \
             -I$(MAGMADIR)/include \
-            -I$(OPENBLASDIR)/include
+            -I$(OPENBLASDIR)/include \
+            -Wno-deprecated-gpu-targets
 
 ifeq ($(DEBUG), 1)
 CXXFLAGS  += -g -pg -Wall
 NVCCFLAGS += -g -pg -Xcompiler -Wall
 else
-CXXFLAGS  += -O3
-NVCCFLAGS += -O3
+CXXFLAGS  += -O3 -Wno-unused-result
+NVCCFLAGS += -O3 -Xcompiler -Wno-unused-result
 endif
 
 ifeq ($(GPU), 1)
