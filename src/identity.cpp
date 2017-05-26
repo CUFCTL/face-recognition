@@ -10,7 +10,7 @@
  * Compute the features for an identity layer.
  *
  * NOTE: since the identity layer just returns the input,
- * this function returns NULL in lieu of allocating a
+ * this function returns nullptr in lieu of allocating a
  * large identity matrix.
  *
  * @param X

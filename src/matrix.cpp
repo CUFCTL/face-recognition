@@ -30,7 +30,7 @@ const precision_t EPSILON = 1e-16;
  */
 void * gpu_malloc(size_t size)
 {
-	void *ptr = NULL;
+	void *ptr = nullptr;
 
 #ifdef __NVCC__
 	int stat = magma_malloc(&ptr, size);
@@ -183,8 +183,8 @@ Matrix::Matrix()
 	this->name = "";
 	this->rows = 0;
 	this->cols = 0;
-	this->data = NULL;
-	this->data_gpu = NULL;
+	this->data = nullptr;
+	this->data_gpu = nullptr;
 }
 
 /**

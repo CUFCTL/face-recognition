@@ -27,7 +27,7 @@ void log(logger_level_t level, const char *format, ...)
 			: stdout;
 		va_list ap;
 
-		time_t t = time(NULL);
+		time_t t = time(nullptr);
 		struct tm *tm = localtime(&t);
 
 		fprintf(stream, "[%04d-%02d-%02d %02d:%02d:%02d] ",

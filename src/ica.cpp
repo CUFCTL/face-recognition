@@ -290,7 +290,7 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 		: min(X.rows, this->n2);
 
 	// determine nonlinearity function
-	ica_nonl_func_t fpica_update = NULL;
+	ica_nonl_func_t fpica_update = nullptr;
 
 	if ( this->nonl == ICA_NONL_POW3 ) {
 		fpica_update = fpica_pow3;

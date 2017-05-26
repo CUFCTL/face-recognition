@@ -890,7 +890,7 @@ int main(int argc, char **argv)
 	};
 
 	int opt;
-	while ( (opt = getopt_long_only(argc, argv, "", long_options, NULL)) != -1 ) {
+	while ( (opt = getopt_long_only(argc, argv, "", long_options, nullptr)) != -1 ) {
 		switch ( opt ) {
 		case 'e':
 			LOGLEVEL = (logger_level_t) atoi(optarg);

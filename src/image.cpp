@@ -22,7 +22,7 @@ Image::Image()
 	this->width = 0;
 	this->height = 0;
 	this->max_value = 0;
-	this->pixels = NULL;
+	this->pixels = nullptr;
 }
 
 /**
@@ -100,7 +100,7 @@ void Image::load(const char *path)
 	int num1 = channels * width * height;
 	int num2 = this->channels * this->width * this->height;
 
-	if ( this->pixels == NULL ) {
+	if ( this->pixels == nullptr ) {
 		this->pixels = (unsigned char *)malloc(num1 * sizeof(unsigned char));
 	}
 	else if ( num1 != num2 ) {

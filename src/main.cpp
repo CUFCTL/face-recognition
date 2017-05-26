@@ -127,7 +127,7 @@ dist_func_t parse_dist_func(const char *name)
 		return m_dist_L2;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /**
@@ -164,8 +164,8 @@ int main(int argc, char **argv)
 		false,
 		false,
 		false,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		FEATURE_NONE,
 		CLASSIFIER_KNN,
 		-1,
@@ -199,7 +199,7 @@ int main(int argc, char **argv)
 
 	// parse command-line arguments
 	int opt;
-	while ( (opt = getopt_long_only(argc, argv, "", long_options, NULL)) != -1 ) {
+	while ( (opt = getopt_long_only(argc, argv, "", long_options, nullptr)) != -1 ) {
 		switch ( opt ) {
 		case OPTION_LOGLEVEL:
 			LOGLEVEL = (logger_level_t) atoi(optarg);
@@ -272,7 +272,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	if ( args.knn_dist == NULL ) {
+	if ( args.knn_dist == nullptr ) {
 		fprintf(stderr, "error: --knn_dist must be L1 | L2 | COS\n");
 		exit(1);
 	}
