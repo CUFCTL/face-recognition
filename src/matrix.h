@@ -14,8 +14,6 @@
 
 typedef float precision_t;
 
-#define M_ELEM_FPRINT  "% 10.4g"
-
 #define ELEM(M, i, j) (M)._data_cpu[(j) * (M)._rows + (i)]
 
 typedef precision_t (*elem_func_t)(precision_t);

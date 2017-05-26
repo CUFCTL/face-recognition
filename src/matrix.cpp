@@ -328,7 +328,7 @@ void Matrix::print(FILE *file) const
 	int i, j;
 	for ( i = 0; i < this->_rows; i++ ) {
 		for ( j = 0; j < this->_cols; j++ ) {
-			fprintf(file, M_ELEM_FPRINT " ", ELEM(*this, i, j));
+			fprintf(file, "%10.4g ", ELEM(*this, i, j));
 		}
 		fprintf(file, "\n");
 	}
