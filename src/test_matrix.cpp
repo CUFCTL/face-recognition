@@ -368,7 +368,7 @@ void test_eigen2()
 	Matrix D;
 
 	Matrix B_inv = B.inverse("inv(B)");
-	Matrix J = B_inv.product("J", A);
+	Matrix J = B_inv * A;
 
 	J.eigen("V", "D", J.rows, V, D);
 
@@ -505,8 +505,8 @@ void test_product()
 	};
 	Matrix A1("A1", 1, 4, A1_data);
 	Matrix B1("B1", 4, 1, B1_data);
-	Matrix C1 = A1.product("C1", B1);
-	Matrix C2 = B1.product("C2", A1);
+	Matrix C1 = A1 * B1;
+	Matrix C2 = B1 * A1;
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		A1.print(stdout);
@@ -534,7 +534,7 @@ void test_product()
 	};
 	Matrix A2("A2", 2, 3, A2_data);
 	Matrix B2("B2", 3, 3, B2_data);
-	Matrix C3 = A2.product("C3", B2);
+	Matrix C3 = A2 * B2;
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		A2.print(stdout);

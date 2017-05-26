@@ -86,9 +86,10 @@ public:
 	friend void swap(Matrix& A, Matrix& B);
 };
 
-inline Matrix& operator+(Matrix& A, const Matrix& B) { A += B; return A; }
-inline Matrix& operator-(Matrix& A, const Matrix& B) { A -= B; return A; }
-inline Matrix& operator*(Matrix& A, precision_t c) { A *= c; return A; }
-inline Matrix& operator/(Matrix& A, precision_t c) { A /= c; return A; }
+inline Matrix operator+(Matrix A, const Matrix& B) { A += B; return A; }
+inline Matrix operator-(Matrix A, const Matrix& B) { A -= B; return A; }
+inline Matrix operator*(const Matrix& A, const Matrix& B) { return A.product("", B); }
+inline Matrix operator*(Matrix A, precision_t c) { A *= c; return A; }
+inline Matrix operator/(Matrix A, precision_t c) { A /= c; return A; }
 
 #endif
