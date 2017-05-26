@@ -429,32 +429,6 @@ void Matrix::image_write(int i, Image& image)
 }
 
 /**
- * Determine the index of the first element
- * in a vector that is the maximum value.
- */
-int Matrix::argmax() const
-{
-	assert(this->_rows == 1 || this->_cols == 1);
-
-	int n = (this->_rows == 1)
-		? this->_cols
-		: this->_rows;
-
-	int index = 0;
-	precision_t max = this->_data_cpu[0];
-
-	int i;
-	for ( i = 1; i < n; i++ ) {
-		if ( max < this->_data_cpu[i] ) {
-			max = this->_data_cpu[i];
-			index = i;
-		}
-	}
-
-	return index;
-}
-
-/**
  * Compute the diagonal matrix of a vector.
  *
  * @param name

@@ -64,7 +64,6 @@ public:
 	inline int cols() const { return this->_cols; };
 	inline precision_t elem(int i, int j) const { return ELEM(*this, i, j); };
 
-	int argmax() const;
 	Matrix diagonalize(const char *name) const;
 	void eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Matrix& D) const;
 	Matrix inverse(const char *name) const;

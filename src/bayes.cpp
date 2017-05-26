@@ -64,13 +64,15 @@ std::vector<data_label_t> BayesLayer::predict(const Matrix& X, const std::vector
 	for ( i = 0; i < X_test.cols(); i++ ) {
 		std::vector<precision_t> probs;
 
+		// compute the Bayes probability for each class
 		for ( j = 0; j < C.size(); j++ ) {
 			Matrix x_test("x_test", X_test, i, i + 1);
 
 			probs.push_back(bayes_prob(x_test, U[j], S_inv[j]));
 		}
 
-		int index = *max_element(probs.begin(), probs.end());
+		// select the class with the highest probability
+		int index = max_element(probs.begin(), probs.end()) - probs.begin();
 
 		Y_pred.push_back(C[index]);
 	}

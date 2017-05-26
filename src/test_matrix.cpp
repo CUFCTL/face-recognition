@@ -251,27 +251,6 @@ void test_copy_columns()
 }
 
 /**
- * Test the argmax function.
- */
-void test_argmax()
-{
-	precision_t v_data[] = {
-		23, 42, 37, 18, 52
-	};
-	Matrix v("v", 1, 5, v_data);
-
-	int index = v.argmax();
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		v.print(stdout);
-
-		printf("argmax(%s) = %d\n", v.name(), index);
-	}
-
-	assert_equal(index, 4, "argmax(v)");
-}
-
-/**
  * Test the diagonal matrix.
  */
 void test_diagonalize()
@@ -914,7 +893,6 @@ int main(int argc, char **argv)
 		test_zeros,
 		test_copy,
 		test_copy_columns,
-		test_argmax,
 		test_diagonalize,
 		test_eigen,
 		test_eigen2,
