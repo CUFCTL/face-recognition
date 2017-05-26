@@ -65,7 +65,7 @@ void ICALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 	D_temp1.elem_apply(sqrtf);
 
 	Matrix D_temp2 = D_temp1.inverse("inv(sqrt(D))");
-	Matrix W_z = D_temp2.product("W_z", pca.W, false, true);
+	Matrix W_z = D_temp2.product("W_z", *pca.W.T);
 
 	// compute whitened input U = W_z * mixedsig
 	Matrix U = W_z.product("U", mixedsig);
@@ -105,7 +105,7 @@ void ICALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
  */
 Matrix ICALayer::project(const Matrix& X)
 {
-	return this->W.product("P", X, true, false);
+	return this->W.T->product("P", X);
 }
 
 /**
@@ -171,7 +171,7 @@ void ICALayer::print()
 Matrix fpica_pow3 (const Matrix& w0, const Matrix& X)
 {
 	// compute w+
-	Matrix w_temp1 = X.product("w_temp1", w0, true, false);
+	Matrix w_temp1 = X.T->product("w_temp1", w0);
 	w_temp1.elem_apply(pow3);
 
 	Matrix w_temp2("w_temp2", w0);
@@ -202,7 +202,7 @@ Matrix fpica_pow3 (const Matrix& w0, const Matrix& X)
 Matrix fpica_tanh (const Matrix& w0, const Matrix& X)
 {
 	// compute w+
-	Matrix w_temp1 = X.product("w_temp1", w0, true, false);
+	Matrix w_temp1 = X.T->product("w_temp1", w0);
 	Matrix w_temp2("w_temp2", w_temp1);
 
 	w_temp1.elem_apply(tanhf);
@@ -257,7 +257,7 @@ precision_t dgauss (precision_t x)
 Matrix fpica_gauss (const Matrix& w0, const Matrix& X)
 {
 	// compute w+
-	Matrix w_temp1 = X.product("w_temp1", w0, true, false);
+	Matrix w_temp1 = X.T->product("w_temp1", w0);
 	Matrix w_temp2("w_temp2", w_temp1);
 
 	w_temp1.elem_apply(gauss);
@@ -313,7 +313,7 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 		Matrix w = Matrix::random("w", n2, 1);
 
 		// compute w = (w - B * B' * w), normalize w
-		Matrix w_temp1 = B.product("w_temp1", B, false, true);
+		Matrix w_temp1 = B.product("w_temp1", *B.T);
 		Matrix w_temp2 = w_temp1.product("w_temp2", w);
 
 		w.subtract(w_temp2);
@@ -325,7 +325,7 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 		int j;
 		for ( j = 0; j < this->max_iter; j++ ) {
 			// compute w = (w - B * B' * w), normalize w
-			w_temp1 = B.product("w_temp1", B, false, true);
+			w_temp1 = B.product("w_temp1", *B.T);
 			w_temp2 = w_temp1.product("w_temp2", w);
 
 			w.subtract(w_temp2);
@@ -349,7 +349,7 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 				B.assign_column(i, w, 0);
 
 				// save W_mix(i, :) = w' * W_z
-				Matrix W_temp1 = w.product("W_temp1", W_z, true, false);
+				Matrix W_temp1 = w.T->product("W_temp1", W_z);
 
 				W_mix.assign_row(i, W_temp1, 0);
 

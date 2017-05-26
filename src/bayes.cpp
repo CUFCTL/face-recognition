@@ -27,8 +27,8 @@ precision_t bayes_prob(Matrix& x, const Matrix& mu, const Matrix& S_inv)
 {
 	x.subtract_columns(mu);
 
-	Matrix p_temp1 = x.product("p_temp1", S_inv, true, false);
-	Matrix p_temp2 = p_temp1.product("p_temp2", x, false, false);
+	Matrix p_temp1 = x.T->product("p_temp1", S_inv);
+	Matrix p_temp2 = p_temp1.product("p_temp2", x);
 
 	precision_t p = -0.5f * ELEM(p_temp2, 0, 0);
 

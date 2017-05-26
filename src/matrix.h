@@ -21,12 +21,17 @@ typedef float precision_t;
 typedef precision_t (*elem_func_t)(precision_t);
 
 class Matrix {
+private:
+	bool transposed;
+
 public:
 	const char *name;
 	int rows;
 	int cols;
 	precision_t *data;
 	precision_t *data_gpu;
+
+	Matrix *T;
 
 	// constructor, destructor functions
 	Matrix(const char *name, int rows, int cols);
@@ -62,7 +67,7 @@ public:
 	Matrix mean_column(const char *name) const;
 	Matrix mean_row(const char *name) const;
 	precision_t norm() const;
-	Matrix product(const char *name, const Matrix& B, bool transA=false, bool transB=false) const;
+	Matrix product(const char *name, const Matrix& B) const;
 	precision_t sum() const;
 	Matrix transpose(const char *name) const;
 

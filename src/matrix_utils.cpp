@@ -175,7 +175,7 @@ std::vector<Matrix> m_class_scatters(const std::vector<Matrix>& X_c, const std::
 		Matrix X_c_i("X_c_i", X_c[i]);
 		X_c_i.subtract_columns(U[i]);
 
-		S.push_back(X_c_i.product("S_i", X_c_i, false, true));
+		S.push_back(X_c_i.product("S_i", *X_c_i.T));
 	}
 
 	return S;
@@ -212,7 +212,7 @@ Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matri
 		Matrix u_i("u_i - u", U[i]);
 		u_i.subtract(u);
 
-		Matrix S_b_i = u_i.product("S_b_i", u_i, false, true);
+		Matrix S_b_i = u_i.product("S_b_i", *u_i.T);
 		S_b_i.elem_mult(X_c[i].cols);
 
 		S_b.add(S_b_i);
@@ -243,7 +243,7 @@ Matrix m_scatter_within(const std::vector<Matrix>& X_c, const std::vector<Matrix
 		Matrix X_c_i("X_c_i", X_c[i]);
 		X_c_i.subtract_columns(U[i]);
 
-		Matrix S_w_i = X_c_i.product("S_w_i", X_c_i, false, true);
+		Matrix S_w_i = X_c_i.product("S_w_i", *X_c_i.T);
 
 		S_w.add(S_w_i);
 	}

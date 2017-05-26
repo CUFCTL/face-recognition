@@ -92,7 +92,7 @@ void LDALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
  */
 Matrix LDALayer::project(const Matrix& X)
 {
-	return this->W.product("P", X, true, false);
+	return this->W.T->product("P", X);
 }
 
 /**

@@ -42,7 +42,7 @@ void PCALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 	if ( X.rows > X.cols ) {
 		timer_push("compute surrogate of covariance matrix L");
 
-		Matrix L = X.product("L", X, true, false);
+		Matrix L = X.T->product("L", X);
 
 		timer_pop();
 
@@ -62,7 +62,7 @@ void PCALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 	else {
 		timer_push("compute covariance matrix C");
 
-		Matrix C = X.product("C", X, false, true);
+		Matrix C = X.product("C", *X.T);
 
 		timer_pop();
 
@@ -83,7 +83,7 @@ void PCALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
  */
 Matrix PCALayer::project(const Matrix& X)
 {
-	return this->W.product("P", X, true, false);
+	return this->W.T->product("P", X);
 }
 
 /**

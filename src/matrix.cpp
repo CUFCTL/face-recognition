@@ -98,6 +98,17 @@ Matrix::Matrix(const char *name, int rows, int cols)
 	this->cols = cols;
 	this->data = (precision_t *)malloc(rows * cols * sizeof(precision_t));
 	this->data_gpu = gpu_malloc_matrix(rows, cols);
+	this->transposed = false;
+	this->T = new Matrix();
+
+	// initialize transpose
+	this->T->name = this->name;
+	this->T->rows = rows;
+	this->T->cols = cols;
+	this->T->data = this->data;
+	this->T->data_gpu = this->data_gpu;
+	this->T->transposed = true;
+	this->T->T = nullptr;
 }
 
 /**
@@ -185,6 +196,8 @@ Matrix::Matrix()
 	this->cols = 0;
 	this->data = nullptr;
 	this->data_gpu = nullptr;
+	this->transposed = false;
+	this->T = nullptr;
 }
 
 /**
@@ -192,8 +205,12 @@ Matrix::Matrix()
  */
 Matrix::~Matrix()
 {
-	free(this->data);
-	gpu_free(this->data_gpu);
+	if ( !this->transposed ) {
+		free(this->data);
+		gpu_free(this->data_gpu);
+
+		delete this->T;
+	}
 }
 
 /**
@@ -692,22 +709,20 @@ precision_t Matrix::norm() const
  *
  * @param name
  * @param B
- * @param transA
- * @param transB
  */
-Matrix Matrix::product(const char *name, const Matrix& B, bool transA, bool transB) const
+Matrix Matrix::product(const char *name, const Matrix& B) const
 {
 	const Matrix& A = *this;
 
-	int m = transA ? A.cols : A.rows;
-	int k1 = transA ? A.rows : A.cols;
-	int k2 = transB ? B.cols : B.rows;
-	int n = transB ? B.rows : B.cols;
+	int m = A.transposed ? A.cols : A.rows;
+	int k1 = A.transposed ? A.rows : A.cols;
+	int k2 = B.transposed ? B.cols : B.rows;
+	int n = B.transposed ? B.rows : B.cols;
 
 	log(LL_DEBUG, "debug: %s [%d,%d] <- %s%s [%d,%d] * %s%s [%d,%d]\n",
 		name, m, n,
-		A.name, transA ? "'" : "", m, k1,
-		B.name, transB ? "'" : "", k2, n);
+		A.name, A.transposed ? "'" : "", m, k1,
+		B.name, B.transposed ? "'" : "", k2, n);
 
 	assert(k1 == k2);
 
@@ -719,8 +734,8 @@ Matrix Matrix::product(const char *name, const Matrix& B, bool transA, bool tran
 	// C := alpha * A * B + beta * C
 #ifdef __NVCC__
 	magma_queue_t queue = magma_queue();
-	magma_trans_t TransA = transA ? MagmaTrans : MagmaNoTrans;
-	magma_trans_t TransB = transB ? MagmaTrans : MagmaNoTrans;
+	magma_trans_t TransA = A.transposed ? MagmaTrans : MagmaNoTrans;
+	magma_trans_t TransB = B.transposed ? MagmaTrans : MagmaNoTrans;
 
 	magma_sgemm(TransA, TransB,
 		m, n, k1,
@@ -730,8 +745,8 @@ Matrix Matrix::product(const char *name, const Matrix& B, bool transA, bool tran
 
 	C.gpu_read();
 #else
-	CBLAS_TRANSPOSE TransA = transA ? CblasTrans : CblasNoTrans;
-	CBLAS_TRANSPOSE TransB = transB ? CblasTrans : CblasNoTrans;
+	CBLAS_TRANSPOSE TransA = A.transposed ? CblasTrans : CblasNoTrans;
+	CBLAS_TRANSPOSE TransB = B.transposed ? CblasTrans : CblasNoTrans;
 
 	cblas_sgemm(CblasColMajor, TransA, TransB,
 		m, n, k1,
@@ -1020,4 +1035,6 @@ void swap(Matrix& A, Matrix& B)
 	std::swap(A.cols, B.cols);
 	std::swap(A.data, B.data);
 	std::swap(A.data_gpu, B.data_gpu);
+	std::swap(A.transposed, B.transposed);
+	std::swap(A.T, B.T);
 }
