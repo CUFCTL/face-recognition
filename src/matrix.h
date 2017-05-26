@@ -34,6 +34,7 @@ public:
 	Matrix(const char *name, const Matrix& M);
 	Matrix(const char *name, const Matrix& M, int i, int j);
 	Matrix(const Matrix& M);
+	Matrix(Matrix&& M);
 	Matrix();
 	~Matrix();
 

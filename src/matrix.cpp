@@ -155,13 +155,24 @@ Matrix::Matrix(const char *name, const Matrix& M, int i, int j)
 }
 
 /**
- * Copy a matrix.
+ * Copy-construct a matrix.
  *
  * @param M
  */
 Matrix::Matrix(const Matrix& M)
 	: Matrix(M.name, M, 0, M.cols)
 {
+}
+
+/**
+ * Move-construct a matrix.
+ *
+ * @param M
+ */
+Matrix::Matrix(Matrix&& M)
+	: Matrix()
+{
+	swap(*this, M);
 }
 
 /**
