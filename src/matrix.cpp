@@ -93,21 +93,21 @@ magma_queue_t magma_queue()
  */
 Matrix::Matrix(const char *name, int rows, int cols)
 {
-	this->name = name;
-	this->rows = rows;
-	this->cols = cols;
-	this->data = (precision_t *)malloc(rows * cols * sizeof(precision_t));
-	this->data_gpu = gpu_malloc_matrix(rows, cols);
-	this->transposed = false;
+	this->_name = name;
+	this->_rows = rows;
+	this->_cols = cols;
+	this->_data_cpu = (precision_t *)malloc(rows * cols * sizeof(precision_t));
+	this->_data_gpu = gpu_malloc_matrix(rows, cols);
+	this->_transposed = false;
 	this->T = new Matrix();
 
 	// initialize transpose
-	this->T->name = this->name;
-	this->T->rows = rows;
-	this->T->cols = cols;
-	this->T->data = this->data;
-	this->T->data_gpu = this->data_gpu;
-	this->T->transposed = true;
+	this->T->_name = this->_name;
+	this->T->_rows = rows;
+	this->T->_cols = cols;
+	this->T->_data_cpu = this->_data_cpu;
+	this->T->_data_gpu = this->_data_gpu;
+	this->T->_transposed = true;
 	this->T->T = nullptr;
 }
 
@@ -139,7 +139,7 @@ Matrix::Matrix(const char *name, int rows, int cols, precision_t *data)
  * @param M
  */
 Matrix::Matrix(const char *name, const Matrix& M)
-	: Matrix(name, M, 0, M.cols)
+	: Matrix(name, M, 0, M._cols)
 {
 }
 
@@ -152,15 +152,15 @@ Matrix::Matrix(const char *name, const Matrix& M)
  * @param j
  */
 Matrix::Matrix(const char *name, const Matrix& M, int i, int j)
-	: Matrix(name, M.rows, j - i)
+	: Matrix(name, M._rows, j - i)
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- %s(:, %d:%d) [%d,%d]\n",
-		this->name, this->rows, this->cols,
-		M.name, i + 1, j, M.rows, j - i);
+		this->_name, this->_rows, this->_cols,
+		M._name, i + 1, j, M._rows, j - i);
 
-	assert(0 <= i && i < j && j <= M.cols);
+	assert(0 <= i && i < j && j <= M._cols);
 
-	memcpy(this->data, &ELEM(M, 0, i), this->rows * this->cols * sizeof(precision_t));
+	memcpy(this->_data_cpu, &ELEM(M, 0, i), this->_rows * this->_cols * sizeof(precision_t));
 
 	this->gpu_write();
 }
@@ -171,7 +171,7 @@ Matrix::Matrix(const char *name, const Matrix& M, int i, int j)
  * @param M
  */
 Matrix::Matrix(const Matrix& M)
-	: Matrix(M.name, M, 0, M.cols)
+	: Matrix(M._name, M, 0, M._cols)
 {
 }
 
@@ -191,12 +191,12 @@ Matrix::Matrix(Matrix&& M)
  */
 Matrix::Matrix()
 {
-	this->name = "";
-	this->rows = 0;
-	this->cols = 0;
-	this->data = nullptr;
-	this->data_gpu = nullptr;
-	this->transposed = false;
+	this->_name = "";
+	this->_rows = 0;
+	this->_cols = 0;
+	this->_data_cpu = nullptr;
+	this->_data_gpu = nullptr;
+	this->_transposed = false;
 	this->T = nullptr;
 }
 
@@ -205,9 +205,9 @@ Matrix::Matrix()
  */
 Matrix::~Matrix()
 {
-	if ( !this->transposed ) {
-		free(this->data);
-		gpu_free(this->data_gpu);
+	if ( !this->_transposed ) {
+		free(this->_data_cpu);
+		gpu_free(this->_data_gpu);
 
 		delete this->T;
 	}
@@ -323,11 +323,11 @@ Matrix Matrix::zeros(const char *name, int rows, int cols)
  */
 void Matrix::print(FILE *file) const
 {
-	fprintf(file, "%s [%d, %d]\n", this->name, this->rows, this->cols);
+	fprintf(file, "%s [%d, %d]\n", this->_name, this->_rows, this->_cols);
 
 	int i, j;
-	for ( i = 0; i < this->rows; i++ ) {
-		for ( j = 0; j < this->cols; j++ ) {
+	for ( i = 0; i < this->_rows; i++ ) {
+		for ( j = 0; j < this->_cols; j++ ) {
 			fprintf(file, M_ELEM_FPRINT " ", ELEM(*this, i, j));
 		}
 		fprintf(file, "\n");
@@ -341,9 +341,9 @@ void Matrix::print(FILE *file) const
  */
 void Matrix::save(FILE *file) const
 {
-	fwrite(&this->rows, sizeof(int), 1, file);
-	fwrite(&this->cols, sizeof(int), 1, file);
-	fwrite(this->data, sizeof(precision_t), this->rows * this->cols, file);
+	fwrite(&this->_rows, sizeof(int), 1, file);
+	fwrite(&this->_cols, sizeof(int), 1, file);
+	fwrite(this->_data_cpu, sizeof(precision_t), this->_rows * this->_cols, file);
 }
 
 /**
@@ -353,7 +353,7 @@ void Matrix::save(FILE *file) const
  */
 void Matrix::load(FILE *file)
 {
-	if ( this->rows * this->cols != 0 ) {
+	if ( this->_rows * this->_cols != 0 ) {
 		log(LL_ERROR, "error: cannot load into non-empty matrix");
 		exit(1);
 	}
@@ -363,7 +363,7 @@ void Matrix::load(FILE *file)
 	fread(&cols, sizeof(int), 1, file);
 
 	Matrix("", rows, cols);
-	fread(this->data, sizeof(precision_t), this->rows * this->cols, file);
+	fread(this->_data_cpu, sizeof(precision_t), this->_rows * this->_cols, file);
 }
 
 /**
@@ -374,9 +374,9 @@ void Matrix::gpu_read()
 #ifdef __NVCC__
 	magma_queue_t queue = magma_queue();
 
-	magma_getmatrix(this->rows, this->cols, sizeof(precision_t),
-		this->data_gpu, this->rows,
-		this->data, this->rows,
+	magma_getmatrix(this->_rows, this->_cols, sizeof(precision_t),
+		this->_data_gpu, this->_rows,
+		this->_data_cpu, this->_rows,
 		queue);
 #endif
 }
@@ -389,9 +389,9 @@ void Matrix::gpu_write()
 #ifdef __NVCC__
 	magma_queue_t queue = magma_queue();
 
-	magma_setmatrix(this->rows, this->cols, sizeof(precision_t),
-		this->data, this->rows,
-		this->data_gpu, this->rows,
+	magma_setmatrix(this->_rows, this->_cols, sizeof(precision_t),
+		this->_data_cpu, this->_rows,
+		this->_data_gpu, this->_rows,
 		queue);
 #endif
 }
@@ -404,10 +404,10 @@ void Matrix::gpu_write()
  */
 void Matrix::image_read(int i, const Image& image)
 {
-	assert(this->rows == image.channels * image.height * image.width);
+	assert(this->_rows == image.channels * image.height * image.width);
 
 	int j;
-	for ( j = 0; j < this->rows; j++ ) {
+	for ( j = 0; j < this->_rows; j++ ) {
 		ELEM(*this, j, i) = (precision_t) image.pixels[j];
 	}
 }
@@ -420,10 +420,10 @@ void Matrix::image_read(int i, const Image& image)
  */
 void Matrix::image_write(int i, Image& image)
 {
-	assert(this->rows == image.channels * image.height * image.width);
+	assert(this->_rows == image.channels * image.height * image.width);
 
 	int j;
-	for ( j = 0; j < this->rows; j++ ) {
+	for ( j = 0; j < this->_rows; j++ ) {
 		image.pixels[j] = (unsigned char) ELEM(*this, j, i);
 	}
 }
@@ -434,19 +434,19 @@ void Matrix::image_write(int i, Image& image)
  */
 int Matrix::argmax() const
 {
-	assert(this->rows == 1 || this->cols == 1);
+	assert(this->_rows == 1 || this->_cols == 1);
 
-	int n = (this->rows == 1)
-		? this->cols
-		: this->rows;
+	int n = (this->_rows == 1)
+		? this->_cols
+		: this->_rows;
 
 	int index = 0;
-	precision_t max = this->data[0];
+	precision_t max = this->_data_cpu[0];
 
 	int i;
 	for ( i = 1; i < n; i++ ) {
-		if ( max < this->data[i] ) {
-			max = this->data[i];
+		if ( max < this->_data_cpu[i] ) {
+			max = this->_data_cpu[i];
 			index = i;
 		}
 	}
@@ -462,19 +462,19 @@ int Matrix::argmax() const
 Matrix Matrix::diagonalize(const char *name) const
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- diag(%s [%d,%d])\n",
-		name, max(this->rows, this->cols), max(this->rows, this->cols),
-		this->name, this->rows, this->cols);
+		name, max(this->_rows, this->_cols), max(this->_rows, this->_cols),
+		this->_name, this->_rows, this->_cols);
 
-	assert(this->rows == 1 || this->cols == 1);
+	assert(this->_rows == 1 || this->_cols == 1);
 
-	int n = (this->rows == 1)
-		? this->cols
-		: this->rows;
+	int n = (this->_rows == 1)
+		? this->_cols
+		: this->_rows;
 	Matrix D = Matrix::zeros(name, n, n);
 
 	int i;
 	for ( i = 0; i < n; i++ ) {
-		ELEM(D, i, i) = this->data[i];
+		ELEM(D, i, i) = this->_data_cpu[i];
 	}
 
 	D.gpu_write();
@@ -499,18 +499,18 @@ Matrix Matrix::diagonalize(const char *name) const
 void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Matrix& D) const
 {
 	log(LL_DEBUG, "debug: %s [%d,%d], %s [%d,%d] <- eig(%s [%d,%d], %d)\n",
-		V_name, this->rows, n1,
+		V_name, this->_rows, n1,
 		D_name, n1, n1,
-		this->name, this->rows, this->cols, n1);
+		this->_name, this->_rows, this->_cols, n1);
 
-	assert(this->rows == this->cols);
+	assert(this->_rows == this->_cols);
 
 	Matrix V_temp1(V_name, *this);
-	Matrix D_temp1(D_name, 1, this->cols);
+	Matrix D_temp1(D_name, 1, this->_cols);
 
 	// compute eigenvalues and eigenvectors
-	int n = this->cols;
-	int lda = this->rows;
+	int n = this->_cols;
+	int lda = this->_rows;
 
 #ifdef __NVCC__
 	int nb = magma_get_ssytrd_nb(n);
@@ -523,8 +523,8 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 	int info;
 
 	magma_ssyevd_gpu(MagmaVec, MagmaUpper,
-		n, V_temp1.data_gpu, lda,
-		D_temp1.data,
+		n, V_temp1._data_gpu, lda,
+		D_temp1._data_cpu,
 		wA, ldwa,
 		work, lwork,
 		iwork, liwork,
@@ -541,8 +541,8 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 	precision_t *work = (precision_t *)malloc(lwork * sizeof(precision_t));
 
 	int info = LAPACKE_ssyev_work(LAPACK_COL_MAJOR, 'V', 'U',
-		n, V_temp1.data, lda,
-		D_temp1.data,
+		n, V_temp1._data_cpu, lda,
+		D_temp1._data_cpu,
 		work, lwork);
 	assert(info == 0);
 
@@ -551,16 +551,16 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 
 	// take only positive eigenvalues
 	int i = 0;
-	while ( i < D_temp1.cols && ELEM(D_temp1, 0, i) < EPSILON ) {
+	while ( i < D_temp1._cols && ELEM(D_temp1, 0, i) < EPSILON ) {
 		i++;
 	}
 
 	// take only the n1 largest eigenvalues
-	i = max(i, D_temp1.cols - n1);
+	i = max(i, D_temp1._cols - n1);
 
-	V = Matrix(V_name, V_temp1, i, V_temp1.cols);
+	V = Matrix(V_name, V_temp1, i, V_temp1._cols);
 
-	Matrix D_temp2 = Matrix(D_name, D_temp1, i, D_temp1.cols);
+	Matrix D_temp2 = Matrix(D_name, D_temp1, i, D_temp1._cols);
 	D = D_temp2.diagonalize(D_name);
 }
 
@@ -572,16 +572,16 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 Matrix Matrix::inverse(const char *name) const
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- inv(%s [%d,%d])\n",
-		name, this->rows, this->cols,
-		this->name, this->rows, this->cols);
+		name, this->_rows, this->_cols,
+		this->_name, this->_rows, this->_cols);
 
-	assert(this->rows == this->cols);
+	assert(this->_rows == this->_cols);
 
 	Matrix M_inv(name, *this);
 
-	int m = this->rows;
-	int n = this->cols;
-	int lda = this->rows;
+	int m = this->_rows;
+	int n = this->_cols;
+	int lda = this->_rows;
 
 #ifdef __NVCC__
 	int nb = magma_get_sgetri_nb(n);
@@ -590,11 +590,11 @@ Matrix Matrix::inverse(const char *name) const
 	precision_t *dwork = (precision_t *)gpu_malloc(lwork * sizeof(precision_t));
 	int info;
 
-	magma_sgetrf_gpu(m, n, M_inv.data_gpu, lda,
+	magma_sgetrf_gpu(m, n, M_inv._data_gpu, lda,
 		ipiv, &info);
 	assert(info == 0);
 
-	magma_sgetri_gpu(n, M_inv.data_gpu, lda,
+	magma_sgetri_gpu(n, M_inv._data_gpu, lda,
 		ipiv, dwork, lwork, &info);
 	assert(info == 0);
 
@@ -608,12 +608,12 @@ Matrix Matrix::inverse(const char *name) const
 	precision_t *work = (precision_t *)malloc(lwork * sizeof(precision_t));
 
 	int info = LAPACKE_sgetrf_work(LAPACK_COL_MAJOR,
-		m, n, M_inv.data, lda,
+		m, n, M_inv._data_cpu, lda,
 		ipiv);
 	assert(info == 0);
 
 	info = LAPACKE_sgetri_work(LAPACK_COL_MAJOR,
-		n, M_inv.data, lda,
+		n, M_inv._data_cpu, lda,
 		ipiv, work, lwork);
 	assert(info == 0);
 
@@ -632,20 +632,20 @@ Matrix Matrix::inverse(const char *name) const
 Matrix Matrix::mean_column(const char *name) const
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- mean(%s [%d,%d], 2)\n",
-		name, this->rows, 1,
-		this->name, this->rows, this->cols);
+		name, this->_rows, 1,
+		this->_name, this->_rows, this->_cols);
 
-	Matrix a = Matrix::zeros(name, this->rows, 1);
+	Matrix a = Matrix::zeros(name, this->_rows, 1);
 
 	int i, j;
-	for ( i = 0; i < this->cols; i++ ) {
-		for ( j = 0; j < this->rows; j++ ) {
+	for ( i = 0; i < this->_cols; i++ ) {
+		for ( j = 0; j < this->_rows; j++ ) {
 			ELEM(a, j, 0) += ELEM(*this, j, i);
 		}
 	}
 	a.gpu_write();
 
-	a.elem_mult(1.0f / this->cols);
+	a.elem_mult(1.0f / this->_cols);
 
 	return a;
 }
@@ -658,20 +658,20 @@ Matrix Matrix::mean_column(const char *name) const
 Matrix Matrix::mean_row(const char *name) const
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- mean(%s [%d,%d], 1)\n",
-		name, 1, this->cols,
-		this->name, this->rows, this->cols);
+		name, 1, this->_cols,
+		this->_name, this->_rows, this->_cols);
 
-	Matrix a = Matrix::zeros(name, 1, this->cols);
+	Matrix a = Matrix::zeros(name, 1, this->_cols);
 
 	int i, j;
-	for ( i = 0; i < this->rows; i++ ) {
-		for ( j = 0; j < this->cols; j++ ) {
+	for ( i = 0; i < this->_rows; i++ ) {
+		for ( j = 0; j < this->_cols; j++ ) {
 			ELEM(a, 0, j) += ELEM(*this, i, j);
 		}
 	}
 	a.gpu_write();
 
-	a.elem_mult(1.0f / this->rows);
+	a.elem_mult(1.0f / this->_rows);
 
 	return a;
 }
@@ -682,13 +682,13 @@ Matrix Matrix::mean_row(const char *name) const
 precision_t Matrix::norm() const
 {
 	log(LL_DEBUG, "debug: n = norm(%s [%d,%d])\n",
-		this->name, this->rows, this->cols);
+		this->_name, this->_rows, this->_cols);
 
-	assert(this->rows == 1 || this->cols == 1);
+	assert(this->_rows == 1 || this->_cols == 1);
 
-	int n = (this->rows == 1)
-		? this->cols
-		: this->rows;
+	int n = (this->_rows == 1)
+		? this->_cols
+		: this->_rows;
 	int incX = 1;
 
 	precision_t norm;
@@ -696,9 +696,9 @@ precision_t Matrix::norm() const
 #ifdef __NVCC__
 	magma_queue_t queue = magma_queue();
 
-	norm = magma_snrm2(n, this->data_gpu, incX, queue);
+	norm = magma_snrm2(n, this->_data_gpu, incX, queue);
 #else
-	norm = cblas_snrm2(n, this->data, incX);
+	norm = cblas_snrm2(n, this->_data_cpu, incX);
 #endif
 
 	return norm;
@@ -714,15 +714,15 @@ Matrix Matrix::product(const char *name, const Matrix& B) const
 {
 	const Matrix& A = *this;
 
-	int m = A.transposed ? A.cols : A.rows;
-	int k1 = A.transposed ? A.rows : A.cols;
-	int k2 = B.transposed ? B.cols : B.rows;
-	int n = B.transposed ? B.rows : B.cols;
+	int m = A._transposed ? A._cols : A._rows;
+	int k1 = A._transposed ? A._rows : A._cols;
+	int k2 = B._transposed ? B._cols : B._rows;
+	int n = B._transposed ? B._rows : B._cols;
 
 	log(LL_DEBUG, "debug: %s [%d,%d] <- %s%s [%d,%d] * %s%s [%d,%d]\n",
 		name, m, n,
-		A.name, A.transposed ? "'" : "", m, k1,
-		B.name, B.transposed ? "'" : "", k2, n);
+		A._name, A._transposed ? "'" : "", m, k1,
+		B._name, B._transposed ? "'" : "", k2, n);
 
 	assert(k1 == k2);
 
@@ -734,24 +734,24 @@ Matrix Matrix::product(const char *name, const Matrix& B) const
 	// C := alpha * A * B + beta * C
 #ifdef __NVCC__
 	magma_queue_t queue = magma_queue();
-	magma_trans_t TransA = A.transposed ? MagmaTrans : MagmaNoTrans;
-	magma_trans_t TransB = B.transposed ? MagmaTrans : MagmaNoTrans;
+	magma_trans_t TransA = A._transposed ? MagmaTrans : MagmaNoTrans;
+	magma_trans_t TransB = B._transposed ? MagmaTrans : MagmaNoTrans;
 
 	magma_sgemm(TransA, TransB,
 		m, n, k1,
-		alpha, A.data_gpu, A.rows, B.data_gpu, B.rows,
-		beta, C.data_gpu, C.rows,
+		alpha, A._data_gpu, A._rows, B._data_gpu, B._rows,
+		beta, C._data_gpu, C._rows,
 		queue);
 
 	C.gpu_read();
 #else
-	CBLAS_TRANSPOSE TransA = A.transposed ? CblasTrans : CblasNoTrans;
-	CBLAS_TRANSPOSE TransB = B.transposed ? CblasTrans : CblasNoTrans;
+	CBLAS_TRANSPOSE TransA = A._transposed ? CblasTrans : CblasNoTrans;
+	CBLAS_TRANSPOSE TransB = B._transposed ? CblasTrans : CblasNoTrans;
 
 	cblas_sgemm(CblasColMajor, TransA, TransB,
 		m, n, k1,
-		alpha, A.data, A.rows, B.data, B.rows,
-		beta, C.data, C.rows);
+		alpha, A._data_cpu, A._rows, B._data_cpu, B._rows,
+		beta, C._data_cpu, C._rows);
 #endif
 
 	return C;
@@ -763,18 +763,18 @@ Matrix Matrix::product(const char *name, const Matrix& B) const
 precision_t Matrix::sum() const
 {
 	log(LL_DEBUG, "debug: s = sum(%s [%d,%d])\n",
-		this->name, this->rows, this->cols);
+		this->_name, this->_rows, this->_cols);
 
-	assert(this->rows == 1 || this->cols == 1);
+	assert(this->_rows == 1 || this->_cols == 1);
 
-	int n = (this->rows == 1)
-		? this->cols
-		: this->rows;
+	int n = (this->_rows == 1)
+		? this->_cols
+		: this->_rows;
 	precision_t sum = 0.0f;
 
 	int i;
 	for ( i = 0; i < n; i++ ) {
-		sum += this->data[i];
+		sum += this->_data_cpu[i];
 	}
 
 	return sum;
@@ -788,14 +788,14 @@ precision_t Matrix::sum() const
 Matrix Matrix::transpose(const char *name) const
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- transpose(%s [%d,%d])\n",
-		name, this->cols, this->rows,
-		this->name, this->rows, this->cols);
+		name, this->_cols, this->_rows,
+		this->_name, this->_rows, this->_cols);
 
-	Matrix T(name, this->cols, this->rows);
+	Matrix T(name, this->_cols, this->_rows);
 
 	int i, j;
-	for ( i = 0; i < T.rows; i++ ) {
-		for ( j = 0; j < T.cols; j++ ) {
+	for ( i = 0; i < T._rows; i++ ) {
+		for ( j = 0; j < T._cols; j++ ) {
 			ELEM(T, i, j) = ELEM(*this, j, i);
 		}
 	}
@@ -815,13 +815,13 @@ void Matrix::add(const Matrix& B)
 	Matrix& A = *this;
 
 	log(LL_DEBUG, "debug: %s [%d,%d] <- %s [%d,%d] + %s [%d,%d]\n",
-		A.name, A.rows, A.cols,
-		A.name, A.rows, A.cols,
-		B.name, B.rows, B.cols);
+		A._name, A._rows, A._cols,
+		A._name, A._rows, A._cols,
+		B._name, B._rows, B._cols);
 
-	assert(A.rows == B.rows && A.cols == B.cols);
+	assert(A._rows == B._rows && A._cols == B._cols);
 
-	int n = A.rows * A.cols;
+	int n = A._rows * A._cols;
 	precision_t alpha = 1.0f;
 	int incX = 1;
 	int incY = 1;
@@ -829,11 +829,11 @@ void Matrix::add(const Matrix& B)
 #ifdef __NVCC__
 	magma_queue_t queue = magma_queue();
 
-	magma_saxpy(n, alpha, B.data_gpu, incX, A.data_gpu, incY, queue);
+	magma_saxpy(n, alpha, B._data_gpu, incX, A._data_gpu, incY, queue);
 
 	A.gpu_read();
 #else
-	cblas_saxpy(n, alpha, B.data, incX, A.data, incY);
+	cblas_saxpy(n, alpha, B._data_cpu, incX, A._data_cpu, incY);
 #endif
 }
 
@@ -849,14 +849,14 @@ void Matrix::assign_column(int i, const Matrix& B, int j)
 	Matrix& A = *this;
 
 	log(LL_DEBUG, "debug: %s(:, %d) [%d,%d] <- %s(:, %d) [%d,%d]\n",
-		A.name, i + 1, A.rows, 1,
-		B.name, j + 1, B.rows, 1);
+		A._name, i + 1, A._rows, 1,
+		B._name, j + 1, B._rows, 1);
 
-	assert(A.rows == B.rows);
-	assert(0 <= i && i < A.cols);
-	assert(0 <= j && j < B.cols);
+	assert(A._rows == B._rows);
+	assert(0 <= i && i < A._cols);
+	assert(0 <= j && j < B._cols);
 
-	memcpy(&ELEM(A, 0, i), B.data, B.rows * sizeof(precision_t));
+	memcpy(&ELEM(A, 0, i), B._data_cpu, B._rows * sizeof(precision_t));
 
 	A.gpu_write();
 }
@@ -873,15 +873,15 @@ void Matrix::assign_row(int i, const Matrix& B, int j)
 	Matrix& A = *this;
 
 	log(LL_DEBUG, "debug: %s(%d, :) [%d,%d] <- %s(%d, :) [%d,%d]\n",
-		A.name, i + 1, 1, A.cols,
-		B.name, j + 1, 1, B.cols);
+		A._name, i + 1, 1, A._cols,
+		B._name, j + 1, 1, B._cols);
 
-	assert(A.cols == B.cols);
-	assert(0 <= i && i < A.rows);
-	assert(0 <= j && j < B.rows);
+	assert(A._cols == B._cols);
+	assert(0 <= i && i < A._rows);
+	assert(0 <= j && j < B._rows);
 
 	int k;
-	for ( k = 0; k < A.cols; k++ ) {
+	for ( k = 0; k < A._cols; k++ ) {
 		ELEM(A, i, k) = ELEM(B, j, k);
 	}
 
@@ -896,12 +896,12 @@ void Matrix::assign_row(int i, const Matrix& B, int j)
 void Matrix::elem_apply(elem_func_t f)
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- f(%s [%d,%d])\n",
-		this->name, this->rows, this->cols,
-		this->name, this->rows, this->cols);
+		this->_name, this->_rows, this->_cols,
+		this->_name, this->_rows, this->_cols);
 
 	int i, j;
-	for ( i = 0; i < this->rows; i++ ) {
-		for ( j = 0; j < this->cols; j++ ) {
+	for ( i = 0; i < this->_rows; i++ ) {
+		for ( j = 0; j < this->_cols; j++ ) {
 			ELEM(*this, i, j) = f(ELEM(*this, i, j));
 		}
 	}
@@ -917,20 +917,20 @@ void Matrix::elem_apply(elem_func_t f)
 void Matrix::elem_mult(precision_t c)
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- %g * %s [%d,%d]\n",
-		this->name, this->rows, this->cols,
-		c, this->name, this->rows, this->cols);
+		this->_name, this->_rows, this->_cols,
+		c, this->_name, this->_rows, this->_cols);
 
-	int n = this->rows * this->cols;
+	int n = this->_rows * this->_cols;
 	int incX = 1;
 
 #ifdef __NVCC__
 	magma_queue_t queue = magma_queue();
 
-	magma_sscal(n, c, this->data_gpu, incX, queue);
+	magma_sscal(n, c, this->_data_gpu, incX, queue);
 
 	this->gpu_read();
 #else
-	cblas_sscal(n, c, this->data, incX);
+	cblas_sscal(n, c, this->_data_cpu, incX);
 #endif
 }
 
@@ -944,13 +944,13 @@ void Matrix::subtract(const Matrix& B)
 	Matrix& A = *this;
 
 	log(LL_DEBUG, "debug: %s [%d,%d] <- %s [%d,%d] - %s [%d,%d]\n",
-		A.name, A.rows, A.cols,
-		A.name, A.rows, A.cols,
-		B.name, B.rows, B.cols);
+		A._name, A._rows, A._cols,
+		A._name, A._rows, A._cols,
+		B._name, B._rows, B._cols);
 
-	assert(A.rows == B.rows && A.cols == B.cols);
+	assert(A._rows == B._rows && A._cols == B._cols);
 
-	int n = A.rows * A.cols;
+	int n = A._rows * A._cols;
 	precision_t alpha = -1.0f;
 	int incX = 1;
 	int incY = 1;
@@ -958,11 +958,11 @@ void Matrix::subtract(const Matrix& B)
 #ifdef __NVCC__
 	magma_queue_t queue = magma_queue();
 
-	magma_saxpy(n, alpha, B.data_gpu, incX, A.data_gpu, incY, queue);
+	magma_saxpy(n, alpha, B._data_gpu, incX, A._data_gpu, incY, queue);
 
 	A.gpu_read();
 #else
-	cblas_saxpy(n, alpha, B.data, incX, A.data, incY);
+	cblas_saxpy(n, alpha, B._data_cpu, incX, A._data_cpu, incY);
 #endif
 }
 
@@ -978,16 +978,16 @@ void Matrix::subtract(const Matrix& B)
 void Matrix::subtract_columns(const Matrix& a)
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- %s [%d,%d] - %s [%d,%d] * %s [%d,%d]\n",
-		this->name, this->rows, this->cols,
-		this->name, this->rows, this->cols,
-		a.name, a.rows, a.cols,
-		"1_N'", 1, this->cols);
+		this->_name, this->_rows, this->_cols,
+		this->_name, this->_rows, this->_cols,
+		a._name, a._rows, a._cols,
+		"1_N'", 1, this->_cols);
 
-	assert(this->rows == a.rows && a.cols == 1);
+	assert(this->_rows == a._rows && a._cols == 1);
 
 	int i, j;
-	for ( i = 0; i < this->cols; i++ ) {
-		for ( j = 0; j < this->rows; j++ ) {
+	for ( i = 0; i < this->_cols; i++ ) {
+		for ( j = 0; j < this->_rows; j++ ) {
 			ELEM(*this, j, i) -= ELEM(a, j, 0);
 		}
 	}
@@ -1006,16 +1006,16 @@ void Matrix::subtract_columns(const Matrix& a)
 void Matrix::subtract_rows(const Matrix& a)
 {
 	log(LL_DEBUG, "debug: %s [%d,%d] <- %s [%d,%d] - %s [%d,%d] * %s [%d,%d]\n",
-		this->name, this->rows, this->cols,
-		this->name, this->rows, this->cols,
-		"1_N", this->rows, 1,
-		a.name, a.rows, a.cols);
+		this->_name, this->_rows, this->_cols,
+		this->_name, this->_rows, this->_cols,
+		"1_N", this->_rows, 1,
+		a._name, a._rows, a._cols);
 
-	assert(this->cols == a.cols && a.rows == 1);
+	assert(this->_cols == a._cols && a._rows == 1);
 
 	int i, j;
-	for ( i = 0; i < this->rows; i++ ) {
-		for ( j = 0; j < this->cols; j++ ) {
+	for ( i = 0; i < this->_rows; i++ ) {
+		for ( j = 0; j < this->_cols; j++ ) {
 			ELEM(*this, i, j) -= ELEM(a, 0, j);
 		}
 	}
@@ -1030,11 +1030,11 @@ void Matrix::subtract_rows(const Matrix& a)
  */
 void swap(Matrix& A, Matrix& B)
 {
-	std::swap(A.name, B.name);
-	std::swap(A.rows, B.rows);
-	std::swap(A.cols, B.cols);
-	std::swap(A.data, B.data);
-	std::swap(A.data_gpu, B.data_gpu);
-	std::swap(A.transposed, B.transposed);
+	std::swap(A._name, B._name);
+	std::swap(A._rows, B._rows);
+	std::swap(A._cols, B._cols);
+	std::swap(A._data_cpu, B._data_cpu);
+	std::swap(A._data_gpu, B._data_gpu);
+	std::swap(A._transposed, B._transposed);
 	std::swap(A.T, B.T);
 }

@@ -112,12 +112,12 @@ std::vector<data_label_t> KNNLayer::predict(const Matrix& X, const std::vector<d
 	std::vector<data_label_t> Y_pred;
 
 	int i;
-	for ( i = 0; i < X_test.cols; i++ ) {
+	for ( i = 0; i < X_test.cols(); i++ ) {
 		// compute distance between X_test_i and each X_i
 		std::vector<neighbor_t> neighbors;
 
 		int j;
-		for ( j = 0; j < X.cols; j++ ) {
+		for ( j = 0; j < X.cols(); j++ ) {
 			neighbor_t n;
 			n.label = Y[j].label;
 			n.dist = this->dist(X_test, i, X, j);

@@ -16,21 +16,20 @@ typedef float precision_t;
 
 #define M_ELEM_FPRINT  "% 10.4g"
 
-#define ELEM(M, i, j) (M).data[(j) * (M).rows + (i)]
+#define ELEM(M, i, j) (M)._data_cpu[(j) * (M)._rows + (i)]
 
 typedef precision_t (*elem_func_t)(precision_t);
 
 class Matrix {
 private:
-	bool transposed;
+	const char *_name;
+	int _rows;
+	int _cols;
+	precision_t *_data_cpu;
+	precision_t *_data_gpu;
+	bool _transposed;
 
 public:
-	const char *name;
-	int rows;
-	int cols;
-	precision_t *data;
-	precision_t *data_gpu;
-
 	Matrix *T;
 
 	// constructor, destructor functions
@@ -60,6 +59,11 @@ public:
 	void image_write(int i, Image& image);
 
 	// getter functions
+	inline const char * name() const { return this->_name; };
+	inline int rows() const { return this->_rows; };
+	inline int cols() const { return this->_cols; };
+	inline precision_t elem(int i, int j) const { return ELEM(*this, i, j); };
+
 	int argmax() const;
 	Matrix diagonalize(const char *name) const;
 	void eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Matrix& D) const;

@@ -46,14 +46,14 @@ bool is_equal(precision_t a, precision_t b)
  */
 bool m_equal(const Matrix& A, const Matrix& B)
 {
-	if ( A.rows != B.rows || A.cols != B.cols ) {
+	if ( A.rows() != B.rows() || A.cols() != B.cols() ) {
 		return false;
 	}
 
 	int i, j;
-	for ( i = 0; i < A.rows; i++ ) {
-		for ( j = 0; j < A.cols; j++ ) {
-			if ( !is_equal(ELEM(A, i, j), ELEM(B, i, j)) ) {
+	for ( i = 0; i < A.rows(); i++ ) {
+		for ( j = 0; j < A.cols(); j++ ) {
+			if ( !is_equal(A.elem(i, j), B.elem(i, j)) ) {
 				return false;
 			}
 		}
@@ -111,7 +111,7 @@ void assert_equal_matrix(const Matrix& A, const Matrix& B, const char *name)
  */
 void assert_matrix_value(const Matrix& M, precision_t *data, const char *name)
 {
-	Matrix M_test("M_test", M.rows, M.cols, data);
+	Matrix M_test("M_test", M.rows(), M.cols(), data);
 
 	assert_equal_matrix(M, M_test, name);
 }
@@ -265,7 +265,7 @@ void test_argmax()
 	if ( LOGGER(LL_VERBOSE) ) {
 		v.print(stdout);
 
-		printf("argmax(%s) = %d\n", v.name, index);
+		printf("argmax(%s) = %d\n", v.name(), index);
 	}
 
 	assert_equal(index, 4, "argmax(v)");
@@ -325,7 +325,7 @@ void test_eigen()
 	Matrix V;
 	Matrix D;
 
-	M.eigen("V", "D", M.rows, V, D);
+	M.eigen("V", "D", M.rows(), V, D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		M.print(stdout);
@@ -370,7 +370,7 @@ void test_eigen2()
 	Matrix B_inv = B.inverse("inv(B)");
 	Matrix J = B_inv * A;
 
-	J.eigen("V", "D", J.rows, V, D);
+	J.eigen("V", "D", J.rows(), V, D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		A.print(stdout);
@@ -472,7 +472,7 @@ void test_norm()
 	if ( LOGGER(LL_VERBOSE) ) {
 		v.print(stdout);
 
-		printf("norm(%s) = %g\n", v.name, n);
+		printf("norm(%s) = %g\n", v.name(), n);
 	}
 
 	assert_equal(n, 3.7417, "norm(v)");
@@ -559,7 +559,7 @@ void test_sum()
 	if ( LOGGER(LL_VERBOSE) ) {
 		v.print(stdout);
 
-		printf("sum(%s) = %g\n", v.name, s);
+		printf("sum(%s) = %g\n", v.name(), s);
 	}
 
 	assert_equal(s, 2, "sum(v)");

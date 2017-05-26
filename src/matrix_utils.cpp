@@ -24,24 +24,24 @@
  */
 precision_t m_dist_COS(const Matrix& A, int i, const Matrix& B, int j)
 {
-	assert(A.rows == B.rows);
-	assert(0 <= i && i < A.cols && 0 <= j && j < B.cols);
+	assert(A.rows() == B.rows());
+	assert(0 <= i && i < A.cols() && 0 <= j && j < B.cols());
 
 	// compute x * y
 	precision_t x_dot_y = 0;
 
 	int k;
-	for ( k = 0; k < A.rows; k++ ) {
-		x_dot_y += ELEM(A, k, i) * ELEM(B, k, j);
+	for ( k = 0; k < A.rows(); k++ ) {
+		x_dot_y += A.elem(k, i) * B.elem(k, j);
 	}
 
 	// compute ||x|| and ||y||
 	precision_t abs_x = 0;
 	precision_t abs_y = 0;
 
-	for ( k = 0; k < A.rows; k++ ) {
-		abs_x += ELEM(A, k, i) * ELEM(A, k, i);
-		abs_y += ELEM(B, k, j) * ELEM(B, k, j);
+	for ( k = 0; k < A.rows(); k++ ) {
+		abs_x += A.elem(k, i) * A.elem(k, i);
+		abs_y += B.elem(k, j) * B.elem(k, j);
 	}
 
 	// compute similarity
@@ -64,14 +64,14 @@ precision_t m_dist_COS(const Matrix& A, int i, const Matrix& B, int j)
  */
 precision_t m_dist_L1(const Matrix& A, int i, const Matrix& B, int j)
 {
-	assert(A.rows == B.rows);
-	assert(0 <= i && i < A.cols && 0 <= j && j < B.cols);
+	assert(A.rows() == B.rows());
+	assert(0 <= i && i < A.cols() && 0 <= j && j < B.cols());
 
 	precision_t dist = 0;
 
 	int k;
-	for ( k = 0; k < A.rows; k++ ) {
-		dist += fabsf(ELEM(A, k, i) - ELEM(B, k, j));
+	for ( k = 0; k < A.rows(); k++ ) {
+		dist += fabsf(A.elem(k, i) - B.elem(k, j));
 	}
 
 	return dist;
@@ -90,14 +90,14 @@ precision_t m_dist_L1(const Matrix& A, int i, const Matrix& B, int j)
  */
 precision_t m_dist_L2(const Matrix& A, int i, const Matrix& B, int j)
 {
-	assert(A.rows == B.rows);
-	assert(0 <= i && i < A.cols && 0 <= j && j < B.cols);
+	assert(A.rows() == B.rows());
+	assert(0 <= i && i < A.cols() && 0 <= j && j < B.cols());
 
 	precision_t dist = 0;
 
 	int k;
-	for ( k = 0; k < A.rows; k++ ) {
-		precision_t diff = ELEM(A, k, i) - ELEM(B, k, j);
+	for ( k = 0; k < A.rows(); k++ ) {
+		precision_t diff = A.elem(k, i) - B.elem(k, j);
 		dist += diff * diff;
 	}
 
@@ -124,7 +124,7 @@ std::vector<Matrix> m_copy_classes(const Matrix& X, const std::vector<data_entry
 	int i, j;
 	for ( i = 0, j = 0; i < c; i++ ) {
 		int k = j;
-		while ( k < X.cols && y[k].label == y[j].label ) {
+		while ( k < X.cols() && y[k].label == y[j].label ) {
 			k++;
 		}
 
@@ -132,7 +132,7 @@ std::vector<Matrix> m_copy_classes(const Matrix& X, const std::vector<data_entry
 		j = k;
 	}
 
-	assert(j == X.cols);
+	assert(j == X.cols());
 
 	return X_c;
 }
@@ -193,7 +193,7 @@ std::vector<Matrix> m_class_scatters(const std::vector<Matrix>& X_c, const std::
  */
 Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matrix>& U, int c)
 {
-	int N = U[0].rows;
+	int N = U[0].rows();
 
 	// compute the mean of all classes
 	Matrix u("u", N, 1);
@@ -213,7 +213,7 @@ Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matri
 		u_i.subtract(u);
 
 		Matrix S_b_i = u_i.product("S_b_i", *u_i.T);
-		S_b_i.elem_mult(X_c[i].cols);
+		S_b_i.elem_mult(X_c[i].cols());
 
 		S_b.add(S_b_i);
 	}
@@ -234,7 +234,7 @@ Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matri
 Matrix m_scatter_within(const std::vector<Matrix>& X_c, const std::vector<Matrix>& U, int c)
 {
 	// compute the within-scatter S_w
-	int N = U[0].rows;
+	int N = U[0].rows();
 	Matrix S_w = Matrix::zeros("S_w", N, N);
 
 	int i;

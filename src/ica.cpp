@@ -82,8 +82,8 @@ void ICALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 	timer_push("compute ICA projection matrix");
 
 	// compute independent components
-	// icasig = W_mix * (mixedsig + mixedmean * ones(1, mixedsig.cols))
-	Matrix ones = Matrix::ones("ones", 1, mixedsig.cols);
+	// icasig = W_mix * (mixedsig + mixedmean * ones(1, mixedsig.cols()))
+	Matrix ones = Matrix::ones("ones", 1, mixedsig.cols());
 	Matrix icasig_temp1 = mixedmean.product("icasig_temp1", ones);
 
 	icasig_temp1.add(mixedsig);
@@ -162,7 +162,7 @@ void ICALayer::print()
  *
  * which gives:
  *
- * w+ = X * ((X' * w) .^ 3) / X.cols - 3 * w
+ * w+ = X * ((X' * w) .^ 3) / X.cols() - 3 * w
  *
  * @param w0
  * @param X
@@ -178,7 +178,7 @@ Matrix fpica_pow3 (const Matrix& w0, const Matrix& X)
 	w_temp2.elem_mult(3.0f);
 
 	Matrix w = X.product("w", w_temp1);
-	w.elem_mult(1.0f / X.cols);
+	w.elem_mult(1.0f / X.cols());
 	w.subtract(w_temp2);
 
 	return w;
@@ -193,7 +193,7 @@ Matrix fpica_pow3 (const Matrix& w0, const Matrix& X)
  *
  * which gives:
  *
- * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X.cols
+ * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X.cols()
  *
  * @param w0
  * @param X
@@ -214,7 +214,7 @@ Matrix fpica_tanh (const Matrix& w0, const Matrix& X)
 
 	Matrix w = X.product("w", w_temp1);
 	w.subtract(w_temp3);
-	w.elem_mult(1.0f / X.cols);
+	w.elem_mult(1.0f / X.cols());
 
 	return w;
 }
@@ -248,7 +248,7 @@ precision_t dgauss (precision_t x)
  *
  * which gives:
  *
- * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X.cols
+ * w+ = (X * g(X' * w) - sum(g'(X' * w)) * w) / X.cols()
  *
  * @param w0
  * @param X
@@ -268,7 +268,7 @@ Matrix fpica_gauss (const Matrix& w0, const Matrix& X)
 
 	Matrix w = X.product("w", w_temp1);
 	w.subtract(w_temp3);
-	w.elem_mult(1.0f / X.cols);
+	w.elem_mult(1.0f / X.cols());
 
 	return w;
 }
@@ -286,8 +286,8 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 {
 	// if n2 is -1, use default value
 	int n2 = (this->n2 == -1)
-		? X.rows
-		: min(X.rows, this->n2);
+		? X.rows()
+		: min(X.rows(), this->n2);
 
 	// determine nonlinearity function
 	ica_nonl_func_t fpica_update = nullptr;
@@ -303,7 +303,7 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 	}
 
 	Matrix B = Matrix::zeros("B", n2, n2);
-	Matrix W_mix = Matrix::zeros("W_mix", n2, W_z.cols);
+	Matrix W_mix = Matrix::zeros("W_mix", n2, W_z.cols());
 
 	int i;
 	for ( i = 0; i < n2; i++ ) {
@@ -320,7 +320,7 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 		w.elem_mult(1.0f / w.norm());
 
 		// initialize w0
-		Matrix w0 = Matrix::zeros("w0", w.rows, w.cols);
+		Matrix w0 = Matrix::zeros("w0", w.rows(), w.cols());
 
 		int j;
 		for ( j = 0; j < this->max_iter; j++ ) {

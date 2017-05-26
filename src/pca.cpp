@@ -34,12 +34,12 @@ void PCALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 {
 	// if n1 = -1, use default value
 	int n1 = (this->n1 == -1)
-		? min(X.rows, X.cols)
+		? min(X.rows(), X.cols())
 		: this->n1;
 
 	timer_push("PCA");
 
-	if ( X.rows > X.cols ) {
+	if ( X.rows() > X.cols() ) {
 		timer_push("compute surrogate of covariance matrix L");
 
 		Matrix L = X.T->product("L", X);

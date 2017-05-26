@@ -33,7 +33,7 @@ void LDALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 {
 	// if n1 = -1, use default value
 	int n1 = (this->n1 == -1)
-		? X.cols - c
+		? X.cols() - c
 		: this->n1;
 
 	// if n2 = -1, use default value

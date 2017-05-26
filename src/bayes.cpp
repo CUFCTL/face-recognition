@@ -3,7 +3,7 @@
  *
  * Implementation of the naive Bayes classifier.
  */
-#include <stdlib.h>
+#include <algorithm>
 #include "bayes.h"
 #include "lda.h"
 #include "logger.h"
@@ -30,7 +30,7 @@ precision_t bayes_prob(Matrix& x, const Matrix& mu, const Matrix& S_inv)
 	Matrix p_temp1 = x.T->product("p_temp1", S_inv);
 	Matrix p_temp2 = p_temp1.product("p_temp2", x);
 
-	precision_t p = -0.5f * ELEM(p_temp2, 0, 0);
+	precision_t p = -0.5f * p_temp2.elem(0, 0);
 
 	return p;
 }
@@ -61,16 +61,16 @@ std::vector<data_label_t> BayesLayer::predict(const Matrix& X, const std::vector
 	// compute label for each test vector
 	std::vector<data_label_t> Y_pred;
 
-	for ( i = 0; i < X_test.cols; i++ ) {
-		Matrix probs("probs", C.size(), 1);
+	for ( i = 0; i < X_test.cols(); i++ ) {
+		std::vector<precision_t> probs;
 
 		for ( j = 0; j < C.size(); j++ ) {
 			Matrix x_test("x_test", X_test, i, i + 1);
 
-			probs.data[j] = bayes_prob(x_test, U[j], S_inv[j]);
+			probs.push_back(bayes_prob(x_test, U[j], S_inv[j]));
 		}
 
-		int index = probs.argmax();
+		int index = *max_element(probs.begin(), probs.end());
 
 		Y_pred.push_back(C[index]);
 	}
