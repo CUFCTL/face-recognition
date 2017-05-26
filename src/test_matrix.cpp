@@ -30,13 +30,12 @@ typedef void (*test_func_t)(void);
  *
  * @param a
  * @param b
- * @return 1 if a = b, 0 otherwise
  */
-int is_equal(precision_t a, precision_t b)
+bool is_equal(precision_t a, precision_t b)
 {
 	static precision_t EPSILON = 1e-4;
 
-	return fabsf(a - b) < EPSILON;
+	return (fabsf(a - b) < EPSILON);
 }
 
 /**
@@ -44,24 +43,39 @@ int is_equal(precision_t a, precision_t b)
  *
  * @param A
  * @param B
- * @return 1 if A = B, 0 otherwise
  */
-int m_equal(const Matrix& A, const Matrix& B)
+bool m_equal(const Matrix& A, const Matrix& B)
 {
 	if ( A.rows != B.rows || A.cols != B.cols ) {
-		return 0;
+		return false;
 	}
 
 	int i, j;
 	for ( i = 0; i < A.rows; i++ ) {
 		for ( j = 0; j < A.cols; j++ ) {
 			if ( !is_equal(ELEM(A, i, j), ELEM(B, i, j)) ) {
-				return 0;
+				return false;
 			}
 		}
 	}
 
-	return 1;
+	return true;
+}
+
+/**
+ * Print a test result.
+ *
+ * @param name
+ * @param result
+ */
+void print_result(const char *name, bool result)
+{
+	const char *fmt = result
+		? "  %-20s  " ANSI_GREEN "PASSED" ANSI_RESET "\n"
+		: "  %-20s  " ANSI_RED ANSI_BOLD "FAILED" ANSI_RESET "\n";
+
+	printf(fmt, name);
+	fflush(stdout);
 }
 
 /**
@@ -73,14 +87,7 @@ int m_equal(const Matrix& A, const Matrix& B)
  */
 void assert_equal(precision_t a, precision_t b, const char *name)
 {
-	if ( is_equal(a, b) ) {
-		printf(ANSI_GREEN "PASSED: %s" ANSI_RESET "\n", name);
-	}
-	else {
-		printf(ANSI_RED ANSI_BOLD "FAILED: %s" ANSI_RESET "\n", name);
-	}
-
-	fflush(stdout);
+	print_result(name, is_equal(a, b));
 }
 
 /**
@@ -92,14 +99,7 @@ void assert_equal(precision_t a, precision_t b, const char *name)
  */
 void assert_equal_matrix(const Matrix& A, const Matrix& B, const char *name)
 {
-	if ( m_equal(A, B) ) {
-		printf(ANSI_GREEN "PASSED: %s" ANSI_RESET "\n", name);
-	}
-	else {
-		printf(ANSI_RED ANSI_BOLD "FAILED: %s" ANSI_RESET "\n", name);
-	}
-
-	fflush(stdout);
+	print_result(name, m_equal(A, B));
 }
 
 /**
@@ -940,10 +940,9 @@ int main(int argc, char **argv)
 	for ( i = 0; i < num_tests; i++ ) {
 		test_func_t test = tests[i];
 
-		printf("TEST %d\n\n", i + 1);
-
+		printf("TEST %d\n", i + 1);
 		test();
-		putchar('\n');
+		printf("\n");
 	}
 
 #ifdef __NVCC__
