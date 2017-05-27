@@ -37,5 +37,7 @@ void log(logger_level_t level, const char *format, ...)
 		va_start(ap, format);
 		vfprintf(stream, format, ap);
 		va_end(ap);
+
+		printf("\n");
 	}
 }

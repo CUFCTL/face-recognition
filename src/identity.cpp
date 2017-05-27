@@ -55,5 +55,5 @@ void IdentityLayer::load(FILE *file)
  */
 void IdentityLayer::print()
 {
-	log(LL_VERBOSE, "Identity\n");
+	log(LL_VERBOSE, "Identity");
 }

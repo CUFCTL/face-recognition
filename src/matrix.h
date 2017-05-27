@@ -34,8 +34,8 @@ public:
 	// constructor, destructor functions
 	Matrix(const char *name, int rows, int cols);
 	Matrix(const char *name, int rows, int cols, precision_t *data);
-	Matrix(const char *name, const Matrix& M);
 	Matrix(const char *name, const Matrix& M, int i, int j);
+	Matrix(const char *name, const Matrix& M);
 	Matrix(const Matrix& M);
 	Matrix(Matrix&& M);
 	Matrix();

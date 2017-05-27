@@ -29,12 +29,12 @@ Model::Model(FeatureLayer *feature, ClassifierLayer *classifier)
 	this->stats.test_time = 0.0f;
 
 	// log hyperparameters
-	log(LL_VERBOSE, "Hyperparameters\n");
+	log(LL_VERBOSE, "Hyperparameters");
 
 	this->feature->print();
 	this->classifier->print();
 
-	log(LL_VERBOSE, "\n");
+	log(LL_VERBOSE, "");
 }
 
 /**
@@ -57,7 +57,7 @@ void Model::train(const Dataset& train_set)
 
 	this->train_set = train_set;
 
-	log(LL_VERBOSE, "Training set: %d samples, %d classes\n",
+	log(LL_VERBOSE, "Training set: %d samples, %d classes",
 		train_set.entries.size(),
 		train_set.labels.size());
 
@@ -76,7 +76,7 @@ void Model::train(const Dataset& train_set)
 	// record training time
 	this->stats.train_time = timer_pop();
 
-	log(LL_VERBOSE, "\n");
+	log(LL_VERBOSE, "");
 }
 
 /**
@@ -126,7 +126,7 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 {
 	timer_push("Prediction");
 
-	log(LL_VERBOSE, "Test set: %d samples, %d classes\n",
+	log(LL_VERBOSE, "Test set: %d samples, %d classes",
 		test_set.entries.size(),
 		test_set.labels.size());
 
@@ -146,7 +146,7 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 	// record predition time
 	this->stats.test_time = timer_pop();
 
-	log(LL_VERBOSE, "\n");
+	log(LL_VERBOSE, "");
 
 	return Y_pred;
 }
@@ -172,7 +172,7 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 	this->stats.accuracy = 100.0f * num_correct / test_set.entries.size();
 
 	// print results
-	log(LL_VERBOSE, "Results\n");
+	log(LL_VERBOSE, "Results");
 
 	for ( i = 0; i < test_set.entries.size(); i++ ) {
 		const data_label_t& y_pred = Y_pred[i];
@@ -182,16 +182,16 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 			? "(!)"
 			: "";
 
-		log(LL_VERBOSE, "%-12s -> %-4s %s\n",
+		log(LL_VERBOSE, "%-12s -> %-4s %s",
 			basename(entry.name.c_str()),
 			y_pred.c_str(), s);
 	}
 
-	log(LL_VERBOSE, "%d / %d matched, %.2f%%\n",
+	log(LL_VERBOSE, "%d / %d matched, %.2f%%",
 		num_correct,
 		test_set.entries.size(),
 		this->stats.accuracy);
-	log(LL_VERBOSE, "\n");
+	log(LL_VERBOSE, "");
 }
 
 /**

@@ -42,7 +42,7 @@ void LDALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 		: this->n2;
 
 	if ( n1 <= 0 ) {
-		log(LL_ERROR, "error: training set is too small for LDA\n");
+		log(LL_ERROR, "error: training set is too small for LDA");
 		exit(1);
 	}
 
@@ -120,7 +120,7 @@ void LDALayer::load(FILE *file)
  */
 void LDALayer::print()
 {
-	log(LL_VERBOSE, "LDA\n");
-	log(LL_VERBOSE, "  %-20s  %10d\n", "n1", this->n1);
-	log(LL_VERBOSE, "  %-20s  %10d\n", "n2", this->n2);
+	log(LL_VERBOSE, "LDA");
+	log(LL_VERBOSE, "  %-20s  %10d", "n1", this->n1);
+	log(LL_VERBOSE, "  %-20s  %10d", "n2", this->n2);
 }

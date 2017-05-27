@@ -111,6 +111,6 @@ void PCALayer::load(FILE *file)
  */
 void PCALayer::print()
 {
-	log(LL_VERBOSE, "PCA\n");
-	log(LL_VERBOSE, "  %-20s  %10d\n", "n1", this->n1);
+	log(LL_VERBOSE, "PCA");
+	log(LL_VERBOSE, "  %-20s  %10d", "n1", this->n1);
 }

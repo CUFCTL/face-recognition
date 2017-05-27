@@ -80,5 +80,5 @@ std::vector<data_label_t> BayesLayer::predict(const Matrix& X, const std::vector
  */
 void BayesLayer::print()
 {
-	log(LL_VERBOSE, "Bayes\n");
+	log(LL_VERBOSE, "Bayes");
 }

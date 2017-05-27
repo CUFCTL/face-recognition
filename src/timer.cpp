@@ -30,7 +30,7 @@ void timer_push(const char *name)
 	timer.items.push_back(item);
 	timer.level++;
 
-	log(LL_VERBOSE, "%*s%s\n", 2 * item.level, "", item.name);
+	log(LL_VERBOSE, "%*s%s", 2 * item.level, "", item.name);
 }
 
 /**
@@ -77,15 +77,15 @@ void timer_print(void)
 	}
 
 	// print timer items
-	log(LL_VERBOSE, "Timing\n");
-	log(LL_VERBOSE, "%-*s  %s\n", max_len, "Name", "Duration (s)");
-	log(LL_VERBOSE, "%-*s  %s\n", max_len, "----", "------------");
+	log(LL_VERBOSE, "Timing");
+	log(LL_VERBOSE, "%-*s  %s", max_len, "Name", "Duration (s)");
+	log(LL_VERBOSE, "%-*s  %s", max_len, "----", "------------");
 
 	for ( iter = timer.items.begin(); iter != timer.items.end(); iter++ ) {
-		log(LL_VERBOSE, "%*s%-*s  % 12.3f\n",
+		log(LL_VERBOSE, "%*s%-*s  % 12.3f",
 			2 * iter->level, "",
 			max_len - 2 * iter->level, iter->name,
 			iter->duration);
 	}
-	log(LL_VERBOSE, "\n");
+	log(LL_VERBOSE, "");
 }
