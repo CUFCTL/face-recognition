@@ -240,7 +240,7 @@ void test_copy_columns()
 
 	int i = 1;
 	int j = 3;
-	Matrix C("C", A, i, j);
+	Matrix C = A(i, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		A.print(stdout);

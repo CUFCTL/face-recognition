@@ -84,6 +84,7 @@ public:
 	void subtract_rows(const Matrix& a);
 
 	// operators
+	inline Matrix operator()(int i, int j) const { return Matrix("", *this, i, j); };
 	inline Matrix& operator=(Matrix B) { swap(*this, B); return *this; };
 	inline Matrix& operator+=(const Matrix& B) { this->add(B); return *this; };
 	inline Matrix& operator-=(const Matrix& B) { this->subtract(B); return *this; };

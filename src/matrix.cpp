@@ -532,8 +532,8 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 	// take only the n1 largest eigenvalues
 	i = max(i, D._cols - n1);
 
-	V = Matrix(V_name, V, i, V._cols);
-	D = Matrix(D_name, D, i, D._cols).diagonalize(D_name);
+	V = V(i, V._cols);
+	D = D(i, D._cols).diagonalize(D_name);
 }
 
 /**

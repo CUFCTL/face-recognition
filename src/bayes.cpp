@@ -23,7 +23,7 @@ BayesLayer::BayesLayer()
  *
  * g_i'(x) = -1/2 * (x - mu_i)' * S_i^-1 * (x - mu_i)
  */
-precision_t bayes_prob(Matrix& x, const Matrix& mu, const Matrix& S_inv)
+precision_t bayes_prob(Matrix x, const Matrix& mu, const Matrix& S_inv)
 {
 	x -= mu;
 
@@ -61,9 +61,9 @@ std::vector<data_label_t> BayesLayer::predict(const Matrix& X, const std::vector
 
 		// compute the Bayes probability for each class
 		for ( j = 0; j < C.size(); j++ ) {
-			Matrix x_test("x_test", X_test, i, i + 1);
+			precision_t p = bayes_prob(X_test(i, i + 1), U[j], S_inv[j]);
 
-			probs.push_back(bayes_prob(x_test, U[j], S_inv[j]));
+			probs.push_back(p);
 		}
 
 		// select the class with the highest probability

@@ -128,7 +128,7 @@ std::vector<Matrix> m_copy_classes(const Matrix& X, const std::vector<data_entry
 			k++;
 		}
 
-		X_c.push_back(Matrix("X_c_i", X, j, k));
+		X_c.push_back(X(j, k));
 		j = k;
 	}
 
