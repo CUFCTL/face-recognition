@@ -362,7 +362,7 @@ void Matrix::load(FILE *file)
 	fread(&rows, sizeof(int), 1, file);
 	fread(&cols, sizeof(int), 1, file);
 
-	Matrix("", rows, cols);
+	*this = Matrix("", rows, cols);
 	fread(this->_data_cpu, sizeof(precision_t), this->_rows * this->_cols, file);
 }
 
