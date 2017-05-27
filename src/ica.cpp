@@ -246,9 +246,8 @@ Matrix fpica_gauss (const Matrix& w0, const Matrix& X)
 	Matrix w_temp1 = TRAN(X) * w0;
 	Matrix w_temp2 = w_temp1;
 
-	w_temp1.elem_apply(tanhf);
-	w_temp2.elem_apply(sechf);
-	w_temp2.elem_apply(pow2);
+	w_temp1.elem_apply(gauss);
+	w_temp2.elem_apply(dgauss);
 
 	Matrix w = X * w_temp1;
 	w -= w_temp2.sum() * w0;
