@@ -15,6 +15,7 @@
 typedef float precision_t;
 
 #define ELEM(M, i, j) (M)._data_cpu[(j) * (M)._rows + (i)]
+#define TRAN(M) (*M.T)
 
 typedef precision_t (*elem_func_t)(precision_t);
 
@@ -93,10 +94,11 @@ public:
 	friend void swap(Matrix& A, Matrix& B);
 };
 
-inline Matrix operator+(Matrix A, const Matrix& B) { A += B; return A; }
-inline Matrix operator-(Matrix A, const Matrix& B) { A -= B; return A; }
+inline Matrix operator+(Matrix A, const Matrix& B) { return (A += B); }
+inline Matrix operator-(Matrix A, const Matrix& B) { return (A -= B); }
 inline Matrix operator*(const Matrix& A, const Matrix& B) { return A.product("", B); }
-inline Matrix operator*(Matrix A, precision_t c) { A *= c; return A; }
-inline Matrix operator/(Matrix A, precision_t c) { A /= c; return A; }
+inline Matrix operator*(Matrix A, precision_t c) { return (A *= c); }
+inline Matrix operator*(precision_t c, Matrix A) { return (A *= c); }
+inline Matrix operator/(Matrix A, precision_t c) { return (A /= c); }
 
 #endif

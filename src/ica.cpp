@@ -61,14 +61,14 @@ void ICALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 
 	pca.compute(mixedsig, y, c);
 
-	Matrix D_temp1("sqrt(D)", pca.D);
-	D_temp1.elem_apply(sqrtf);
+	Matrix D = pca.D;
+	D.elem_apply(sqrtf);
+	D = D.inverse(D.name());
 
-	Matrix D_temp2 = D_temp1.inverse("inv(sqrt(D))");
-	Matrix W_z = D_temp2.product("W_z", *pca.W.T);
+	Matrix W_z = D * TRAN(pca.W);
 
 	// compute whitened input U = W_z * mixedsig
-	Matrix U = W_z.product("U", mixedsig);
+	Matrix U = W_z * mixedsig;
 
 	timer_pop();
 
@@ -83,12 +83,10 @@ void ICALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 
 	// compute independent components
 	// icasig = W_mix * (mixedsig + mixedmean * ones(1, mixedsig.cols()))
-	Matrix ones = Matrix::ones("ones", 1, mixedsig.cols());
-	Matrix icasig_temp1 = mixedmean.product("icasig_temp1", ones);
+	Matrix icasig_temp1 = mixedmean * Matrix::ones("", 1, mixedsig.cols());
+	icasig_temp1 += mixedsig;
 
-	icasig_temp1.add(mixedsig);
-
-	Matrix icasig = W_mix.product("icasig", icasig_temp1);
+	Matrix icasig = W_mix * icasig_temp1;
 
 	// compute W_ica = icasig'
 	this->W = icasig.transpose("W_ica");
@@ -105,7 +103,7 @@ void ICALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
  */
 Matrix ICALayer::project(const Matrix& X)
 {
-	return this->W.T->product("P", X);
+	return TRAN(this->W) * X;
 }
 
 /**
@@ -166,20 +164,15 @@ void ICALayer::print()
  *
  * @param w0
  * @param X
- * @return w*
  */
 Matrix fpica_pow3 (const Matrix& w0, const Matrix& X)
 {
-	// compute w+
-	Matrix w_temp1 = X.T->product("w_temp1", w0);
+	Matrix w_temp1 = TRAN(X) * w0;
 	w_temp1.elem_apply(pow3);
 
-	Matrix w_temp2("w_temp2", w0);
-	w_temp2.elem_mult(3.0f);
-
-	Matrix w = X.product("w", w_temp1);
-	w.elem_mult(1.0f / X.cols());
-	w.subtract(w_temp2);
+	Matrix w = X * w_temp1;
+	w /= X.cols();
+	w -= 3 * w0;
 
 	return w;
 }
@@ -197,24 +190,19 @@ Matrix fpica_pow3 (const Matrix& w0, const Matrix& X)
  *
  * @param w0
  * @param X
- * @return w*
  */
 Matrix fpica_tanh (const Matrix& w0, const Matrix& X)
 {
-	// compute w+
-	Matrix w_temp1 = X.T->product("w_temp1", w0);
-	Matrix w_temp2("w_temp2", w_temp1);
+	Matrix w_temp1 = TRAN(X) * w0;
+	Matrix w_temp2 = w_temp1;
 
 	w_temp1.elem_apply(tanhf);
 	w_temp2.elem_apply(sechf);
 	w_temp2.elem_apply(pow2);
 
-	Matrix w_temp3("w_temp3", w0);
-	w_temp3.elem_mult(w_temp2.sum());
-
-	Matrix w = X.product("w", w_temp1);
-	w.subtract(w_temp3);
-	w.elem_mult(1.0f / X.cols());
+	Matrix w = X * w_temp1;
+	w -= w_temp2.sum() * w0;
+	w /= X.cols();
 
 	return w;
 }
@@ -252,23 +240,19 @@ precision_t dgauss (precision_t x)
  *
  * @param w0
  * @param X
- * @return w*
  */
 Matrix fpica_gauss (const Matrix& w0, const Matrix& X)
 {
-	// compute w+
-	Matrix w_temp1 = X.T->product("w_temp1", w0);
-	Matrix w_temp2("w_temp2", w_temp1);
+	Matrix w_temp1 = TRAN(X) * w0;
+	Matrix w_temp2 = w_temp1;
 
-	w_temp1.elem_apply(gauss);
-	w_temp2.elem_apply(dgauss);
+	w_temp1.elem_apply(tanhf);
+	w_temp2.elem_apply(sechf);
+	w_temp2.elem_apply(pow2);
 
-	Matrix w_temp3("w_temp3", w0);
-	w_temp3.elem_mult(w_temp2.sum());
-
-	Matrix w = X.product("w", w_temp1);
-	w.subtract(w_temp3);
-	w.elem_mult(1.0f / X.cols());
+	Matrix w = X * w_temp1;
+	w -= w_temp2.sum() * w0;
+	w /= X.cols();
 
 	return w;
 }
@@ -280,7 +264,6 @@ Matrix fpica_gauss (const Matrix& w0, const Matrix& X)
  *
  * @param X
  * @param W_z
- * @return mixing matrix W_mix
  */
 Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 {
@@ -312,36 +295,22 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 		// initialize w as a Gaussian (0, 1) random vector
 		Matrix w = Matrix::random("w", n2, 1);
 
-		// compute w = (w - B * B' * w), normalize w
-		Matrix w_temp1 = B.product("w_temp1", *B.T);
-		Matrix w_temp2 = w_temp1.product("w_temp2", w);
-
-		w.subtract(w_temp2);
-		w.elem_mult(1.0f / w.norm());
+		// compute w = w - B * B' * w, normalize w
+		w -= B * TRAN(B) * w;
+		w /= w.norm();
 
 		// initialize w0
 		Matrix w0 = Matrix::zeros("w0", w.rows(), w.cols());
 
 		int j;
 		for ( j = 0; j < this->max_iter; j++ ) {
-			// compute w = (w - B * B' * w), normalize w
-			w_temp1 = B.product("w_temp1", *B.T);
-			w_temp2 = w_temp1.product("w_temp2", w);
-
-			w.subtract(w_temp2);
-			w.elem_mult(1.0f / w.norm());
-
-			// compute w_delta1 = w - w0
-			Matrix w_delta1("w_delta1", w);
-			w_delta1.subtract(w0);
-
-			// compute w_delta2 = w + w0
-			Matrix w_delta2("w_delta2", w);
-			w_delta2.add(w0);
+			// compute w = w - B * B' * w, normalize w
+			w -= B * TRAN(B) * w;
+			w /= w.norm();
 
 			// determine whether the direction of w and w0 are equal
-			precision_t norm1 = w_delta1.norm();
-			precision_t norm2 = w_delta2.norm();
+			precision_t norm1 = (w - w0).norm();
+			precision_t norm2 = (w + w0).norm();
 
 			// terminate round if w converges
 			if ( norm1 < this->eps || norm2 < this->eps ) {
@@ -349,9 +318,7 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 				B.assign_column(i, w, 0);
 
 				// save W_mix(i, :) = w' * W_z
-				Matrix W_temp1 = w.T->product("W_temp1", W_z);
-
-				W_mix.assign_row(i, W_temp1, 0);
+				W_mix.assign_row(i, TRAN(w) * W_z, 0);
 
 				// continue to the next round
 				break;
@@ -364,7 +331,7 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 			w = fpica_update(w0, X);
 
 			// compute w* = w+ / ||w+||
-			w.elem_mult(1.0f / w.norm());
+			w /= w.norm();
 		}
 
 		log(LL_VERBOSE, "      iterations: %d\n", j);

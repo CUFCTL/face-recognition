@@ -479,8 +479,8 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 
 	assert(this->_rows == this->_cols);
 
-	Matrix V_temp1(V_name, *this);
-	Matrix D_temp1(D_name, 1, this->_cols);
+	V = Matrix(V_name, *this);
+	D = Matrix(D_name, 1, this->_cols);
 
 	// compute eigenvalues and eigenvectors
 	int n = this->_cols;
@@ -497,8 +497,8 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 	int info;
 
 	magma_ssyevd_gpu(MagmaVec, MagmaUpper,
-		n, V_temp1._data_gpu, lda,
-		D_temp1._data_cpu,
+		n, V._data_gpu, lda,
+		D._data_cpu,
 		wA, ldwa,
 		work, lwork,
 		iwork, liwork,
@@ -509,14 +509,14 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 	free(work);
 	free(iwork);
 
-	V_temp1.gpu_read();
+	V.gpu_read();
 #else
 	int lwork = 3 * n;
 	precision_t *work = (precision_t *)malloc(lwork * sizeof(precision_t));
 
 	int info = LAPACKE_ssyev_work(LAPACK_COL_MAJOR, 'V', 'U',
-		n, V_temp1._data_cpu, lda,
-		D_temp1._data_cpu,
+		n, V._data_cpu, lda,
+		D._data_cpu,
 		work, lwork);
 	assert(info == 0);
 
@@ -525,17 +525,15 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 
 	// take only positive eigenvalues
 	int i = 0;
-	while ( i < D_temp1._cols && ELEM(D_temp1, 0, i) < EPSILON ) {
+	while ( i < D._cols && ELEM(D, 0, i) < EPSILON ) {
 		i++;
 	}
 
 	// take only the n1 largest eigenvalues
-	i = max(i, D_temp1._cols - n1);
+	i = max(i, D._cols - n1);
 
-	V = Matrix(V_name, V_temp1, i, V_temp1._cols);
-
-	Matrix D_temp2 = Matrix(D_name, D_temp1, i, D_temp1._cols);
-	D = D_temp2.diagonalize(D_name);
+	V = Matrix(V_name, V, i, V._cols);
+	D = Matrix(D_name, D, i, D._cols).diagonalize(D_name);
 }
 
 /**
@@ -619,7 +617,7 @@ Matrix Matrix::mean_column(const char *name) const
 	}
 	a.gpu_write();
 
-	a.elem_mult(1.0f / this->_cols);
+	a /= this->_cols;
 
 	return a;
 }
@@ -645,7 +643,7 @@ Matrix Matrix::mean_row(const char *name) const
 	}
 	a.gpu_write();
 
-	a.elem_mult(1.0f / this->_rows);
+	a /= this->_rows;
 
 	return a;
 }

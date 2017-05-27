@@ -172,10 +172,10 @@ std::vector<Matrix> m_class_scatters(const std::vector<Matrix>& X_c, const std::
 
 	int i;
 	for ( i = 0; i < c; i++ ) {
-		Matrix X_c_i("X_c_i", X_c[i]);
+		Matrix X_c_i = X_c[i];
 		X_c_i.subtract_columns(U[i]);
 
-		S.push_back(X_c_i.product("S_i", *X_c_i.T));
+		S.push_back(X_c_i * TRAN(X_c_i));
 	}
 
 	return S;
@@ -200,22 +200,20 @@ Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matri
 
 	int i;
 	for ( i = 0; i < c; i++ ) {
-		u.add(U[i]);
+		u += U[i];
 	}
-	u.elem_mult(1.0f / c);
+	u /= c;
 
 	// compute the between-scatter S_b
 	Matrix S_b = Matrix::zeros("S_b", N, N);
 
 	for ( i = 0; i < c; i++ ) {
-		// compute S_b_i
-		Matrix u_i("u_i - u", U[i]);
-		u_i.subtract(u);
+		Matrix U_i = U[i] - u;
 
-		Matrix S_b_i = u_i.product("S_b_i", *u_i.T);
-		S_b_i.elem_mult(X_c[i].cols());
+		Matrix S_b_i = U_i * TRAN(U_i);
+		S_b_i *= X_c[i].cols();
 
-		S_b.add(S_b_i);
+		S_b += S_b_i;
 	}
 
 	return S_b;
@@ -233,19 +231,15 @@ Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matri
  */
 Matrix m_scatter_within(const std::vector<Matrix>& X_c, const std::vector<Matrix>& U, int c)
 {
-	// compute the within-scatter S_w
 	int N = U[0].rows();
 	Matrix S_w = Matrix::zeros("S_w", N, N);
 
 	int i;
 	for ( i = 0; i < c; i++ ) {
-		// compute S_w_i
-		Matrix X_c_i("X_c_i", X_c[i]);
+		Matrix X_c_i = X_c[i];
 		X_c_i.subtract_columns(U[i]);
 
-		Matrix S_w_i = X_c_i.product("S_w_i", *X_c_i.T);
-
-		S_w.add(S_w_i);
+		S_w += X_c_i * TRAN(X_c_i);
 	}
 
 	return S_w;

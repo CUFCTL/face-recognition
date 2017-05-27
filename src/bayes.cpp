@@ -25,14 +25,9 @@ BayesLayer::BayesLayer()
  */
 precision_t bayes_prob(Matrix& x, const Matrix& mu, const Matrix& S_inv)
 {
-	x.subtract_columns(mu);
+	x -= mu;
 
-	Matrix p_temp1 = x.T->product("p_temp1", S_inv);
-	Matrix p_temp2 = p_temp1.product("p_temp2", x);
-
-	precision_t p = -0.5f * p_temp2.elem(0, 0);
-
-	return p;
+	return -0.5f * (TRAN(x) * S_inv * x).elem(0, 0);
 }
 
 /**

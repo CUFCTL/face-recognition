@@ -68,7 +68,7 @@ void LDALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 	timer_push("compute eigendecomposition of S_b and S_w");
 
 	Matrix S_w_inv = S_w.inverse("inv(S_w)");
-	Matrix J = S_w_inv.product("J", S_b);
+	Matrix J = S_w_inv * S_b;
 
 	Matrix W_fld;
 	Matrix J_eval;
@@ -78,7 +78,7 @@ void LDALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 
 	timer_push("compute Fisherfaces");
 
-	this->W = pca.W.product("W_lda", W_fld);
+	this->W = pca.W * W_fld;
 
 	timer_pop();
 
@@ -92,7 +92,7 @@ void LDALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
  */
 Matrix LDALayer::project(const Matrix& X)
 {
-	return this->W.T->product("P", X);
+	return TRAN(this->W) * X;
 }
 
 /**
