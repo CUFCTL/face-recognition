@@ -48,19 +48,18 @@ std::vector<data_label_t> BayesLayer::predict(const Matrix& X, const std::vector
 	// compute inverses of each S_i
 	std::vector<Matrix> S_inv;
 
-	unsigned i, j;
-	for ( i = 0; i < C.size(); i++ ) {
+	for ( size_t i = 0; i < C.size(); i++ ) {
 		S_inv.push_back(S[i].inverse("S_i_inv"));
 	}
 
 	// compute label for each test vector
 	std::vector<data_label_t> Y_pred;
 
-	for ( i = 0; i < X_test.cols(); i++ ) {
+	for ( int i = 0; i < X_test.cols(); i++ ) {
 		std::vector<precision_t> probs;
 
 		// compute the Bayes probability for each class
-		for ( j = 0; j < C.size(); j++ ) {
+		for ( size_t j = 0; j < C.size(); j++ ) {
 			precision_t p = bayes_prob(X_test(i, i + 1), U[j], S_inv[j]);
 
 			probs.push_back(p);
