@@ -18,21 +18,6 @@ typedef struct {
 } item_count_t;
 
 /**
- * Print a list of neighbors.
- *
- * @param neighbors
- * @param num
- */
-void debug_print_neighbors(const std::vector<neighbor_t>& neighbors)
-{
-	size_t i;
-	for ( i = 0; i < neighbors.size(); i++) {
-		printf("%8s  %f\n", neighbors[i].label.c_str(), neighbors[i].dist);
-	}
-	putchar('\n');
-}
-
-/**
  * Comparison function for sorting neighbors.
  *
  * @param a
@@ -53,9 +38,8 @@ data_label_t kNN_mode(const std::vector<neighbor_t>& items)
 	std::vector<item_count_t> counts;
 
 	// compute the frequency of each item in the list
-	size_t i;
-	for ( i = 0; i < items.size(); i++ ) {
-		const data_label_t& id = items[i].label;
+	for ( const neighbor_t& item : items ) {
+		const data_label_t& id = item.label;
 
 		size_t j = 0;
 		while ( j < counts.size() && counts[j].id != id ) {
@@ -77,7 +61,7 @@ data_label_t kNN_mode(const std::vector<neighbor_t>& items)
 	// find the item with the highest frequency
 	item_count_t max = counts[0];
 
-	for ( i = 1; i < counts.size(); i++ ) {
+	for ( size_t i = 1; i < counts.size(); i++ ) {
 		if ( max.count < counts[i].count ) {
 			max = counts[i];
 		}
@@ -111,13 +95,11 @@ std::vector<data_label_t> KNNLayer::predict(const Matrix& X, const std::vector<d
 {
 	std::vector<data_label_t> Y_pred;
 
-	int i;
-	for ( i = 0; i < X_test.cols(); i++ ) {
+	for ( int i = 0; i < X_test.cols(); i++ ) {
 		// compute distance between X_test_i and each X_i
 		std::vector<neighbor_t> neighbors;
 
-		int j;
-		for ( j = 0; j < X.cols(); j++ ) {
+		for ( int j = 0; j < X.cols(); j++ ) {
 			neighbor_t n;
 			n.label = Y[j].label;
 			n.dist = this->dist(X_test, i, X, j);

@@ -122,9 +122,8 @@ Matrix::Matrix(const char *name, int rows, int cols)
 Matrix::Matrix(const char *name, int rows, int cols, precision_t *data)
 	: Matrix(name, rows, cols)
 {
-	int i, j;
-	for ( i = 0; i < rows; i++ ) {
-		for ( j = 0; j < cols; j++ ) {
+	for ( int i = 0; i < rows; i++ ) {
+		for ( int j = 0; j < cols; j++ ) {
 			ELEM(*this, i, j) = data[i * cols + j];
 		}
 	}
@@ -227,9 +226,8 @@ Matrix Matrix::identity(const char *name, int rows)
 
 	Matrix M(name, rows, rows);
 
-	int i, j;
-	for ( i = 0; i < rows; i++ ) {
-		for ( j = 0; j < rows; j++ ) {
+	for ( int i = 0; i < rows; i++ ) {
+		for ( int j = 0; j < rows; j++ ) {
 			ELEM(M, i, j) = (i == j);
 		}
 	}
@@ -254,9 +252,8 @@ Matrix Matrix::ones(const char *name, int rows, int cols)
 
 	Matrix M(name, rows, cols);
 
-	int i, j;
-	for ( i = 0; i < rows; i++ ) {
-		for ( j = 0; j < cols; j++ ) {
+	for ( int i = 0; i < rows; i++ ) {
+		for ( int j = 0; j < cols; j++ ) {
 			ELEM(M, i, j) = 1;
 		}
 	}
@@ -284,9 +281,8 @@ Matrix Matrix::random(const char *name, int rows, int cols)
 
 	Matrix M(name, rows, cols);
 
-	int i, j;
-	for ( i = 0; i < rows; i++ ) {
-		for ( j = 0; j < cols; j++ ) {
+	for ( int i = 0; i < rows; i++ ) {
+		for ( int j = 0; j < cols; j++ ) {
 			ELEM(M, i, j) = distribution(generator);
 		}
 	}
@@ -307,9 +303,8 @@ Matrix Matrix::zeros(const char *name, int rows, int cols)
 {
 	Matrix M(name, rows, cols);
 
-	int i, j;
-	for ( i = 0; i < rows; i++ ) {
-		for ( j = 0; j < cols; j++ ) {
+	for ( int i = 0; i < rows; i++ ) {
+		for ( int j = 0; j < cols; j++ ) {
 			ELEM(M, i, j) = 0;
 		}
 	}
@@ -408,8 +403,7 @@ void Matrix::image_read(int i, const Image& image)
 {
 	assert(this->_rows == image.channels * image.height * image.width);
 
-	int j;
-	for ( j = 0; j < this->_rows; j++ ) {
+	for ( int j = 0; j < this->_rows; j++ ) {
 		ELEM(*this, j, i) = (precision_t) image.pixels[j];
 	}
 }
@@ -424,8 +418,7 @@ void Matrix::image_write(int i, Image& image)
 {
 	assert(this->_rows == image.channels * image.height * image.width);
 
-	int j;
-	for ( j = 0; j < this->_rows; j++ ) {
+	for ( int j = 0; j < this->_rows; j++ ) {
 		image.pixels[j] = (unsigned char) ELEM(*this, j, i);
 	}
 }
@@ -448,8 +441,7 @@ Matrix Matrix::diagonalize(const char *name) const
 		: this->_rows;
 	Matrix D = Matrix::zeros(name, n, n);
 
-	int i;
-	for ( i = 0; i < n; i++ ) {
+	for ( int i = 0; i < n; i++ ) {
 		ELEM(D, i, i) = this->_data_cpu[i];
 	}
 
@@ -611,9 +603,8 @@ Matrix Matrix::mean_column(const char *name) const
 
 	Matrix a = Matrix::zeros(name, this->_rows, 1);
 
-	int i, j;
-	for ( i = 0; i < this->_cols; i++ ) {
-		for ( j = 0; j < this->_rows; j++ ) {
+	for ( int i = 0; i < this->_cols; i++ ) {
+		for ( int j = 0; j < this->_rows; j++ ) {
 			ELEM(a, j, 0) += ELEM(*this, j, i);
 		}
 	}
@@ -637,9 +628,8 @@ Matrix Matrix::mean_row(const char *name) const
 
 	Matrix a = Matrix::zeros(name, 1, this->_cols);
 
-	int i, j;
-	for ( i = 0; i < this->_rows; i++ ) {
-		for ( j = 0; j < this->_cols; j++ ) {
+	for ( int i = 0; i < this->_rows; i++ ) {
+		for ( int j = 0; j < this->_cols; j++ ) {
 			ELEM(a, 0, j) += ELEM(*this, i, j);
 		}
 	}
@@ -746,8 +736,7 @@ precision_t Matrix::sum() const
 		: this->_rows;
 	precision_t sum = 0.0f;
 
-	int i;
-	for ( i = 0; i < n; i++ ) {
+	for ( int i = 0; i < n; i++ ) {
 		sum += this->_data_cpu[i];
 	}
 
@@ -767,9 +756,8 @@ Matrix Matrix::transpose(const char *name) const
 
 	Matrix T(name, this->_cols, this->_rows);
 
-	int i, j;
-	for ( i = 0; i < T._rows; i++ ) {
-		for ( j = 0; j < T._cols; j++ ) {
+	for ( int i = 0; i < T._rows; i++ ) {
+		for ( int j = 0; j < T._cols; j++ ) {
 			ELEM(T, i, j) = ELEM(*this, j, i);
 		}
 	}
@@ -854,8 +842,7 @@ void Matrix::assign_row(int i, const Matrix& B, int j)
 	assert(0 <= i && i < A._rows);
 	assert(0 <= j && j < B._rows);
 
-	int k;
-	for ( k = 0; k < A._cols; k++ ) {
+	for ( int k = 0; k < A._cols; k++ ) {
 		ELEM(A, i, k) = ELEM(B, j, k);
 	}
 
@@ -873,9 +860,8 @@ void Matrix::elem_apply(elem_func_t f)
 		this->_name, this->_rows, this->_cols,
 		this->_name, this->_rows, this->_cols);
 
-	int i, j;
-	for ( i = 0; i < this->_rows; i++ ) {
-		for ( j = 0; j < this->_cols; j++ ) {
+	for ( int i = 0; i < this->_rows; i++ ) {
+		for ( int j = 0; j < this->_cols; j++ ) {
 			ELEM(*this, i, j) = f(ELEM(*this, i, j));
 		}
 	}
@@ -959,9 +945,8 @@ void Matrix::subtract_columns(const Matrix& a)
 
 	assert(this->_rows == a._rows && a._cols == 1);
 
-	int i, j;
-	for ( i = 0; i < this->_cols; i++ ) {
-		for ( j = 0; j < this->_rows; j++ ) {
+	for ( int i = 0; i < this->_cols; i++ ) {
+		for ( int j = 0; j < this->_rows; j++ ) {
 			ELEM(*this, j, i) -= ELEM(a, j, 0);
 		}
 	}
@@ -987,9 +972,8 @@ void Matrix::subtract_rows(const Matrix& a)
 
 	assert(this->_cols == a._cols && a._rows == 1);
 
-	int i, j;
-	for ( i = 0; i < this->_rows; i++ ) {
-		for ( j = 0; j < this->_cols; j++ ) {
+	for ( int i = 0; i < this->_rows; i++ ) {
+		for ( int j = 0; j < this->_cols; j++ ) {
 			ELEM(*this, i, j) -= ELEM(a, 0, j);
 		}
 	}

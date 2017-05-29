@@ -51,9 +51,8 @@ bool m_equal(const Matrix& A, const Matrix& B)
 		return false;
 	}
 
-	int i, j;
-	for ( i = 0; i < A.rows(); i++ ) {
-		for ( j = 0; j < A.cols(); j++ ) {
+	for ( int i = 0; i < A.rows(); i++ ) {
+		for ( int j = 0; j < A.cols(); j++ ) {
 			if ( !is_equal(A.elem(i, j), B.elem(i, j)) ) {
 				return false;
 			}
@@ -890,8 +889,7 @@ int main(int argc, char **argv)
 	};
 	int num_tests = sizeof(tests) / sizeof(test_func_t);
 
-	int i;
-	for ( i = 0; i < num_tests; i++ ) {
+	for ( int i = 0; i < num_tests; i++ ) {
 		test_func_t test = tests[i];
 
 		std::cout << "TEST " << i + 1 << "\n";

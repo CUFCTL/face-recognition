@@ -29,8 +29,7 @@ precision_t m_dist_COS(const Matrix& A, int i, const Matrix& B, int j)
 	// compute x * y
 	precision_t x_dot_y = 0;
 
-	int k;
-	for ( k = 0; k < A.rows(); k++ ) {
+	for ( int k = 0; k < A.rows(); k++ ) {
 		x_dot_y += A.elem(k, i) * B.elem(k, j);
 	}
 
@@ -38,7 +37,7 @@ precision_t m_dist_COS(const Matrix& A, int i, const Matrix& B, int j)
 	precision_t abs_x = 0;
 	precision_t abs_y = 0;
 
-	for ( k = 0; k < A.rows(); k++ ) {
+	for ( int k = 0; k < A.rows(); k++ ) {
 		abs_x += A.elem(k, i) * A.elem(k, i);
 		abs_y += B.elem(k, j) * B.elem(k, j);
 	}
@@ -68,8 +67,7 @@ precision_t m_dist_L1(const Matrix& A, int i, const Matrix& B, int j)
 
 	precision_t dist = 0;
 
-	int k;
-	for ( k = 0; k < A.rows(); k++ ) {
+	for ( int k = 0; k < A.rows(); k++ ) {
 		dist += fabsf(A.elem(k, i) - B.elem(k, j));
 	}
 
@@ -94,8 +92,7 @@ precision_t m_dist_L2(const Matrix& A, int i, const Matrix& B, int j)
 
 	precision_t dist = 0;
 
-	int k;
-	for ( k = 0; k < A.rows(); k++ ) {
+	for ( int k = 0; k < A.rows(); k++ ) {
 		precision_t diff = A.elem(k, i) - B.elem(k, j);
 		dist += diff * diff;
 	}
@@ -147,9 +144,8 @@ std::vector<Matrix> m_class_means(const std::vector<Matrix>& X_c, int c)
 {
 	std::vector<Matrix> U;
 
-	int i;
-	for ( i = 0; i < c; i++ ) {
-		U.push_back(X_c[i].mean_column("U_i"));
+	for ( const Matrix& X_c_i : X_c ) {
+		U.push_back(X_c_i.mean_column("U_i"));
 	}
 
 	return U;
@@ -169,8 +165,7 @@ std::vector<Matrix> m_class_scatters(const std::vector<Matrix>& X_c, const std::
 {
 	std::vector<Matrix> S;
 
-	int i;
-	for ( i = 0; i < c; i++ ) {
+	for ( size_t i = 0; i < X_c.size(); i++ ) {
 		Matrix X_c_i = X_c[i];
 		X_c_i.subtract_columns(U[i]);
 
@@ -197,16 +192,15 @@ Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matri
 	// compute the mean of all classes
 	Matrix u("u", N, 1);
 
-	int i;
-	for ( i = 0; i < c; i++ ) {
-		u += U[i];
+	for ( const Matrix& U_i : U ) {
+		u += U_i;
 	}
 	u /= c;
 
 	// compute the between-scatter S_b
 	Matrix S_b = Matrix::zeros("S_b", N, N);
 
-	for ( i = 0; i < c; i++ ) {
+	for ( size_t i = 0; i < X_c.size(); i++ ) {
 		Matrix U_i = U[i] - u;
 
 		Matrix S_b_i = U_i * TRAN(U_i);
@@ -233,8 +227,7 @@ Matrix m_scatter_within(const std::vector<Matrix>& X_c, const std::vector<Matrix
 	int N = U[0].rows();
 	Matrix S_w = Matrix::zeros("S_w", N, N);
 
-	int i;
-	for ( i = 0; i < c; i++ ) {
+	for ( size_t i = 0; i < X_c.size(); i++ ) {
 		Matrix X_c_i = X_c[i];
 		X_c_i.subtract_columns(U[i]);
 

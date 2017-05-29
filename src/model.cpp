@@ -139,7 +139,8 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 		this->P,
 		this->train_set.entries,
 		this->train_set.labels,
-		P_test);
+		P_test
+	);
 
 	// record predition time
 	this->stats.test_time = timer_pop();
@@ -160,8 +161,7 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 	// compute accuracy
 	int num_correct = 0;
 
-	unsigned i;
-	for ( i = 0; i < test_set.entries.size(); i++ ) {
+	for ( size_t i = 0; i < test_set.entries.size(); i++ ) {
 		if ( Y_pred[i] == test_set.entries[i].label ) {
 			num_correct++;
 		}
@@ -172,7 +172,7 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 	// print results
 	log(LL_VERBOSE, "Results");
 
-	for ( i = 0; i < test_set.entries.size(); i++ ) {
+	for ( size_t i = 0; i < test_set.entries.size(); i++ ) {
 		const data_label_t& y_pred = Y_pred[i];
 		const data_entry_t& entry = test_set.entries[i];
 
@@ -180,15 +180,10 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 			? "(!)"
 			: "";
 
-		log(LL_VERBOSE, "%-12s -> %-4s %s",
-			entry.name.c_str(),
-			y_pred.c_str(), s);
+		log(LL_VERBOSE, "%-12s -> %-4s %s", entry.name.c_str(), y_pred.c_str(), s);
 	}
 
-	log(LL_VERBOSE, "%d / %d matched, %.2f%%",
-		num_correct,
-		test_set.entries.size(),
-		this->stats.accuracy);
+	log(LL_VERBOSE, "%d / %d matched, %.2f%%", num_correct, test_set.entries.size(), this->stats.accuracy);
 	log(LL_VERBOSE, "");
 }
 
