@@ -6,15 +6,15 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include <time.h>
+#include <chrono>
 #include <string>
 #include <vector>
 
 typedef struct {
 	std::string name;
 	int level;
-	clock_t start;
-	clock_t end;
+	std::chrono::system_clock::system_clock::time_point start;
+	std::chrono::system_clock::system_clock::time_point end;
 	float duration;
 } timer_item_t;
 

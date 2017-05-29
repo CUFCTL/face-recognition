@@ -22,7 +22,7 @@ void timer_push(const std::string& name)
 	timer_item_t item;
 	item.name = name;
 	item.level = timer.level;
-	item.start = clock();
+	item.start = std::chrono::system_clock::now();
 	item.duration = -1;
 
 	timer.items.push_back(item);
@@ -48,8 +48,8 @@ float timer_pop(void)
 
 	assert(iter != timer.items.rend());
 
-	iter->end = clock();
-	iter->duration = (float)(iter->end - iter->start) / CLOCKS_PER_SEC;
+	iter->end = std::chrono::system_clock::now();
+	iter->duration = std::chrono::duration_cast<std::chrono::milliseconds>(iter->end - iter->start).count() / 1000.0f;
 
 	timer.level--;
 
