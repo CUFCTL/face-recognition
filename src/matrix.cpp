@@ -326,11 +326,11 @@ Matrix Matrix::zeros(const char *name, int rows, int cols)
  */
 void Matrix::print(std::ostream& os) const
 {
-	os << this->_name << " [" << this->_rows << ", " << this->_cols << "\n";
+	os << this->_name << " [" << this->_rows << ", " << this->_cols << "]\n";
 
 	for ( int i = 0; i < this->_rows; i++ ) {
 		for ( int j = 0; j < this->_cols; j++ ) {
-			os << std::setw(10) << std::setprecision(4) << this->elem(i, j);
+			os << std::right << std::setw(10) << std::setprecision(4) << this->elem(i, j);
 		}
 		os << "\n";
 	}

@@ -103,5 +103,6 @@ inline Matrix operator*(const Matrix& A, const Matrix& B) { return A.product("",
 inline Matrix operator*(Matrix A, precision_t c) { return (A *= c); }
 inline Matrix operator*(precision_t c, Matrix A) { return (A *= c); }
 inline Matrix operator/(Matrix A, precision_t c) { return (A /= c); }
+inline std::ostream& operator<<(std::ostream& os, const Matrix& M) { M.print(os); return os; }
 
 #endif
