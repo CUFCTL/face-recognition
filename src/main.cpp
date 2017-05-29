@@ -3,9 +3,9 @@
  *
  * User interface to the face recognition system.
  */
+#include <cstdlib>
 #include <getopt.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include "bayes.h"
 #include "dataset.h"

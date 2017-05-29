@@ -4,7 +4,6 @@
  * Implementation of the model type.
  */
 #include <stdio.h>
-#include <stdlib.h>
 #include "image.h"
 #include "logger.h"
 #include "model.h"

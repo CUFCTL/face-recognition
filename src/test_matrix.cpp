@@ -6,10 +6,10 @@
  * Tests are based on examples in the MATLAB documentation
  * where appropriate.
  */
+#include <cstdlib>
 #include <getopt.h>
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #include "logger.h"
 #include "matrix.h"
@@ -154,27 +154,6 @@ void test_ones()
 	}
 
 	assert_matrix_value(X, X_data, "ones(M, N)");
-}
-
-/**
- * Test random matrix.
- */
-void test_random()
-{
-	precision_t X_data[] = {
-		-2.4191,  0.7112, -0.3091,  0.5153,  1.0677,
-		 0.0119,  1.8262, -0.1099, -0.5056,  0.5643,
-		-1.2957, -0.6433,  1.8492,  0.7887,  0.1808,
-		 0.2610,  0.2159,  1.0133,  0.4165,  0.5066,
-		 0.2370,  0.9451, -2.8396, -1.4088, -0.2007
-	};
-	Matrix X = Matrix::random("X", 5, 5);
-
-	if ( LOGGER(LL_VERBOSE) ) {
-		X.print(stdout);
-	}
-
-	assert_matrix_value(X, X_data, "randn(M, N)");
 }
 
 /**
@@ -889,7 +868,6 @@ int main(int argc, char **argv)
 	test_func_t tests[] = {
 		test_identity,
 		test_ones,
-		test_random,
 		test_zeros,
 		test_copy,
 		test_copy_columns,

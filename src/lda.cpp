@@ -3,7 +3,6 @@
  *
  * Implementation of LDA (Belhumeur et al., 1996; Zhao et al., 1998).
  */
-#include <stdlib.h>
 #include "lda.h"
 #include "logger.h"
 #include "matrix_utils.h"

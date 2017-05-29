@@ -9,7 +9,6 @@
  */
 #include <ctype.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "image.h"
 
 /**
@@ -29,7 +28,7 @@ Image::Image()
  */
 Image::~Image()
 {
-	free(this->pixels);
+	delete[] this->pixels;
 }
 
 /**
@@ -102,7 +101,7 @@ void Image::load(const std::string& path)
 	int num2 = this->channels * this->width * this->height;
 
 	if ( this->pixels == nullptr ) {
-		this->pixels = (unsigned char *)malloc(num1 * sizeof(unsigned char));
+		this->pixels = new unsigned char[num1];
 	}
 	else if ( num1 != num2 ) {
 		fprintf(stderr, "error: unequal sizes on image reload\n");

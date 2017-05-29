@@ -10,7 +10,6 @@ int max(int x, int y);
 int min(int x, int y);
 float pow2(float x);
 float pow3(float x);
-float rand_normal(float mu, float sigma);
 float sechf(float x);
 
 #endif

@@ -4,7 +4,6 @@
  * Implementation of the dataset type.
  */
 #include <dirent.h>
-#include <stdlib.h>
 #include "dataset.h"
 
 /**
@@ -29,12 +28,12 @@ std::string str_fread(FILE *file)
 	int num;
 	fread(&num, sizeof(int), 1, file);
 
-	char *buffer = (char *)malloc(num * sizeof(char));
+	char *buffer = new char[num];
 	fread(buffer, sizeof(char), num, file);
 
 	std::string str(buffer);
 
-	free(buffer);
+	delete[] buffer;
 
 	return std::string(str);
 }

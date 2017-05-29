@@ -7,7 +7,10 @@
 #include <assert.h>
 #include <cstring>
 #include <math.h>
-#include <stdlib.h>
+#include <random>
+#include "logger.h"
+#include "math_utils.h"
+#include "matrix.h"
 
 #if defined(__NVCC__)
 	#include <cuda_runtime.h>
@@ -16,10 +19,6 @@
 	#include <cblas.h>
 	#include <lapacke.h>
 #endif
-
-#include "logger.h"
-#include "math_utils.h"
-#include "matrix.h"
 
 const precision_t EPSILON = 1e-16;
 
@@ -96,7 +95,7 @@ Matrix::Matrix(const char *name, int rows, int cols)
 	this->_name = name;
 	this->_rows = rows;
 	this->_cols = cols;
-	this->_data_cpu = (precision_t *)malloc(rows * cols * sizeof(precision_t));
+	this->_data_cpu = new precision_t[rows * cols];
 	this->_data_gpu = gpu_malloc_matrix(rows, cols);
 	this->_transposed = false;
 	this->T = new Matrix();
@@ -206,7 +205,7 @@ Matrix::Matrix()
 Matrix::~Matrix()
 {
 	if ( !this->_transposed ) {
-		free(this->_data_cpu);
+		delete[] this->_data_cpu;
 		gpu_free(this->_data_gpu);
 
 		delete this->T;
@@ -279,12 +278,15 @@ Matrix Matrix::random(const char *name, int rows, int cols)
 		name, rows, cols,
 		rows, cols);
 
+	static std::default_random_engine generator;
+	static std::normal_distribution<precision_t> distribution(0, 1);
+
 	Matrix M(name, rows, cols);
 
 	int i, j;
 	for ( i = 0; i < rows; i++ ) {
 		for ( j = 0; j < cols; j++ ) {
-			ELEM(M, i, j) = rand_normal(0, 1);
+			ELEM(M, i, j) = distribution(generator);
 		}
 	}
 
@@ -489,11 +491,11 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 #ifdef __NVCC__
 	int nb = magma_get_ssytrd_nb(n);
 	int ldwa = n;
-	precision_t *wA = (precision_t *)malloc(ldwa * n * sizeof(precision_t));
+	precision_t *wA = new precision_t[ldwa * n];
 	int lwork = max(2*n + n*nb, 1 + 6*n + 2*n*n);
-	precision_t *work = (precision_t *)malloc(lwork * sizeof(precision_t));
+	precision_t *work = new precision_t[lwork];
 	int liwork = 3 + 5*n;
-	int *iwork = (int *)malloc(liwork * sizeof(int));
+	int *iwork = new int[liwork];
 	int info;
 
 	magma_ssyevd_gpu(MagmaVec, MagmaUpper,
@@ -505,14 +507,14 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 		&info);
 	assert(info == 0);
 
-	free(wA);
-	free(work);
-	free(iwork);
+	delete[] wA;
+	delete[] work;
+	delete[] iwork;
 
 	V.gpu_read();
 #else
 	int lwork = 3 * n;
-	precision_t *work = (precision_t *)malloc(lwork * sizeof(precision_t));
+	precision_t *work = new precision_t[lwork];
 
 	int info = LAPACKE_ssyev_work(LAPACK_COL_MAJOR, 'V', 'U',
 		n, V._data_cpu, lda,
@@ -520,7 +522,7 @@ void Matrix::eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Ma
 		work, lwork);
 	assert(info == 0);
 
-	free(work);
+	delete[] work;
 #endif
 
 	// take only positive eigenvalues
@@ -557,7 +559,7 @@ Matrix Matrix::inverse(const char *name) const
 
 #ifdef __NVCC__
 	int nb = magma_get_sgetri_nb(n);
-	int *ipiv = (int *)malloc(n * sizeof(int));
+	int *ipiv = new int[n];
 	int lwork = n * nb;
 	precision_t *dwork = (precision_t *)gpu_malloc(lwork * sizeof(precision_t));
 	int info;
@@ -570,14 +572,14 @@ Matrix Matrix::inverse(const char *name) const
 		ipiv, dwork, lwork, &info);
 	assert(info == 0);
 
-	free(ipiv);
+	delete[] ipiv;
 	gpu_free(dwork);
 
 	M_inv.gpu_read();
 #else
-	int *ipiv = (int *)malloc(n * sizeof(int));
+	int *ipiv = new int[n];
 	int lwork = n;
-	precision_t *work = (precision_t *)malloc(lwork * sizeof(precision_t));
+	precision_t *work = new precision_t[lwork];
 
 	int info = LAPACKE_sgetrf_work(LAPACK_COL_MAJOR,
 		m, n, M_inv._data_cpu, lda,
@@ -589,8 +591,8 @@ Matrix Matrix::inverse(const char *name) const
 		ipiv, work, lwork);
 	assert(info == 0);
 
-	free(ipiv);
-	free(work);
+	delete[] ipiv;
+	delete[] work;
 #endif
 
 	return M_inv;
