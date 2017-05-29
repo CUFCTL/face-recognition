@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <cstring>
+#include <iomanip>
 #include <math.h>
 #include <random>
 #include "logger.h"
@@ -319,20 +320,19 @@ Matrix Matrix::zeros(const char *name, int rows, int cols)
 }
 
 /**
- * Print a matrix to a file.
+ * Print a matrix.
  *
- * @param file
+ * @param os
  */
-void Matrix::print(FILE *file) const
+void Matrix::print(std::ostream& os) const
 {
-	fprintf(file, "%s [%d, %d]\n", this->_name, this->_rows, this->_cols);
+	os << this->_name << " [" << this->_rows << ", " << this->_cols << "\n";
 
-	int i, j;
-	for ( i = 0; i < this->_rows; i++ ) {
-		for ( j = 0; j < this->_cols; j++ ) {
-			fprintf(file, "%10.4g ", ELEM(*this, i, j));
+	for ( int i = 0; i < this->_rows; i++ ) {
+		for ( int j = 0; j < this->_cols; j++ ) {
+			os << std::setw(10) << std::setprecision(4) << this->elem(i, j);
 		}
-		fprintf(file, "\n");
+		os << "\n";
 	}
 }
 
@@ -341,11 +341,11 @@ void Matrix::print(FILE *file) const
  *
  * @param file
  */
-void Matrix::save(FILE *file) const
+void Matrix::save(std::ofstream& file) const
 {
-	fwrite(&this->_rows, sizeof(int), 1, file);
-	fwrite(&this->_cols, sizeof(int), 1, file);
-	fwrite(this->_data_cpu, sizeof(precision_t), this->_rows * this->_cols, file);
+	file.write(reinterpret_cast<const char *>(&this->_rows), sizeof(int));
+	file.write(reinterpret_cast<const char *>(&this->_cols), sizeof(int));
+	file.write(reinterpret_cast<const char *>(this->_data_cpu), this->_rows * this->_cols * sizeof(precision_t));
 }
 
 /**
@@ -353,7 +353,7 @@ void Matrix::save(FILE *file) const
  *
  * @param file
  */
-void Matrix::load(FILE *file)
+void Matrix::load(std::ifstream& file)
 {
 	if ( this->_rows * this->_cols != 0 ) {
 		log(LL_ERROR, "error: cannot load into non-empty matrix");
@@ -361,11 +361,11 @@ void Matrix::load(FILE *file)
 	}
 
 	int rows, cols;
-	fread(&rows, sizeof(int), 1, file);
-	fread(&cols, sizeof(int), 1, file);
+	file.read(reinterpret_cast<char *>(&rows), sizeof(int));
+	file.read(reinterpret_cast<char *>(&cols), sizeof(int));
 
 	*this = Matrix("", rows, cols);
-	fread(this->_data_cpu, sizeof(precision_t), this->_rows * this->_cols, file);
+	file.read(reinterpret_cast<char *>(this->_data_cpu), this->_rows * this->_cols * sizeof(precision_t));
 }
 
 /**

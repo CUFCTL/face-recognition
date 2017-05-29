@@ -37,7 +37,7 @@ Matrix IdentityLayer::project(const Matrix& X)
  *
  * @param file
  */
-void IdentityLayer::save(FILE *file)
+void IdentityLayer::save(std::ofstream& file)
 {
 }
 
@@ -46,7 +46,7 @@ void IdentityLayer::save(FILE *file)
  *
  * @param file
  */
-void IdentityLayer::load(FILE *file)
+void IdentityLayer::load(std::ifstream& file)
 {
 }
 

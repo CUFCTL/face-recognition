@@ -99,7 +99,7 @@ Matrix LDALayer::project(const Matrix& X)
  *
  * @param file
  */
-void LDALayer::save(FILE *file)
+void LDALayer::save(std::ofstream& file)
 {
 	this->W.save(file);
 }
@@ -109,7 +109,7 @@ void LDALayer::save(FILE *file)
  *
  * @param file
  */
-void LDALayer::load(FILE *file)
+void LDALayer::load(std::ifstream& file)
 {
 	this->W.load(file);
 }

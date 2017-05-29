@@ -9,7 +9,8 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#include <stdio.h>
+#include <fstream>
+#include <iostream>
 #include "image.h"
 
 typedef float precision_t;
@@ -47,9 +48,10 @@ public:
 	static Matrix zeros(const char *name, int rows, int cols);
 
 	// I/O functions
-	void print(FILE *file) const;
-	void save(FILE *file) const;
-	void load(FILE *file);
+	void print(std::ostream& os) const;
+
+	void save(std::ofstream& file) const;
+	void load(std::ifstream& file);
 
 	void gpu_read();
 	void gpu_write();

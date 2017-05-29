@@ -4,7 +4,6 @@
  * Implementation of the timer.
  */
 #include <assert.h>
-#include <stdio.h>
 #include "logger.h"
 #include "timer.h"
 

@@ -21,8 +21,8 @@ public:
 	void compute(const Matrix& X, const std::vector<data_entry_t>& y, int c);
 	Matrix project(const Matrix& X);
 
-	void save(FILE *file);
-	void load(FILE *file);
+	void save(std::ofstream& file);
+	void load(std::ifstream& file);
 
 	void print();
 };

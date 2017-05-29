@@ -8,8 +8,9 @@
  * - binary PPM (P6)
  */
 #include <ctype.h>
-#include <stdio.h>
+#include <fstream>
 #include "image.h"
+#include "logger.h"
 
 /**
  * Construct an image.
@@ -34,23 +35,23 @@ Image::~Image()
 /**
  * Helper function to skip comments in a PGM/PPM image.
  */
-void skip_to_next_value(FILE* in)
+void skip_to_next_value(std::ifstream& file)
 {
-	char c = fgetc(in);
+	char c = file.get();
 	while ( c == '#' || isspace(c) ) {
 		if ( c == '#' ) {
 			while ( c != '\n' ) {
-				c = fgetc(in);
+				c = file.get();
 			}
 		}
 		else {
 			while ( isspace(c) ) {
-				c = fgetc(in);
+				c = file.get();
 			}
 		}
 	}
 
-	ungetc(c, in);
+	file.unget();
 }
 
 /**
@@ -60,13 +61,13 @@ void skip_to_next_value(FILE* in)
  */
 void Image::load(const std::string& path)
 {
-	FILE *in = fopen(path.c_str(), "r");
+	std::ifstream file(path, std::ifstream::in);
 
 	// read image header
-	char buffer[4];
-	fscanf(in, "%s", buffer);
+	std::string header;
+	file >> header;
 
-	std::string header(buffer);
+	// determine image channels
 	int channels;
 
 	if ( header == "P5" ) {
@@ -76,25 +77,25 @@ void Image::load(const std::string& path)
 		channels = 3;
 	}
 	else {
-		fprintf(stderr, "error: cannot read image \'%s\'\n", path.c_str());
+		log(LL_ERROR, "error: cannot read image \'%s\'\n", path.c_str());
 		exit(1);
 	}
 
-	skip_to_next_value(in);
+	skip_to_next_value(file);
 
 	// read image metadata
 	int width;
 	int height;
 	int max_value;
 
-	fscanf(in, "%d", &width);
-	skip_to_next_value(in);
+	file >> width;
+	skip_to_next_value(file);
 
-	fscanf(in, "%d", &height);
-	skip_to_next_value(in);
+	file >> height;
+	skip_to_next_value(file);
 
-	fscanf(in, "%d", &max_value);
-	fgetc(in);
+	file >> max_value;
+	file.get();
 
 	// verify that image sizes are equal (if reloading)
 	int num1 = channels * width * height;
@@ -104,7 +105,7 @@ void Image::load(const std::string& path)
 		this->pixels = new unsigned char[num1];
 	}
 	else if ( num1 != num2 ) {
-		fprintf(stderr, "error: unequal sizes on image reload\n");
+		log(LL_ERROR, "error: unequal sizes on image reload\n");
 		exit(1);
 	}
 
@@ -114,9 +115,9 @@ void Image::load(const std::string& path)
 	this->max_value = max_value;
 
 	// read pixel data
-	fread(this->pixels, sizeof(unsigned char), num1, in);
+	file.read(reinterpret_cast<char *>(this->pixels), num1);
 
-	fclose(in);
+	file.close();
 }
 
 /**
@@ -126,27 +127,32 @@ void Image::load(const std::string& path)
  */
 void Image::save(const std::string& path)
 {
-	FILE *out = fopen(path.c_str(), "w");
+	std::ofstream file(path, std::ofstream::out);
 
-	// write image header
+	// determine image header
+	std::string header;
+
 	if ( this->channels == 1 ) {
-		fprintf(out, "P5\n");
+		header = "P5";
 	}
 	else if ( this->channels == 3 ) {
-		fprintf(out, "P6\n");
+		header = "P6";
 	}
 	else {
-		fprintf(stderr, "error: cannot write image \'%s\'\n", path.c_str());
+		log(LL_ERROR, "error: cannot write image \'%s\'\n", path.c_str());
 		exit(1);
 	}
 
 	// write image metadata
-	fprintf(out, "%d %d %d\n", this->width, this->height, this->max_value);
+	file << header << "\n"
+		<< this->width << " "
+		<< this->height << " "
+		<< this->max_value << "\n";
 
 	// write pixel data
 	int num = this->channels * this->width * this->height;
 
-	fwrite(this->pixels, sizeof(unsigned char), num, out);
+	file.write(reinterpret_cast<char *>(this->pixels), num);
 
-	fclose(out);
+	file.close();
 }

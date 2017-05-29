@@ -109,7 +109,7 @@ Matrix ICALayer::project(const Matrix& X)
  *
  * @param file
  */
-void ICALayer::save(FILE *file)
+void ICALayer::save(std::ofstream& file)
 {
 	this->W.save(file);
 }
@@ -119,7 +119,7 @@ void ICALayer::save(FILE *file)
  *
  * @param file
  */
-void ICALayer::load(FILE *file)
+void ICALayer::load(std::ifstream& file)
 {
 	this->W.load(file);
 }

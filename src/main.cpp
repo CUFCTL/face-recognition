@@ -5,7 +5,7 @@
  */
 #include <cstdlib>
 #include <getopt.h>
-#include <stdio.h>
+#include <iostream>
 #include <unistd.h>
 #include "bayes.h"
 #include "dataset.h"
@@ -62,8 +62,9 @@ typedef struct {
 	bool train;
 	bool test;
 	bool stream;
-	char *path_train;
-	char *path_test;
+	const char *path_train;
+	const char *path_test;
+	const char *path_model;
 	feature_type_t feature_type;
 	classifier_type_t classifier_type;
 	int pca_n1;
@@ -80,7 +81,7 @@ typedef struct {
 
 void print_usage()
 {
-	fprintf(stderr,
+	std::cerr <<
 		"Usage: ./face-rec [options]\n"
 		"\n"
 		"Options:\n"
@@ -104,8 +105,7 @@ void print_usage()
 		"  --ica_max_iterations N  (ICA) maximum iterations\n"
 		"  --ica_epsilon X         (ICA) convergence threshold for w\n"
 		"  --knn_k N               (kNN) number of nearest neighbors to use\n"
-		"  --knn_dist [dist]       (kNN) distance function to use (L1, L2, COS)\n"
-	);
+		"  --knn_dist [dist]       (kNN) distance function to use (L1, L2, COS)\n";
 }
 
 /**
@@ -148,21 +148,21 @@ ica_nonl_t parse_nonl_func(const std::string& name)
 	return ICA_NONL_NONE;
 }
 
-int main(int argc, char **argv)
+/**
+ * Parse command-line arguments.
+ *
+ * @param argc
+ * @param argv
+ */
+optarg_t parse_args(int argc, char **argv)
 {
-#ifdef __NVCC__
-	magma_int_t stat = magma_init();
-	assert(stat == MAGMA_SUCCESS);
-#endif
-
-	const char *MODEL_FNAME = "./model.dat";
-
 	optarg_t args = {
 		false,
 		false,
 		false,
 		nullptr,
 		nullptr,
+		"./model.dat",
 		FEATURE_NONE,
 		CLASSIFIER_KNN,
 		-1,
@@ -194,7 +194,6 @@ int main(int argc, char **argv)
 		{ 0, 0, 0, 0 }
 	};
 
-	// parse command-line arguments
 	int opt;
 	while ( (opt = getopt_long_only(argc, argv, "", long_options, nullptr)) != -1 ) {
 		switch ( opt ) {
@@ -263,21 +262,53 @@ int main(int argc, char **argv)
 		}
 	}
 
-	// validate arguments
+	return args;
+}
+
+/**
+ * Validate command-line arguments.
+ *
+ * @param args
+ */
+void validate_args(const optarg_t& args)
+{
+	bool valid = true;
+	std::string errmsg;
+
 	if ( !args.train && !args.test ) {
-		print_usage();
-		exit(1);
+		errmsg = "--train and/or --test are required";
+		valid = false;
 	}
 
 	if ( args.knn_dist == nullptr ) {
-		fprintf(stderr, "error: --knn_dist must be L1 | L2 | COS\n");
-		exit(1);
+		errmsg = "--knn_dist must be L1 | L2 | COS";
+		valid = false;
 	}
 
 	if ( args.ica_nonl == ICA_NONL_NONE ) {
-		fprintf(stderr, "error: --ica_nonl must be pow3 | tanh | gauss\n");
+		errmsg = "--ica_nonl must be pow3 | tanh | gauss";
+		valid = false;
+	}
+
+	if ( !valid ) {
+		std::cerr << "error: " << errmsg << "\n";
+		print_usage();
 		exit(1);
 	}
+}
+
+int main(int argc, char **argv)
+{
+#ifdef __NVCC__
+	magma_int_t stat = magma_init();
+	assert(stat == MAGMA_SUCCESS);
+#endif
+
+	// parse command-line arguments
+	optarg_t args = parse_args(argc, argv);
+
+	// validate arguments
+	validate_args(args);
 
 	// initialize feature layer
 	FeatureLayer *feature;
@@ -321,7 +352,7 @@ int main(int argc, char **argv)
 		model.train(train_set);
 	}
 	else {
-		model.load(MODEL_FNAME);
+		model.load(args.path_model);
 	}
 
 	if ( args.test && args.stream ) {
@@ -329,7 +360,7 @@ int main(int argc, char **argv)
 		char READ = '1';
 
 		while ( 1 ) {
-			char c = getchar();
+			char c = std::cin.get();
 
 			if ( c == END ) {
 				break;
@@ -349,7 +380,7 @@ int main(int argc, char **argv)
 		model.validate(test_set, Y_pred);
 	}
 	else {
-		model.save(MODEL_FNAME);
+		model.save(args.path_model);
 	}
 
 	timer_print();

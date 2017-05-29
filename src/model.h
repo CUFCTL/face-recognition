@@ -38,8 +38,8 @@ public:
 	~Model();
 
 	void train(const Dataset& train_set);
-	void save(const char *path);
-	void load(const char *path);
+	void save(const std::string& path);
+	void load(const std::string& path);
 	std::vector<data_label_t> predict(const Dataset& test_set);
 	void validate(const Dataset& test_set, const std::vector<data_label_t>& Y_pred);
 	void print_stats();

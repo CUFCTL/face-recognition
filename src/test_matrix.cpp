@@ -8,8 +8,9 @@
  */
 #include <cstdlib>
 #include <getopt.h>
+#include <iomanip>
+#include <iostream>
 #include <math.h>
-#include <stdio.h>
 
 #include "logger.h"
 #include "matrix.h"
@@ -70,12 +71,11 @@ bool m_equal(const Matrix& A, const Matrix& B)
  */
 void print_result(const char *name, bool result)
 {
-	const char *fmt = result
-		? "  %-20s  " ANSI_GREEN "PASSED" ANSI_RESET "\n"
-		: "  %-20s  " ANSI_RED ANSI_BOLD "FAILED" ANSI_RESET "\n";
+	std::string message = result
+		? ANSI_GREEN "PASSED" ANSI_RESET
+		: ANSI_RED ANSI_BOLD "FAILED" ANSI_RESET;
 
-	printf(fmt, name);
-	fflush(stdout);
+	std::cout << std::left << std::setw(20) << name << "  " << message << "\n";
 }
 
 /**
@@ -130,7 +130,7 @@ void test_identity()
 	Matrix I = Matrix::identity("I", 4);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		I.print(stdout);
+		I.print(std::cout);
 	}
 
 	assert_matrix_value(I, I_data, "eye(N)");
@@ -150,7 +150,7 @@ void test_ones()
 	Matrix X = Matrix::ones("X", 4, 4);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		X.print(stdout);
+		X.print(std::cout);
 	}
 
 	assert_matrix_value(X, X_data, "ones(M, N)");
@@ -170,7 +170,7 @@ void test_zeros()
 	Matrix X = Matrix::zeros("X", 4, 4);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		X.print(stdout);
+		X.print(std::cout);
 	}
 
 	assert_matrix_value(X, X_data, "zeros(M, N)");
@@ -191,8 +191,8 @@ void test_copy()
 	Matrix C("C", A);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		C.print(stdout);
+		A.print(std::cout);
+		C.print(std::cout);
 	}
 
 	assert_equal_matrix(A, C, "A(:, :)");
@@ -222,8 +222,8 @@ void test_copy_columns()
 	Matrix C = A(i, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		C.print(stdout);
+		A.print(std::cout);
+		C.print(std::cout);
 	}
 
 	assert_matrix_value(C, C_data, "A(:, i:j)");
@@ -248,9 +248,9 @@ void test_diagonalize()
 	Matrix D = v.diagonalize("D");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		v.print(stdout);
+		v.print(std::cout);
 
-		D.print(stdout);
+		D.print(std::cout);
 	}
 
 	assert_matrix_value(D, D_data, "diag(v)");
@@ -286,9 +286,9 @@ void test_eigen()
 	M.eigen("V", "D", M.rows(), V, D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		M.print(stdout);
-		V.print(stdout);
-		D.print(stdout);
+		M.print(std::cout);
+		V.print(std::cout);
+		D.print(std::cout);
 	}
 
 	assert_matrix_value(V, V_data, "eigenvectors of M");
@@ -331,10 +331,10 @@ void test_eigen2()
 	J.eigen("V", "D", J.rows(), V, D);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		B.print(stdout);
-		V.print(stdout);
-		D.print(stdout);
+		A.print(std::cout);
+		B.print(std::cout);
+		V.print(std::cout);
+		D.print(std::cout);
 	}
 
 	assert_matrix_value(V, V_data, "eigenvectors of A, B");
@@ -360,8 +360,8 @@ void test_inverse()
 	Matrix Y = X.inverse("Y");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		X.print(stdout);
-		Y.print(stdout);
+		X.print(std::cout);
+		Y.print(std::cout);
 	}
 
 	assert_matrix_value(Y, Y_data, "inv(X)");
@@ -384,8 +384,8 @@ void test_mean_column()
 	Matrix m = A.mean_column("m");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		m.print(stdout);
+		A.print(std::cout);
+		m.print(std::cout);
 	}
 
 	assert_matrix_value(m, m_data, "mean(A, 2)");
@@ -409,8 +409,8 @@ void test_mean_row()
 	Matrix m = A.mean_row("m");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		m.print(stdout);
+		A.print(std::cout);
+		m.print(std::cout);
 	}
 
 	assert_matrix_value(m, m_data, "mean(A, 1)");
@@ -428,9 +428,9 @@ void test_norm()
 	precision_t n = v.norm();
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		v.print(stdout);
+		v.print(std::cout);
 
-		printf("norm(%s) = %g\n", v.name(), n);
+		std::cout << "norm(" << v.name() << ") = " << n << "\n";
 	}
 
 	assert_equal(n, 3.7417, "norm(v)");
@@ -467,10 +467,10 @@ void test_product()
 	Matrix C2 = B1 * A1;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A1.print(stdout);
-		B1.print(stdout);
-		C1.print(stdout);
-		C2.print(stdout);
+		A1.print(std::cout);
+		B1.print(std::cout);
+		C1.print(std::cout);
+		C2.print(std::cout);
 	}
 
 	assert_matrix_value(C1, C1_data, "A1 * B1");
@@ -495,9 +495,9 @@ void test_product()
 	Matrix C3 = A2 * B2;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A2.print(stdout);
-		B2.print(stdout);
-		C3.print(stdout);
+		A2.print(std::cout);
+		B2.print(std::cout);
+		C3.print(std::cout);
 	}
 
 	assert_matrix_value(C3, C3_data, "A2 * B2");
@@ -515,9 +515,9 @@ void test_sum()
 	precision_t s = v.sum();
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		v.print(stdout);
+		v.print(std::cout);
 
-		printf("sum(%s) = %g\n", v.name(), s);
+		std::cout << "sum(" << v.name() << ") = " << s << "\n";
 	}
 
 	assert_equal(s, 2, "sum(v)");
@@ -544,8 +544,8 @@ void test_transpose()
 	Matrix B = A.transpose("B");
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		B.print(stdout);
+		A.print(std::cout);
+		B.print(std::cout);
 	}
 
 	assert_matrix_value(B, B_data, "A'");
@@ -572,14 +572,14 @@ void test_add()
 	Matrix B("B", 2, 2, B_data);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		B.print(stdout);
+		A.print(std::cout);
+		B.print(std::cout);
 	}
 
 	A += B;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
+		A.print(std::cout);
 	}
 
 	assert_matrix_value(A, A_data2, "A + B");
@@ -614,14 +614,14 @@ void test_assign_column()
 	int j = 0;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		B.print(stdout);
+		A.print(std::cout);
+		B.print(std::cout);
 	}
 
 	A.assign_column(i, B, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
+		A.print(std::cout);
 	}
 
 	assert_matrix_value(A, A_data2, "A(:, i) = B(:, j)");
@@ -653,14 +653,14 @@ void test_assign_row()
 	int j = 0;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		B.print(stdout);
+		A.print(std::cout);
+		B.print(std::cout);
 	}
 
 	A.assign_row(i, B, j);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
+		A.print(std::cout);
 	}
 
 	assert_matrix_value(A, A_data2, "A(i, :) = B(j, :)");
@@ -682,13 +682,13 @@ void test_elem_apply()
 	Matrix A("A", 2, 3, A_data1);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
+		A.print(std::cout);
 	}
 
 	A.elem_apply(sqrtf);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
+		A.print(std::cout);
 	}
 
 	assert_matrix_value(A, A_data2, "sqrt(A)");
@@ -711,13 +711,13 @@ void test_elem_mult()
 	precision_t c = 3;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
+		A.print(std::cout);
 	}
 
 	A *= c;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
+		A.print(std::cout);
 	}
 
 	assert_matrix_value(A, A_data2, "c * A");
@@ -744,14 +744,14 @@ void test_subtract()
 	Matrix B("B", 2, 2, B_data);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
-		B.print(stdout);
+		A.print(std::cout);
+		B.print(std::cout);
 	}
 
 	A -= B;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		A.print(stdout);
+		A.print(std::cout);
 	}
 
 	assert_matrix_value(A, A_data2, "A - B");
@@ -781,14 +781,14 @@ void test_subtract_columns()
 	Matrix a("a", 3, 1, a_data);;
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		M.print(stdout);
-		a.print(stdout);
+		M.print(std::cout);
+		a.print(std::cout);
 	}
 
 	M.subtract_columns(a);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		M.print(stdout);
+		M.print(std::cout);
 	}
 
 	assert_matrix_value(M, M_data2, "M - a * 1_N'");
@@ -816,14 +816,14 @@ void test_subtract_rows()
 	Matrix a("a", 1, 4, a_data);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		M.print(stdout);
-		a.print(stdout);
+		M.print(std::cout);
+		a.print(std::cout);
 	}
 
 	M.subtract_rows(a);
 
 	if ( LOGGER(LL_VERBOSE) ) {
-		M.print(stdout);
+		M.print(std::cout);
 	}
 
 	assert_matrix_value(M, M_data2, "M - 1_N * a");
@@ -831,12 +831,11 @@ void test_subtract_rows()
 
 void print_usage()
 {
-	fprintf(stderr,
+	std::cerr <<
 		"Usage: ./test-matrix [options]\n"
 		"\n"
 		"Options:\n"
-		"  --loglevel LEVEL   set the log level (1=info, 2=verbose, 3=debug)\n"
-	);
+		"  --loglevel LEVEL   set the log level (1=info, 2=verbose, 3=debug)\n";
 }
 
 int main(int argc, char **argv)
@@ -896,9 +895,9 @@ int main(int argc, char **argv)
 	for ( i = 0; i < num_tests; i++ ) {
 		test_func_t test = tests[i];
 
-		printf("TEST %d\n", i + 1);
+		std::cout << "TEST " << i + 1 << "\n";
 		test();
-		printf("\n");
+		std::cout << "\n";
 	}
 
 #ifdef __NVCC__

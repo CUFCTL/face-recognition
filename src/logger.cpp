@@ -3,8 +3,8 @@
  *
  * Implementation of the logger.
  */
+#include <cstdio>
 #include <stdarg.h>
-#include <stdio.h>
 #include <time.h>
 #include "logger.h"
 

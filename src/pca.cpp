@@ -91,7 +91,7 @@ Matrix PCALayer::project(const Matrix& X)
  *
  * @param file
  */
-void PCALayer::save(FILE *file)
+void PCALayer::save(std::ofstream& file)
 {
 	this->W.save(file);
 }
@@ -101,7 +101,7 @@ void PCALayer::save(FILE *file)
  *
  * @param file
  */
-void PCALayer::load(FILE *file)
+void PCALayer::load(std::ifstream& file)
 {
 	this->W.load(file);
 }

@@ -5,6 +5,7 @@
  */
 #include <dirent.h>
 #include "dataset.h"
+#include "logger.h"
 
 /**
  * Get whether an entry is a file, excluding "." and "..".
@@ -19,23 +20,45 @@ int is_file(const struct dirent *entry)
 }
 
 /**
- * Read a string from a file.
+ * Read an integer from a binary file.
  *
  * @param file
  */
-std::string str_fread(FILE *file)
+int read_int(std::ifstream& file)
 {
-	int num;
-	fread(&num, sizeof(int), 1, file);
+	int n;
+	file.read(reinterpret_cast<char *>(&n), sizeof(int));
+
+	return n;
+}
+
+/**
+ * Read a string from a binary file.
+ *
+ * @param file
+ */
+std::string read_string(std::ifstream& file)
+{
+	int num = read_int(file);
 
 	char *buffer = new char[num];
-	fread(buffer, sizeof(char), num, file);
+	file.read(buffer, num);
 
 	std::string str(buffer);
 
 	delete[] buffer;
 
-	return std::string(str);
+	return str;
+}
+
+/**
+ * Write an integer to a binary file.
+ *
+ * @param file
+ */
+void write_int(int n, std::ofstream& file)
+{
+	file.write(reinterpret_cast<char *>(&n), sizeof(int));
 }
 
 /**
@@ -44,12 +67,12 @@ std::string str_fread(FILE *file)
  * @param str
  * @param file
  */
-void str_fwrite(const std::string& str, FILE *file)
+void write_string(const std::string& str, std::ofstream& file)
 {
 	int num = str.size() + 1;
 
-	fwrite(&num, sizeof(int), 1, file);
-	fwrite(str.c_str(), sizeof(char), num, file);
+	write_int(num, file);
+	file.write(str.c_str(), num);
 }
 
 /**
@@ -121,40 +144,6 @@ Dataset::Dataset(const std::string& path)
 }
 
 /**
- * Construct a dataset from a file.
- *
- * @param file
- */
-Dataset::Dataset(FILE *file)
-{
-	// read path
-	this->path = str_fread(file);
-
-	// read labels
-	int num_labels;
-	fread(&num_labels, sizeof(int), 1, file);
-
-	int i;
-	for ( i = 0; i < num_labels; i++ ) {
-		data_label_t label(str_fread(file));
-
-		this->labels.push_back(label);
-	}
-
-	// read entries
-	int num_entries;
-	fread(&num_entries, sizeof(int), 1, file);
-
-	for ( i = 0; i < num_entries; i++ ) {
-		data_entry_t entry;
-		entry.label = str_fread(file);
-		entry.name = str_fread(file);
-
-		this->entries.push_back(entry);
-	}
-}
-
-/**
  * Construct an empty dataset.
  */
 Dataset::Dataset()
@@ -162,42 +151,13 @@ Dataset::Dataset()
 }
 
 /**
- * Save a dataset to a file.
- *
- * @param file
- */
-void Dataset::save(FILE *file)
-{
-	// save path
-	str_fwrite(this->path.c_str(), file);
-
-	// save labels
-	int num_labels = this->labels.size();
-	fwrite(&num_labels, sizeof(int), 1, file);
-
-	int i;
-	for ( i = 0; i < num_labels; i++ ) {
-		str_fwrite(this->labels[i].c_str(), file);
-	}
-
-	// save entries
-	int num_entries = this->entries.size();
-	fwrite(&num_entries, sizeof(int), 1, file);
-
-	for ( i = 0; i < num_entries; i++ ) {
-		str_fwrite(this->entries[i].label.c_str(), file);
-		str_fwrite(this->entries[i].name.c_str(), file);
-	}
-}
-
-/**
- * Get the data matrix X for a dataset. Each column
+ * Load the data matrix X for a dataset. Each column
  * in X is an observation. Every observation in X must
  * have the same dimensionality.
  *
  * This function assumes that the data are images.
  */
-Matrix Dataset::load() const
+Matrix Dataset::load_data() const
 {
 	// get the image size from the first image
 	Image image;
@@ -222,25 +182,86 @@ Matrix Dataset::load() const
 }
 
 /**
- * Print the labels in a dataset.
+ * Save a dataset to a file.
+ *
+ * @param file
  */
-void Dataset::print_labels() const
+void Dataset::save(std::ofstream& file)
 {
-	unsigned i;
-	for ( i = 0; i < this->labels.size(); i++ ) {
-		printf("%3d  %s\n", i, this->labels[i].c_str());
+	// save path
+	write_string(this->path.c_str(), file);
+
+	// save labels
+	int num_labels = this->labels.size();
+	write_int(num_labels, file);
+
+	for ( const data_label_t& label : this->labels ) {
+		write_string(label.c_str(), file);
 	}
-	putchar('\n');
+
+	// save entries
+	int num_entries = this->entries.size();
+	write_int(num_entries, file);
+
+	for ( const data_entry_t& entry : this->entries ) {
+		write_string(entry.label.c_str(), file);
+		write_string(entry.name.c_str(), file);
+	}
 }
 
 /**
- * Print the entries in a dataset.
+ * Load a dataset from a file.
+ *
+ * @param file
  */
-void Dataset::print_entries() const
+void Dataset::load(std::ifstream& file)
 {
-	unsigned i;
-	for ( i = 0; i < this->entries.size(); i++ ) {
-		printf("%8s  %s\n", this->entries[i].label.c_str(), this->entries[i].name.c_str());
+	// read path
+	this->path = read_string(file);
+
+	// read labels
+	int num_labels = read_int(file);
+
+	for ( int i = 0; i < num_labels; i++ ) {
+		data_label_t label(read_string(file));
+
+		this->labels.push_back(label);
 	}
-	putchar('\n');
+
+	// read entries
+	int num_entries = read_int(file);
+
+	for ( int i = 0; i < num_entries; i++ ) {
+		data_entry_t entry;
+		entry.label = read_string(file);
+		entry.name = read_string(file);
+
+		this->entries.push_back(entry);
+	}
+}
+
+/**
+ * Print information about a dataset.
+ */
+void Dataset::print() const
+{
+	// print path
+	log(LL_VERBOSE, "path: %s", this->path.c_str());
+	log(LL_VERBOSE, "");
+
+	// print labels
+	log(LL_VERBOSE, "%d classes", this->labels.size());
+
+	for ( const data_label_t& label : this->labels ) {
+		log(LL_VERBOSE, "%s", label.c_str());
+	}
+	log(LL_VERBOSE, "");
+
+	// print entries
+	log(LL_VERBOSE, "%d entries", this->entries.size());
+
+	for ( const data_entry_t& entry : this->entries ) {
+		log(LL_VERBOSE, "%8s  %s", entry.label.c_str(), entry.name.c_str());
+	}
+	log(LL_VERBOSE, "");
 }

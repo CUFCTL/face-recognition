@@ -3,15 +3,15 @@
  *
  * Test suite for the image library.
  */
-#include <stdio.h>
+#include <iostream>
 #include "image.h"
 #include "matrix.h"
 
 int main(int argc, char **argv)
 {
 	if ( argc != 3 ) {
-		fprintf(stderr, "usage: ./test-image [infile] [outfile]\n");
-		return 1;
+		std::cerr << "usage: ./test-image [infile] [outfile]\n";
+		exit(1);
 	}
 
 	const char *FILENAME_IN = argv[1];

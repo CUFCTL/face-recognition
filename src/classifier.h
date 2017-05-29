@@ -6,7 +6,6 @@
 #ifndef CLASSIFIER_H
 #define CLASSIFIER_H
 
-#include <stdio.h>
 #include <vector>
 #include "dataset.h"
 #include "matrix.h"

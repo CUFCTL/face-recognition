@@ -6,7 +6,7 @@
 #ifndef DATASET_H
 #define DATASET_H
 
-#include <stdio.h>
+#include <fstream>
 #include <string>
 #include <vector>
 #include "matrix.h"
@@ -25,15 +25,14 @@ public:
 	std::vector<data_entry_t> entries;
 
 	Dataset(const std::string& path);
-	Dataset(FILE *file);
 	Dataset();
 
-	void save(FILE *file);
+	Matrix load_data() const;
 
-	Matrix load() const;
+	void save(std::ofstream& file);
+	void load(std::ifstream& file);
 
-	void print_labels() const;
-	void print_entries() const;
+	void print() const;
 };
 
 #endif

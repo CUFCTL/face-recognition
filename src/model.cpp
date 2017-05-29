@@ -3,7 +3,7 @@
  *
  * Implementation of the model type.
  */
-#include <stdio.h>
+#include <iomanip>
 #include "image.h"
 #include "logger.h"
 #include "model.h"
@@ -60,7 +60,7 @@ void Model::train(const Dataset& train_set)
 		train_set.labels.size());
 
 	// get data matrix X
-	Matrix X = train_set.load();
+	Matrix X = train_set.load_data();
 
 	// subtract mean from X
 	this->mean = X.mean_column("m");
@@ -82,9 +82,9 @@ void Model::train(const Dataset& train_set)
  *
  * @param path
  */
-void Model::save(const char *path)
+void Model::save(const std::string& path)
 {
-	FILE *file = fopen(path, "w");
+	std::ofstream file(path, std::ofstream::out);
 
 	this->train_set.save(file);
 
@@ -93,7 +93,7 @@ void Model::save(const char *path)
 	this->feature->save(file);
 	this->P.save(file);
 
-	fclose(file);
+	file.close();
 }
 
 /**
@@ -101,18 +101,18 @@ void Model::save(const char *path)
  *
  * @param path
  */
-void Model::load(const char *path)
+void Model::load(const std::string& path)
 {
-	FILE *file = fopen(path, "r");
+	std::ifstream file(path, std::ifstream::in);
 
-	this->train_set = Dataset(file);
+	this->train_set.load(file);
 
 	this->mean.load(file);
 
 	this->feature->load(file);
 	this->P.load(file);
 
-	fclose(file);
+	file.close();
 }
 
 /**
@@ -129,7 +129,7 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 		test_set.labels.size());
 
 	// compute projected test images
-	Matrix X_test = test_set.load();
+	Matrix X_test = test_set.load_data();
 	X_test.subtract_columns(this->mean);
 
 	Matrix P_test = this->feature->project(X_test);
@@ -197,8 +197,9 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
  */
 void Model::print_stats()
 {
-	printf("%10.2f  %10.3f  %10.3f\n",
-		this->stats.accuracy,
-		this->stats.train_time,
-		this->stats.test_time);
+	std::cout
+		<< std::setw(12) << std::setprecision(3) << this->stats.accuracy
+		<< std::setw(12) << std::setprecision(3) << this->stats.train_time
+		<< std::setw(12) << std::setprecision(3) << this->stats.test_time
+		<< "\n";
 }
