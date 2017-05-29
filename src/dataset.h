@@ -20,6 +20,7 @@ typedef struct {
 
 class Dataset {
 public:
+	std::string path;
 	std::vector<data_label_t> labels;
 	std::vector<data_entry_t> entries;
 

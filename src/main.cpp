@@ -6,7 +6,6 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include "bayes.h"
 #include "dataset.h"
@@ -113,17 +112,16 @@ void print_usage()
  * Parse a distance function from a name.
  *
  * @param name
- * @return pointer to corresponding distance function
  */
-dist_func_t parse_dist_func(const char *name)
+dist_func_t parse_dist_func(const std::string& name)
 {
-	if ( strcmp(name, "COS") == 0 ) {
+	if ( name == "COS" ) {
 		return m_dist_COS;
 	}
-	else if ( strcmp(name, "L1") == 0 ) {
+	else if ( name == "L1" ) {
 		return m_dist_L1;
 	}
-	else if ( strcmp(name, "L2") == 0 ) {
+	else if ( name == "L2" ) {
 		return m_dist_L2;
 	}
 
@@ -134,17 +132,16 @@ dist_func_t parse_dist_func(const char *name)
  * Parse a nonlinearity function from a name.
  *
  * @param name
- * @return pointer to corresponding nonlinearity function
  */
-ica_nonl_t parse_nonl_func(const char *name)
+ica_nonl_t parse_nonl_func(const std::string& name)
 {
-	if ( strcmp(name, "pow3") == 0 ) {
+	if ( name == "pow3" ) {
 		return ICA_NONL_POW3;
 	}
-	else if ( strcmp(name, "tanh") == 0 ) {
+	else if ( name == "tanh" ) {
 		return ICA_NONL_TANH;
 	}
-	else if ( strcmp(name, "gauss") == 0 ) {
+	else if ( name == "gauss" ) {
 		return ICA_NONL_GAUSS;
 	}
 

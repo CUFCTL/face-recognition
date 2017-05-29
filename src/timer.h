@@ -7,10 +7,11 @@
 #define TIMER_H
 
 #include <time.h>
+#include <string>
 #include <vector>
 
 typedef struct {
-	const char *name;
+	std::string name;
 	int level;
 	clock_t start;
 	clock_t end;
@@ -22,7 +23,7 @@ typedef struct {
 	int level;
 } timekeeper_t;
 
-void timer_push(const char *);
+void timer_push(const std::string& name);
 float timer_pop(void);
 void timer_print(void);
 

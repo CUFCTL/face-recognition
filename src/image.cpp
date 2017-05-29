@@ -10,7 +10,6 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "image.h"
 
 /**
@@ -60,23 +59,25 @@ void skip_to_next_value(FILE* in)
  *
  * @param path
  */
-void Image::load(const char *path)
+void Image::load(const std::string& path)
 {
-	FILE *in = fopen(path, "r");
+	FILE *in = fopen(path.c_str(), "r");
 
 	// read image header
-	char header[4];
+	char buffer[4];
+	fscanf(in, "%s", buffer);
+
+	std::string header(buffer);
 	int channels;
 
-	fscanf(in, "%s", header);
-	if ( strcmp(header, "P5") == 0 ) {
+	if ( header == "P5" ) {
 		channels = 1;
 	}
-	else if ( strcmp(header, "P6") == 0 ) {
+	else if ( header == "P6" ) {
 		channels = 3;
 	}
 	else {
-		fprintf(stderr, "error: cannot read image \'%s\'\n", path);
+		fprintf(stderr, "error: cannot read image \'%s\'\n", path.c_str());
 		exit(1);
 	}
 
@@ -124,9 +125,9 @@ void Image::load(const char *path)
  *
  * @param path
  */
-void Image::save(const char *path)
+void Image::save(const std::string& path)
 {
-	FILE *out = fopen(path, "w");
+	FILE *out = fopen(path.c_str(), "w");
 
 	// write image header
 	if ( this->channels == 1 ) {
@@ -136,7 +137,7 @@ void Image::save(const char *path)
 		fprintf(out, "P6\n");
 	}
 	else {
-		fprintf(stderr, "error: cannot write image \'%s\'\n", path);
+		fprintf(stderr, "error: cannot write image \'%s\'\n", path.c_str());
 		exit(1);
 	}
 

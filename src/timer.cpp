@@ -5,7 +5,6 @@
  */
 #include <assert.h>
 #include <stdio.h>
-#include <string.h>
 #include "logger.h"
 #include "timer.h"
 
@@ -19,7 +18,7 @@ timekeeper_t timer;
  *
  * @param name
  */
-void timer_push(const char *name)
+void timer_push(const std::string& name)
 {
 	timer_item_t item;
 	item.name = name;
@@ -30,7 +29,7 @@ void timer_push(const char *name)
 	timer.items.push_back(item);
 	timer.level++;
 
-	log(LL_VERBOSE, "%*s%s", 2 * item.level, "", item.name);
+	log(LL_VERBOSE, "%*s%s", 2 * item.level, "", item.name.c_str());
 }
 
 /**
@@ -69,7 +68,7 @@ void timer_print(void)
 	int max_len = 0;
 
 	for ( iter = timer.items.begin(); iter != timer.items.end(); iter++ ) {
-		int len = 2 * iter->level + strlen(iter->name);
+		int len = 2 * iter->level + iter->name.size();
 
 		if ( max_len < len ) {
 			max_len = len;
@@ -84,7 +83,7 @@ void timer_print(void)
 	for ( iter = timer.items.begin(); iter != timer.items.end(); iter++ ) {
 		log(LL_VERBOSE, "%*s%-*s  % 12.3f",
 			2 * iter->level, "",
-			max_len - 2 * iter->level, iter->name,
+			max_len - 2 * iter->level, iter->name.c_str(),
 			iter->duration);
 	}
 	log(LL_VERBOSE, "");

@@ -6,6 +6,8 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include <string>
+
 class Image {
 public:
 	int channels;
@@ -17,8 +19,8 @@ public:
 	Image();
 	~Image();
 
-	void load(const char *path);
-	void save(const char *path);
+	void load(const std::string& path);
+	void save(const std::string& path);
 };
 
 #endif

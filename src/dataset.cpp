@@ -5,35 +5,38 @@
  */
 #include <dirent.h>
 #include <stdlib.h>
-#include <string.h>
 #include "dataset.h"
 
 /**
  * Get whether an entry is a file, excluding "." and "..".
  *
  * @param entry
- * @return 1 if entry is a file, 0 otherwise
  */
 int is_file(const struct dirent *entry)
 {
-	return (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0);
+	std::string name(entry->d_name);
+
+	return (name != "." && name != "..");
 }
 
 /**
  * Read a string from a file.
  *
  * @param file
- * @return pointer to new string
  */
-char * str_fread(FILE *file)
+std::string str_fread(FILE *file)
 {
 	int num;
 	fread(&num, sizeof(int), 1, file);
 
-	char *str = (char *)malloc(num * sizeof(char));
-	fread(str, sizeof(char), num, file);
+	char *buffer = (char *)malloc(num * sizeof(char));
+	fread(buffer, sizeof(char), num, file);
 
-	return str;
+	std::string str(buffer);
+
+	free(buffer);
+
+	return std::string(str);
 }
 
 /**
@@ -42,11 +45,12 @@ char * str_fread(FILE *file)
  * @param str
  * @param file
  */
-void str_fwrite(const char *str, FILE *file)
+void str_fwrite(const std::string& str, FILE *file)
 {
-	int num = strlen(str) + 1;
+	int num = str.size() + 1;
+
 	fwrite(&num, sizeof(int), 1, file);
-	fwrite(str, sizeof(char), num, file);
+	fwrite(str.c_str(), sizeof(char), num, file);
 }
 
 /**
@@ -100,7 +104,7 @@ Dataset::Dataset(const std::string& path)
 		// append entry
 		data_entry_t entry;
 		entry.label = labels[j];
-		entry.name = path + "/" + filename;
+		entry.name = filename;
 
 		entries.push_back(entry);
 	}
@@ -112,6 +116,7 @@ Dataset::Dataset(const std::string& path)
 	free(files);
 
 	// construct dataset
+	this->path = path;
 	this->labels = labels;
 	this->entries = entries;
 }
@@ -123,23 +128,22 @@ Dataset::Dataset(const std::string& path)
  */
 Dataset::Dataset(FILE *file)
 {
+	// read path
+	this->path = str_fread(file);
+
 	// read labels
 	int num_labels;
-	std::vector<data_label_t> labels;
-
 	fread(&num_labels, sizeof(int), 1, file);
 
 	int i;
 	for ( i = 0; i < num_labels; i++ ) {
 		data_label_t label(str_fread(file));
 
-		labels.push_back(label);
+		this->labels.push_back(label);
 	}
 
 	// read entries
 	int num_entries;
-	std::vector<data_entry_t> entries;
-
 	fread(&num_entries, sizeof(int), 1, file);
 
 	for ( i = 0; i < num_entries; i++ ) {
@@ -147,11 +151,8 @@ Dataset::Dataset(FILE *file)
 		entry.label = str_fread(file);
 		entry.name = str_fread(file);
 
-		entries.push_back(entry);
+		this->entries.push_back(entry);
 	}
-
-	this->labels = labels;
-	this->entries = entries;
 }
 
 /**
@@ -168,6 +169,9 @@ Dataset::Dataset()
  */
 void Dataset::save(FILE *file)
 {
+	// save path
+	str_fwrite(this->path.c_str(), file);
+
 	// save labels
 	int num_labels = this->labels.size();
 	fwrite(&num_labels, sizeof(int), 1, file);
@@ -193,15 +197,13 @@ void Dataset::save(FILE *file)
  * have the same dimensionality.
  *
  * This function assumes that the data are images.
- *
- * @return pointer to data matrix
  */
 Matrix Dataset::load() const
 {
 	// get the image size from the first image
 	Image image;
 
-	image.load(this->entries[0].name.c_str());
+	image.load(this->path + "/" + this->entries[0].name);
 
 	// construct image matrix
 	int m = image.channels * image.height * image.width;
@@ -213,7 +215,7 @@ Matrix Dataset::load() const
 
 	int i;
 	for ( i = 1; i < n; i++ ) {
-		image.load(this->entries[i].name.c_str());
+		image.load(this->path + "/" + this->entries[i].name);
 		X.image_read(i, image);
 	}
 

@@ -5,7 +5,6 @@
  */
 #include <math.h>
 #include <stdlib.h>
-#include <string.h>
 #include "ica.h"
 #include "logger.h"
 #include "math_utils.h"

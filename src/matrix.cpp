@@ -5,9 +5,9 @@
  */
 #include <algorithm>
 #include <assert.h>
+#include <cstring>
 #include <math.h>
 #include <stdlib.h>
-#include <string.h>
 
 #if defined(__NVCC__)
 	#include <cuda_runtime.h>

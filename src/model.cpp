@@ -5,7 +5,6 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "image.h"
 #include "logger.h"
 #include "model.h"
@@ -183,7 +182,7 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 			: "";
 
 		log(LL_VERBOSE, "%-12s -> %-4s %s",
-			basename(entry.name.c_str()),
+			entry.name.c_str(),
 			y_pred.c_str(), s);
 	}
 
