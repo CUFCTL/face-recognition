@@ -4,10 +4,10 @@
  * Implementation of the matrix library.
  */
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
+#include <cmath>
 #include <cstring>
 #include <iomanip>
-#include <math.h>
 #include <random>
 #include "logger.h"
 #include "math_utils.h"

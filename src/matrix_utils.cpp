@@ -3,8 +3,8 @@
  *
  * Library of helpful matrix functions.
  */
-#include <assert.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
 #include "matrix_utils.h"
 
 /**

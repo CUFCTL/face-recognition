@@ -7,7 +7,7 @@
  * - binary PGM (P5)
  * - binary PPM (P6)
  */
-#include <ctype.h>
+#include <cctype>
 #include <fstream>
 #include "image.h"
 #include "logger.h"

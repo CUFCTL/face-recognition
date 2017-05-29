@@ -3,7 +3,7 @@
  *
  * Implementation of the timer.
  */
-#include <assert.h>
+#include <cassert>
 #include "logger.h"
 #include "timer.h"
 

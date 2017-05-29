@@ -6,11 +6,11 @@
  * Tests are based on examples in the MATLAB documentation
  * where appropriate.
  */
+#include <cmath>
 #include <cstdlib>
 #include <getopt.h>
 #include <iomanip>
 #include <iostream>
-#include <math.h>
 
 #include "logger.h"
 #include "matrix.h"

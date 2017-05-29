@@ -3,7 +3,7 @@
  *
  * Implementation of ICA (Hyvarinen, 1999).
  */
-#include <math.h>
+#include <cmath>
 #include "ica.h"
 #include "logger.h"
 #include "math_utils.h"

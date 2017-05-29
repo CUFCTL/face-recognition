@@ -3,7 +3,7 @@
  *
  * Library of helpful math functions.
  */
-#include <math.h>
+#include <cmath>
 #include "math_utils.h"
 
 /**

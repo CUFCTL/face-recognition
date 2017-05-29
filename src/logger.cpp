@@ -3,9 +3,9 @@
  *
  * Implementation of the logger.
  */
+#include <cstdarg>
 #include <cstdio>
 #include <ctime>
-#include <stdarg.h>
 #include "logger.h"
 
 logger_level_t LOGLEVEL = LL_INFO;
