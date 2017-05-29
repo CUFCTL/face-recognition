@@ -138,9 +138,8 @@ std::vector<Matrix> m_copy_classes(const Matrix& X, const std::vector<data_entry
  * given by a list X_c of class submatrices.
  *
  * @param X_c
- * @param c
  */
-std::vector<Matrix> m_class_means(const std::vector<Matrix>& X_c, int c)
+std::vector<Matrix> m_class_means(const std::vector<Matrix>& X_c)
 {
 	std::vector<Matrix> U;
 
@@ -159,9 +158,8 @@ std::vector<Matrix> m_class_means(const std::vector<Matrix>& X_c, int c)
  *
  * @param X_c
  * @param U
- * @param c
  */
-std::vector<Matrix> m_class_scatters(const std::vector<Matrix>& X_c, const std::vector<Matrix>& U, int c)
+std::vector<Matrix> m_class_scatters(const std::vector<Matrix>& X_c, const std::vector<Matrix>& U)
 {
 	std::vector<Matrix> S;
 
@@ -183,9 +181,8 @@ std::vector<Matrix> m_class_scatters(const std::vector<Matrix>& X_c, const std::
  *
  * @param X_c
  * @param U
- * @param c
  */
-Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matrix>& U, int c)
+Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matrix>& U)
 {
 	int N = U[0].rows();
 
@@ -195,7 +192,7 @@ Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matri
 	for ( const Matrix& U_i : U ) {
 		u += U_i;
 	}
-	u /= c;
+	u /= X_c.size();
 
 	// compute the between-scatter S_b
 	Matrix S_b = Matrix::zeros("S_b", N, N);
@@ -220,9 +217,8 @@ Matrix m_scatter_between(const std::vector<Matrix>& X_c, const std::vector<Matri
  *
  * @param X_c
  * @param U
- * @param c
  */
-Matrix m_scatter_within(const std::vector<Matrix>& X_c, const std::vector<Matrix>& U, int c)
+Matrix m_scatter_within(const std::vector<Matrix>& X_c, const std::vector<Matrix>& U)
 {
 	int N = U[0].rows();
 	Matrix S_w = Matrix::zeros("S_w", N, N);

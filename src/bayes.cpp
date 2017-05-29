@@ -42,8 +42,8 @@ precision_t bayes_prob(Matrix x, const Matrix& mu, const Matrix& S_inv)
 std::vector<data_label_t> BayesLayer::predict(const Matrix& X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, const Matrix& X_test)
 {
 	std::vector<Matrix> X_c = m_copy_classes(X, Y, C.size());
-	std::vector<Matrix> U = m_class_means(X_c, C.size());
-	std::vector<Matrix> S = m_class_scatters(X_c, U, C.size());
+	std::vector<Matrix> U = m_class_means(X_c);
+	std::vector<Matrix> S = m_class_scatters(X_c, U);
 
 	// compute inverses of each S_i
 	std::vector<Matrix> S_inv;

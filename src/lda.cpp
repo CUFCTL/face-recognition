@@ -58,9 +58,9 @@ void LDALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int 
 	timer_push("compute scatter matrices S_b and S_w");
 
 	std::vector<Matrix> X_c = m_copy_classes(P_pca, y, c);
-	std::vector<Matrix> U = m_class_means(X_c, c);
-	Matrix S_b = m_scatter_between(X_c, U, c);
-	Matrix S_w = m_scatter_within(X_c, U, c);
+	std::vector<Matrix> U = m_class_means(X_c);
+	Matrix S_b = m_scatter_between(X_c, U);
+	Matrix S_w = m_scatter_within(X_c, U);
 
 	timer_pop();
 
