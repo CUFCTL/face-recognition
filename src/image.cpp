@@ -17,11 +17,11 @@
  */
 Image::Image()
 {
-	this->channels = 0;
-	this->width = 0;
-	this->height = 0;
-	this->max_value = 0;
-	this->pixels = nullptr;
+	this->_channels = 0;
+	this->_width = 0;
+	this->_height = 0;
+	this->_max_value = 0;
+	this->_pixels = nullptr;
 }
 
 /**
@@ -29,7 +29,7 @@ Image::Image()
  */
 Image::~Image()
 {
-	delete[] this->pixels;
+	delete[] this->_pixels;
 }
 
 /**
@@ -99,23 +99,23 @@ void Image::load(const std::string& path)
 
 	// verify that image sizes are equal (if reloading)
 	int num1 = channels * width * height;
-	int num2 = this->channels * this->width * this->height;
+	int num2 = this->_channels * this->_width * this->_height;
 
-	if ( this->pixels == nullptr ) {
-		this->pixels = new unsigned char[num1];
+	if ( this->_pixels == nullptr ) {
+		this->_pixels = new unsigned char[num1];
 	}
 	else if ( num1 != num2 ) {
 		log(LL_ERROR, "error: unequal sizes on image reload\n");
 		exit(1);
 	}
 
-	this->channels = channels;
-	this->width = width;
-	this->height = height;
-	this->max_value = max_value;
+	this->_channels = channels;
+	this->_width = width;
+	this->_height = height;
+	this->_max_value = max_value;
 
 	// read pixel data
-	file.read(reinterpret_cast<char *>(this->pixels), num1);
+	file.read(reinterpret_cast<char *>(this->_pixels), num1);
 
 	file.close();
 }
@@ -132,10 +132,10 @@ void Image::save(const std::string& path)
 	// determine image header
 	std::string header;
 
-	if ( this->channels == 1 ) {
+	if ( this->_channels == 1 ) {
 		header = "P5";
 	}
-	else if ( this->channels == 3 ) {
+	else if ( this->_channels == 3 ) {
 		header = "P6";
 	}
 	else {
@@ -145,14 +145,14 @@ void Image::save(const std::string& path)
 
 	// write image metadata
 	file << header << "\n"
-		<< this->width << " "
-		<< this->height << " "
-		<< this->max_value << "\n";
+		<< this->_width << " "
+		<< this->_height << " "
+		<< this->_max_value << "\n";
 
 	// write pixel data
-	int num = this->channels * this->width * this->height;
+	int num = this->_channels * this->_width * this->_height;
 
-	file.write(reinterpret_cast<char *>(this->pixels), num);
+	file.write(reinterpret_cast<char *>(this->_pixels), num);
 
 	file.close();
 }

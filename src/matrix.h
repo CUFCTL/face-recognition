@@ -60,10 +60,10 @@ public:
 	void image_write(int i, Image& image);
 
 	// getter functions
-	inline const char * name() const { return this->_name; };
-	inline int rows() const { return this->_rows; };
-	inline int cols() const { return this->_cols; };
-	inline precision_t elem(int i, int j) const { return ELEM(*this, i, j); };
+	inline const char * name() const { return this->_name; }
+	inline int rows() const { return this->_rows; }
+	inline int cols() const { return this->_cols; }
+	inline precision_t elem(int i, int j) const { return ELEM(*this, i, j); }
 
 	Matrix diagonalize(const char *name) const;
 	void eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Matrix& D) const;
@@ -86,12 +86,12 @@ public:
 	void subtract_rows(const Matrix& a);
 
 	// operators
-	inline Matrix operator()(int i, int j) const { return Matrix("", *this, i, j); };
-	inline Matrix& operator=(Matrix B) { swap(*this, B); return *this; };
-	inline Matrix& operator+=(const Matrix& B) { this->add(B); return *this; };
-	inline Matrix& operator-=(const Matrix& B) { this->subtract(B); return *this; };
-	inline Matrix& operator*=(precision_t c) { this->elem_mult(c); return *this; };
-	inline Matrix& operator/=(precision_t c) { this->elem_mult(1 / c); return *this; };
+	inline Matrix operator()(int i, int j) const { return Matrix("", *this, i, j); }
+	inline Matrix& operator=(Matrix B) { swap(*this, B); return *this; }
+	inline Matrix& operator+=(const Matrix& B) { this->add(B); return *this; }
+	inline Matrix& operator-=(const Matrix& B) { this->subtract(B); return *this; }
+	inline Matrix& operator*=(precision_t c) { this->elem_mult(c); return *this; }
+	inline Matrix& operator/=(precision_t c) { this->elem_mult(1 / c); return *this; }
 
 	// friend functions
 	friend void swap(Matrix& A, Matrix& B);

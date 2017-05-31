@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 	Image image;
 	image.load(FILENAME_IN);
 
-	Matrix x("x", image.channels * image.width * image.height, 1);
+	Matrix x("x", image.channels() * image.width() * image.height(), 1);
 	x.image_read(0, image);
 
 	// map a column vector to an image

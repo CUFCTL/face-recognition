@@ -165,7 +165,7 @@ Matrix Dataset::load_data() const
 	image.load(this->path + "/" + this->entries[0].name);
 
 	// construct image matrix
-	int m = image.channels * image.height * image.width;
+	int m = image.channels() * image.height() * image.width();
 	int n = this->entries.size();
 	Matrix X("X", m, n);
 

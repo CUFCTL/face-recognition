@@ -401,10 +401,10 @@ void Matrix::gpu_write()
  */
 void Matrix::image_read(int i, const Image& image)
 {
-	assert(this->_rows == image.channels * image.height * image.width);
+	assert(this->_rows == image.channels() * image.height() * image.width());
 
 	for ( int j = 0; j < this->_rows; j++ ) {
-		ELEM(*this, j, i) = (precision_t) image.pixels[j];
+		ELEM(*this, j, i) = (precision_t) image.elem(j);
 	}
 }
 
@@ -416,10 +416,10 @@ void Matrix::image_read(int i, const Image& image)
  */
 void Matrix::image_write(int i, Image& image)
 {
-	assert(this->_rows == image.channels * image.height * image.width);
+	assert(this->_rows == image.channels() * image.height() * image.width());
 
 	for ( int j = 0; j < this->_rows; j++ ) {
-		image.pixels[j] = (unsigned char) ELEM(*this, j, i);
+		image.elem(j) = (unsigned char) ELEM(*this, j, i);
 	}
 }
 
