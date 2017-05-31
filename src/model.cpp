@@ -18,19 +18,19 @@
 Model::Model(FeatureLayer *feature, ClassifierLayer *classifier)
 {
 	// initialize layers
-	this->feature = feature;
-	this->classifier = classifier;
+	this->_feature = feature;
+	this->_classifier = classifier;
 
 	// initialize stats
-	this->stats.accuracy = 0.0f;
-	this->stats.train_time = 0.0f;
-	this->stats.test_time = 0.0f;
+	this->_stats.accuracy = 0.0f;
+	this->_stats.train_time = 0.0f;
+	this->_stats.test_time = 0.0f;
 
 	// log hyperparameters
 	log(LL_VERBOSE, "Hyperparameters");
 
-	this->feature->print();
-	this->classifier->print();
+	this->_feature->print();
+	this->_classifier->print();
 
 	log(LL_VERBOSE, "");
 }
@@ -40,41 +40,8 @@ Model::Model(FeatureLayer *feature, ClassifierLayer *classifier)
  */
 Model::~Model()
 {
-	delete this->feature;
-	delete this->classifier;
-}
-
-/**
- * Perform training on a training set.
- *
- * @param train_set
- */
-void Model::train(const Dataset& train_set)
-{
-	timer_push("Training");
-
-	this->train_set = train_set;
-
-	log(LL_VERBOSE, "Training set: %d samples, %d classes",
-		train_set.entries().size(),
-		train_set.labels().size());
-
-	// get data matrix X
-	Matrix X = train_set.load_data();
-
-	// subtract mean from X
-	this->mean = X.mean_column("m");
-
-	X.subtract_columns(this->mean);
-
-	// project X into feature space
-	this->feature->compute(X, this->train_set.entries(), this->train_set.labels().size());
-	this->P = this->feature->project(X);
-
-	// record training time
-	this->stats.train_time = timer_pop();
-
-	log(LL_VERBOSE, "");
+	delete this->_feature;
+	delete this->_classifier;
 }
 
 /**
@@ -86,12 +53,10 @@ void Model::save(const std::string& path)
 {
 	std::ofstream file(path, std::ofstream::out);
 
-	this->train_set.save(file);
-
-	this->mean.save(file);
-
-	this->feature->save(file);
-	this->P.save(file);
+	this->_train_set.save(file);
+	this->_mean.save(file);
+	this->_feature->save(file);
+	this->_P.save(file);
 
 	file.close();
 }
@@ -105,14 +70,45 @@ void Model::load(const std::string& path)
 {
 	std::ifstream file(path, std::ifstream::in);
 
-	this->train_set.load(file);
-
-	this->mean.load(file);
-
-	this->feature->load(file);
-	this->P.load(file);
+	this->_train_set.load(file);
+	this->_mean.load(file);
+	this->_feature->load(file);
+	this->_P.load(file);
 
 	file.close();
+}
+
+/**
+ * Perform training on a training set.
+ *
+ * @param train_set
+ */
+void Model::train(const Dataset& train_set)
+{
+	timer_push("Training");
+
+	this->_train_set = train_set;
+
+	log(LL_VERBOSE, "Training set: %d samples, %d classes",
+		train_set.entries().size(),
+		train_set.labels().size());
+
+	// get data matrix X
+	Matrix X = train_set.load_data();
+
+	// subtract mean from X
+	this->_mean = X.mean_column("m");
+
+	X.subtract_columns(this->_mean);
+
+	// project X into feature space
+	this->_feature->compute(X, this->_train_set.entries(), this->_train_set.labels().size());
+	this->_P = this->_feature->project(X);
+
+	// record training time
+	this->_stats.train_time = timer_pop();
+
+	log(LL_VERBOSE, "");
 }
 
 /**
@@ -130,20 +126,20 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 
 	// compute projected test images
 	Matrix X_test = test_set.load_data();
-	X_test.subtract_columns(this->mean);
+	X_test.subtract_columns(this->_mean);
 
-	Matrix P_test = this->feature->project(X_test);
+	Matrix P_test = this->_feature->project(X_test);
 
 	// compute predicted labels
-	std::vector<data_label_t> Y_pred = this->classifier->predict(
-		this->P,
-		this->train_set.entries(),
-		this->train_set.labels(),
+	std::vector<data_label_t> Y_pred = this->_classifier->predict(
+		this->_P,
+		this->_train_set.entries(),
+		this->_train_set.labels(),
 		P_test
 	);
 
 	// record predition time
-	this->stats.test_time = timer_pop();
+	this->_stats.test_time = timer_pop();
 
 	log(LL_VERBOSE, "");
 
@@ -167,7 +163,7 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 		}
 	}
 
-	this->stats.accuracy = 100.0f * num_correct / test_set.entries().size();
+	this->_stats.accuracy = 100.0f * num_correct / test_set.entries().size();
 
 	// print results
 	log(LL_VERBOSE, "Results");
@@ -183,7 +179,7 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 		log(LL_VERBOSE, "%-12s -> %-4s %s", entry.name.c_str(), y_pred.c_str(), s);
 	}
 
-	log(LL_VERBOSE, "%d / %d matched, %.2f%%", num_correct, test_set.entries().size(), this->stats.accuracy);
+	log(LL_VERBOSE, "%d / %d matched, %.2f%%", num_correct, test_set.entries().size(), this->_stats.accuracy);
 	log(LL_VERBOSE, "");
 }
 
@@ -193,8 +189,8 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 void Model::print_stats()
 {
 	std::cout
-		<< std::setw(12) << std::setprecision(3) << this->stats.accuracy
-		<< std::setw(12) << std::setprecision(3) << this->stats.train_time
-		<< std::setw(12) << std::setprecision(3) << this->stats.test_time
+		<< std::setw(12) << std::setprecision(3) << this->_stats.accuracy
+		<< std::setw(12) << std::setprecision(3) << this->_stats.train_time
+		<< std::setw(12) << std::setprecision(3) << this->_stats.test_time
 		<< "\n";
 }

@@ -19,29 +19,31 @@ typedef struct {
 
 class Model {
 private:
+	// input data
+	Dataset _train_set;
+	Matrix _mean;
+
 	// feature layer
-	FeatureLayer *feature;
-	Matrix P;
+	FeatureLayer *_feature;
+	Matrix _P;
 
 	// classifier layer
-	ClassifierLayer *classifier;
-
-	// input data
-	Dataset train_set;
-	Matrix mean;
+	ClassifierLayer *_classifier;
 
 	// performance, accuracy stats
-	model_stats_t stats;
+	model_stats_t _stats;
 
 public:
 	Model(FeatureLayer *feature, ClassifierLayer *classifier);
 	~Model();
 
-	void train(const Dataset& train_set);
 	void save(const std::string& path);
 	void load(const std::string& path);
+
+	void train(const Dataset& train_set);
 	std::vector<data_label_t> predict(const Dataset& test_set);
 	void validate(const Dataset& test_set, const std::vector<data_label_t>& Y_pred);
+
 	void print_stats();
 };
 
