@@ -4,8 +4,10 @@
  * User interface to the face recognition system.
  */
 #include <cstdlib>
+#include <exception>
 #include <getopt.h>
 #include <iostream>
+#include <map>
 #include <unistd.h>
 #include "bayes.h"
 #include "dataset.h"
@@ -79,6 +81,18 @@ typedef struct {
 	dist_func_t knn_dist;
 } optarg_t;
 
+const std::map<std::string, dist_func_t> dist_funcs = {
+	{ "COS", m_dist_COS },
+	{ "L1", m_dist_L1 },
+	{ "L2", m_dist_L2 }
+};
+
+const std::map<std::string, ica_nonl_t> nonl_funcs = {
+	{ "pow3", ICA_NONL_POW3 },
+	{ "tanh", ICA_NONL_TANH },
+	{ "gauss", ICA_NONL_GAUSS }
+};
+
 void print_usage()
 {
 	std::cerr <<
@@ -106,46 +120,6 @@ void print_usage()
 		"  --ica_epsilon X         (ICA) convergence threshold for w\n"
 		"  --knn_k N               (kNN) number of nearest neighbors to use\n"
 		"  --knn_dist [dist]       (kNN) distance function to use (L1, L2, COS)\n";
-}
-
-/**
- * Parse a distance function from a name.
- *
- * @param name
- */
-dist_func_t parse_dist_func(const std::string& name)
-{
-	if ( name == "COS" ) {
-		return m_dist_COS;
-	}
-	else if ( name == "L1" ) {
-		return m_dist_L1;
-	}
-	else if ( name == "L2" ) {
-		return m_dist_L2;
-	}
-
-	return nullptr;
-}
-
-/**
- * Parse a nonlinearity function from a name.
- *
- * @param name
- */
-ica_nonl_t parse_nonl_func(const std::string& name)
-{
-	if ( name == "pow3" ) {
-		return ICA_NONL_POW3;
-	}
-	else if ( name == "tanh" ) {
-		return ICA_NONL_TANH;
-	}
-	else if ( name == "gauss" ) {
-		return ICA_NONL_GAUSS;
-	}
-
-	return ICA_NONL_NONE;
 }
 
 /**
@@ -242,7 +216,12 @@ optarg_t parse_args(int argc, char **argv)
 			args.ica_n2 = atoi(optarg);
 			break;
 		case OPTION_ICA_NONL:
-			args.ica_nonl = parse_nonl_func(optarg);
+			try {
+				args.ica_nonl = nonl_funcs.at(optarg);
+			}
+			catch ( std::exception& e ) {
+				args.ica_nonl = ICA_NONL_NONE;
+			}
 			break;
 		case OPTION_ICA_MAX_ITERATIONS:
 			args.ica_max_iter = atoi(optarg);
@@ -254,7 +233,12 @@ optarg_t parse_args(int argc, char **argv)
 			args.knn_k = atoi(optarg);
 			break;
 		case OPTION_KNN_DIST:
-			args.knn_dist = parse_dist_func(optarg);
+			try {
+				args.knn_dist = dist_funcs.at(optarg);
+			}
+			catch ( std::exception& e ) {
+				args.knn_dist = nullptr;
+			}
 			break;
 		case OPTION_UNKNOWN:
 			print_usage();
@@ -272,26 +256,21 @@ optarg_t parse_args(int argc, char **argv)
  */
 void validate_args(const optarg_t& args)
 {
+	std::vector<std::pair<bool, std::string>> validators = {
+		{ args.train || args.test, "--train and/or --test are required" },
+		{ args.knn_dist != nullptr, "--knn_dist must be L1 | L2 | COS" },
+		{ args.ica_nonl != ICA_NONL_NONE, "--ica_nonl must be pow3 | tanh | gauss" }
+	};
 	bool valid = true;
-	std::string errmsg;
 
-	if ( !args.train && !args.test ) {
-		errmsg = "--train and/or --test are required";
-		valid = false;
-	}
-
-	if ( args.knn_dist == nullptr ) {
-		errmsg = "--knn_dist must be L1 | L2 | COS";
-		valid = false;
-	}
-
-	if ( args.ica_nonl == ICA_NONL_NONE ) {
-		errmsg = "--ica_nonl must be pow3 | tanh | gauss";
-		valid = false;
+	for ( auto v : validators ) {
+		if ( !v.first ) {
+			std::cerr << "error: " << v.second << "\n";
+			valid = false;
+		}
 	}
 
 	if ( !valid ) {
-		std::cerr << "error: " << errmsg << "\n";
 		print_usage();
 		exit(1);
 	}
