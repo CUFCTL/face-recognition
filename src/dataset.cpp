@@ -138,9 +138,9 @@ Dataset::Dataset(const std::string& path)
 	free(files);
 
 	// construct dataset
-	this->path = path;
-	this->labels = labels;
-	this->entries = entries;
+	this->_path = path;
+	this->_labels = labels;
+	this->_entries = entries;
 }
 
 /**
@@ -162,11 +162,11 @@ Matrix Dataset::load_data() const
 	// get the image size from the first image
 	Image image;
 
-	image.load(this->path + "/" + this->entries[0].name);
+	image.load(this->_path + "/" + this->_entries[0].name);
 
 	// construct image matrix
 	int m = image.channels() * image.height() * image.width();
-	int n = this->entries.size();
+	int n = this->_entries.size();
 	Matrix X("X", m, n);
 
 	// map each image to a column in X
@@ -174,7 +174,7 @@ Matrix Dataset::load_data() const
 
 	int i;
 	for ( i = 1; i < n; i++ ) {
-		image.load(this->path + "/" + this->entries[i].name);
+		image.load(this->_path + "/" + this->_entries[i].name);
 		X.image_read(i, image);
 	}
 
@@ -189,21 +189,21 @@ Matrix Dataset::load_data() const
 void Dataset::save(std::ofstream& file)
 {
 	// save path
-	write_string(this->path.c_str(), file);
+	write_string(this->_path.c_str(), file);
 
 	// save labels
-	int num_labels = this->labels.size();
+	int num_labels = this->_labels.size();
 	write_int(num_labels, file);
 
-	for ( const data_label_t& label : this->labels ) {
+	for ( const data_label_t& label : this->_labels ) {
 		write_string(label.c_str(), file);
 	}
 
 	// save entries
-	int num_entries = this->entries.size();
+	int num_entries = this->_entries.size();
 	write_int(num_entries, file);
 
-	for ( const data_entry_t& entry : this->entries ) {
+	for ( const data_entry_t& entry : this->_entries ) {
 		write_string(entry.label.c_str(), file);
 		write_string(entry.name.c_str(), file);
 	}
@@ -217,7 +217,7 @@ void Dataset::save(std::ofstream& file)
 void Dataset::load(std::ifstream& file)
 {
 	// read path
-	this->path = read_string(file);
+	this->_path = read_string(file);
 
 	// read labels
 	int num_labels = read_int(file);
@@ -225,7 +225,7 @@ void Dataset::load(std::ifstream& file)
 	for ( int i = 0; i < num_labels; i++ ) {
 		data_label_t label(read_string(file));
 
-		this->labels.push_back(label);
+		this->_labels.push_back(label);
 	}
 
 	// read entries
@@ -236,7 +236,7 @@ void Dataset::load(std::ifstream& file)
 		entry.label = read_string(file);
 		entry.name = read_string(file);
 
-		this->entries.push_back(entry);
+		this->_entries.push_back(entry);
 	}
 }
 
@@ -246,21 +246,21 @@ void Dataset::load(std::ifstream& file)
 void Dataset::print() const
 {
 	// print path
-	log(LL_VERBOSE, "path: %s", this->path.c_str());
+	log(LL_VERBOSE, "path: %s", this->_path.c_str());
 	log(LL_VERBOSE, "");
 
 	// print labels
-	log(LL_VERBOSE, "%d classes", this->labels.size());
+	log(LL_VERBOSE, "%d classes", this->_labels.size());
 
-	for ( const data_label_t& label : this->labels ) {
+	for ( const data_label_t& label : this->_labels ) {
 		log(LL_VERBOSE, "%s", label.c_str());
 	}
 	log(LL_VERBOSE, "");
 
 	// print entries
-	log(LL_VERBOSE, "%d entries", this->entries.size());
+	log(LL_VERBOSE, "%d entries", this->_entries.size());
 
-	for ( const data_entry_t& entry : this->entries ) {
+	for ( const data_entry_t& entry : this->_entries ) {
 		log(LL_VERBOSE, "%8s  %s", entry.label.c_str(), entry.name.c_str());
 	}
 	log(LL_VERBOSE, "");

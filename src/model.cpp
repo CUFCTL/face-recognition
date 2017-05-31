@@ -56,8 +56,8 @@ void Model::train(const Dataset& train_set)
 	this->train_set = train_set;
 
 	log(LL_VERBOSE, "Training set: %d samples, %d classes",
-		train_set.entries.size(),
-		train_set.labels.size());
+		train_set.entries().size(),
+		train_set.labels().size());
 
 	// get data matrix X
 	Matrix X = train_set.load_data();
@@ -68,7 +68,7 @@ void Model::train(const Dataset& train_set)
 	X.subtract_columns(this->mean);
 
 	// project X into feature space
-	this->feature->compute(X, this->train_set.entries, this->train_set.labels.size());
+	this->feature->compute(X, this->train_set.entries(), this->train_set.labels().size());
 	this->P = this->feature->project(X);
 
 	// record training time
@@ -125,8 +125,8 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 	timer_push("Prediction");
 
 	log(LL_VERBOSE, "Test set: %d samples, %d classes",
-		test_set.entries.size(),
-		test_set.labels.size());
+		test_set.entries().size(),
+		test_set.labels().size());
 
 	// compute projected test images
 	Matrix X_test = test_set.load_data();
@@ -137,8 +137,8 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 	// compute predicted labels
 	std::vector<data_label_t> Y_pred = this->classifier->predict(
 		this->P,
-		this->train_set.entries,
-		this->train_set.labels,
+		this->train_set.entries(),
+		this->train_set.labels(),
 		P_test
 	);
 
@@ -161,20 +161,20 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 	// compute accuracy
 	int num_correct = 0;
 
-	for ( size_t i = 0; i < test_set.entries.size(); i++ ) {
-		if ( Y_pred[i] == test_set.entries[i].label ) {
+	for ( size_t i = 0; i < test_set.entries().size(); i++ ) {
+		if ( Y_pred[i] == test_set.entries()[i].label ) {
 			num_correct++;
 		}
 	}
 
-	this->stats.accuracy = 100.0f * num_correct / test_set.entries.size();
+	this->stats.accuracy = 100.0f * num_correct / test_set.entries().size();
 
 	// print results
 	log(LL_VERBOSE, "Results");
 
-	for ( size_t i = 0; i < test_set.entries.size(); i++ ) {
+	for ( size_t i = 0; i < test_set.entries().size(); i++ ) {
 		const data_label_t& y_pred = Y_pred[i];
-		const data_entry_t& entry = test_set.entries[i];
+		const data_entry_t& entry = test_set.entries()[i];
 
 		const char *s = (y_pred != entry.label)
 			? "(!)"
@@ -183,7 +183,7 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 		log(LL_VERBOSE, "%-12s -> %-4s %s", entry.name.c_str(), y_pred.c_str(), s);
 	}
 
-	log(LL_VERBOSE, "%d / %d matched, %.2f%%", num_correct, test_set.entries.size(), this->stats.accuracy);
+	log(LL_VERBOSE, "%d / %d matched, %.2f%%", num_correct, test_set.entries().size(), this->stats.accuracy);
 	log(LL_VERBOSE, "");
 }
 

@@ -19,13 +19,18 @@ typedef struct {
 } data_entry_t;
 
 class Dataset {
-public:
-	std::string path;
-	std::vector<data_label_t> labels;
-	std::vector<data_entry_t> entries;
+private:
+	std::string _path;
+	std::vector<data_label_t> _labels;
+	std::vector<data_entry_t> _entries;
 
+public:
 	Dataset(const std::string& path);
 	Dataset();
+
+	inline const std::string& path() const { return this->_path; }
+	inline const std::vector<data_label_t>& labels() const { return this->_labels; }
+	inline const std::vector<data_entry_t>& entries() const { return this->_entries; }
 
 	Matrix load_data() const;
 
