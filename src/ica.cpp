@@ -21,7 +21,7 @@ typedef Matrix (*ica_nonl_func_t)(const Matrix& , const Matrix& );
  * @param max_iter
  * @param eps
  */
-ICALayer::ICALayer(int n1, int n2, ica_nonl_t nonl, int max_iter, precision_t eps)
+ICALayer::ICALayer(int n1, int n2, ICANonl nonl, int max_iter, precision_t eps)
 {
 	this->n1 = n1;
 	this->n2 = n2;
@@ -131,13 +131,13 @@ void ICALayer::print()
 {
 	const char *nonl_name = "";
 
-	if ( this->nonl == ICA_NONL_POW3 ) {
+	if ( this->nonl == ICANonl::pow3 ) {
 		nonl_name = "pow3";
 	}
-	else if ( this->nonl == ICA_NONL_TANH ) {
+	else if ( this->nonl == ICANonl::tanh ) {
 		nonl_name = "tanh";
 	}
-	else if ( this->nonl == ICA_NONL_GAUSS ) {
+	else if ( this->nonl == ICANonl::gauss ) {
 		nonl_name = "gauss";
 	}
 
@@ -272,13 +272,13 @@ Matrix ICALayer::fpica(const Matrix& X, const Matrix& W_z)
 	// determine nonlinearity function
 	ica_nonl_func_t fpica_update = nullptr;
 
-	if ( this->nonl == ICA_NONL_POW3 ) {
+	if ( this->nonl == ICANonl::pow3 ) {
 		fpica_update = fpica_pow3;
 	}
-	else if ( this->nonl == ICA_NONL_TANH ) {
+	else if ( this->nonl == ICANonl::tanh ) {
 		fpica_update = fpica_tanh;
 	}
-	else if ( this->nonl == ICA_NONL_GAUSS ) {
+	else if ( this->nonl == ICANonl::gauss ) {
 		fpica_update = fpica_gauss;
 	}
 

@@ -8,18 +8,18 @@
 
 #include "feature.h"
 
-typedef enum {
-	ICA_NONL_NONE,
-	ICA_NONL_POW3,
-	ICA_NONL_TANH,
-	ICA_NONL_GAUSS
-} ica_nonl_t;
+enum class ICANonl {
+	none,
+	pow3,
+	tanh,
+	gauss
+};
 
 class ICALayer : public FeatureLayer {
 private:
 	int n1;
 	int n2;
-	ica_nonl_t nonl;
+	ICANonl nonl;
 	int max_iter;
 	precision_t eps;
 
@@ -28,7 +28,7 @@ private:
 public:
 	Matrix W;
 
-	ICALayer(int n1, int n2, ica_nonl_t nonl, int max_iter, precision_t eps);
+	ICALayer(int n1, int n2, ICANonl nonl, int max_iter, precision_t eps);
 
 	void compute(const Matrix& X, const std::vector<DataEntry>& y, int c);
 	Matrix project(const Matrix& X);

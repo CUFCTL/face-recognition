@@ -24,18 +24,18 @@
 	#include "magma_v2.h"
 #endif
 
-typedef enum {
-	FEATURE_NONE,
-	FEATURE_PCA,
-	FEATURE_LDA,
-	FEATURE_ICA
-} feature_type_t;
+enum class FeatureType {
+	Identity,
+	PCA,
+	LDA,
+	ICA
+};
 
-typedef enum {
-	CLASSIFIER_NONE,
-	CLASSIFIER_KNN,
-	CLASSIFIER_BAYES
-} classifier_type_t;
+enum class ClassifierType {
+	None,
+	KNN,
+	Bayes
+};
 
 typedef enum {
 	OPTION_LOGLEVEL,
@@ -67,14 +67,14 @@ typedef struct {
 	const char *path_train;
 	const char *path_test;
 	const char *path_model;
-	feature_type_t feature_type;
-	classifier_type_t classifier_type;
+	FeatureType feature_type;
+	ClassifierType classifier_type;
 	int pca_n1;
 	int lda_n1;
 	int lda_n2;
 	int ica_n1;
 	int ica_n2;
-	ica_nonl_t ica_nonl;
+	ICANonl ica_nonl;
 	int ica_max_iter;
 	precision_t ica_eps;
 	int knn_k;
@@ -87,12 +87,15 @@ const std::map<std::string, dist_func_t> dist_funcs = {
 	{ "L2", m_dist_L2 }
 };
 
-const std::map<std::string, ica_nonl_t> nonl_funcs = {
-	{ "pow3", ICA_NONL_POW3 },
-	{ "tanh", ICA_NONL_TANH },
-	{ "gauss", ICA_NONL_GAUSS }
+const std::map<std::string, ICANonl> nonl_funcs = {
+	{ "pow3", ICANonl::pow3 },
+	{ "tanh", ICANonl::tanh },
+	{ "gauss", ICANonl::gauss }
 };
 
+/**
+ * Print command-line usage and help text.
+ */
 void print_usage()
 {
 	std::cerr <<
@@ -137,11 +140,11 @@ optarg_t parse_args(int argc, char **argv)
 		nullptr,
 		nullptr,
 		"./model.dat",
-		FEATURE_NONE,
-		CLASSIFIER_KNN,
+		FeatureType::Identity,
+		ClassifierType::KNN,
 		-1,
 		-1, -1,
-		-1, -1, ICA_NONL_POW3, 1000, 0.0001f,
+		-1, -1, ICANonl::pow3, 1000, 0.0001f,
 		1, m_dist_L2
 	};
 
@@ -186,19 +189,19 @@ optarg_t parse_args(int argc, char **argv)
 			args.stream = true;
 			break;
 		case OPTION_PCA:
-			args.feature_type = FEATURE_PCA;
+			args.feature_type = FeatureType::PCA;
 			break;
 		case OPTION_LDA:
-			args.feature_type = FEATURE_LDA;
+			args.feature_type = FeatureType::LDA;
 			break;
 		case OPTION_ICA:
-			args.feature_type = FEATURE_ICA;
+			args.feature_type = FeatureType::ICA;
 			break;
 		case OPTION_KNN:
-			args.classifier_type = CLASSIFIER_KNN;
+			args.classifier_type = ClassifierType::KNN;
 			break;
 		case OPTION_BAYES:
-			args.classifier_type = CLASSIFIER_BAYES;
+			args.classifier_type = ClassifierType::Bayes;
 			break;
 		case OPTION_PCA_N1:
 			args.pca_n1 = atoi(optarg);
@@ -220,7 +223,7 @@ optarg_t parse_args(int argc, char **argv)
 				args.ica_nonl = nonl_funcs.at(optarg);
 			}
 			catch ( std::exception& e ) {
-				args.ica_nonl = ICA_NONL_NONE;
+				args.ica_nonl = ICANonl::none;
 			}
 			break;
 		case OPTION_ICA_MAX_ITERATIONS:
@@ -259,7 +262,7 @@ void validate_args(const optarg_t& args)
 	std::vector<std::pair<bool, std::string>> validators = {
 		{ args.train || args.test, "--train and/or --test are required" },
 		{ args.knn_dist != nullptr, "--knn_dist must be L1 | L2 | COS" },
-		{ args.ica_nonl != ICA_NONL_NONE, "--ica_nonl must be pow3 | tanh | gauss" }
+		{ args.ica_nonl != ICANonl::none, "--ica_nonl must be pow3 | tanh | gauss" }
 	};
 	bool valid = true;
 
@@ -292,16 +295,16 @@ int main(int argc, char **argv)
 	// initialize feature layer
 	FeatureLayer *feature;
 
-	if ( args.feature_type == FEATURE_NONE ) {
+	if ( args.feature_type == FeatureType::Identity ) {
 		feature = new IdentityLayer();
 	}
-	else if ( args.feature_type == FEATURE_PCA ) {
+	else if ( args.feature_type == FeatureType::PCA ) {
 		feature = new PCALayer(args.pca_n1);
 	}
-	else if ( args.feature_type == FEATURE_LDA ) {
+	else if ( args.feature_type == FeatureType::LDA ) {
 		feature = new LDALayer(args.lda_n1, args.lda_n2);
 	}
-	else if ( args.feature_type == FEATURE_ICA ) {
+	else if ( args.feature_type == FeatureType::ICA ) {
 		feature = new ICALayer(
 			args.ica_n1,
 			args.ica_n2,
@@ -314,10 +317,10 @@ int main(int argc, char **argv)
 	// initialize classifier layer
 	ClassifierLayer *classifier;
 
-	if ( args.classifier_type == CLASSIFIER_KNN ) {
+	if ( args.classifier_type == ClassifierType::KNN ) {
 		classifier = new KNNLayer(args.knn_k, args.knn_dist);
 	}
-	else if ( args.classifier_type == CLASSIFIER_BAYES ) {
+	else if ( args.classifier_type == ClassifierType::Bayes ) {
 		classifier = new BayesLayer();
 	}
 
