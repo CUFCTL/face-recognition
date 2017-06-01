@@ -53,8 +53,8 @@ typedef enum {
 	OPTION_ICA_N1,
 	OPTION_ICA_N2,
 	OPTION_ICA_NONL,
-	OPTION_ICA_MAX_ITERATIONS,
-	OPTION_ICA_EPSILON,
+	OPTION_ICA_MAX_ITER,
+	OPTION_ICA_EPS,
 	OPTION_KNN_K,
 	OPTION_KNN_DIST,
 	OPTION_UNKNOWN = '?'
@@ -113,16 +113,23 @@ void print_usage()
 		"  --bayes            use the Bayes classifier\n"
 		"\n"
 		"Hyperparameters:\n"
-		"  --pca_n1 N              (PCA) number of principal components to compute\n"
-		"  --lda_n1 N              (LDA) number of principal components to compute\n"
-		"  --lda_n2 N              (LDA) number of Fisherfaces to compute\n"
-		"  --ica_n1 N              (ICA) number of principal components to compute\n"
-		"  --ica_n2 N              (ICA) number of independent components to estimate\n"
-		"  --ica_nonl [nonl]       (ICA) nonlinearity function to use (pow3, tanh, gauss)\n"
-		"  --ica_max_iterations N  (ICA) maximum iterations\n"
-		"  --ica_epsilon X         (ICA) convergence threshold for w\n"
-		"  --knn_k N               (kNN) number of nearest neighbors to use\n"
-		"  --knn_dist [dist]       (kNN) distance function to use (L1, L2, COS)\n";
+		"PCA:\n"
+		"  --pca_n1 N         number of principal components to compute\n"
+		"\n"
+		"LDA:\n"
+		"  --lda_n1 N         number of principal components to compute\n"
+		"  --lda_n2 N         number of Fisherfaces to compute\n"
+		"\n"
+		"ICA:\n"
+		"  --ica_n1 N         number of principal components to compute\n"
+		"  --ica_n2 N         number of independent components to estimate\n"
+		"  --ica_nonl [nonl]  nonlinearity function to use (pow3, tanh, gauss)\n"
+		"  --ica_max_iter N   maximum iterations\n"
+		"  --ica_eps X        convergence threshold for w\n"
+		"\n"
+		"kNN:\n"
+		"  --knn_k N          number of nearest neighbors to use\n"
+		"  --knn_dist [dist]  distance function to use (L1, L2, COS)\n";
 }
 
 /**
@@ -164,8 +171,8 @@ optarg_t parse_args(int argc, char **argv)
 		{ "ica_n1", required_argument, 0, OPTION_ICA_N1 },
 		{ "ica_n2", required_argument, 0, OPTION_ICA_N2 },
 		{ "ica_nonl", required_argument, 0, OPTION_ICA_NONL },
-		{ "ica_max_iterations", required_argument, 0, OPTION_ICA_MAX_ITERATIONS },
-		{ "ica_epsilon", required_argument, 0, OPTION_ICA_EPSILON },
+		{ "ica_max_iter", required_argument, 0, OPTION_ICA_MAX_ITER },
+		{ "ica_eps", required_argument, 0, OPTION_ICA_EPS },
 		{ "knn_k", required_argument, 0, OPTION_KNN_K },
 		{ "knn_dist", required_argument, 0, OPTION_KNN_DIST },
 		{ 0, 0, 0, 0 }
@@ -226,10 +233,10 @@ optarg_t parse_args(int argc, char **argv)
 				args.ica_nonl = ICANonl::none;
 			}
 			break;
-		case OPTION_ICA_MAX_ITERATIONS:
+		case OPTION_ICA_MAX_ITER:
 			args.ica_max_iter = atoi(optarg);
 			break;
-		case OPTION_ICA_EPSILON:
+		case OPTION_ICA_EPS:
 			args.ica_eps = atof(optarg);
 			break;
 		case OPTION_KNN_K:
