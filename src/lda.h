@@ -18,7 +18,7 @@ public:
 
 	LDALayer(int n1, int n2);
 
-	void compute(const Matrix& X, const std::vector<data_entry_t>& y, int c);
+	void compute(const Matrix& X, const std::vector<DataEntry>& y, int c);
 	Matrix project(const Matrix& X);
 
 	void save(std::ofstream& file);

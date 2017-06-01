@@ -28,7 +28,7 @@ LDALayer::LDALayer(int n1, int n2)
  * @param y
  * @param c
  */
-void LDALayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int c)
+void LDALayer::compute(const Matrix& X, const std::vector<DataEntry>& y, int c)
 {
 	// if n1 = -1, use default value
 	int n1 = (this->n1 == -1)

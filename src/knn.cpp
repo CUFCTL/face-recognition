@@ -8,12 +8,12 @@
 #include "logger.h"
 
 typedef struct {
-	data_label_t label;
+	DataLabel label;
 	precision_t dist;
 } neighbor_t;
 
 typedef struct {
-	data_label_t id;
+	DataLabel id;
 	int count;
 } item_count_t;
 
@@ -33,13 +33,13 @@ bool kNN_compare(const neighbor_t& a, const neighbor_t& b)
  *
  * @param items
  */
-data_label_t kNN_mode(const std::vector<neighbor_t>& items)
+DataLabel kNN_mode(const std::vector<neighbor_t>& items)
 {
 	std::vector<item_count_t> counts;
 
 	// compute the frequency of each item in the list
 	for ( const neighbor_t& item : items ) {
-		const data_label_t& id = item.label;
+		const DataLabel& id = item.label;
 
 		size_t j = 0;
 		while ( j < counts.size() && counts[j].id != id ) {
@@ -91,9 +91,9 @@ KNNLayer::KNNLayer(int k, dist_func_t dist)
  * @param X_test
  * @return predicted labels of the test observations
  */
-std::vector<data_label_t> KNNLayer::predict(const Matrix& X, const std::vector<data_entry_t>& Y, const std::vector<data_label_t>& C, const Matrix& X_test)
+std::vector<DataLabel> KNNLayer::predict(const Matrix& X, const std::vector<DataEntry>& Y, const std::vector<DataLabel>& C, const Matrix& X_test)
 {
-	std::vector<data_label_t> Y_pred;
+	std::vector<DataLabel> Y_pred;
 
 	for ( int i = 0; i < X_test.cols(); i++ ) {
 		// compute distance between X_test_i and each X_i
@@ -113,7 +113,7 @@ std::vector<data_label_t> KNNLayer::predict(const Matrix& X, const std::vector<d
 		neighbors.erase(neighbors.begin() + this->k, neighbors.end());
 
 		// determine the mode of the k nearest labels
-		data_label_t y_pred = kNN_mode(neighbors);
+		DataLabel y_pred = kNN_mode(neighbors);
 
 		Y_pred.push_back(y_pred);
 	}

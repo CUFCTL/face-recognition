@@ -41,8 +41,8 @@ public:
 	void load(const std::string& path);
 
 	void train(const Dataset& train_set);
-	std::vector<data_label_t> predict(const Dataset& test_set);
-	void validate(const Dataset& test_set, const std::vector<data_label_t>& Y_pred);
+	std::vector<DataLabel> predict(const Dataset& test_set);
+	void validate(const Dataset& test_set, const std::vector<DataLabel>& Y_pred);
 
 	void print_stats();
 };

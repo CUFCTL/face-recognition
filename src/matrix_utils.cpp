@@ -113,7 +113,7 @@ precision_t m_dist_L2(const Matrix& A, int i, const Matrix& B, int j)
  * @param y
  * @param c
  */
-std::vector<Matrix> m_copy_classes(const Matrix& X, const std::vector<data_entry_t>& y, int c)
+std::vector<Matrix> m_copy_classes(const Matrix& X, const std::vector<DataEntry>& y, int c)
 {
 	std::vector<Matrix> X_c;
 

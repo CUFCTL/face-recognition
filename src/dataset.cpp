@@ -100,8 +100,8 @@ Dataset::Dataset(const std::string& path)
 	}
 
 	// construct labels and entries
-	std::vector<data_label_t> labels;
-	std::vector<data_entry_t> entries;
+	std::vector<DataLabel> labels;
+	std::vector<DataEntry> entries;
 
 	int i;
 	for ( i = 0; i < num_entries; i++ ) {
@@ -110,7 +110,7 @@ Dataset::Dataset(const std::string& path)
 
 		// construct label name
 		unsigned n = filename.find_first_of('_');
-		data_label_t label = filename.substr(0, n);
+		DataLabel label = filename.substr(0, n);
 
 		// search labels for label name
 		unsigned j = 0;
@@ -124,7 +124,7 @@ Dataset::Dataset(const std::string& path)
 		}
 
 		// append entry
-		data_entry_t entry;
+		DataEntry entry;
 		entry.label = labels[j];
 		entry.name = filename;
 
@@ -195,7 +195,7 @@ void Dataset::save(std::ofstream& file)
 	int num_labels = this->_labels.size();
 	write_int(num_labels, file);
 
-	for ( const data_label_t& label : this->_labels ) {
+	for ( const DataLabel& label : this->_labels ) {
 		write_string(label.c_str(), file);
 	}
 
@@ -203,7 +203,7 @@ void Dataset::save(std::ofstream& file)
 	int num_entries = this->_entries.size();
 	write_int(num_entries, file);
 
-	for ( const data_entry_t& entry : this->_entries ) {
+	for ( const DataEntry& entry : this->_entries ) {
 		write_string(entry.label.c_str(), file);
 		write_string(entry.name.c_str(), file);
 	}
@@ -223,7 +223,7 @@ void Dataset::load(std::ifstream& file)
 	int num_labels = read_int(file);
 
 	for ( int i = 0; i < num_labels; i++ ) {
-		data_label_t label(read_string(file));
+		DataLabel label(read_string(file));
 
 		this->_labels.push_back(label);
 	}
@@ -232,7 +232,7 @@ void Dataset::load(std::ifstream& file)
 	int num_entries = read_int(file);
 
 	for ( int i = 0; i < num_entries; i++ ) {
-		data_entry_t entry;
+		DataEntry entry;
 		entry.label = read_string(file);
 		entry.name = read_string(file);
 
@@ -252,7 +252,7 @@ void Dataset::print() const
 	// print labels
 	log(LL_VERBOSE, "%d classes", this->_labels.size());
 
-	for ( const data_label_t& label : this->_labels ) {
+	for ( const DataLabel& label : this->_labels ) {
 		log(LL_VERBOSE, "%s", label.c_str());
 	}
 	log(LL_VERBOSE, "");
@@ -260,7 +260,7 @@ void Dataset::print() const
 	// print entries
 	log(LL_VERBOSE, "%d entries", this->_entries.size());
 
-	for ( const data_entry_t& entry : this->_entries ) {
+	for ( const DataEntry& entry : this->_entries ) {
 		log(LL_VERBOSE, "%8s  %s", entry.label.c_str(), entry.name.c_str());
 	}
 	log(LL_VERBOSE, "");

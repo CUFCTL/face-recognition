@@ -347,7 +347,7 @@ int main(int argc, char **argv)
 			else if ( c == READ ) {
 				Dataset test_set(args.path_test);
 
-				std::vector<data_label_t> Y_pred = model.predict(test_set);
+				std::vector<DataLabel> Y_pred = model.predict(test_set);
 				model.validate(test_set, Y_pred);
 			}
 		}
@@ -355,7 +355,7 @@ int main(int argc, char **argv)
 	else if ( args.test ) {
 		Dataset test_set(args.path_test);
 
-		std::vector<data_label_t> Y_pred = model.predict(test_set);
+		std::vector<DataLabel> Y_pred = model.predict(test_set);
 		model.validate(test_set, Y_pred);
 	}
 	else {

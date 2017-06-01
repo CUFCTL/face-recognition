@@ -17,7 +17,7 @@
  * @param y
  * @param c
  */
-void IdentityLayer::compute(const Matrix& X, const std::vector<data_entry_t>& y, int c)
+void IdentityLayer::compute(const Matrix& X, const std::vector<DataEntry>& y, int c)
 {
 }
 

@@ -14,10 +14,10 @@ class ClassifierLayer {
 public:
 	virtual ~ClassifierLayer() {};
 
-	virtual std::vector<data_label_t> predict(
+	virtual std::vector<DataLabel> predict(
 		const Matrix& X,
-		const std::vector<data_entry_t>& Y,
-		const std::vector<data_label_t>& C,
+		const std::vector<DataEntry>& Y,
+		const std::vector<DataLabel>& C,
 		const Matrix& X_test
 	) = 0;
 

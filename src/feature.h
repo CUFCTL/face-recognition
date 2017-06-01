@@ -14,7 +14,7 @@ class FeatureLayer {
 public:
 	virtual ~FeatureLayer() {};
 
-	virtual void compute(const Matrix& X, const std::vector<data_entry_t>& y, int c) = 0;
+	virtual void compute(const Matrix& X, const std::vector<DataEntry>& y, int c) = 0;
 	virtual Matrix project(const Matrix& X) = 0;
 
 	virtual void save(std::ofstream& file) = 0;

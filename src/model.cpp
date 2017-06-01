@@ -116,7 +116,7 @@ void Model::train(const Dataset& train_set)
  *
  * @param test_set
  */
-std::vector<data_label_t> Model::predict(const Dataset& test_set)
+std::vector<DataLabel> Model::predict(const Dataset& test_set)
 {
 	timer_push("Prediction");
 
@@ -131,7 +131,7 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
 	Matrix P_test = this->_feature->project(X_test);
 
 	// compute predicted labels
-	std::vector<data_label_t> Y_pred = this->_classifier->predict(
+	std::vector<DataLabel> Y_pred = this->_classifier->predict(
 		this->_P,
 		this->_train_set.entries(),
 		this->_train_set.labels(),
@@ -152,7 +152,7 @@ std::vector<data_label_t> Model::predict(const Dataset& test_set)
  * @param test_set
  * @param Y_pred
  */
-void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y_pred)
+void Model::validate(const Dataset& test_set, const std::vector<DataLabel>& Y_pred)
 {
 	// compute accuracy
 	int num_correct = 0;
@@ -169,8 +169,8 @@ void Model::validate(const Dataset& test_set, const std::vector<data_label_t>& Y
 	log(LL_VERBOSE, "Results");
 
 	for ( size_t i = 0; i < test_set.entries().size(); i++ ) {
-		const data_label_t& y_pred = Y_pred[i];
-		const data_entry_t& entry = test_set.entries()[i];
+		const DataLabel& y_pred = Y_pred[i];
+		const DataEntry& entry = test_set.entries()[i];
 
 		const char *s = (y_pred != entry.label)
 			? "(!)"
