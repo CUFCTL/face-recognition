@@ -77,70 +77,70 @@ void write_string(const std::string& str, std::ofstream& file)
 
 /**
  * Construct a dataset from a directory. Each file in
- * the directory is treated as an observation. The
- * filename should be formatted as follows:
+ * the directory is treated as an observation.
+ *
+ * If the data are labeled, the filename should be
+ * formatted as follows:
  *
  * "<class>_<...>"
  *
  * This format is used to determine the label of each
- * file without separate label data, and to order the
- * entries by class.
+ * file without separate label data, and to group the
+ * entries by label.
  *
  * @param path
  */
-Dataset::Dataset(const std::string& path)
+Dataset::Dataset(const std::string& path, bool is_labeled)
 {
+	this->_path = path;
+
 	// get list of files
 	struct dirent **files;
-	int num_entries = scandir(path.c_str(), &files, is_file, alphasort);
+	int num_entries = scandir(this->_path.c_str(), &files, is_file, alphasort);
 
 	if ( num_entries <= 0 ) {
 		perror("scandir");
 		exit(1);
 	}
 
-	// construct labels and entries
-	std::vector<DataLabel> labels;
-	std::vector<DataEntry> entries;
-
-	int i;
-	for ( i = 0; i < num_entries; i++ ) {
-		// get filename
-		std::string filename(files[i]->d_name);
+	// construct entries
+	for ( int i = 0; i < num_entries; i++ ) {
+		// construct entry name
+		std::string name(files[i]->d_name);
 
 		// construct label name
-		unsigned n = filename.find_first_of('_');
-		DataLabel label = filename.substr(0, n);
-
-		// search labels for label name
-		unsigned j = 0;
-		while ( j < labels.size() && labels[j] != label ) {
-			j++;
-		}
-
-		// append label if not found
-		if ( j == labels.size() ) {
-			labels.push_back(label);
-		}
+		DataLabel label = is_labeled
+			? name.substr(0, name.find_first_of('_'))
+			: "";
 
 		// append entry
-		DataEntry entry;
-		entry.label = labels[j];
-		entry.name = filename;
+		this->_entries.push_back(DataEntry {
+			label,
+			name
+		});
+	}
 
-		entries.push_back(entry);
+	// construct labels
+	if ( is_labeled ) {
+		for ( const DataEntry& entry : this->_entries ) {
+			// search labels for label name
+			size_t j = 0;
+			while ( j < this->_labels.size() && this->_labels[j] != entry.label ) {
+				j++;
+			}
+
+			// append label if not found
+			if ( j == this->_labels.size() ) {
+				this->_labels.push_back(entry.label);
+			}
+		}
 	}
 
 	// clean up
-	for ( i = 0; i < num_entries; i++ ) {
+	for ( int i = 0; i < num_entries; i++ ) {
 		free(files[i]);
 	}
 	free(files);
-
-	// construct dataset
-	this->_path = path;
-	this->_labels = labels;
-	this->_entries = entries;
 }
 
 /**
@@ -261,7 +261,7 @@ void Dataset::print() const
 	log(LL_VERBOSE, "%d entries", this->_entries.size());
 
 	for ( const DataEntry& entry : this->_entries ) {
-		log(LL_VERBOSE, "%8s  %s", entry.label.c_str(), entry.name.c_str());
+		log(LL_VERBOSE, "%-8s  %s", entry.label.c_str(), entry.name.c_str());
 	}
 	log(LL_VERBOSE, "");
 }

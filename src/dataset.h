@@ -25,7 +25,7 @@ private:
 	std::vector<DataEntry> _entries;
 
 public:
-	Dataset(const std::string& path);
+	Dataset(const std::string& path, bool is_labeled=true);
 	Dataset();
 
 	inline const std::string& path() const { return this->_path; }

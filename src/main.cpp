@@ -356,7 +356,7 @@ int main(int argc, char **argv)
 				break;
 			}
 			else if ( c == READ ) {
-				Dataset test_set(args.path_test);
+				Dataset test_set(args.path_test, false);
 
 				std::vector<DataLabel> Y_pred = model.predict(test_set);
 
