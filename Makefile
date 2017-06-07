@@ -13,8 +13,8 @@ endif
 
 # define library paths
 CUDADIR     ?= /usr/local/cuda
-MAGMADIR    ?= ../magma-2.2.0
-OPENBLASDIR ?= ../OpenBLAS-0.2.19
+MAGMADIR    ?= $(HOME)/software/magma-2.2.0
+OPENBLASDIR ?= $(HOME)/software/OpenBLAS-0.2.19
 
 # define compiler flags, libraries
 LIBS      = -lm
