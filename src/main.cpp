@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <exception>
 #include <getopt.h>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <unistd.h>
@@ -358,7 +359,14 @@ int main(int argc, char **argv)
 				Dataset test_set(args.path_test);
 
 				std::vector<DataLabel> Y_pred = model.predict(test_set);
-				model.validate(test_set, Y_pred);
+
+				// print results
+				for ( size_t i = 0; i < test_set.entries().size(); i++ ) {
+					const DataLabel& y_pred = Y_pred[i];
+					const DataEntry& entry = test_set.entries()[i];
+
+					std::cout << std::left << std::setw(12) << entry.name << "  " << y_pred << "\n";
+				}
 			}
 		}
 	}
