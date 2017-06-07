@@ -97,4 +97,4 @@ test-matrix: $(addprefix $(OBJDIR)/, logger.o math_utils.o matrix.o test_matrix.
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
 
 clean:
-	rm -rf $(OBJDIR) $(BINS)
+	rm -rf $(OBJDIR) $(BINS) gmon.out
