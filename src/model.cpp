@@ -22,7 +22,7 @@ Model::Model(FeatureLayer *feature, ClassifierLayer *classifier)
 	this->_classifier = classifier;
 
 	// initialize stats
-	this->_stats.accuracy = 0.0f;
+	this->_stats.error_rate = 0.0f;
 	this->_stats.train_time = 0.0f;
 	this->_stats.test_time = 0.0f;
 
@@ -154,16 +154,16 @@ std::vector<DataLabel> Model::predict(const Dataset& test_set)
  */
 void Model::validate(const Dataset& test_set, const std::vector<DataLabel>& Y_pred)
 {
-	// compute accuracy
-	int num_correct = 0;
+	// compute error rate
+	int num_errors = 0;
 
 	for ( size_t i = 0; i < test_set.entries().size(); i++ ) {
-		if ( Y_pred[i] == test_set.entries()[i].label ) {
-			num_correct++;
+		if ( Y_pred[i] != test_set.entries()[i].label ) {
+			num_errors++;
 		}
 	}
 
-	this->_stats.accuracy = 100.0f * num_correct / test_set.entries().size();
+	this->_stats.error_rate = (float) num_errors / test_set.entries().size();
 
 	// print results
 	log(LL_VERBOSE, "Results");
@@ -179,17 +179,17 @@ void Model::validate(const Dataset& test_set, const std::vector<DataLabel>& Y_pr
 		log(LL_VERBOSE, "%-12s -> %-4s %s", entry.name.c_str(), y_pred.c_str(), s);
 	}
 
-	log(LL_VERBOSE, "%d / %d matched, %.2f%%", num_correct, test_set.entries().size(), this->_stats.accuracy);
+	log(LL_VERBOSE, "Error rate: %d / %d, %.3f", num_errors, test_set.entries().size(), this->_stats.error_rate);
 	log(LL_VERBOSE, "");
 }
 
 /**
- * Print a model's performance / accuracy stats.
+ * Print a model's performance and accuracy statistics.
  */
 void Model::print_stats()
 {
 	std::cout
-		<< std::setw(12) << std::setprecision(3) << this->_stats.accuracy
+		<< std::setw(12) << std::setprecision(3) << this->_stats.error_rate
 		<< std::setw(12) << std::setprecision(3) << this->_stats.train_time
 		<< std::setw(12) << std::setprecision(3) << this->_stats.test_time
 		<< "\n";

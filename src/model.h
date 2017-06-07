@@ -12,7 +12,7 @@
 #include "matrix.h"
 
 typedef struct {
-	float accuracy;
+	float error_rate;
 	float train_time;
 	float test_time;
 } model_stats_t;
