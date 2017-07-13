@@ -74,7 +74,7 @@ void print_result(const char *name, bool result)
 		? ANSI_GREEN "PASSED" ANSI_RESET
 		: ANSI_RED ANSI_BOLD "FAILED" ANSI_RESET;
 
-	std::cout << std::left << std::setw(20) << name << "  " << message << "\n";
+	std::cout << std::left << std::setw(25) << name << "  " << message << "\n";
 }
 
 /**
@@ -522,6 +522,48 @@ void test_sum()
 }
 
 /**
+ * Test singular value decomposition.
+ */
+void test_svd()
+{
+	precision_t A_data[] = {
+		1, 2,
+		3, 4,
+		5, 6,
+		7, 8
+	};
+	precision_t U_data[] = {
+		-0.1525, -0.8226,
+		-0.3499, -0.4214,
+		-0.5474, -0.0201,
+		-0.7448,  0.3812,
+	};
+	precision_t S_data[] = {
+		14.2691,      0,
+		      0, 0.6268
+	};
+	precision_t V_data[] = {
+		-0.6414,  0.7672,
+		-0.7672, -0.6414
+	};
+	Matrix A("A", 4, 2, A_data);
+	Matrix U, S, V;
+
+	A.svd(U, S, V);
+
+	if ( LOGGER(LL_VERBOSE) ) {
+		std::cout << A;
+		std::cout << U;
+		std::cout << S;
+		std::cout << V;
+	}
+
+	assert_matrix_value(U, U_data, "l. singular vectors of A");
+	assert_matrix_value(S, S_data, "singular values of A");
+	assert_matrix_value(V, V_data, "r. singular vectors of A");
+}
+
+/**
  * Test matrix transpose.
  */
 void test_transpose()
@@ -877,6 +919,7 @@ int main(int argc, char **argv)
 		test_norm,
 		test_product,
 		test_sum,
+		test_svd,
 		test_transpose,
 		test_add,
 		test_subtract,

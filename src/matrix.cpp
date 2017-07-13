@@ -744,6 +744,70 @@ precision_t Matrix::sum() const
 }
 
 /**
+ * Compute the economy-size singular value decomposition
+ * of a matrix:
+ *
+ *   A = U * S * V'
+ *
+ * @param U
+ * @param S
+ * @param V
+ */
+void Matrix::svd(Matrix& U, Matrix& S, Matrix& V)
+{
+	log(LL_DEBUG, "debug: U, S, V <- svd(%s [%d,%d])",
+		this->_name, this->_rows, this->_cols);
+
+	int m = this->_rows;
+	int n = this->_cols;
+	int lda = m;
+	int ldu = m;
+	int ldvt = min(m, n);
+
+	U = Matrix("U", ldu, min(m, n));
+	S = Matrix("S", 1, min(m, n));
+	Matrix VT = Matrix("VT", ldvt, n);
+
+#ifdef __NVCC__
+	Matrix wA = *this;
+	int nb = magma_get_sgesvd_nb(m, n);
+	int lwork = 2 * min(m, n) + (max(m, n) + min(m, n)) * nb;
+	precision_t *work = new precision_t[lwork];
+	int info;
+
+	magma_sgesvd(
+		MagmaSomeVec, MagmaSomeVec,
+		m, n, wA._data_cpu, lda,
+		S._data_cpu,
+		U._data_cpu, ldu,
+		VT._data_cpu, ldvt,
+		work, lwork,
+		&info);
+	assert(info == 0);
+
+	delete[] work;
+#else
+	Matrix wA = *this;
+	int lwork = 5 * min(m, n);
+	precision_t *work = new precision_t[lwork];
+
+	int info = LAPACKE_sgesvd_work(
+		LAPACK_COL_MAJOR, 'S', 'S',
+		m, n, wA._data_cpu, lda,
+		S._data_cpu,
+		U._data_cpu, ldu,
+		VT._data_cpu, ldvt,
+		work, lwork);
+	assert(info == 0);
+
+	delete[] work;
+#endif
+
+	S = S.diagonalize("S");
+	V = VT.transpose("V");
+}
+
+/**
  * Compute the transpose of a matrix.
  *
  * @param name

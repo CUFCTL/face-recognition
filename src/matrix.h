@@ -73,6 +73,7 @@ public:
 	precision_t norm() const;
 	Matrix product(const char *name, const Matrix& B) const;
 	precision_t sum() const;
+	void svd(Matrix& U, Matrix& S, Matrix& V);
 	Matrix transpose(const char *name) const;
 
 	// mutator functions
