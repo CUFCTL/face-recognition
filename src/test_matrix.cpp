@@ -229,6 +229,28 @@ void test_copy_columns()
 }
 
 /**
+ * The the matrix determinant.
+ */
+void test_determinant()
+{
+	precision_t A_data[] = {
+		 1, -2,  4,
+		-5,  2,  0,
+		 1,  0,  3
+	};
+	Matrix A("A", 3, 3, A_data);
+
+	precision_t det = A.determinant();
+
+	if ( LOGGER(LL_VERBOSE) ) {
+		std::cout << A;
+		std::cout << "det(" << A.name() << ") = " << det << "\n";
+	}
+
+	assert_equal(det, -32, "det(A)");
+}
+
+/**
  * Test the diagonal matrix.
  */
 void test_diagonalize()
@@ -427,7 +449,6 @@ void test_norm()
 
 	if ( LOGGER(LL_VERBOSE) ) {
 		std::cout << v;
-
 		std::cout << "norm(" << v.name() << ") = " << n << "\n";
 	}
 
@@ -910,6 +931,7 @@ int main(int argc, char **argv)
 		test_zeros,
 		test_copy,
 		test_copy_columns,
+		test_determinant,
 		test_diagonalize,
 		test_eigen,
 		test_eigen2,

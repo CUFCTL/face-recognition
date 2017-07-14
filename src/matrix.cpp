@@ -424,6 +424,56 @@ void Matrix::image_write(int i, Image& image)
 }
 
 /**
+ * Compute the determinant of a matrix using LU decomposition.
+ *
+ *   det(A) = det(P * L * U)
+ */
+precision_t Matrix::determinant() const
+{
+	int m = this->_rows;
+	int n = this->_cols;
+	Matrix U = *this;
+	int lda = m;
+	int *ipiv = new int[min(m, n)];
+
+	// compute LU decomposition
+#ifdef __NVCC__
+	int info;
+
+	magma_sgetrf_gpu(
+		m, n, U._data_gpu, lda,
+		ipiv,
+		&info);
+	assert(info == 0);
+
+	U.gpu_read();
+#else
+	int info = LAPACKE_sgetrf_work(
+		LAPACK_COL_MAJOR,
+		m, n, U._data_cpu, lda,
+		ipiv);
+	assert(info == 0);
+#endif
+
+	// compute det(A) = det(P * L * U) = 1^S * det(U)
+	precision_t det = 1;
+	for ( int i = 0; i < min(m, n); i++ ) {
+		if ( i + 1 != ipiv[i] ) {
+			det *= -1;
+		}
+	}
+
+	for ( int i = 0; i < min(m, n); i++ ) {
+		det *= U.elem(i, i);
+	}
+
+	// cleanup
+	delete[] ipiv;
+
+	return det;
+}
+
+/**
  * Compute the diagonal matrix of a vector.
  *
  * @param name
@@ -753,7 +803,7 @@ precision_t Matrix::sum() const
  * @param S
  * @param V
  */
-void Matrix::svd(Matrix& U, Matrix& S, Matrix& V)
+void Matrix::svd(Matrix& U, Matrix& S, Matrix& V) const
 {
 	log(LL_DEBUG, "debug: U, S, V <- svd(%s [%d,%d])",
 		this->_name, this->_rows, this->_cols);

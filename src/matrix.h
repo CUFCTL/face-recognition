@@ -65,6 +65,7 @@ public:
 	inline int cols() const { return this->_cols; }
 	inline precision_t elem(int i, int j) const { return ELEM(*this, i, j); }
 
+	precision_t determinant() const;
 	Matrix diagonalize(const char *name) const;
 	void eigen(const char *V_name, const char *D_name, int n1, Matrix& V, Matrix& D) const;
 	Matrix inverse(const char *name) const;
@@ -73,7 +74,7 @@ public:
 	precision_t norm() const;
 	Matrix product(const char *name, const Matrix& B) const;
 	precision_t sum() const;
-	void svd(Matrix& U, Matrix& S, Matrix& V);
+	void svd(Matrix& U, Matrix& S, Matrix& V) const;
 	Matrix transpose(const char *name) const;
 
 	// mutator functions
