@@ -48,6 +48,7 @@ OBJDIR = obj
 OBJS = $(addprefix $(OBJDIR)/, \
 	bayes.o \
 	dataset.o \
+	genome.o \
 	ica.o \
 	identity.o \
 	image.o \
