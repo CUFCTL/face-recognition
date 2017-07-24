@@ -1,6 +1,6 @@
 # define build parameters
 DEBUG ?= 0
-GPU   ?= 0
+GPU   ?= 1
 
 # define compiler suite
 CXX  = g++

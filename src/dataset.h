@@ -9,7 +9,11 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include "genome.h"
 #include "matrix.h"
+
+#define IMAGE_TYPE 1
+#define GENOME_TYPE 2
 
 typedef std::string DataLabel;
 
@@ -32,7 +36,7 @@ public:
 	inline const std::vector<DataLabel>& labels() const { return this->_labels; }
 	inline const std::vector<DataEntry>& entries() const { return this->_entries; }
 
-	Matrix load_data() const;
+	Matrix load_data(int type) const;
 
 	void save(std::ofstream& file);
 	void load(std::ifstream& file);

@@ -43,5 +43,7 @@ void Genome::load_rna_seq(const std::string& path)
 		this->_expr_lvls.push_back(temp);
 	}
 
+	this->_gene_count = _expr_lvls.size();
+
 	file.close();
 }

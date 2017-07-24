@@ -12,7 +12,7 @@
 class Genome {
 private:
 	int _gene_count;
-	std::vector<float > _expr_lvls;
+	std::vector<float> _expr_lvls;
 
 public:
 	Genome();

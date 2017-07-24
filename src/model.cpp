@@ -94,7 +94,7 @@ void Model::train(const Dataset& train_set)
 		train_set.labels().size());
 
 	// get data matrix X
-	Matrix X = train_set.load_data();
+	Matrix X = train_set.load_data(GENOME_TYPE);
 
 	// subtract mean from X
 	this->_mean = X.mean_column("m");
@@ -125,7 +125,7 @@ std::vector<DataLabel> Model::predict(const Dataset& test_set)
 		test_set.labels().size());
 
 	// compute projected test images
-	Matrix X_test = test_set.load_data();
+	Matrix X_test = test_set.load_data(GENOME_TYPE);
 	X_test.subtract_columns(this->_mean);
 
 	Matrix P_test = this->_feature->project(X_test);

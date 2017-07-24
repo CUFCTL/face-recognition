@@ -12,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include "image.h"
+#include "genome.h"
 
 typedef float precision_t;
 
@@ -58,6 +59,8 @@ public:
 
 	void image_read(int i, const Image& image);
 	void image_write(int i, Image& image);
+
+	void genome_read(int i, const Genome *genome);
 
 	// getter functions
 	inline const char * name() const { return this->_name; }

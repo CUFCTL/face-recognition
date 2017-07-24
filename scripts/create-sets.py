@@ -10,11 +10,15 @@ import datasets
 
 # parse command-line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--dataset", choices=["feret", "mnist", "orl"], required=True, help="name of dataset", dest="DATASET")
+parser.add_argument("-d", "--dataset", choices=["feret", "mnist", "orl", "gtex"], required=True, help="name of dataset", dest="DATASET")
 parser.add_argument("-t", "--train", type=int, choices=range(1, 100), required=True, help="percentage of training set", metavar="N", dest="TRAIN")
 parser.add_argument("-r", "--test", type=int, choices=range(1, 100), required=True, help="percentage of test set", metavar="N", dest="TEST")
 
 args = parser.parse_args()
+
+def get_sub_dirs(dir):
+    return [name for name in os.listdir(dir)
+            if os.path.isdir(os.path.join(dir, name))]
 
 # perform some custom validation
 if args.TRAIN + args.TEST != 100:
@@ -28,6 +32,10 @@ elif args.DATASET == "mnist":
 	dataset = datasets.MNISTDataset()
 elif args.DATASET == "orl":
 	dataset = datasets.ORLDataset()
+elif args.DATASET == "gtex":
+	subs = get_sub_dirs('datasets/GTEx_Data')
+	subs.sort()
+	dataset = datasets.GTEXDataset(subs)
 
 # initialize the training set and test set
 TRAIN_PATH = "train_images"

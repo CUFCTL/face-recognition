@@ -156,29 +156,60 @@ Dataset::Dataset()
  * have the same dimensionality.
  *
  * This function assumes that the data are images.
+ * type is 0 for image, 1 for genome
  */
-Matrix Dataset::load_data() const
+Matrix Dataset::load_data(int type) const
 {
-	// get the image size from the first image
-	Image image;
-
-	image.load(this->_path + "/" + this->_entries[0].name);
-
-	// construct image matrix
-	int m = image.channels() * image.height() * image.width();
-	int n = this->_entries.size();
-	Matrix X("X", m, n);
-
-	// map each image to a column in X
-	X.image_read(0, image);
-
 	int i;
-	for ( i = 1; i < n; i++ ) {
-		image.load(this->_path + "/" + this->_entries[i].name);
-		X.image_read(i, image);
+	if (type == IMAGE_TYPE)
+	{
+		// get the image size from the first image
+		Image image;
+
+		image.load(this->_path + "/" + this->_entries[0].name);
+
+		// construct image matrix
+		int m = image.channels() * image.height() * image.width();
+		int n = this->_entries.size();
+		Matrix X("X", m, n);
+
+		// map each image to a column in X
+		X.image_read(0, image);
+
+		
+		for ( i = 1; i < n; i++ ) {
+			image.load(this->_path + "/" + this->_entries[i].name);
+			X.image_read(i, image);
+		}
+
+		return X;
+	}
+	else if (type == GENOME_TYPE)
+	{
+		Genome *genome = new Genome();
+
+		genome->load_rna_seq(this->_path + "/" + this->_entries[0].name);
+
+		// construct genome matrix
+		int m = genome->gene_count();
+		int n = this->_entries.size();
+		Matrix X("X", m, n);
+
+		// map each image to a column in X
+		X.genome_read(0, genome);
+
+		delete genome;
+
+		for (i = 1; i < n; i++) {
+			Genome *genome = new Genome();;
+			genome->load_rna_seq(this->_path + "/" + this->_entries[i].name);
+			X.genome_read(i, genome);
+			delete genome;
+		}
+
+		return X;
 	}
 
-	return X;
 }
 
 /**

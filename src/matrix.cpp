@@ -424,6 +424,21 @@ void Matrix::image_write(int i, Image& image)
 }
 
 /**
+ * Read a column vector from a genome.
+ *
+ * @param i
+ * @param genome
+ */
+void Matrix::genome_read(int i, const Genome *genome)
+{
+	assert(this->_rows == genome->gene_count());
+
+	for ( int j = 0; j < this->_rows; j++ ) {
+		ELEM(*this, j, i) = (precision_t) genome->elem(j);
+	}
+}
+
+/**
  * Compute the determinant of a matrix using LU decomposition.
  *
  *   det(A) = det(P * L * U)
