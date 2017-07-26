@@ -1,5 +1,5 @@
 # define build parameters
-DEBUG ?= 0
+DEBUG ?= 1
 GPU   ?= 1
 
 # define compiler suite

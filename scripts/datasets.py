@@ -92,3 +92,22 @@ class GTEXDataset(Dataset):
 	def get_dst_filename(self, i, filename):
 		class_name = self.get_class_name(i)
 		return "%s_%s" % (class_name, filename)
+
+class GTEXDataset30(Dataset):
+	def __init__(self, sorted_sub_dirs):
+		Dataset.__init__(self, "datasets/GTEx_Data_30", 8555, 30)
+		self.dirs = sorted_sub_dirs
+
+	def get_class_name(self, i):
+		return self.dirs[i]
+
+	def get_class_path(self, path, i):
+		return os.path.join(path, self.get_class_name(i))
+
+	def get_class_files(self, path, i):
+		class_path = self.get_class_path(path, i)
+		return os.listdir(class_path)
+
+	def get_dst_filename(self, i, filename):
+		class_name = self.get_class_name(i)
+		return "%s_%s" % (class_name, filename)

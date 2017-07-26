@@ -10,7 +10,7 @@ import datasets
 
 # parse command-line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--dataset", choices=["feret", "mnist", "orl", "gtex"], required=True, help="name of dataset", dest="DATASET")
+parser.add_argument("-d", "--dataset", choices=["feret", "mnist", "orl", "gtex", "gtex_30"], required=True, help="name of dataset", dest="DATASET")
 parser.add_argument("-t", "--train", type=int, choices=range(1, 100), required=True, help="percentage of training set", metavar="N", dest="TRAIN")
 parser.add_argument("-r", "--test", type=int, choices=range(1, 100), required=True, help="percentage of test set", metavar="N", dest="TEST")
 
@@ -36,10 +36,19 @@ elif args.DATASET == "gtex":
 	subs = get_sub_dirs('datasets/GTEx_Data')
 	subs.sort()
 	dataset = datasets.GTEXDataset(subs)
+elif args.DATASET == "gtex_30":
+	subs = get_sub_dirs('datasets/GTEx_Data_30')
+	subs.sort()
+	dataset = datasets.GTEXDataset30(subs)
 
 # initialize the training set and test set
-TRAIN_PATH = "train_images"
-TEST_PATH = "test_images"
+if args.DATASET is "feret" or args.DATASET is "mnist" or args.DATASET is "orl":
+	TRAIN_PATH = "train_images"
+	TEST_PATH = "test_images"
+else:
+	TRAIN_PATH = "train_genomes"
+	TEST_PATH = "test_genomes"
+
 
 if os.path.isdir(TRAIN_PATH):
 	shutil.rmtree(TRAIN_PATH)

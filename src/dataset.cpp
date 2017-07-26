@@ -209,6 +209,10 @@ Matrix Dataset::load_data(int type) const
 
 		return X;
 	}
+	else
+	{
+		return Matrix();
+	}
 
 }
 
