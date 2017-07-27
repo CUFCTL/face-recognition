@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Run an experiment on the feature-classifier algorithm.
 
 # define default settings

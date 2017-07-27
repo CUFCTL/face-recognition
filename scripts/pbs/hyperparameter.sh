@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Run an experiment on a hyperparameter.
 
 # define default settings

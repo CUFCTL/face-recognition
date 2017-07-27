@@ -42,13 +42,8 @@ elif args.DATASET == "gtex_30":
 	dataset = datasets.GTEXDataset30(subs)
 
 # initialize the training set and test set
-if args.DATASET is "feret" or args.DATASET is "mnist" or args.DATASET is "orl":
-	TRAIN_PATH = "train_images"
-	TEST_PATH = "test_images"
-else:
-	TRAIN_PATH = "train_genomes"
-	TEST_PATH = "test_genomes"
-
+TRAIN_PATH = "train_data"
+TEST_PATH = "test_data"
 
 if os.path.isdir(TRAIN_PATH):
 	shutil.rmtree(TRAIN_PATH)

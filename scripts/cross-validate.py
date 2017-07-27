@@ -44,7 +44,7 @@ args.ARGS.remove("--")
 # construct subprocess args
 args_dataset = ["python", "scripts/create-sets.py", "-d", args.DATASET, "-t", str(args.TRAIN), "-r", str(args.TEST)]
 
-args_c = ["./face-rec", "--train", "train_images", "--test", "test_images"]
+args_c = ["./face-rec", "--train", "train_data", "--test", "test_data"]
 args_c.extend(args.ARGS);
 
 # construct results object
