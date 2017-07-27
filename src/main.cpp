@@ -14,6 +14,12 @@
 
 using namespace ML;
 
+enum class InputDataType {
+	None,
+	Genome,
+	Image
+};
+
 enum class FeatureType {
 	Identity,
 	PCA,
@@ -32,6 +38,7 @@ typedef enum {
 	OPTION_TRAIN,
 	OPTION_TEST,
 	OPTION_STREAM,
+	OPTION_DATA,
 	OPTION_PCA,
 	OPTION_LDA,
 	OPTION_ICA,
@@ -57,6 +64,7 @@ typedef struct {
 	const char *path_train;
 	const char *path_test;
 	const char *path_model;
+	InputDataType data_type;
 	FeatureType feature_type;
 	ClassifierType classifier_type;
 	int pca_n1;
@@ -70,6 +78,11 @@ typedef struct {
 	int knn_k;
 	dist_func_t knn_dist;
 } optarg_t;
+
+const std::map<std::string, InputDataType> data_types = {
+	{ "genome", InputDataType::Genome },
+	{ "image", InputDataType::Image }
+};
 
 const std::map<std::string, dist_func_t> dist_funcs = {
 	{ "COS", m_dist_COS },
@@ -96,6 +109,7 @@ void print_usage()
 		"  --train DIRECTORY  train a model with a training set\n"
 		"  --test DIRECTORY   perform recognition on a test set\n"
 		"  --stream           perform recognition on an input stream\n"
+		"  --data             data type (genome, [image])\n"
 		"  --pca              use PCA for feature extraction\n"
 		"  --lda              use LDA for feature extraction\n"
 		"  --ica              use ICA for feature extraction\n"
@@ -113,13 +127,13 @@ void print_usage()
 		"ICA:\n"
 		"  --ica_n1 N         number of principal components to compute\n"
 		"  --ica_n2 N         number of independent components to estimate\n"
-		"  --ica_nonl [nonl]  nonlinearity function to use (pow3, tanh, gauss)\n"
+		"  --ica_nonl [nonl]  nonlinearity function to use ([pow3], tanh, gauss)\n"
 		"  --ica_max_iter N   maximum iterations\n"
 		"  --ica_eps X        convergence threshold for w\n"
 		"\n"
 		"kNN:\n"
 		"  --knn_k N          number of nearest neighbors to use\n"
-		"  --knn_dist [dist]  distance function to use (L1, L2, COS)\n";
+		"  --knn_dist [dist]  distance function to use (L1, [L2], COS)\n";
 }
 
 /**
@@ -137,6 +151,7 @@ optarg_t parse_args(int argc, char **argv)
 		nullptr,
 		nullptr,
 		"./model.dat",
+		InputDataType::Image,
 		FeatureType::Identity,
 		ClassifierType::KNN,
 		-1,
@@ -150,6 +165,7 @@ optarg_t parse_args(int argc, char **argv)
 		{ "train", required_argument, 0, OPTION_TRAIN },
 		{ "test", required_argument, 0, OPTION_TEST },
 		{ "stream", no_argument, 0, OPTION_STREAM },
+		{ "data", required_argument, 0, OPTION_DATA },
 		{ "pca", no_argument, 0, OPTION_PCA },
 		{ "lda", no_argument, 0, OPTION_LDA },
 		{ "ica", no_argument, 0, OPTION_ICA },
@@ -184,6 +200,14 @@ optarg_t parse_args(int argc, char **argv)
 			break;
 		case OPTION_STREAM:
 			args.stream = true;
+			break;
+		case OPTION_DATA:
+			try {
+				args.data_type = data_types.at(optarg);
+			}
+			catch ( std::exception& e ) {
+				args.data_type = InputDataType::None;
+			}
 			break;
 		case OPTION_PCA:
 			args.feature_type = FeatureType::PCA;
@@ -258,6 +282,7 @@ void validate_args(const optarg_t& args)
 {
 	std::vector<std::pair<bool, std::string>> validators = {
 		{ args.train || args.test, "--train and/or --test are required" },
+		{ args.data_type != InputDataType::None, "--data must be genome | image" },
 		{ args.knn_dist != nullptr, "--knn_dist must be L1 | L2 | COS" },
 		{ args.ica_nonl != ICANonl::none, "--ica_nonl must be pow3 | tanh | gauss" }
 	};
@@ -285,6 +310,16 @@ int main(int argc, char **argv)
 
 	// validate arguments
 	validate_args(args);
+
+	// initialize data type
+	DataType *data_type;
+
+	if ( args.data_type == InputDataType::Genome ) {
+		data_type = new Genome();
+	}
+	else if ( args.data_type == InputDataType::Image ) {
+		data_type = new Image();
+	}
 
 	// initialize feature layer
 	FeatureLayer *feature;
@@ -319,7 +354,7 @@ int main(int argc, char **argv)
 	}
 
 	// initialize model
-	Model model(feature, classifier);
+	Model model(feature, classifier, data_type);
 
 	// run the face recognition system
 	if ( args.train ) {
