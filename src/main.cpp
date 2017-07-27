@@ -9,21 +9,10 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <mlearn.h>
 #include <unistd.h>
-#include "bayes.h"
-#include "dataset.h"
-#include "ica.h"
-#include "identity.h"
-#include "knn.h"
-#include "lda.h"
-#include "logger.h"
-#include "model.h"
-#include "pca.h"
-#include "timer.h"
 
-#ifdef __NVCC__
-	#include "magma_v2.h"
-#endif
+using namespace ML;
 
 enum class FeatureType {
 	Identity,
@@ -289,10 +278,7 @@ void validate_args(const optarg_t& args)
 
 int main(int argc, char **argv)
 {
-#ifdef __NVCC__
-	magma_int_t stat = magma_init();
-	assert(stat == MAGMA_SUCCESS);
-#endif
+	gpu_init();
 
 	// parse command-line arguments
 	optarg_t args = parse_args(argc, argv);
@@ -384,10 +370,7 @@ int main(int argc, char **argv)
 
 	model.print_stats();
 
-#ifdef __NVCC__
-	stat = magma_finalize();
-	assert(stat == MAGMA_SUCCESS);
-#endif
+	gpu_finalize();
 
 	return 0;
 }
