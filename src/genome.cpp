@@ -34,16 +34,17 @@ Genome::~Genome()
  */
 void Genome::load_rna_seq(const std::string& path)
 {
-	float temp = 0;
 	std::ifstream file (path, std::ifstream::in);
 
-	// initialize gene expression level vector
-	while (file >> temp)
-	{
-		this->_expr_lvls.push_back(temp);
-	}
+	std::streampos fsize = file.tellg();
+    file.seekg( 0, std::ios::end );
+    fsize = file.tellg() - fsize;
 
-	this->_gene_count = _expr_lvls.size();
+    this->_gene_count = (int)fsize / sizeof(float);
 
+    this->_expr_lvls = new float[this->_gene_count];
+
+	file.seekg(0);
+	file.read(reinterpret_cast<char *>(this->_expr_lvls), this->_gene_count * sizeof(float));
 	file.close();
 }
