@@ -6,10 +6,11 @@ CXX  = g++
 
 # library paths
 MLEARNDIR ?= $(HOME)/software/libmlearn
+OPENBLASDIR ?= $(HOME)/software/OpenBLAS-0.2.19
 
 # compiler flags, linker flags
-LDFLAGS   = -lm -L$(MLEARNDIR)/lib -lmlearn
-CXXFLAGS  = -std=c++11 -I$(MLEARNDIR)/include
+LDFLAGS   = -lm -L$(OPENBLASDIR)/lib -lopenblas -L$(MLEARNDIR)/lib -lmlearn
+CXXFLAGS  = -std=c++11 -I$(OPENBLASDIR)/include -I$(MLEARNDIR)/include
 
 ifeq ($(DEBUG), 1)
 CXXFLAGS  += -g -pg -Wall
