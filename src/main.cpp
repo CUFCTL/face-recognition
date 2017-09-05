@@ -354,11 +354,11 @@ int main(int argc, char **argv)
 	}
 
 	// initialize model
-	Model model(feature, classifier, data_type);
+	ClassificationModel model(feature, classifier);
 
 	// run the face recognition system
 	if ( args.train ) {
-		Dataset train_set(args.path_train);
+		Dataset train_set(data_type, args.path_train);
 
 		model.train(train_set);
 	}
@@ -377,7 +377,7 @@ int main(int argc, char **argv)
 				break;
 			}
 			else if ( c == READ ) {
-				Dataset test_set(args.path_test, false);
+				Dataset test_set(data_type, args.path_test, false);
 
 				std::vector<DataLabel> Y_pred = model.predict(test_set);
 
@@ -392,7 +392,7 @@ int main(int argc, char **argv)
 		}
 	}
 	else if ( args.test ) {
-		Dataset test_set(args.path_test);
+		Dataset test_set(data_type, args.path_test);
 
 		std::vector<DataLabel> Y_pred = model.predict(test_set);
 		model.validate(test_set, Y_pred);
