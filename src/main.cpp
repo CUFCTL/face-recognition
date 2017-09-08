@@ -64,6 +64,7 @@ typedef struct {
 	bool stream;
 	const char *path_train;
 	const char *path_test;
+	const char *path_stream;
 	const char *path_model;
 	InputDataType data_type;
 	FeatureType feature_type;
@@ -152,6 +153,7 @@ optarg_t parse_args(int argc, char **argv)
 		false,
 		nullptr,
 		nullptr,
+		nullptr,
 		"./model.dat",
 		InputDataType::Image,
 		FeatureType::Identity,
@@ -167,7 +169,7 @@ optarg_t parse_args(int argc, char **argv)
 		{ "loglevel", required_argument, 0, OPTION_LOGLEVEL },
 		{ "train", required_argument, 0, OPTION_TRAIN },
 		{ "test", required_argument, 0, OPTION_TEST },
-		{ "stream", no_argument, 0, OPTION_STREAM },
+		{ "stream", required_argument, 0, OPTION_STREAM },
 		{ "data", required_argument, 0, OPTION_DATA },
 		{ "pca", no_argument, 0, OPTION_PCA },
 		{ "lda", no_argument, 0, OPTION_LDA },
@@ -206,6 +208,7 @@ optarg_t parse_args(int argc, char **argv)
 			break;
 		case OPTION_STREAM:
 			args.stream = true;
+			args.path_stream = optarg;
 			break;
 		case OPTION_DATA:
 			try {
@@ -287,7 +290,7 @@ optarg_t parse_args(int argc, char **argv)
 void validate_args(const optarg_t& args)
 {
 	std::vector<std::pair<bool, std::string>> validators = {
-		{ args.train || args.test, "--train and/or --test are required" },
+		{ args.train || args.test || args.stream, "--train / --test / --stream are required" },
 		{ args.data_type != InputDataType::None, "--data must be genome | image" },
 		{ args.knn_dist != nullptr, "--knn_dist must be L1 | L2 | COS" },
 		{ args.ica_nonl != ICANonl::none, "--ica_nonl must be pow3 | tanh | gauss" }
@@ -373,18 +376,24 @@ int main(int argc, char **argv)
 		model.load(args.path_model);
 	}
 
-	if ( args.test && args.stream ) {
-		char END = '0';
-		char READ = '1';
+	if ( args.test ) {
+		Dataset test_set(data_type, args.path_test);
 
-		while ( 1 ) {
+		std::vector<DataLabel> Y_pred = model.predict(test_set);
+		model.validate(test_set, Y_pred);
+	}
+	else if ( args.stream ) {
+		const char END = '0';
+		const char READ = '1';
+
+		while ( true ) {
 			char c = std::cin.get();
 
 			if ( c == END ) {
 				break;
 			}
 			else if ( c == READ ) {
-				Dataset test_set(data_type, args.path_test, false);
+				Dataset test_set(data_type, args.path_stream, false);
 
 				std::vector<DataLabel> Y_pred = model.predict(test_set);
 
@@ -397,12 +406,6 @@ int main(int argc, char **argv)
 				}
 			}
 		}
-	}
-	else if ( args.test ) {
-		Dataset test_set(data_type, args.path_test);
-
-		std::vector<DataLabel> Y_pred = model.predict(test_set);
-		model.validate(test_set, Y_pred);
 	}
 	else {
 		model.save(args.path_model);
