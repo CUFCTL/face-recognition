@@ -34,6 +34,7 @@ enum class ClassifierType {
 };
 
 typedef enum {
+	OPTION_GPU,
 	OPTION_LOGLEVEL,
 	OPTION_TRAIN,
 	OPTION_TEST,
@@ -105,6 +106,7 @@ void print_usage()
 		"Usage: ./face-rec [options]\n"
 		"\n"
 		"Options:\n"
+		"  --gpu              enable GPU acceleration\n"
 		"  --loglevel LEVEL   set the log level ([1]=info, 2=verbose, 3=debug)\n"
 		"  --train DIRECTORY  train a model with a training set\n"
 		"  --test DIRECTORY   perform recognition on a test set\n"
@@ -161,6 +163,7 @@ optarg_t parse_args(int argc, char **argv)
 	};
 
 	struct option long_options[] = {
+		{ "gpu", no_argument, 0, OPTION_GPU },
 		{ "loglevel", required_argument, 0, OPTION_LOGLEVEL },
 		{ "train", required_argument, 0, OPTION_TRAIN },
 		{ "test", required_argument, 0, OPTION_TEST },
@@ -187,6 +190,9 @@ optarg_t parse_args(int argc, char **argv)
 	int opt;
 	while ( (opt = getopt_long_only(argc, argv, "", long_options, nullptr)) != -1 ) {
 		switch ( opt ) {
+		case OPTION_GPU:
+			GPU = true;
+			break;
 		case OPTION_LOGLEVEL:
 			LOGLEVEL = (logger_level_t) atoi(optarg);
 			break;
@@ -303,13 +309,14 @@ void validate_args(const optarg_t& args)
 
 int main(int argc, char **argv)
 {
-	gpu_init();
-
 	// parse command-line arguments
 	optarg_t args = parse_args(argc, argv);
 
 	// validate arguments
 	validate_args(args);
+
+	// initialize GPU if enabled
+	gpu_init();
 
 	// initialize data type
 	DataType *data_type;
