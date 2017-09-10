@@ -9,12 +9,13 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <mlearn.h>
 #include <unistd.h>
 
 using namespace ML;
 
-enum class InputDataType {
+enum class DataType {
 	None,
 	Genome,
 	Image
@@ -66,7 +67,7 @@ typedef struct {
 	const char *path_test;
 	const char *path_stream;
 	const char *path_model;
-	InputDataType data_type;
+	DataType data_type;
 	FeatureType feature_type;
 	ClassifierType classifier_type;
 	int pca_n1;
@@ -81,9 +82,9 @@ typedef struct {
 	dist_func_t knn_dist;
 } optarg_t;
 
-const std::map<std::string, InputDataType> data_types = {
-	{ "genome", InputDataType::Genome },
-	{ "image", InputDataType::Image }
+const std::map<std::string, DataType> data_types = {
+	{ "genome", DataType::Genome },
+	{ "image", DataType::Image }
 };
 
 const std::map<std::string, dist_func_t> dist_funcs = {
@@ -109,9 +110,9 @@ void print_usage()
 		"Options:\n"
 		"  --gpu              enable GPU acceleration\n"
 		"  --loglevel LEVEL   set the log level ([1]=info, 2=verbose, 3=debug)\n"
-		"  --train DIRECTORY  train a model with a training set\n"
-		"  --test DIRECTORY   perform recognition on a test set\n"
-		"  --stream           perform recognition on an input stream\n"
+		"  --train DIR        train a model with a training set\n"
+		"  --test DIR         perform recognition on a test set\n"
+		"  --stream DIR       perform recognition on an input stream\n"
 		"  --data             data type (genome, [image])\n"
 		"  --pca              use PCA for feature extraction\n"
 		"  --lda              use LDA for feature extraction\n"
@@ -155,7 +156,7 @@ optarg_t parse_args(int argc, char **argv)
 		nullptr,
 		nullptr,
 		"./model.dat",
-		InputDataType::Image,
+		DataType::Image,
 		FeatureType::Identity,
 		ClassifierType::KNN,
 		-1,
@@ -215,7 +216,7 @@ optarg_t parse_args(int argc, char **argv)
 				args.data_type = data_types.at(optarg);
 			}
 			catch ( std::exception& e ) {
-				args.data_type = InputDataType::None;
+				args.data_type = DataType::None;
 			}
 			break;
 		case OPTION_PCA:
@@ -290,8 +291,8 @@ optarg_t parse_args(int argc, char **argv)
 void validate_args(const optarg_t& args)
 {
 	std::vector<std::pair<bool, std::string>> validators = {
-		{ args.train || args.test || args.stream, "--train / --test / --stream are required" },
-		{ args.data_type != InputDataType::None, "--data must be genome | image" },
+		{ args.train || args.test || args.stream, "--train / --test / --stream is required" },
+		{ args.data_type != DataType::None, "--data must be genome | image" },
 		{ args.knn_dist != nullptr, "--knn_dist must be L1 | L2 | COS" },
 		{ args.ica_nonl != ICANonl::none, "--ica_nonl must be pow3 | tanh | gauss" }
 	};
@@ -322,53 +323,53 @@ int main(int argc, char **argv)
 	gpu_init();
 
 	// initialize data type
-	DataType *data_type;
+	std::unique_ptr<DataIterator> data_iter;
 
-	if ( args.data_type == InputDataType::Genome ) {
-		data_type = new Genome();
+	if ( args.data_type == DataType::Genome ) {
+		data_iter.reset(new Genome());
 	}
-	else if ( args.data_type == InputDataType::Image ) {
-		data_type = new Image();
+	else if ( args.data_type == DataType::Image ) {
+		data_iter.reset(new Image());
 	}
 
 	// initialize feature layer
-	FeatureLayer *feature;
+	std::unique_ptr<FeatureLayer> feature;
 
 	if ( args.feature_type == FeatureType::Identity ) {
-		feature = new IdentityLayer();
+		feature.reset(new IdentityLayer());
 	}
 	else if ( args.feature_type == FeatureType::PCA ) {
-		feature = new PCALayer(args.pca_n1);
+		feature.reset(new PCALayer(args.pca_n1));
 	}
 	else if ( args.feature_type == FeatureType::LDA ) {
-		feature = new LDALayer(args.lda_n1, args.lda_n2);
+		feature.reset(new LDALayer(args.lda_n1, args.lda_n2));
 	}
 	else if ( args.feature_type == FeatureType::ICA ) {
-		feature = new ICALayer(
+		feature.reset(new ICALayer(
 			args.ica_n1,
 			args.ica_n2,
 			args.ica_nonl,
 			args.ica_max_iter,
 			args.ica_eps
-		);
+		));
 	}
 
 	// initialize classifier layer
-	ClassifierLayer *classifier;
+	std::unique_ptr<ClassifierLayer> classifier;
 
 	if ( args.classifier_type == ClassifierType::KNN ) {
-		classifier = new KNNLayer(args.knn_k, args.knn_dist);
+		classifier.reset(new KNNLayer(args.knn_k, args.knn_dist));
 	}
 	else if ( args.classifier_type == ClassifierType::Bayes ) {
-		classifier = new BayesLayer();
+		classifier.reset(new BayesLayer());
 	}
 
 	// initialize model
-	ClassificationModel model(feature, classifier);
+	ClassificationModel model(feature.get(), classifier.get());
 
 	// run the face recognition system
 	if ( args.train ) {
-		Dataset train_set(data_type, args.path_train);
+		Dataset train_set(data_iter.get(), args.path_train);
 
 		model.train(train_set);
 	}
@@ -377,7 +378,7 @@ int main(int argc, char **argv)
 	}
 
 	if ( args.test ) {
-		Dataset test_set(data_type, args.path_test);
+		Dataset test_set(data_iter.get(), args.path_test);
 
 		std::vector<DataLabel> Y_pred = model.predict(test_set);
 		model.validate(test_set, Y_pred);
@@ -393,7 +394,7 @@ int main(int argc, char **argv)
 				break;
 			}
 			else if ( c == READ ) {
-				Dataset test_set(data_type, args.path_stream, false);
+				Dataset test_set(data_iter.get(), args.path_stream, false);
 
 				std::vector<DataLabel> Y_pred = model.predict(test_set);
 
