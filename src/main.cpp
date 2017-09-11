@@ -77,7 +77,7 @@ typedef struct {
 	int ica_n2;
 	ICANonl ica_nonl;
 	int ica_max_iter;
-	precision_t ica_eps;
+	float ica_eps;
 	int knn_k;
 	dist_func_t knn_dist;
 } optarg_t;
@@ -319,6 +319,9 @@ int main(int argc, char **argv)
 	// validate arguments
 	validate_args(args);
 
+	// initialize random number engine
+	RNG_seed();
+
 	// initialize GPU if enabled
 	gpu_init();
 
@@ -381,7 +384,9 @@ int main(int argc, char **argv)
 		Dataset test_set(data_iter.get(), args.path_test);
 
 		std::vector<DataLabel> Y_pred = model.predict(test_set);
+
 		model.validate(test_set, Y_pred);
+		model.print_results(test_set, Y_pred);
 	}
 	else if ( args.stream ) {
 		const char END = '0';
