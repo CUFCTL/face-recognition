@@ -1,43 +1,46 @@
 import numpy as np
 import cv2
 import os
-import shutil
-from crop import detect_face
-from crop import box_face
-from crop import crop_face
+import crop
+
+# define constants
+FOLDER_OUT = "FOLDER_OUT"
+DEVICE_NUM = 0
+NUM_FRAMES = 1
 
 # load the cascade classifier files
 cascade_face = cv2.CascadeClassifier("haarcascade_frontalface_alt.xml")
 #cascade_eye = cv2.CascadeClassifier("haarcascade_eye_tree_eyeglasses.xml")
 
-FOLDER_OUT = "FOLDER_OUT"
-if os.path.exists(FOLDER_OUT):
-	shutil.rmtree(FOLDER_OUT)
-os.mkdir(FOLDER_OUT, 0775)
+# initialize output directory
+if not os.path.exists(FOLDER_OUT):
+    os.mkdir(FOLDER_OUT, 0775)
 
+# initialize video feed
+cap = cv2.VideoCapture(DEVICE_NUM)
 
-cap = cv2.VideoCapture(1)
-
+# begin capture/crop loop
 i = 0
-while(True):
-    # Capture frame-by-frame
-    #for i in range(0,9):
+while True:
+    # capture frame
     ret, frame = cap.read()
 
-    # Our operations on the frame come here
-    #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = detect_face(frame, cascade_face)
-    img = box_face(frame, faces)
-    if i == 9:
-        crop_face(frame, faces, FOLDER_OUT)
-        i = -1
+    # detect and draw bounding box for each face
+    faces = crop.detect_face(frame, cascade_face)
+    img = crop.box_face(frame, faces)
 
+    # save cropped image every NUM_FRAMES
     i = i + 1
-    # Display the resulting frame
-    cv2.imshow('frame',img)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if i == NUM_FRAMES:
+        crop.crop_face(frame, faces, FOLDER_OUT)
+        i = 0
+
+    # display the annotated frame
+    cv2.imshow("Face Detection", img)
+
+    if (cv2.waitKey(1) & 0xFF) == ord("q"):
         break
 
-# When everything done, release the capture
+# release the video feed
 cap.release()
 cv2.destroyAllWindows()
