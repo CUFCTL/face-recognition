@@ -10,7 +10,7 @@ import datasets
 
 # parse command-line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--dataset", choices=["feret", "mnist", "orl", "gtex", "gtex_30"], required=True, help="name of dataset", dest="DATASET")
+parser.add_argument("-d", "--dataset", choices=["feret", "mnist", "orl", "gtex", "gtex_30", "lab"], required=True, help="name of dataset", dest="DATASET")
 parser.add_argument("-t", "--train", type=int, choices=range(1, 100), required=True, help="percentage of training set", metavar="N", dest="TRAIN")
 parser.add_argument("-r", "--test", type=int, choices=range(1, 100), required=True, help="percentage of test set", metavar="N", dest="TEST")
 
@@ -40,6 +40,9 @@ elif args.DATASET == "gtex_30":
 	subs = get_sub_dirs('datasets/GTEx_Data_30')
 	subs.sort()
 	dataset = datasets.GTEXDataset30(subs)
+elif args.DATASET == "lab":
+	subs = get_sub_dirs('datasets/lab_faces')
+	dataset = datasets.LABDataset(subs)
 
 # initialize the training set and test set
 TRAIN_PATH = "train_data"
