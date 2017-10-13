@@ -417,7 +417,7 @@ int main(int argc, char **argv)
 		model.save(args.path_model);
 	}
 
-	timer_print();
+	Timer::print();
 
 	model.print_stats();
 
