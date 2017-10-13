@@ -320,7 +320,7 @@ int main(int argc, char **argv)
 	validate_args(args);
 
 	// initialize random number engine
-	RNG_seed();
+	Random::seed();
 
 	// initialize GPU if enabled
 	gpu_init();
