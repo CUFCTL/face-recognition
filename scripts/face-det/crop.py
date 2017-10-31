@@ -12,8 +12,8 @@ def detect_face(img, cascade_face):
 
 	return faces
 
-def box_face(img, faces):
-	for(x,y,w,h) in faces:
+def box_face(img, faces, labels):
+	for (x,y,w,h) in faces:
 		x1 = x
 		x2 = x + w
 		y1 = y
@@ -26,8 +26,8 @@ def box_face(img, faces):
 def crop_face(img, faces, FOLDER_OUT):
 	# save each face to a cropped image, and draw rectangles
 	for (x,y,w,h) in faces:
-		path = FOLDER_OUT + "/" + str(datetime.now()) + ".ppm"
-		print path
+		path = "%s/%s.ppm" % (FOLDER_OUT, str(datetime.now()))
+		path = path.replace(" ", "_")
 
 		x1 = x
 		x2 = x + w
