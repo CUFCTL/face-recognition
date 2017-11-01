@@ -2,20 +2,16 @@
 DEBUG ?= 0
 
 # compiler suite
-CXX  = g++
-
-# library paths
-MLEARNDIR ?= $(HOME)/software/libmlearn
-OPENBLASDIR ?= $(HOME)/software/OpenBLAS-0.2.19
+CXX = g++
 
 # compiler flags, linker flags
-LDFLAGS   = -lm -L$(OPENBLASDIR)/lib -lopenblas -L$(MLEARNDIR)/lib -lmlearn
-CXXFLAGS  = -std=c++11 -I$(OPENBLASDIR)/include -I$(MLEARNDIR)/include
+CXXFLAGS = -std=c++11
+LDFLAGS  = -lm -lopenblas -lmlearn
 
 ifeq ($(DEBUG), 1)
-CXXFLAGS  += -g -pg -Wall
+CXXFLAGS += -g -pg -Wall
 else
-CXXFLAGS  += -O3 -Wno-unused-result
+CXXFLAGS += -O3 -Wno-unused-result
 endif
 
 # binary targets
