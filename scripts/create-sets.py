@@ -11,8 +11,8 @@ import datasets
 # parse command-line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--dataset", choices=["feret", "mnist", "orl", "gtex", "gtex_30", "fctl"], required=True, help="name of dataset", dest="DATASET")
-parser.add_argument("-t", "--train", type=int, choices=range(1, 100), required=True, help="percentage of training set", metavar="N", dest="TRAIN")
-parser.add_argument("-r", "--test", type=int, choices=range(1, 100), required=True, help="percentage of test set", metavar="N", dest="TEST")
+parser.add_argument("-t", "--train", type=int, choices=range(101), required=True, help="percentage of training set", metavar="N", dest="TRAIN")
+parser.add_argument("-r", "--test", type=int, choices=range(101), required=True, help="percentage of test set", metavar="N", dest="TEST")
 
 args = parser.parse_args()
 

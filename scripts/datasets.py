@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # Class definitions for several datasets.
 import os
 
