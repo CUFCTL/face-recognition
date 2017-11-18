@@ -29,6 +29,10 @@ def display():
 	# capture frame
 	ret, frame = cap.read()
 
+	if not ret:
+		print "error: could not read frame from video stream"
+		quit()
+
 	# detect faces
 	faces = detector.detect_faces(frame, cascade_face)
 
@@ -58,6 +62,15 @@ def display():
 display.thread = None
 display.is_running = False
 
+def quit(signal=None, frame=None):
+	if display.thread:
+		display.thread.cancel()
+	cap.release()
+	cv2.destroyAllWindows()
+	server.stop()
+	sys.exit()
+	print "\nBye"
+
 # load the cascade classifier files
 print "Loading cascade classifier files..."
 
@@ -74,16 +87,12 @@ server.start(STREAM_DATA)
 # initialize video stream
 cap = cv2.VideoCapture(DEVICE_NUM)
 
+if not cap.isOpened():
+	print "error: could not open video stream"
+	quit()
+
 # initialize display
 display()
 
 # initialize event loop
-def quit(signal, frame):
-	display.thread.cancel()
-	cap.release()
-	cv2.destroyAllWindows()
-	server.stop()
-	print "\nBye"
-
 signal.signal(signal.SIGINT, quit)
-
