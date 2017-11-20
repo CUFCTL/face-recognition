@@ -6,7 +6,7 @@ CXX = g++
 
 # compiler flags, linker flags
 CXXFLAGS = -std=c++11
-LDFLAGS  = -lm -lopenblas -lmlearn
+LDFLAGS  = -lm -lopenblas -lmlearn -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect
 
 ifeq ($(DEBUG), 1)
 CXXFLAGS += -g -pg -Wall
@@ -16,7 +16,9 @@ endif
 
 # binary targets
 OBJDIR = obj
-OBJS = $(OBJDIR)/main.o
+OBJS = \
+	$(OBJDIR)/bboxiterator.o \
+	$(OBJDIR)/main.o
 BINS = face-rec
 
 all: echo $(BINS)

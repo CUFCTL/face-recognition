@@ -11,7 +11,12 @@
 #include <map>
 #include <memory>
 #include <mlearn.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/objdetect/objdetect.hpp>
 #include <unistd.h>
+#include "bboxiterator.h"
 
 using namespace ML;
 
@@ -63,9 +68,9 @@ typedef struct {
 	bool train;
 	bool test;
 	bool stream;
+	int stream_dev;
 	const char *path_train;
 	const char *path_test;
-	const char *path_stream;
 	const char *path_model;
 	DataType data_type;
 	FeatureType feature_type;
@@ -112,7 +117,7 @@ void print_usage()
 		"  --loglevel LEVEL   set the log level ([1]=info, 2=verbose, 3=debug)\n"
 		"  --train DIR        train a model with a training set\n"
 		"  --test DIR         perform recognition on a test set\n"
-		"  --stream DIR       perform recognition on an input stream\n"
+		"  --stream           perform recognition in real time on a video stream\n"
 		"  --data             data type (genome, [image])\n"
 		"  --pca              use PCA for feature extraction\n"
 		"  --lda              use LDA for feature extraction\n"
@@ -151,8 +156,7 @@ optarg_t parse_args(int argc, char **argv)
 	optarg_t args = {
 		false,
 		false,
-		false,
-		nullptr,
+		false, 0,
 		nullptr,
 		nullptr,
 		"./model.dat",
@@ -170,7 +174,7 @@ optarg_t parse_args(int argc, char **argv)
 		{ "loglevel", required_argument, 0, OPTION_LOGLEVEL },
 		{ "train", required_argument, 0, OPTION_TRAIN },
 		{ "test", required_argument, 0, OPTION_TEST },
-		{ "stream", required_argument, 0, OPTION_STREAM },
+		{ "stream", no_argument, 0, OPTION_STREAM },
 		{ "data", required_argument, 0, OPTION_DATA },
 		{ "pca", no_argument, 0, OPTION_PCA },
 		{ "lda", no_argument, 0, OPTION_LDA },
@@ -209,7 +213,6 @@ optarg_t parse_args(int argc, char **argv)
 			break;
 		case OPTION_STREAM:
 			args.stream = true;
-			args.path_stream = optarg;
 			break;
 		case OPTION_DATA:
 			try {
@@ -311,6 +314,71 @@ void validate_args(const optarg_t& args)
 	}
 }
 
+std::vector<cv::Rect> detect_faces(cv::Mat& image, cv::CascadeClassifier& cascade)
+{
+	cv::Mat image_gray;
+	cv::cvtColor(image, image_gray, CV_BGR2GRAY);
+
+	std::vector<cv::Rect> rects;
+	cascade.detectMultiScale(image_gray, rects, 1.3, 5);
+
+	return rects;
+}
+
+std::vector<DataLabel> classify_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, ClassificationModel& model)
+{
+	const cv::Size IMAGE_SIZE(128, 128);
+
+	BBoxIterator data_iter(image, rects, IMAGE_SIZE);
+	Dataset dataset(&data_iter);
+
+	return model.predict(dataset);
+}
+
+void label_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, const std::vector<std::string>& labels)
+{
+	const cv::Scalar RECT_COLOR(255, 0, 0);
+	const int RECT_THICKNESS = 2;
+	const int TEXT_FONT = cv::FONT_HERSHEY_COMPLEX_SMALL;
+	const double TEXT_SCALE = 1;
+	const cv::Scalar TEXT_COLOR(255, 255, 255);
+
+	for ( size_t i = 0; i < rects.size(); i++ ) {
+		cv::rectangle(image, rects[i], RECT_COLOR, RECT_THICKNESS);
+		cv::putText(image, labels[i], rects[i].tl(), TEXT_FONT, TEXT_SCALE, TEXT_COLOR);
+	}
+}
+
+void stream(int device, ClassificationModel& model)
+{
+	cv::VideoCapture cap(device);
+	cv::CascadeClassifier cascade("scripts/face-det/haarcascade_frontalface_alt.xml");
+
+	if ( !cap.isOpened() ) {
+		fprintf(stderr, "error: could not open video stream");
+		exit(1);
+	}
+
+	while ( true ) {
+		cv::Mat frame;
+		cap >> frame;
+
+		std::vector<cv::Rect> rects = detect_faces(frame, cascade);
+
+		if ( rects.size() > 0 ) {
+			std::vector<std::string> labels = classify_faces(frame, rects, model);
+
+			label_faces(frame, rects, labels);
+		}
+
+		cv::imshow("Face Detection", frame);
+
+		if ( cv::waitKey(30) == 27 ) {
+			break;
+		}
+	}
+}
+
 int main(int argc, char **argv)
 {
 	// parse command-line arguments
@@ -324,16 +392,6 @@ int main(int argc, char **argv)
 
 	// initialize GPU if enabled
 	gpu_init();
-
-	// initialize data type
-	std::unique_ptr<DataIterator> data_iter;
-
-	if ( args.data_type == DataType::Genome ) {
-		data_iter.reset(new Genome());
-	}
-	else if ( args.data_type == DataType::Image ) {
-		data_iter.reset(new Image());
-	}
 
 	// initialize feature layer
 	std::unique_ptr<FeatureLayer> feature;
@@ -372,7 +430,18 @@ int main(int argc, char **argv)
 
 	// run the face recognition system
 	if ( args.train ) {
-		Dataset train_set(data_iter.get(), args.path_train);
+		// initialize data iterator
+		std::unique_ptr<DataIterator> data_iter;
+
+		if ( args.data_type == DataType::Genome ) {
+			data_iter.reset(new GenomeIterator(args.path_train));
+		}
+		else if ( args.data_type == DataType::Image ) {
+			data_iter.reset(new ImageIterator(args.path_train));
+		}
+
+		// train model with training set
+		Dataset train_set(data_iter.get());
 
 		model.train(train_set);
 	}
@@ -381,7 +450,18 @@ int main(int argc, char **argv)
 	}
 
 	if ( args.test ) {
-		Dataset test_set(data_iter.get(), args.path_test);
+		// initialize data iterator
+		std::unique_ptr<DataIterator> data_iter;
+
+		if ( args.data_type == DataType::Genome ) {
+			data_iter.reset(new GenomeIterator(args.path_test));
+		}
+		else if ( args.data_type == DataType::Image ) {
+			data_iter.reset(new ImageIterator(args.path_test));
+		}
+
+		// evaluate model with the test set
+		Dataset test_set(data_iter.get());
 
 		std::vector<DataLabel> Y_pred = model.predict(test_set);
 
@@ -389,29 +469,7 @@ int main(int argc, char **argv)
 		model.print_results(test_set, Y_pred);
 	}
 	else if ( args.stream ) {
-		const char END = '0';
-		const char READ = '1';
-
-		while ( true ) {
-			char c = std::cin.get();
-
-			if ( c == END ) {
-				break;
-			}
-			else if ( c == READ ) {
-				Dataset test_set(data_iter.get(), args.path_stream, false);
-
-				std::vector<DataLabel> Y_pred = model.predict(test_set);
-
-				// print results
-				for ( size_t i = 0; i < test_set.entries().size(); i++ ) {
-					const DataLabel& y_pred = Y_pred[i];
-					const DataEntry& entry = test_set.entries()[i];
-
-					std::cout << std::left << std::setw(12) << entry.name << "  " << y_pred << "\n";
-				}
-			}
-		}
+		stream(args.stream_dev, model);
 	}
 	else {
 		model.save(args.path_model);
