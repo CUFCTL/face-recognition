@@ -30,9 +30,6 @@ BBoxIterator::BBoxIterator(const cv::Mat& image, const std::vector<cv::Rect>& re
       // append empty entry
       _entries.push_back(ML::DataEntry { "", "" });
    }
-
-   // append empty label
-   _labels.push_back("");
 }
 
 void BBoxIterator::sample(ML::Matrix& X, int i)

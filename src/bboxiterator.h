@@ -12,7 +12,6 @@
 class BBoxIterator : public ML::DataIterator {
 private:
    std::vector<ML::DataEntry> _entries;
-	std::vector<ML::DataLabel> _labels;
 
    int _channels;
    cv::Size _size;
@@ -25,7 +24,6 @@ public:
    int num_samples() const { return _entries.size(); }
 	int sample_size() const { return _channels * _size.width * _size.height; }
    const std::vector<ML::DataEntry>& entries() const { return _entries; }
-	const std::vector<ML::DataLabel>& labels() const { return _labels; }
 
 	void sample(ML::Matrix& X, int i);
 };
