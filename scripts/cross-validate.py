@@ -43,7 +43,7 @@ elif args.DATASET == "orl":
 	dataset = datasets.ORLDataset()
 elif args.DATASET == "fctl":
 	subs = get_sub_dirs('datasets/fctl')
-	dataset = datasets.LABDataset(subs)
+	dataset = datasets.FCTLDataset(subs)
 
 # remove '--' from ARGS
 args.ARGS.remove("--")

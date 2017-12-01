@@ -42,7 +42,7 @@ elif args.DATASET == "gtex_30":
 	dataset = datasets.GTEXDataset30(subs)
 elif args.DATASET == "fctl":
 	subs = get_sub_dirs('datasets/fctl')
-	dataset = datasets.LABDataset(subs)
+	dataset = datasets.FCTLDataset(subs)
 
 # initialize the training set and test set
 TRAIN_PATH = "train_data"

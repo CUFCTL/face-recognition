@@ -36,13 +36,10 @@ void BBoxIterator::sample(ML::Matrix& X, int i)
 {
    assert(X.rows() == this->sample_size());
 
-	for ( int j = 0; j < X.rows(); j++ ) {
-      int idx[] = {
+   for ( int j = 0; j < X.rows(); j++ ) {
+      X.elem(j, i) = _faces[i].at<cv::Vec3b>(
          (j / _channels) / _size.width,
-         (j / _channels) % _size.width,
-         j % _channels
-      };
-
-		X.elem(j, i) = _faces[i].at<double>(idx);
-	}
+         (j / _channels) % _size.width
+      )[_channels - 1 - (j % _channels)];
+   }
 }

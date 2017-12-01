@@ -19,13 +19,13 @@ private:
 
 public:
    BBoxIterator(const cv::Mat& image, const std::vector<cv::Rect>& rects, cv::Size size);
-	~BBoxIterator() {};
+   ~BBoxIterator() {};
 
    int num_samples() const { return _entries.size(); }
-	int sample_size() const { return _channels * _size.width * _size.height; }
+   int sample_size() const { return _channels * _size.width * _size.height; }
    const std::vector<ML::DataEntry>& entries() const { return _entries; }
 
-	void sample(ML::Matrix& X, int i);
+   void sample(ML::Matrix& X, int i);
 };
 
 #endif

@@ -111,9 +111,9 @@ class GTEXDataset30(Dataset):
 		class_name = self.get_class_name(i)
 		return "%s_%s" % (class_name, filename)
 
-class LABDataset(Dataset):
+class FCTLDataset(Dataset):
 	def __init__(self, sub_dirs):
-		Dataset.__init__(self, "datasets/fctl", 540, 17)
+		Dataset.__init__(self, "datasets/fctl", 588, 15)
 		self.dirs = sub_dirs
 
 	def get_class_name(self, i):

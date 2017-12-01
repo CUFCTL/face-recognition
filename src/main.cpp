@@ -314,6 +314,12 @@ void validate_args(const optarg_t& args)
 	}
 }
 
+/**
+ * Detect faces in an image with a cascade classifier.
+ *
+ * @param image
+ * @param cascade
+ */
 std::vector<cv::Rect> detect_faces(cv::Mat& image, cv::CascadeClassifier& cascade)
 {
 	cv::Mat image_gray;
@@ -325,6 +331,13 @@ std::vector<cv::Rect> detect_faces(cv::Mat& image, cv::CascadeClassifier& cascad
 	return rects;
 }
 
+/**
+ * Classify faces in an image with a classification model.
+ *
+ * @param image
+ * @param rects
+ * @param model
+ */
 std::vector<DataLabel> classify_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, ClassificationModel& model)
 {
 	const cv::Size IMAGE_SIZE(128, 128);
@@ -335,6 +348,13 @@ std::vector<DataLabel> classify_faces(cv::Mat& image, const std::vector<cv::Rect
 	return model.predict(dataset);
 }
 
+/**
+ * Annotate each face in an image with a bounding box and label.
+ *
+ * @param image
+ * @param rects
+ * @param labels
+ */
 void label_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, const std::vector<std::string>& labels)
 {
 	const cv::Scalar RECT_COLOR(255, 0, 0);
@@ -349,19 +369,29 @@ void label_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, const std::
 	}
 }
 
+/**
+ * Perform face recognition in real time on a video stream.
+ *
+ * @param device
+ * @param model
+ */
 void stream(int device, ClassificationModel& model)
 {
 	cv::VideoCapture cap(device);
 	cv::CascadeClassifier cascade("scripts/face-det/haarcascade_frontalface_alt.xml");
 
 	if ( !cap.isOpened() ) {
-		fprintf(stderr, "error: could not open video stream");
+		std::cerr << "error: could not open video stream\n";
 		exit(1);
 	}
 
 	while ( true ) {
 		cv::Mat frame;
-		cap >> frame;
+
+		if ( !cap.read(frame) ) {
+			std::cerr << "error: could not read video frame\n";
+			continue;
+		}
 
 		std::vector<cv::Rect> rects = detect_faces(frame, cascade);
 
