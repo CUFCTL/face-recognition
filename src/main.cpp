@@ -18,13 +18,19 @@
 #include <unistd.h>
 #include "bboxiterator.h"
 
+
+
 using namespace ML;
+
+
 
 enum class DataType {
 	None,
 	Genome,
 	Image
 };
+
+
 
 enum class FeatureType {
 	Identity,
@@ -33,11 +39,15 @@ enum class FeatureType {
 	ICA
 };
 
+
+
 enum class ClassifierType {
 	None,
 	KNN,
 	Bayes
 };
+
+
 
 typedef enum {
 	OPTION_GPU,
@@ -64,6 +74,8 @@ typedef enum {
 	OPTION_UNKNOWN = '?'
 } option_t;
 
+
+
 typedef struct {
 	bool train;
 	bool test;
@@ -87,10 +99,14 @@ typedef struct {
 	dist_func_t knn_dist;
 } optarg_t;
 
+
+
 const std::map<std::string, DataType> data_types = {
 	{ "genome", DataType::Genome },
 	{ "image", DataType::Image }
 };
+
+
 
 const std::map<std::string, dist_func_t> dist_funcs = {
 	{ "COS", m_dist_COS },
@@ -98,11 +114,15 @@ const std::map<std::string, dist_func_t> dist_funcs = {
 	{ "L2", m_dist_L2 }
 };
 
+
+
 const std::map<std::string, ICANonl> nonl_funcs = {
 	{ "pow3", ICANonl::pow3 },
 	{ "tanh", ICANonl::tanh },
 	{ "gauss", ICANonl::gauss }
 };
+
+
 
 /**
  * Print command-line usage and help text.
@@ -144,6 +164,8 @@ void print_usage()
 		"  --knn_k N          number of nearest neighbors to use\n"
 		"  --knn_dist [dist]  distance function to use (L1, [L2], COS)\n";
 }
+
+
 
 /**
  * Parse command-line arguments.
@@ -286,6 +308,8 @@ optarg_t parse_args(int argc, char **argv)
 	return args;
 }
 
+
+
 /**
  * Validate command-line arguments.
  *
@@ -314,6 +338,8 @@ void validate_args(const optarg_t& args)
 	}
 }
 
+
+
 /**
  * Detect faces in an image with a cascade classifier.
  *
@@ -331,6 +357,8 @@ std::vector<cv::Rect> detect_faces(cv::Mat& image, cv::CascadeClassifier& cascad
 	return rects;
 }
 
+
+
 /**
  * Classify faces in an image with a classification model.
  *
@@ -338,15 +366,26 @@ std::vector<cv::Rect> detect_faces(cv::Mat& image, cv::CascadeClassifier& cascad
  * @param rects
  * @param model
  */
-std::vector<DataLabel> classify_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, ClassificationModel& model)
+std::vector<std::string> classify_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, ClassificationModel& model)
 {
 	const cv::Size IMAGE_SIZE(128, 128);
 
 	BBoxIterator data_iter(image, rects, IMAGE_SIZE);
 	Dataset dataset(&data_iter);
 
-	return model.predict(dataset);
+	std::vector<int> y_pred = model.predict(dataset);
+
+	std::vector<std::string> labels;
+
+	for ( int i = 0; i < y_pred.size(); i++ ) {
+		auto& label = model.train_set().classes()[y_pred[i]];
+		labels.push_back(label);
+	}
+
+	return labels;
 }
+
+
 
 /**
  * Annotate each face in an image with a bounding box and label.
@@ -368,6 +407,8 @@ void label_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, const std::
 		cv::putText(image, labels[i], rects[i].tl(), TEXT_FONT, TEXT_SCALE, TEXT_COLOR);
 	}
 }
+
+
 
 /**
  * Perform face recognition in real time on a video stream.
@@ -408,6 +449,8 @@ void stream(int device, ClassificationModel& model)
 		}
 	}
 }
+
+
 
 int main(int argc, char **argv)
 {
@@ -493,10 +536,10 @@ int main(int argc, char **argv)
 		// evaluate model with the test set
 		Dataset test_set(data_iter.get());
 
-		std::vector<DataLabel> Y_pred = model.predict(test_set);
+		std::vector<int> y_pred = model.predict(test_set);
 
-		model.validate(test_set, Y_pred);
-		model.print_results(test_set, Y_pred);
+		model.validate(test_set, y_pred);
+		model.print_results(test_set, y_pred);
 	}
 	else if ( args.stream ) {
 		stream(args.stream_dev, model);

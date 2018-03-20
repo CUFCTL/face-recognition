@@ -9,6 +9,8 @@
 #include <mlearn.h>
 #include <opencv2/core/core.hpp>
 
+
+
 class BBoxIterator : public ML::DataIterator {
 private:
    std::vector<ML::DataEntry> _entries;
@@ -27,5 +29,7 @@ public:
 
    void sample(ML::Matrix& X, int i);
 };
+
+
 
 #endif

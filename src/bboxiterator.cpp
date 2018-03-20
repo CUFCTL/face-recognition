@@ -7,6 +7,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "bboxiterator.h"
 
+
+
 /**
  * Construct a bounding-box iterator from an image
  * and a list of bounding boxes.
@@ -31,6 +33,8 @@ BBoxIterator::BBoxIterator(const cv::Mat& image, const std::vector<cv::Rect>& re
       _entries.push_back(ML::DataEntry { "", "" });
    }
 }
+
+
 
 void BBoxIterator::sample(ML::Matrix& X, int i)
 {
