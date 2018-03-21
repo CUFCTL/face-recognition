@@ -96,7 +96,7 @@ typedef struct {
 	int ica_max_iter;
 	float ica_eps;
 	int knn_k;
-	dist_func_t knn_dist;
+	KNNDist knn_dist;
 } optarg_t;
 
 
@@ -108,10 +108,10 @@ const std::map<std::string, DataType> data_types = {
 
 
 
-const std::map<std::string, dist_func_t> dist_funcs = {
-	{ "COS", m_dist_COS },
-	{ "L1", m_dist_L1 },
-	{ "L2", m_dist_L2 }
+const std::map<std::string, KNNDist> dist_funcs = {
+	{ "COS", KNNDist::COS },
+	{ "L1", KNNDist::L1 },
+	{ "L2", KNNDist::L2 }
 };
 
 
@@ -188,7 +188,7 @@ optarg_t parse_args(int argc, char **argv)
 		-1,
 		-1, -1,
 		-1, -1, ICANonl::pow3, 1000, 0.0001f,
-		1, m_dist_L2
+		1, KNNDist::L2
 	};
 
 	struct option long_options[] = {
@@ -296,7 +296,7 @@ optarg_t parse_args(int argc, char **argv)
 				args.knn_dist = dist_funcs.at(optarg);
 			}
 			catch ( std::exception& e ) {
-				args.knn_dist = nullptr;
+				args.knn_dist = KNNDist::none;
 			}
 			break;
 		case OPTION_UNKNOWN:
@@ -320,7 +320,7 @@ void validate_args(const optarg_t& args)
 	std::vector<std::pair<bool, std::string>> validators = {
 		{ args.train || args.test || args.stream, "--train / --test / --stream is required" },
 		{ args.data_type != DataType::None, "--data must be genome | image" },
-		{ args.knn_dist != nullptr, "--knn_dist must be L1 | L2 | COS" },
+		{ args.knn_dist != KNNDist::none, "--knn_dist must be L1 | L2 | COS" },
 		{ args.ica_nonl != ICANonl::none, "--ica_nonl must be pow3 | tanh | gauss" }
 	};
 	bool valid = true;
