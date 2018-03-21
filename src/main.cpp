@@ -154,7 +154,7 @@ void print_usage()
 		"  --stream           perform recognition in real time on a video stream\n"
 		"  --data             data type (genome, [image])\n"
 		"  --feat FEATURE     feature extraction layer ([identity], pca, lda, ica)\n"
-		"  --clas CLASSIFIER  classifier layer ([knn], bayes)\n";
+		"  --clas CLASSIFIER  classifier layer ([knn], bayes)\n"
 		"\n"
 		"Hyperparameters:\n"
 		"PCA:\n"
@@ -388,8 +388,8 @@ std::vector<std::string> classify_faces(cv::Mat& image, const std::vector<cv::Re
 
 	std::vector<std::string> labels;
 
-	for ( int i = 0; i < y_pred.size(); i++ ) {
-		auto& label = model.train_set().classes()[y_pred[i]];
+	for ( auto y_i : y_pred ) {
+		auto& label = model.train_set().classes()[y_i];
 		labels.push_back(label);
 	}
 
@@ -527,10 +527,12 @@ int main(int argc, char **argv)
 		// train model with training set
 		Dataset train_set(data_iter.get());
 
+		model.print();
 		model.train(train_set);
 	}
 	else {
 		model.load(args.path_model);
+		model.print();
 	}
 
 	if ( args.test ) {
