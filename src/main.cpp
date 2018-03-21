@@ -33,6 +33,7 @@ enum class DataType {
 
 
 enum class FeatureType {
+	None,
 	Identity,
 	PCA,
 	LDA,
@@ -56,11 +57,8 @@ typedef enum {
 	OPTION_TEST,
 	OPTION_STREAM,
 	OPTION_DATA,
-	OPTION_PCA,
-	OPTION_LDA,
-	OPTION_ICA,
-	OPTION_KNN,
-	OPTION_BAYES,
+	OPTION_FEATURE,
+	OPTION_CLASSIFIER,
 	OPTION_PCA_N1,
 	OPTION_LDA_N1,
 	OPTION_LDA_N2,
@@ -108,6 +106,22 @@ const std::map<std::string, DataType> data_types = {
 
 
 
+const std::map<std::string, FeatureType> feature_types = {
+	{ "identity", FeatureType::Identity },
+	{ "pca", FeatureType::PCA },
+	{ "lda", FeatureType::LDA },
+	{ "ica", FeatureType::ICA }
+};
+
+
+
+const std::map<std::string, ClassifierType> classifier_types = {
+	{ "knn", ClassifierType::KNN },
+	{ "bayes", ClassifierType::Bayes }
+};
+
+
+
 const std::map<std::string, KNNDist> dist_funcs = {
 	{ "COS", KNNDist::COS },
 	{ "L1", KNNDist::L1 },
@@ -139,11 +153,8 @@ void print_usage()
 		"  --test DIR         perform recognition on a test set\n"
 		"  --stream           perform recognition in real time on a video stream\n"
 		"  --data             data type (genome, [image])\n"
-		"  --pca              use PCA for feature extraction\n"
-		"  --lda              use LDA for feature extraction\n"
-		"  --ica              use ICA for feature extraction\n"
-		"  --knn              use the kNN classifier (default)\n"
-		"  --bayes            use the Bayes classifier\n"
+		"  --feat FEATURE     feature extraction layer ([identity], pca, lda, ica)\n"
+		"  --clas CLASSIFIER  classifier layer ([knn], bayes)\n";
 		"\n"
 		"Hyperparameters:\n"
 		"PCA:\n"
@@ -198,11 +209,8 @@ optarg_t parse_args(int argc, char **argv)
 		{ "test", required_argument, 0, OPTION_TEST },
 		{ "stream", no_argument, 0, OPTION_STREAM },
 		{ "data", required_argument, 0, OPTION_DATA },
-		{ "pca", no_argument, 0, OPTION_PCA },
-		{ "lda", no_argument, 0, OPTION_LDA },
-		{ "ica", no_argument, 0, OPTION_ICA },
-		{ "knn", no_argument, 0, OPTION_KNN },
-		{ "bayes", no_argument, 0, OPTION_BAYES },
+		{ "feat", required_argument, 0, OPTION_FEATURE },
+		{ "clas", required_argument, 0, OPTION_CLASSIFIER },
 		{ "pca_n1", required_argument, 0, OPTION_PCA_N1 },
 		{ "lda_n1", required_argument, 0, OPTION_LDA_N1 },
 		{ "lda_n2", required_argument, 0, OPTION_LDA_N2 },
@@ -244,20 +252,21 @@ optarg_t parse_args(int argc, char **argv)
 				args.data_type = DataType::None;
 			}
 			break;
-		case OPTION_PCA:
-			args.feature_type = FeatureType::PCA;
+		case OPTION_FEATURE:
+			try {
+				args.feature_type = feature_types.at(optarg);
+			}
+			catch ( std::exception& e ) {
+				args.feature_type = FeatureType::None;
+			}
 			break;
-		case OPTION_LDA:
-			args.feature_type = FeatureType::LDA;
-			break;
-		case OPTION_ICA:
-			args.feature_type = FeatureType::ICA;
-			break;
-		case OPTION_KNN:
-			args.classifier_type = ClassifierType::KNN;
-			break;
-		case OPTION_BAYES:
-			args.classifier_type = ClassifierType::Bayes;
+		case OPTION_CLASSIFIER:
+			try {
+				args.classifier_type = classifier_types.at(optarg);
+			}
+			catch ( std::exception& e ) {
+				args.classifier_type = ClassifierType::None;
+			}
 			break;
 		case OPTION_PCA_N1:
 			args.pca_n1 = atoi(optarg);
@@ -320,6 +329,8 @@ void validate_args(const optarg_t& args)
 	std::vector<std::pair<bool, std::string>> validators = {
 		{ args.train || args.test || args.stream, "--train / --test / --stream is required" },
 		{ args.data_type != DataType::None, "--data must be genome | image" },
+		{ args.feature_type != FeatureType::None, "--feat must be identity | pca | lda | ica" },
+		{ args.classifier_type != ClassifierType::None, "--clas must be knn | bayes" },
 		{ args.knn_dist != KNNDist::none, "--knn_dist must be L1 | L2 | COS" },
 		{ args.ica_nonl != ICANonl::none, "--ica_nonl must be pow3 | tanh | gauss" }
 	};
