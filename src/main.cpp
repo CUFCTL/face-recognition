@@ -134,7 +134,7 @@ void print_usage()
 		"\n"
 		"Options:\n"
 		"  --gpu              enable GPU acceleration\n"
-		"  --loglevel LEVEL   set the log level ([1]=info, 2=verbose, 3=debug)\n"
+		"  --loglevel LEVEL   log level (0=error, 1=warn, [2]=info, 3=verbose, 4=debug)\n"
 		"  --train DIR        train a model with a training set\n"
 		"  --test DIR         perform recognition on a test set\n"
 		"  --stream           perform recognition in real time on a video stream\n"
@@ -223,7 +223,7 @@ optarg_t parse_args(int argc, char **argv)
 			GPU = true;
 			break;
 		case OPTION_LOGLEVEL:
-			LOGLEVEL = (logger_level_t) atoi(optarg);
+			Logger::LEVEL = (LogLevel) atoi(optarg);
 			break;
 		case OPTION_TRAIN:
 			args.train = true;
