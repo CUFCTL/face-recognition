@@ -35,7 +35,7 @@ This repository includes a `face-rec` executable, which performs training, testi
 
 The examples below use the ORL database, which you can set up with `./scripts/get_orl.sh`.
 
-## Training and Testing
+### Training and Testing
 
 Run `./face-rec` without any arguments to view all of the options.
 
@@ -45,7 +45,7 @@ To train and test the system with PCA and a 70/30 dataset partition:
 ./face-rec --train train_data --test test_data --feat pca --loglevel=3
 ```
 
-## Cross Validation
+### Cross Validation
 
 To train and test the system 5 items with PCA and 70/30 dataset partitions:
 ```
@@ -57,7 +57,7 @@ Notice that arguments for `./face-rec` must be placed after a `--`. You can supp
 ./scripts/cross-validate.py -d orl -t 70 -r 30 -i 5 -- --pca --pca_n1=20 --loglevel=3
 ```
 
-## Real-time Face Recognition
+### Real-time Face Recognition
 
 To create a database and perform real-time recognition on a video stream:
 ```
