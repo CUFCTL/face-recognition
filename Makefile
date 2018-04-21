@@ -1,12 +1,19 @@
 # build parameters
 DEBUG ?= 0
+INSTALL_PREFIX ?= $(HOME)/software
 
 # compiler suite
 CXX = g++
 
 # compiler flags, linker flags
-CXXFLAGS = -std=c++11
-LDFLAGS  = -lm -lopenblas -lmlearn -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect
+CXXFLAGS = \
+	-std=c++11 \
+	-I$(INSTALL_PREFIX)/include
+
+LDFLAGS = \
+	-lm \
+	-L$(INSTALL_PREFIX)/lib -lmlearn \
+	-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_objdetect
 
 ifeq ($(DEBUG), 1)
 CXXFLAGS += -g -pg -Wall

@@ -528,7 +528,7 @@ int main(int argc, char **argv)
 		Dataset train_set(data_iter.get());
 
 		model.print();
-		model.train(train_set);
+		model.fit(train_set);
 	}
 	else {
 		model.load(args.path_model);
