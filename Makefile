@@ -8,6 +8,7 @@ CXX = g++
 # compiler flags, linker flags
 CXXFLAGS = \
 	-std=c++11 \
+	-I$(CUDADIR)/include \
 	-I$(INSTALL_PREFIX)/include
 
 LDFLAGS = \

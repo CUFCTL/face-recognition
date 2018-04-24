@@ -228,7 +228,7 @@ optarg_t parse_args(int argc, char **argv)
 	while ( (opt = getopt_long_only(argc, argv, "", long_options, nullptr)) != -1 ) {
 		switch ( opt ) {
 		case OPTION_GPU:
-			GPU = true;
+			Device::initialize();
 			break;
 		case OPTION_LOGLEVEL:
 			Logger::LEVEL = (LogLevel) atoi(optarg);
@@ -474,14 +474,11 @@ int main(int argc, char **argv)
 	// initialize random number engine
 	Random::seed();
 
-	// initialize GPU if enabled
-	gpu_init();
-
 	// initialize feature layer
 	std::unique_ptr<FeatureLayer> feature;
 
 	if ( args.feature_type == FeatureType::Identity ) {
-		feature.reset(new IdentityLayer());
+		feature.reset();
 	}
 	else if ( args.feature_type == FeatureType::PCA ) {
 		feature.reset(new PCALayer(args.pca_n1));
@@ -551,7 +548,7 @@ int main(int argc, char **argv)
 
 		std::vector<int> y_pred = model.predict(test_set);
 
-		model.validate(test_set, y_pred);
+		model.score(test_set, y_pred);
 		model.print_results(test_set, y_pred);
 	}
 	else if ( args.stream ) {
@@ -564,8 +561,6 @@ int main(int argc, char **argv)
 	Timer::print();
 
 	model.print_stats();
-
-	gpu_finalize();
 
 	return 0;
 }
