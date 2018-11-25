@@ -20,7 +20,7 @@
 
 
 
-using namespace ML;
+using namespace mlearn;
 
 
 
@@ -377,20 +377,19 @@ std::vector<cv::Rect> detect_faces(cv::Mat& image, cv::CascadeClassifier& cascad
  * @param rects
  * @param model
  */
-std::vector<std::string> classify_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, ClassificationModel& model)
+std::vector<std::string> classify_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, Pipeline& model)
 {
 	const cv::Size IMAGE_SIZE(128, 128);
 
 	BBoxIterator data_iter(image, rects, IMAGE_SIZE);
 	Dataset dataset(&data_iter);
 
-	std::vector<int> y_pred = model.predict(dataset);
+	std::vector<int> y_pred = model.predict(dataset.load_data());
 
 	std::vector<std::string> labels;
 
 	for ( auto y_i : y_pred ) {
-		auto& label = model.train_set().classes()[y_i];
-		labels.push_back(label);
+		labels.push_back(std::to_string(y_i));
 	}
 
 	return labels;
@@ -427,7 +426,7 @@ void label_faces(cv::Mat& image, const std::vector<cv::Rect>& rects, const std::
  * @param device
  * @param model
  */
-void stream(int device, ClassificationModel& model)
+void stream(int device, Pipeline& model)
 {
 	cv::VideoCapture cap(device);
 	cv::CascadeClassifier cascade("scripts/face-det/haarcascade_frontalface_alt.xml");
@@ -474,20 +473,18 @@ int main(int argc, char **argv)
 	// initialize random number engine
 	Random::seed();
 
-	// initialize feature layer
-	std::unique_ptr<FeatureLayer> feature;
+	// initialize transformer layers
+	std::vector<TransformerLayer*> transforms;
+	transforms.push_back(new Scaler(true, false));
 
-	if ( args.feature_type == FeatureType::Identity ) {
-		feature.reset();
-	}
-	else if ( args.feature_type == FeatureType::PCA ) {
-		feature.reset(new PCALayer(args.pca_n1));
+	if ( args.feature_type == FeatureType::PCA ) {
+		transforms.push_back(new PCALayer(args.pca_n1));
 	}
 	else if ( args.feature_type == FeatureType::LDA ) {
-		feature.reset(new LDALayer(args.lda_n1, args.lda_n2));
+		transforms.push_back(new LDALayer(args.lda_n1, args.lda_n2));
 	}
 	else if ( args.feature_type == FeatureType::ICA ) {
-		feature.reset(new ICALayer(
+		transforms.push_back(new ICALayer(
 			args.ica_n1,
 			args.ica_n2,
 			args.ica_nonl,
@@ -497,17 +494,17 @@ int main(int argc, char **argv)
 	}
 
 	// initialize classifier layer
-	std::unique_ptr<ClassifierLayer> classifier;
+	EstimatorLayer* classifier = nullptr;
 
 	if ( args.classifier_type == ClassifierType::KNN ) {
-		classifier.reset(new KNNLayer(args.knn_k, args.knn_dist));
+		classifier = new KNNLayer(args.knn_k, args.knn_dist);
 	}
 	else if ( args.classifier_type == ClassifierType::Bayes ) {
-		classifier.reset(new BayesLayer());
+		classifier = new BayesLayer();
 	}
 
-	// initialize model
-	ClassificationModel model(feature.get(), classifier.get());
+	// initialize classifier pipeline
+	Pipeline model(transforms, classifier);
 
 	// run the face recognition system
 	if ( args.train ) {
@@ -525,10 +522,12 @@ int main(int argc, char **argv)
 		Dataset train_set(data_iter.get());
 
 		model.print();
-		model.fit(train_set);
+		model.fit(train_set.load_data());
 	}
 	else {
-		model.load(args.path_model);
+		IODevice file(args.path_model, std::iostream::in);
+		model.load(file);
+
 		model.print();
 	}
 
@@ -546,21 +545,19 @@ int main(int argc, char **argv)
 		// evaluate model with the test set
 		Dataset test_set(data_iter.get());
 
-		std::vector<int> y_pred = model.predict(test_set);
+		float accuracy = model.score(test_set.load_data(), test_set.labels());
 
-		model.score(test_set, y_pred);
-		model.print_results(test_set, y_pred);
+		Logger::log(LogLevel::Verbose, "Test accuracy: %.3f", accuracy);
 	}
 	else if ( args.stream ) {
 		stream(args.stream_dev, model);
 	}
 	else {
-		model.save(args.path_model);
+		IODevice file(args.path_model, std::iostream::out);
+		model.save(file);
 	}
 
 	Timer::print();
-
-	model.print_stats();
 
 	return 0;
 }

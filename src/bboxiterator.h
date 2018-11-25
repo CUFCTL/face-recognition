@@ -11,9 +11,9 @@
 
 
 
-class BBoxIterator : public ML::DataIterator {
+class BBoxIterator : public mlearn::DataIterator {
 private:
-   std::vector<ML::DataEntry> _entries;
+   std::vector<mlearn::DataEntry> _entries;
 
    int _channels;
    cv::Size _size;
@@ -25,9 +25,9 @@ public:
 
    int num_samples() const { return _entries.size(); }
    int sample_size() const { return _channels * _size.width * _size.height; }
-   const std::vector<ML::DataEntry>& entries() const { return _entries; }
+   const std::vector<mlearn::DataEntry>& entries() const { return _entries; }
 
-   void sample(ML::Matrix& X, int i);
+   void sample(mlearn::Matrix& X, int i);
 };
 
 

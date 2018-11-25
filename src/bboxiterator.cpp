@@ -30,13 +30,13 @@ BBoxIterator::BBoxIterator(const cv::Mat& image, const std::vector<cv::Rect>& re
       _faces.push_back(face);
 
       // append empty entry
-      _entries.push_back(ML::DataEntry { "", "" });
+      _entries.push_back(mlearn::DataEntry { "", "" });
    }
 }
 
 
 
-void BBoxIterator::sample(ML::Matrix& X, int i)
+void BBoxIterator::sample(mlearn::Matrix& X, int i)
 {
    assert(X.rows() == this->sample_size());
 
